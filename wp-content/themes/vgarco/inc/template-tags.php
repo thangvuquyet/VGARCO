@@ -159,13 +159,64 @@ function vgarco_page_key(): string {
 }
 
 /**
- * Bộ chuyển ngôn ngữ VI / DE (UC-10).
+ * Các mục của bộ chuyển ngôn ngữ (UC-10) — phần THUẦN, kiểm thử được.
+ *
+ * Có bản dịch → liên kết thẳng tới trang tương ứng. Chưa có bản dịch (2a) → liên kết tới trang danh mục tương ứng của ngôn ngữ đích
+ * (dự án → danh mục dự án; tin → trang tin; vị trí → trang tuyển dụng; trang khác → trang chủ), và đánh dấu "missing" để JS báo
+ * "nội dung đang được cập nhật" ở trang đích.
+ *
+ * @param array<string,array> $languages Kết quả wpml_active_languages (skip_missing = 0): mã → [url, active, native_name, missing].
+ * @param array<string,string> $fallbacks Mã ngôn ngữ → địa chỉ dự phòng (chỉ cần cho ngôn ngữ thiếu bản dịch).
+ * @return array[] Mỗi mục: code, url, active (bool), missing (bool), name.
+ */
+function vgarco_switcher_items( array $languages, array $fallbacks ): array {
+	$items = array();
+	foreach ( $languages as $code => $language ) {
+		$active  = ! empty( $language['active'] );
+		$missing = ! $active && ! empty( $language['missing'] );
+		$items[] = array(
+			'code'    => (string) $code,
+			'url'     => $missing && isset( $fallbacks[ $code ] ) && '' !== $fallbacks[ $code ] ? (string) $fallbacks[ $code ] : (string) ( $language['url'] ?? '' ),
+			'active'  => $active,
+			'missing' => $missing,
+			'name'    => (string) ( $language['native_name'] ?? strtoupper( (string) $code ) ),
+		);
+	}
+	return $items;
+}
+
+/**
+ * Địa chỉ dự phòng cho mỗi ngôn ngữ thiếu bản dịch của trang hiện tại, theo loại trang. Địa chỉ đi qua WPML nên đúng ngôn ngữ đích
+ * (kể cả phần đường dẫn đã dịch).
+ *
+ * @param array<string,array> $languages Xem vgarco_switcher_items().
+ * @return array<string,string>
+ */
+function vgarco_switcher_fallbacks( array $languages ): array {
+	$target = home_url( '/' );
+	if ( is_singular( 'du_an' ) || is_tax( 'loai_cong_trinh' ) ) {
+		$target = get_post_type_archive_link( 'du_an' ) ?: $target;
+	} elseif ( is_singular( 'tin_tuc' ) || is_tax( 'chuyen_muc' ) ) {
+		$target = get_post_type_archive_link( 'tin_tuc' ) ?: $target;
+	} elseif ( is_singular( 'vi_tri' ) || 'apply' === vgarco_page_key() ) {
+		$target = vgarco_page_url( 'careers' );
+	}
+
+	$fallbacks = array();
+	foreach ( $languages as $code => $language ) {
+		if ( ! empty( $language['missing'] ) ) {
+			$fallbacks[ $code ] = (string) apply_filters( 'wpml_permalink', $target, $code );
+		}
+	}
+	return $fallbacks;
+}
+
+/**
+ * Bộ chuyển ngôn ngữ VI / DE.
  *
  * Dùng liên kết thật (không phải nút + JS): chuyển ngôn ngữ hoạt động không cần JS và công cụ tìm kiếm thấy được.
  * Chỉ hiện khi có ít nhất 2 ngôn ngữ đang hiển thị với khách — ngôn ngữ ở chế độ ẩn (DE trước Mốc 2)
  * WPML tự loại khỏi danh sách với khách vãng lai.
- *
- * Còn thiếu: nhánh "trang chưa có bản dịch" (UC-10 2a) — làm cùng logic chuyển ngôn ngữ ở bước sau.
  */
 function vgarco_language_switcher(): void {
 	$languages = apply_filters( 'wpml_active_languages', null, array( 'skip_missing' => 0 ) );
@@ -175,14 +226,15 @@ function vgarco_language_switcher(): void {
 	}
 
 	printf( '<div class="language-switch" role="group" aria-label="%s">', esc_attr__( 'Ngôn ngữ', 'vgarco' ) );
-	foreach ( $languages as $code => $language ) {
+	foreach ( vgarco_switcher_items( $languages, vgarco_switcher_fallbacks( $languages ) ) as $item ) {
 		printf(
-			'<a href="%1$s" lang="%2$s" hreflang="%2$s"%3$s aria-label="%4$s">%5$s</a>',
-			esc_url( $language['url'] ),
-			esc_attr( $code ),
-			! empty( $language['active'] ) ? ' aria-current="true"' : '',
-			esc_attr( $language['native_name'] ?? strtoupper( $code ) ),
-			esc_html( strtoupper( $code ) )
+			'<a href="%1$s" lang="%2$s" hreflang="%2$s"%3$s%4$s aria-label="%5$s">%6$s</a>',
+			esc_url( $item['url'] ),
+			esc_attr( $item['code'] ),
+			$item['active'] ? ' aria-current="true"' : '',
+			$item['missing'] ? ' data-lang-missing' : '',
+			esc_attr( $item['name'] ),
+			esc_html( strtoupper( $item['code'] ) )
 		);
 	}
 	echo '</div>';

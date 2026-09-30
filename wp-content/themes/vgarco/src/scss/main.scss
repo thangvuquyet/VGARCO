@@ -26,6 +26,7 @@
   @include meta.load-css('components/breadcrumb');
   @include meta.load-css('components/entry');
   @include meta.load-css('components/search');
+  @include meta.load-css('components/notice');
 }
 
 @layer pages {

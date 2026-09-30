@@ -320,6 +320,23 @@ same( '404: mục ở gốc site không khớp mọi thứ', '', vgarco_url_sect
 same( '404: đường dẫn gốc → không mục nào', '', vgarco_url_section( '/', $secs ) );
 same( '404: đường dẫn rỗng → không mục nào', '', vgarco_url_section( '', $secs ) );
 
+// Bộ chuyển ngôn ngữ (UC-10): mục liên kết và nhánh "chưa có bản dịch".
+$langs = array(
+	'vi' => array( 'url' => '/', 'active' => 1, 'native_name' => 'Tiếng Việt', 'missing' => 0 ),
+	'de' => array( 'url' => '/de/', 'active' => 0, 'native_name' => 'Deutsch', 'missing' => 1 ),
+);
+$sw = vgarco_switcher_items( $langs, array( 'de' => '/de/du-an/' ) );
+same( 'chuyển ngôn ngữ: thiếu bản dịch → dùng địa chỉ dự phòng và đánh dấu missing', array( '/de/du-an/', true ), array( $sw[1]['url'], $sw[1]['missing'] ) );
+same( 'chuyển ngôn ngữ: ngôn ngữ đang xem giữ địa chỉ và không bao giờ bị đánh dấu missing', array( '/', true, false ), array( $sw[0]['url'], $sw[0]['active'], $sw[0]['missing'] ) );
+same( 'chuyển ngôn ngữ: giữ thứ tự và tên', array( 'vi', 'de' ), array_column( $sw, 'code' ) );
+$has = vgarco_switcher_items( array( 'de' => array( 'url' => '/de/bai/', 'active' => 0, 'missing' => 0, 'native_name' => 'Deutsch' ) ), array( 'de' => '/de/du-an/' ) );
+same( 'chuyển ngôn ngữ: có bản dịch → liên kết thẳng, dù có địa chỉ dự phòng', array( '/de/bai/', false ), array( $has[0]['url'], $has[0]['missing'] ) );
+$nofb = vgarco_switcher_items( $langs, array() );
+same( 'chuyển ngôn ngữ: thiếu bản dịch mà không có địa chỉ dự phòng → dùng địa chỉ WPML (không để rỗng)', array( '/de/', true ), array( $nofb[1]['url'], $nofb[1]['missing'] ) );
+same( 'chuyển ngôn ngữ: địa chỉ dự phòng rỗng bị bỏ qua', '/de/', vgarco_switcher_items( $langs, array( 'de' => '' ) )[1]['url'] );
+same( 'chuyển ngôn ngữ: không có native_name → mã viết hoa', 'FR', vgarco_switcher_items( array( 'fr' => array( 'url' => '/fr/' ) ), array() )[0]['name'] );
+same( 'chuyển ngôn ngữ: thiếu cờ missing coi như có bản dịch', false, vgarco_switcher_items( array( 'de' => array( 'url' => '/de/' ) ), array( 'de' => '/x/' ) )[0]['missing'] );
+
 /* ---------- Kết quả ---------- */
 
 echo "\n";

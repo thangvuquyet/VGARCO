@@ -307,10 +307,15 @@ function apply_filters( $hook, $value = null, ...$args ) {
 	}
 	if ( 'wpml_active_languages' === $hook ) {
 		$vi = 'vi' === $GLOBALS['lang'];
+		// VG_FX_MISSING=de: trang hiện tại chưa có bản dịch sang ngôn ngữ đó (WPML trả missing=1 và địa chỉ trang chủ của ngôn ngữ).
+		$missing = array_filter( explode( ',', (string) getenv( 'VG_FX_MISSING' ) ) );
 		return array(
-			'vi' => array( 'url' => '/', 'active' => $vi ? 1 : 0, 'native_name' => 'Tiếng Việt' ),
-			'de' => array( 'url' => '/de/', 'active' => $vi ? 0 : 1, 'native_name' => 'Deutsch' ),
+			'vi' => array( 'url' => '/', 'active' => $vi ? 1 : 0, 'native_name' => 'Tiếng Việt', 'missing' => in_array( 'vi', $missing, true ) ? 1 : 0 ),
+			'de' => array( 'url' => '/de/', 'active' => $vi ? 0 : 1, 'native_name' => 'Deutsch', 'missing' => in_array( 'de', $missing, true ) ? 1 : 0 ),
 		);
+	}
+	if ( 'wpml_permalink' === $hook ) {
+		return ( 'de' === ( $args[0] ?? '' ) ? '/de' : '' ) . $value; // WPML thêm tiền tố thư mục ngôn ngữ
 	}
 	return $value;
 }

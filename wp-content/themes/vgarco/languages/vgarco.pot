@@ -399,7 +399,7 @@ msgstr ""
 msgid "Định hướng hoạt động tư vấn thiết kế, phối hợp chuyên môn và triển khai dự án của VGARCO."
 msgstr ""
 
-#: wp-content/themes/vgarco/template-parts/project-gallery.php
+#: wp-content/themes/vgarco/header.php wp-content/themes/vgarco/template-parts/project-gallery.php
 msgid "Đóng"
 msgstr ""
 
@@ -833,6 +833,10 @@ msgstr ""
 
 #: wp-content/themes/vgarco/templates/contact.php
 msgid "Nội dung email soạn sẵn"
+msgstr ""
+
+#: wp-content/themes/vgarco/header.php
+msgid "Nội dung này đang được dịch. Trong lúc chờ, mời bạn xem mục tương ứng."
 msgstr ""
 
 #: wp-content/themes/vgarco/templates/contact.php

@@ -441,6 +441,20 @@ const M = [
     "if ( $next->getTimestamp() <= $now ) {", "if ( $next->getTimestamp() < $now ) {", 'security'],
   ["cache: cron tính theo UTC thay vì múi giờ website", "wp-content/plugins/vgarco-core/inc/cache-lib.php",
     "$tz    = new DateTimeZone( $timezone );", "$tz    = new DateTimeZone( 'UTC' );", 'security'],
+  ["chuyển ngôn ngữ: luôn dùng địa chỉ dự phòng dù đã có bản dịch", "wp-content/themes/vgarco/inc/template-tags.php",
+    "$missing && isset( $fallbacks[ $code ] ) && '' !== $fallbacks[ $code ] ?", "isset( $fallbacks[ $code ] ) && '' !== $fallbacks[ $code ] ?", 'smoke'],
+  ["chuyển ngôn ngữ: địa chỉ dự phòng rỗng được dùng", "wp-content/themes/vgarco/inc/template-tags.php",
+    "isset( $fallbacks[ $code ] ) && '' !== $fallbacks[ $code ] ?", "isset( $fallbacks[ $code ] ) ?", 'smoke'],
+  ["chuyển ngôn ngữ: trang loại công trình về trang chủ thay vì danh mục dự án", "wp-content/themes/vgarco/inc/template-tags.php",
+    "is_singular( 'du_an' ) || is_tax( 'loai_cong_trinh' )", "is_singular( 'du_an' )", 'pages'],
+  ["chuyển ngôn ngữ: trang ứng tuyển về trang chủ thay vì trang tuyển dụng", "wp-content/themes/vgarco/inc/template-tags.php",
+    "is_singular( 'vi_tri' ) || 'apply' === vgarco_page_key()", "is_singular( 'vi_tri' )", 'pages'],
+  ["chuyển ngôn ngữ: liên kết thiếu bản dịch không có cờ cho JS", "wp-content/themes/vgarco/inc/template-tags.php",
+    "$item['missing'] ? ' data-lang-missing' : ''", "''", 'pages'],
+  ["chuyển ngôn ngữ: địa chỉ dự phòng không qua WPML", "wp-content/themes/vgarco/inc/template-tags.php",
+    "$fallbacks[ $code ] = (string) apply_filters( 'wpml_permalink', $target, $code );", "$fallbacks[ $code ] = (string) $target;", 'pages'],
+  ["chuyển ngôn ngữ: khung thông báo hiện sẵn", "wp-content/themes/vgarco/header.php",
+    "data-lang-notice role=\"status\" hidden>", "data-lang-notice role=\"status\">", 'pages'],
 ];
 
 let caught = 0, missed = 0, skipped = 0;

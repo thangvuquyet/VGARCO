@@ -46,3 +46,10 @@ defined( 'ABSPATH' ) || exit;
 </header>
 
 <main id="main">
+<?php // Hiện khi người dùng vừa chuyển ngôn ngữ tới trang chưa có bản dịch (UC-10 2a): main.js bỏ thuộc tính hidden. ?>
+<div class="lang-notice wrap" data-lang-notice role="status" hidden>
+	<p><?php esc_html_e( 'Nội dung này đang được dịch. Trong lúc chờ, mời bạn xem mục tương ứng.', 'vgarco' ); ?></p>
+	<button type="button" class="lang-notice-close" data-lang-notice-close aria-label="<?php esc_attr_e( 'Đóng', 'vgarco' ); ?>">
+		<?php echo vgarco_icon( 'close' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- SVG của theme. ?>
+	</button>
+</div>

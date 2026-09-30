@@ -107,6 +107,10 @@ function common_checks( DOMXPath $x, string $name ): void {
 	}
 	same( "{$name}: nút không chữ đều có aria-label", 0, $nameless );
 
+	// UC-10 2a: khung thông báo "nội dung đang được dịch" có sẵn nhưng ẩn (JS chỉ mở khi người dùng vừa chuyển sang trang chưa có bản dịch).
+	$notice = q( $x, '//main/div[@data-lang-notice]' );
+	check( "{$name}: khung thông báo chuyển ngôn ngữ ẩn sẵn, có role=status, có chữ và nút đóng có tên", 1 === $notice->length && $notice->item( 0 )->hasAttribute( 'hidden' ) && 'status' === $notice->item( 0 )->getAttribute( 'role' ) && '' !== trim( $notice->item( 0 )->textContent ) && 1 === q( $x, '//main/div[@data-lang-notice]/button[@data-lang-notice-close and string-length(@aria-label) > 0]' )->length );
+
 	// SEO: tối đa một canonical và một mô tả; mọi khối JSON-LD là JSON hợp lệ có @context.
 	same( "{$name}: tối đa một thẻ canonical", true, q( $x, '//link[@rel="canonical"]' )->length <= 1 );
 	same( "{$name}: tối đa một meta description", true, q( $x, '//meta[@name="description"]' )->length <= 1 );
@@ -656,6 +660,33 @@ $xss = render( '404', false, 'vi', array( 'VG_FX_URI' => '/du-an/"><script>alert
 same( '404: đường dẫn chứa <script> không lọt vào HTML', 0, q( $xss, '//script[contains(., "alert(1)")]' )->length );
 $de404 = render( '404', false, 'de', array( 'VG_FX_URI' => '/du-an/x/' ) );
 common_checks( $de404, '404 tiếng Đức' );
+
+/* ========================= Bộ chuyển ngôn ngữ (UC-10) ========================= */
+
+$de_link = static function ( DOMXPath $n ): array {
+	$a = q( $n, '//div[' . cls( 'language-switch' ) . ']/a[@hreflang="de"]' );
+	return $a->length ? array( $a->item( 0 )->getAttribute( 'href' ), $a->item( 0 )->hasAttribute( 'data-lang-missing' ) ) : array();
+};
+$switch_cases = array(
+	'dự án'                  => array( 'single-du_an', array( 'VG_FX_ID' => '104' ), '/de/du-an/' ),
+	'loại công trình'        => array( 'taxonomy-loai_cong_trinh', array( 'VG_FX_TERM' => 'giao-duc' ), '/de/du-an/' ),
+	'tin'                    => array( 'single-tin_tuc', array( 'VG_FX_ID' => '301' ), '/de/tin-tuc/' ),
+	'chuyên mục'             => array( 'taxonomy-chuyen_muc', array( 'VG_FX_TERM' => 'su-kien' ), '/de/tin-tuc/' ),
+	'vị trí tuyển dụng'      => array( 'single-vi_tri', array( 'VG_FX_ID' => '401' ), '/de/tuyen-dung/' ),
+	'ứng tuyển'              => array( 'templates/apply', array( 'VG_FX_ID' => '507', 'VG_FX_GET' => 'id=401' ), '/de/tuyen-dung/' ),
+	'trang Về công ty'       => array( 'templates/about', array( 'VG_FX_ID' => '501' ), '/de/' ),
+	'trang chủ'              => array( 'front-page', array(), '/de/' ),
+);
+foreach ( $switch_cases as $label => [ $template, $env, $fallback ] ) {
+	$miss = render( $template, false, 'vi', array_merge( $env, array( 'VG_FX_MISSING' => 'de' ) ) );
+	same( "chuyển ngôn ngữ ({$label}) chưa có bản dịch: DE trỏ tới {$fallback} và đánh dấu missing", array( $fallback, true ), $de_link( $miss ) );
+	same( "chuyển ngôn ngữ ({$label}): ngôn ngữ đang xem (VI) không bị đánh dấu missing", 0, q( $miss, '//div[' . cls( 'language-switch' ) . ']/a[@hreflang="vi" and @data-lang-missing]' )->length );
+	$have = render( $template, false, 'vi', $env );
+	same( "chuyển ngôn ngữ ({$label}) đã có bản dịch: liên kết thẳng của WPML, không đánh dấu", array( '/de/', false ), $de_link( $have ) );
+}
+$de_miss = render( 'front-page', false, 'de', array( 'VG_FX_MISSING' => 'vi' ) );
+same( 'chuyển ngôn ngữ: từ trang DE sang VI chưa có bản dịch cũng đánh dấu missing (đối xứng)', array( '/', true ), array( q( $de_miss, '//div[' . cls( 'language-switch' ) . ']/a[@hreflang="vi"]' )->item( 0 )->getAttribute( 'href' ), q( $de_miss, '//div[' . cls( 'language-switch' ) . ']/a[@hreflang="vi"]' )->item( 0 )->hasAttribute( 'data-lang-missing' ) ) );
+same( 'chuyển ngôn ngữ: ngôn ngữ đang xem mang aria-current', 1, q( $de_miss, '//div[' . cls( 'language-switch' ) . ']/a[@hreflang="de" and @aria-current="true"]' )->length );
 
 /* ========================= SEO cơ bản (mục 8.9) ========================= */
 

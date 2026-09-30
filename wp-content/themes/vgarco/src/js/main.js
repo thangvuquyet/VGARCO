@@ -50,9 +50,43 @@ function initSearch() {
 	}
 }
 
+// UC-10 2a: bấm ngôn ngữ chưa có bản dịch thì nhớ trong sessionStorage (không dùng tham số URL để không phân mảnh cache);
+// trang đích hiện thông báo "nội dung đang được dịch". Cờ chỉ có hiệu lực 30 giây và dùng một lần.
+function initLanguageNotice() {
+	const KEY = 'vg-lang-missing';
+	const notice = document.querySelector( '[data-lang-notice]' );
+
+	document.addEventListener( 'click', ( event ) => {
+		if ( event.target instanceof Element && event.target.closest( '[data-lang-missing]' ) ) {
+			try {
+				sessionStorage.setItem( KEY, String( Date.now() ) );
+			} catch {
+				/* trình duyệt chặn sessionStorage: bỏ qua, chỉ mất thông báo */
+			}
+		}
+	} );
+
+	if ( ! notice ) {
+		return;
+	}
+	try {
+		const flagged = Number( sessionStorage.getItem( KEY ) );
+		sessionStorage.removeItem( KEY );
+		if ( flagged && Date.now() - flagged < 30000 ) {
+			notice.hidden = false;
+		}
+	} catch {
+		/* như trên */
+	}
+	notice.querySelector( '[data-lang-notice-close]' )?.addEventListener( 'click', () => {
+		notice.hidden = true;
+	} );
+}
+
 function start() {
 	initNav();
 	initSearch();
+	initLanguageNotice();
 
 	const load = pageModules[ document.body.dataset.vgPage ];
 	if ( load ) {

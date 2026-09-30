@@ -1,0 +1,45 @@
+@use '../mixins' as *;
+
+// Thông báo dưới đầu trang (UC-10 2a): "nội dung đang được dịch". Không có trong bản thiết kế HTML; dùng màu nền ấm và đường kẻ của site.
+.lang-notice {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  padding-block: 0.75rem;
+  margin-top: 0.75rem;
+  font-size: var(--fs-small);
+  line-height: 1.5;
+  color: var(--c-ink);
+  background: var(--c-surface-warm);
+  border-left: 3px solid var(--c-brand);
+
+  &[hidden] {
+    display: none;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+.lang-notice-close {
+  position: relative;
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  color: var(--c-ink);
+
+  &:hover {
+    color: var(--c-brand);
+  }
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  @include hit-area(0.25rem, 0.25rem);
+}

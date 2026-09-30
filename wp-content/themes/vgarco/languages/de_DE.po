@@ -408,7 +408,7 @@ msgstr "Hauptnavigation"
 msgid "Định hướng hoạt động tư vấn thiết kế, phối hợp chuyên môn và triển khai dự án của VGARCO."
 msgstr "Verantwortung für die fachliche Ausrichtung von Planung, Zusammenarbeit und Projektumsetzung bei VGARCO."
 
-#: wp-content/themes/vgarco/template-parts/project-gallery.php
+#: wp-content/themes/vgarco/header.php wp-content/themes/vgarco/template-parts/project-gallery.php
 msgid "Đóng"
 msgstr "Schließen"
 
@@ -870,6 +870,10 @@ msgstr "Der Inhalt wird gerade aktualisiert."
 #: wp-content/themes/vgarco/templates/contact.php
 msgid "Nội dung email soạn sẵn"
 msgstr "Vorbereiteter E-Mail-Text"
+
+#: wp-content/themes/vgarco/header.php
+msgid "Nội dung này đang được dịch. Trong lúc chờ, mời bạn xem mục tương ứng."
+msgstr "Dieser Inhalt wird derzeit übersetzt. In der Zwischenzeit finden Sie hier den passenden Bereich."
 
 #: wp-content/themes/vgarco/templates/contact.php
 msgid "Nội dung trao đổi"
