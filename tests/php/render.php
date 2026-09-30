@@ -174,10 +174,10 @@ function get_queried_object_id() {
 	return $GLOBALS['post_id'];
 }
 function is_page() {
-	return false;
+	return str_starts_with( $GLOBALS['template'], 'templates/' );
 }
 function get_page_template_slug() {
-	return '';
+	return str_starts_with( $GLOBALS['template'], 'templates/' ) ? $GLOBALS['template'] . '.php' : '';
 }
 function get_terms( $args ) {
 	require_once VGARCO_CORE_DIR . 'inc/seed.php';
@@ -232,6 +232,7 @@ function the_excerpt() {
 require_once __DIR__ . '/fixtures.php';
 require_once VGARCO_CORE_DIR . 'inc/helpers.php';
 require_once THEME . '/inc/models.php';
+require_once THEME . '/inc/content.php';
 require_once THEME . '/inc/menus.php';
 require_once THEME . '/inc/template-tags.php';
 require_once THEME . '/inc/enqueue.php';
@@ -245,7 +246,7 @@ $out = ROOT . '/tests/out';
 if ( ! is_dir( $out ) ) {
 	mkdir( $out, 0777, true );
 }
-$name = ( array( 'index' => 'frame', 'front-page' => 'home' )[ $template ] ?? $template ) . ( $GLOBALS['term'] ? '-' . $GLOBALS['term'] : '' ) . ( $GLOBALS['post_id'] ? '-' . $GLOBALS['post_id'] : '' );
+$name = str_replace( '/', '-', ( array( 'index' => 'frame', 'front-page' => 'home' )[ $template ] ?? $template ) ) . ( $GLOBALS['term'] ? '-' . $GLOBALS['term'] : '' ) . ( $GLOBALS['post_id'] ? '-' . $GLOBALS['post_id'] : '' );
 file_put_contents( $out . '/' . $name . '.html', $html );
 
 echo 'Đã kết xuất ' . strlen( $html ) . " byte → tests/out/$name.html, không có cảnh báo PHP.\n";

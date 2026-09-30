@@ -31,4 +31,5 @@
   @include meta.load-css('pages/home');
   @include meta.load-css('pages/projects');
   @include meta.load-css('pages/project');
+  @include meta.load-css('pages/about');
 }

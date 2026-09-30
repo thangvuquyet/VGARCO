@@ -37,19 +37,24 @@
   // --- Bố cục ---
   --w-content: 86.25rem; // 1380 px — theo bản thiết kế (đặc tả 6.2 ghi 1320: lệch, xem phương án mục 3.1 #12)
   --header-h: 72px;
-  --header-pad: 1rem;
+  --header-pad: 0.8125rem; // 13 @390 · 16 @480 · 24 @701
   --gutter: 1.25rem;
   --footer-pad: 1.25rem;
   --shadow-panel: 0 16px 25px rgb(25 27 26 / 7%);
 
-  @media (min-width: 701px) {
+  @include up($bp-phone) {
+    --header-pad: 1rem;
+  }
+
+  // Đầu trang và cỡ tiêu đề đổi ở 701 px; lề trang (--gutter) đổi sớm hơn, ở 601 px (đo từ bản thiết kế ở 610 / 700 / 701 px).
+  @include up($bp-md) {
+    --header-h: 86px;
+    --header-pad: 1.5rem;
     --fs-headline-a: clamp(2.75rem, 3.65vw, 3.875rem);
     --fs-headline-b: clamp(2rem, 2.75vw, 2.75rem);
   }
 
   @include up($bp-tablet) {
-    --header-h: 86px;
-    --header-pad: 1.5rem;
     --gutter: 2.25rem;
     --footer-pad: clamp(1.25rem, 4.4vw, 4.75rem); // 39,6 @900 · 63,36 @1440 · 76 @1920 (đo từ bản thiết kế)
   }

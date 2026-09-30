@@ -1,4 +1,5 @@
 // Điểm gãy bố cục (px). Thiết kế mobile-first: viết kiểu cho màn nhỏ trước, mở rộng bằng up().
+$bp-phone: 480px; // ≥ : điện thoại lớn — đầu trang nới lề và nút (bản thiết kế đổi ở đây)
 $bp-tablet: 601px; // ≥ : máy tính bảng
 $bp-md: 701px; // ≥ : lưới 2–3 cột, tiêu đề khối nằm ngang
 $bp-lg: 1001px; // ≥ : bố cục máy tính (hero 3 cột, lưới dự án 3 cột)

@@ -21,6 +21,7 @@ require_once VGARCO_CORE_DIR . 'inc/fields/linh-vuc.php';
 require_once VGARCO_CORE_DIR . 'inc/fields/tin-tuc.php';
 require_once VGARCO_CORE_DIR . 'inc/fields/vi-tri.php';
 require_once VGARCO_CORE_DIR . 'inc/fields/cau-hinh.php';
+require_once VGARCO_CORE_DIR . 'inc/fields/trang.php';
 
 /**
  * Chuyển tên chế độ dịch sang số của WPML (0 bỏ qua, 1 sao chép, 2 dịch, 3 sao chép một lần).
@@ -84,7 +85,8 @@ function vgarco_field_groups(): array {
 			vgarco_fields_tin_tuc(),
 			vgarco_fields_vi_tri(),
 		),
-		vgarco_fields_cau_hinh()
+		vgarco_fields_cau_hinh(),
+		vgarco_fields_trang()
 	);
 }
 

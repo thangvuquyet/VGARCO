@@ -127,9 +127,13 @@ h3 em {
   position: relative;
   display: grid;
   place-items: center;
-  width: 36px;
+  width: 34px;
   height: 42px;
   color: var(--c-ink);
+
+  @include up($bp-phone) {
+    width: 36px;
+  }
 
   svg {
     width: 23px;
@@ -137,7 +141,7 @@ h3 em {
   }
 
   // Di động: nút nhìn thấy 36 × 42 nhưng vùng bấm đủ 44 × 44 (phương án mục 7.8).
-  @include hit-area(0.0625rem, 0.25rem);
+  @include hit-area(0.0625rem, 0.3125rem);
 
   @include up($bp-tablet) {
     width: 44px;

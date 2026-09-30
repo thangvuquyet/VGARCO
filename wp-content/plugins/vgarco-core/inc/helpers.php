@@ -52,6 +52,28 @@ function vgarco_option_defaults(): array {
 			'zalo'     => '',
 			'facebook' => '',
 		),
+		'chi_so_gioi_thieu' => array(
+			array(
+				'so'     => '13',
+				'hau_to' => '+',
+				'nhan'   => __( 'Năm hình thành và phát triển', 'vgarco-core' ),
+			),
+			array(
+				'so'     => '20',
+				'hau_to' => '',
+				'nhan'   => __( 'Dự án trong hồ sơ năng lực', 'vgarco-core' ),
+			),
+			array(
+				'so'     => '03',
+				'hau_to' => '',
+				'nhan'   => __( 'Quốc gia có dự án', 'vgarco-core' ),
+			),
+			array(
+				'so'     => '06',
+				'hau_to' => '',
+				'nhan'   => __( 'Nhóm chuyên môn phối hợp', 'vgarco-core' ),
+			),
+		),
 		'chi_so_trang_chu' => array(
 			array(
 				'so'     => '13',

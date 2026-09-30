@@ -32,7 +32,7 @@ function same( string $label, $expected, $actual ): void {
 function render( string $template, bool $empty = false, string $lang = 'vi', array $env = array() ): DOMXPath {
 	$names  = array( 'index' => 'frame', 'front-page' => 'home' );
 	$suffix = ( ! empty( $env['VG_FX_TERM'] ) ? '-' . $env['VG_FX_TERM'] : '' ) . ( ! empty( $env['VG_FX_ID'] ) ? '-' . $env['VG_FX_ID'] : '' );
-	$file   = ROOT . '/tests/out/' . ( $names[ $template ] ?? $template ) . $suffix . '.html';
+	$file   = ROOT . '/tests/out/' . str_replace( '/', '-', $names[ $template ] ?? $template ) . $suffix . '.html';
 	@unlink( $file );
 
 	$cmd = sprintf(
@@ -311,6 +311,55 @@ same( 'một ảnh: không có nút trước/sau, chấm, số đếm, ảnh nh�
 same( 'một ảnh: vẫn có nút phóng to và hộp xem ảnh lớn', array( 1, 1 ), array( q( $one, '//button[@data-gallery-open]' )->length, q( $one, '//dialog[@data-gallery-lightbox]' )->length ) );
 same( 'một ảnh: hộp xem ảnh lớn không có nút trước/sau', 0, q( $one, '//dialog//button[@data-lightbox-prev or @data-lightbox-next]' )->length );
 same( 'một ảnh: chú thích không có số thứ tự "01"', 0, q( $one, '//*[' . cls( 'gallery-caption-index' ) . ']' )->length );
+
+/* ========================= Về công ty (UC-02) ========================= */
+
+// Cài mới: chưa nhập gì — chữ mặc định đủ, ảnh và khối ghi nhận ẩn.
+$a = render( 'templates/about', false, 'vi', array( 'VG_FX_ID' => '501' ) );
+common_checks( $a, 'về công ty' );
+check( 'về công ty: trang thuộc module "about" (data-vg-page)', 1 === q( $a, '//body[@data-vg-page="about"]' )->length );
+same( 'về công ty: đường dẫn Trang chủ / Về công ty', array( 'Trang chủ', 'Về công ty' ), array_map( static fn( $n ) => trim( $n->textContent ), iterator_to_array( q( $a, '//nav[' . cls( 'breadcrumb' ) . ']//li' ) ) ) );
+same( 'về công ty: h1 có ngắt dòng và cụm nhấn', 1, q( $a, '//h1[count(br)=1 and count(em)=1]' )->length );
+same( 'về công ty: nhãn đầu trang mặc định', 'Về công ty / Est. 2013', trim( q( $a, '//*[' . cls( 'about-masthead' ) . ']/p[' . cls( 'eyebrow' ) . ']' )->item( 0 )->textContent ) );
+check( 'về công ty: nút cuộn xuống có tên và trỏ tới "Chúng tôi là ai"', 1 === q( $a, '//a[' . cls( 'about-scroll' ) . ' and @href="#cau-chuyen-cong-ty" and @aria-label != ""]' )->length && 1 === q( $a, '//section[@id="cau-chuyen-cong-ty"]' )->length );
+same( 'về công ty: chưa chọn ảnh bìa thì ẩn khối ảnh bìa', 0, q( $a, '//figure[' . cls( 'about-cover' ) . ']' )->length );
+$story_text = q( $a, '//section[' . cls( 'about-story' ) . ']' )->item( 0 )->textContent;
+check( 'về công ty: nêu đúng ngày thành lập 19/08/2013 và tên cũ 3SEVEN, đổi tên 05/12/2023', str_contains( $story_text, '19/08/2013' ) && str_contains( $story_text, '3SEVEN' ) && str_contains( $story_text, '05/12/2023' ) );
+same( 'về công ty: 4 chỉ số, số đầu là "13+"', array( 4, '13+' ), array( q( $a, '//section[' . cls( 'about-metrics' ) . ']/div' )->length, trim( q( $a, '//section[' . cls( 'about-metrics' ) . ']/div[1]/strong' )->item( 0 )->textContent ) ) );
+same( 'về công ty: 4 mốc thời gian', 4, q( $a, '//ol[' . cls( 'timeline' ) . ']/li' )->length );
+same( 'về công ty: mốc có ngày thật dùng thẻ <time datetime>', array( '2013-08-19', '2023-12-05' ), array_map( static fn( $n ) => $n->getAttribute( 'datetime' ), iterator_to_array( q( $a, '//ol[' . cls( 'timeline' ) . ']//time' ) ) ) );
+same( 'về công ty: mốc có địa điểm dùng <span> (không giả làm ngày)', 2, q( $a, '//ol[' . cls( 'timeline' ) . ']//span[' . cls( 'timeline-meta' ) . ']' )->length );
+check( 'về công ty: khối hành trình có nhãn (aria-labelledby trỏ tới tiêu đề)', 1 === q( $a, '//section[' . cls( 'about-timeline' ) . ' and @aria-labelledby="timeline-title"]//h2[@id="timeline-title"]' )->length && 1 === q( $a, '//section[' . cls( 'about-timeline' ) . ' and ' . cls( 'on-dark' ) . ']' )->length );
+same( 'về công ty: 3 nguyên tắc, số thứ tự ẩn khỏi trình đọc màn hình', array( 3, 3 ), array( q( $a, '//div[' . cls( 'approach-list' ) . ']/article' )->length, q( $a, '//div[' . cls( 'approach-list' ) . ']/article/span[@aria-hidden="true"]' )->length ) );
+same( 'về công ty: 3 quốc gia', array( 'Việt Nam', 'Lào', 'CHLB Đức' ), array_map( static fn( $n ) => trim( $n->textContent ), iterator_to_array( q( $a, '//ul[' . cls( 'reach-countries' ) . ']/li' ) ) ) );
+same( 'về công ty: chưa nhập thì ẩn khối "Sự ghi nhận" (UC-02 2c)', 0, q( $a, '//section[' . cls( 'recognition' ) . ']' )->length );
+same( 'về công ty: không ảnh nào trên trang khi chưa chọn ảnh', 0, q( $a, '//main//img' )->length );
+
+// Biên tập viên đã chọn ảnh và nhập khối ghi nhận.
+$f2 = render( 'templates/about', false, 'vi', array( 'VG_FX_ID' => '501', 'VG_FX_PAGE_FULL' => '1' ) );
+common_checks( $f2, 'về công ty đủ ảnh' );
+$cover2 = q( $f2, '//figure[' . cls( 'about-cover' ) . ']/img' )->item( 0 );
+check( 'ảnh bìa: là ảnh LCP — eager + fetchpriority=high', null !== $cover2 && 'eager' === $cover2->getAttribute( 'loading' ) && 'high' === $cover2->getAttribute( 'fetchpriority' ) );
+check( 'ảnh bìa: alt là tên công trình', null !== $cover2 && 'Trường THCS chất lượng cao Bắc Từ Liêm' === $cover2->getAttribute( 'alt' ) );
+same( 'ảnh bìa: năm ở góc "2013" và nhãn "Năm khởi đầu"', array( '2013', 'Năm khởi đầu' ), array( trim( q( $f2, '//*[' . cls( 'cover-year' ) . ']/strong' )->item( 0 )->textContent ), trim( q( $f2, '//*[' . cls( 'cover-year' ) . ']/span' )->item( 0 )->textContent ) ) );
+same( 'ảnh bìa: chú thích 2 phần', 2, q( $f2, '//figure[' . cls( 'about-cover' ) . ']/figcaption/span' )->length );
+same( 'cách làm việc: ảnh lazy có alt = chú thích', array( 'lazy', 'Niedernhausen, Đức / Phối cảnh thiết kế' ), array( q( $f2, '//section[' . cls( 'about-approach' ) . ']//img' )->item( 0 )->getAttribute( 'loading' ), q( $f2, '//section[' . cls( 'about-approach' ) . ']//img' )->item( 0 )->getAttribute( 'alt' ) ) );
+same( 'ghi nhận: có khối, tiêu đề nhiều dòng', 1, q( $f2, '//section[@id="ghi-nhan"]//h2[count(br)=1]' )->length );
+check( 'ghi nhận: nút "Xem tư liệu ghi nhận" dẫn tới bài viết đã chọn (UC-02 2b)', 1 === q( $f2, '//section[@id="ghi-nhan"]//a[' . cls( 'text-link' ) . ' and @href="/tin-tuc/301/"]' )->length );
+check( 'ghi nhận: ảnh tư liệu có mô tả', str_contains( q( $f2, '//section[@id="ghi-nhan"]//img' )->item( 0 )->getAttribute( 'alt' ), 'Bằng khen' ) );
+check( 'ghi nhận: khối gắn nhãn bằng tiêu đề của nó', 1 === q( $f2, '//section[@id="ghi-nhan" and @aria-labelledby="recognition-title"]//h2[@id="recognition-title"]' )->length );
+
+$f3 = render( 'templates/about', false, 'vi', array( 'VG_FX_ID' => '501', 'VG_FX_PAGE_FULL' => '1', 'VG_FX_NO_AWARD_POST' => '1' ) );
+same( 'ghi nhận: không chọn bài viết thì ẩn nút nhưng giữ khối', array( 1, 0 ), array( q( $f3, '//section[@id="ghi-nhan"]' )->length, q( $f3, '//section[@id="ghi-nhan"]//a' )->length ) );
+
+// Biên tập viên ghi đè chữ: bản nhập luôn thắng bản mặc định; dòng trống bị bỏ; nội dung độc hại bị chặn.
+$o = render( 'templates/about', false, 'vi', array( 'VG_FX_ID' => '501', 'VG_FX_PAGE_OVERRIDE' => '1' ) );
+check( 'ghi đè: tiêu đề do biên tập viên nhập thắng bản mặc định, giữ cụm nhấn', str_contains( trim( q( $o, '//h1' )->item( 0 )->textContent ), 'Tiêu đề do biên tập viên nhập.' ) && 1 === q( $o, '//h1/em' )->length );
+same( 'ghi đè: dòng lặp trống hoàn toàn bị bỏ — chỉ còn 1 mốc (không lẫn 4 mốc mặc định)', 1, q( $o, '//ol[' . cls( 'timeline' ) . ']/li' )->length );
+same( 'ghi đè: danh sách quốc gia bỏ dòng trống và dòng chỉ có khoảng trắng', array( 'Việt Nam', 'Lào', 'Đức', 'Áo' ), array_map( static fn( $n ) => trim( $n->textContent ), iterator_to_array( q( $o, '//ul[' . cls( 'reach-countries' ) . ']/li' ) ) ) );
+same( 'an toàn: <img onerror> trong tiêu đề bị loại', 0, q( $o, '//img[@onerror]' )->length );
+same( 'an toàn: <script> trong ô chữ bị thoát, không thành thẻ script trong trang', 0, q( $o, '//main//script' )->length );
+check( 'an toàn: chữ "<b>đậm</b>" trong ô chữ hiển thị nguyên văn, không thành thẻ', 0 === q( $o, '//main//b' )->length && str_contains( q( $o, '//*[' . cls( 'masthead-bottom' ) . ']/p[1]' )->item( 0 )->textContent, '<b>đậm</b>' ) );
 
 /* ---------- Kết quả ---------- */
 

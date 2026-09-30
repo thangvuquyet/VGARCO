@@ -1,0 +1,782 @@
+@use '../mixins' as *;
+
+// Về công ty (UC-02). Số đo lấy từ bản thiết kế ở 390 / 610 / 700 / 900 / 1100 / 1280 / 1440 px.
+// Ba nấc, giống bản thiết kế: di động (< 601 px), máy tính bảng (601–999 px, cỡ chữ tiêu đề CỐ ĐỊNH), máy tính (≥ 1000 px,
+// cỡ chữ theo vw và chặn trần bằng giá trị ở 1600 px).
+
+// Nhãn nhỏ màu đỏ đứng trên tiêu đề của từng khối.
+:is(.about-masthead, .about-story, .about-approach, .about-reach, .recognition) .eyebrow {
+  margin-bottom: 1.375rem;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  letter-spacing: 0.1em;
+  color: var(--c-brand);
+
+  @include up($bp-tablet) {
+    margin-bottom: 1.75rem;
+    font-size: var(--fs-caption);
+  }
+}
+
+// ===================================================================== ĐẦU TRANG
+.about-masthead {
+  padding-block: 1.5rem;
+
+  .eyebrow {
+    margin-bottom: 1.125rem;
+  }
+
+  h1 {
+    max-width: 70rem;
+    font-size: 2.75rem; // 44
+    font-weight: 450;
+    line-height: 1.06;
+    letter-spacing: -0.055em;
+
+    @include up($bp-tablet) {
+      font-size: 3.25rem; // 52
+      line-height: 1.07;
+    }
+
+    @include up($bp-desk) {
+      font-size: min(5.4vw, 5.4rem);
+    }
+  }
+
+  @include up($bp-tablet) {
+    padding-block: 1.75rem 1.875rem;
+  }
+}
+
+.masthead-bottom {
+  display: grid;
+  gap: 0.875rem;
+  align-items: end;
+  margin-top: 1.5rem;
+
+  p {
+    max-width: 33.75rem;
+    font-size: 0.9375rem;
+    line-height: 1.8;
+  }
+
+  // Di động: dòng đầu là nhãn nhỏ hơn đoạn giới thiệu bên dưới.
+  p:first-child {
+    font-size: var(--fs-small);
+  }
+
+  @include up($bp-tablet) {
+    grid-template-columns: 5fr 7fr 45px;
+    gap: 1.875rem;
+
+    p,
+    p:first-child {
+      font-size: 0.9375rem;
+      line-height: 1.75;
+    }
+  }
+
+  @include up($bp-desk) {
+    grid-template-columns: 1fr 1fr 50px;
+    gap: 2.8125rem;
+  }
+}
+
+.about-scroll {
+  display: grid;
+  place-items: center;
+  height: 50px;
+  border: 1px solid var(--c-line);
+
+  svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  &:hover {
+    color: #fff;
+    background: var(--c-ink);
+    border-color: var(--c-ink);
+  }
+
+  @include up($bp-tablet) {
+    width: 45px;
+    height: 60px;
+
+    svg {
+      width: 30px;
+      height: 30px;
+    }
+  }
+
+  @include up($bp-desk) {
+    width: 50px;
+  }
+}
+
+.about-cover {
+  position: relative;
+  overflow: hidden;
+  background: var(--c-surface-pale);
+
+  img {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+    object-position: 55% 50%;
+  }
+
+  .cover-year {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 1.0625rem 1.25rem;
+    color: #fff;
+    background: var(--c-brand);
+
+    strong {
+      display: block;
+      font-size: 2.4375rem; // 39
+      font-weight: 500;
+      line-height: 1.1;
+      letter-spacing: -0.06em;
+    }
+
+    span {
+      display: block;
+      margin-top: 0.4375rem;
+      font-size: 0.6875rem; // 11
+      line-height: 1.7;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+  }
+
+  figcaption {
+    display: grid;
+    gap: 0.25rem;
+    padding: 0.875rem var(--gutter);
+    font-size: var(--fs-small);
+    line-height: 1.55;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #fff;
+    background: var(--c-ink);
+  }
+
+  @include up($bp-tablet) {
+    width: min(100% - 3rem, 100rem);
+    margin-inline: auto;
+
+    img {
+      object-position: 50% 53%;
+    }
+
+    .cover-year {
+      padding: 1.75rem 1.875rem;
+
+      strong {
+        font-size: 3.625rem; // 58
+      }
+
+      span {
+        margin-top: 0.75rem;
+        font-size: var(--fs-small);
+      }
+    }
+
+    figcaption {
+      display: flex;
+      justify-content: space-between;
+      gap: 1.5625rem;
+      padding: 1.125rem 1.5rem;
+    }
+  }
+
+  @include up($bp-desk) {
+    width: min(100% - 4rem, 100rem);
+
+    img {
+      height: max(300px, 33vw);
+    }
+  }
+}
+
+// ===================================================================== CHÚNG TÔI LÀ AI
+.about-story {
+  display: grid;
+  gap: 1.25rem;
+  padding-block: 3.25rem;
+
+  .eyebrow {
+    margin-bottom: 0;
+
+    @include up($bp-tablet) {
+      margin-bottom: 1.75rem;
+    }
+  }
+
+  h2 {
+    font-size: 2.0625rem; // 33
+    line-height: 1.22;
+    letter-spacing: -0.035em;
+
+    @include up($bp-tablet) {
+      font-size: 2.3125rem; // 37
+      line-height: 1.18;
+    }
+
+    @include up($bp-desk) {
+      font-size: min(4.1vw, 4.1rem);
+    }
+  }
+
+  h2 em {
+    letter-spacing: -0.045em;
+  }
+
+  // Ghi chú bên lề chỉ có từ 601 px.
+  .margin-note {
+    display: none;
+    margin: 3.4375rem 0 1.25rem;
+    line-height: 1.9;
+    color: var(--c-ink-muted);
+
+    @include up($bp-tablet) {
+      display: block;
+    }
+  }
+
+  @include up($bp-tablet) {
+    grid-template-columns: 0.3fr 1fr;
+    gap: 2.1875rem;
+  }
+
+  @include up($bp-desk) {
+    grid-template-columns: 0.35fr 1fr;
+    gap: 5rem;
+  }
+}
+
+.story-columns {
+  display: grid;
+  gap: 1.25rem;
+  margin-top: 1.5625rem;
+
+  p {
+    font-size: 0.9375rem;
+    line-height: 1.85;
+    color: var(--c-ink-muted);
+  }
+
+  @include up($bp-tablet) {
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5625rem;
+    margin-top: 2rem;
+
+    p {
+      font-size: var(--fs-body);
+      line-height: 1.9;
+    }
+  }
+
+  @include up($bp-desk) {
+    gap: 2.8125rem;
+  }
+}
+
+.story-closing {
+  max-width: 56.25rem;
+  margin-top: 1.5rem;
+  padding-top: 1.375rem;
+  font-size: 1.0625rem;
+  line-height: 1.8;
+  border-top: 1px solid var(--c-line);
+
+  @include up($bp-tablet) {
+    margin-top: 1.75rem;
+    padding-top: 1.5625rem;
+    font-size: 1.1875rem;
+  }
+}
+
+// ===================================================================== CHỈ SỐ
+.about-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.875rem 1.25rem;
+  margin-bottom: 3.25rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--c-line);
+
+  strong {
+    display: block;
+    font-size: 3.6875rem; // 59
+    font-weight: 350;
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+
+  strong span {
+    margin-left: 0.05em;
+    font-size: 0.37em;
+    vertical-align: top;
+    color: var(--c-brand);
+  }
+
+  div > p {
+    margin-top: 0.9375rem;
+    font-size: var(--fs-small);
+    line-height: 1.6;
+    color: var(--c-ink-muted);
+  }
+
+  .metrics-note {
+    grid-column: 1 / -1;
+    font-size: var(--fs-caption);
+    line-height: 1.7;
+    color: var(--c-ink-muted);
+  }
+
+  @include up($bp-tablet) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0 0.9375rem;
+
+    strong {
+      font-size: 3.75rem; // 60
+    }
+
+    div > p {
+      margin-block: 1.25rem;
+      font-size: var(--fs-body);
+    }
+
+    .metrics-note {
+      margin-top: 1.75rem;
+      font-size: var(--fs-small);
+      line-height: 1.7;
+    }
+  }
+
+  @include up($bp-desk) {
+    column-gap: 1.875rem;
+
+    strong {
+      font-size: min(6vw, 5.4rem);
+    }
+  }
+}
+
+// ===================================================================== HÀNH TRÌNH
+.about-timeline {
+  padding-block: 3.625rem;
+  color: #fff;
+  background: #1b201d;
+
+  .eyebrow {
+    margin-bottom: 1.25rem;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    letter-spacing: 0.1em;
+    color: #fff;
+
+    @include up($bp-tablet) {
+      font-size: var(--fs-caption);
+    }
+  }
+
+  h2 {
+    font-size: 2.375rem; // 38
+    line-height: 1.12;
+    letter-spacing: -0.035em;
+
+    @include up($bp-tablet) {
+      font-size: 2.625rem; // 42
+    }
+
+    @include up($bp-desk) {
+      font-size: min(4.6vw, 4.6rem);
+    }
+  }
+
+  h2 em {
+    color: #d8ddd6; // đỏ thương hiệu trên nền đen chỉ đạt 3,7 : 1
+    letter-spacing: -0.045em;
+  }
+}
+
+.timeline-head {
+  display: grid;
+  gap: 1.5rem;
+  margin-bottom: 1.875rem;
+
+  > p {
+    max-width: 17.5rem;
+    font-size: 0.9375rem;
+    line-height: 1.8;
+    color: #aeb9ae;
+  }
+
+  @include up($bp-tablet) {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.875rem;
+    margin-bottom: 3.125rem;
+
+    > p {
+      margin-bottom: 1.25rem;
+      font-size: var(--fs-body);
+      line-height: 1.8;
+    }
+  }
+
+  @include up($bp-desk) {
+    gap: 3.125rem;
+  }
+}
+
+.timeline {
+  display: grid;
+  gap: 2rem;
+  padding: 0;
+  margin: 2.375rem 0 0;
+  list-style: none;
+
+  li {
+    display: grid;
+    grid-template-columns: 98px minmax(0, 1fr);
+    gap: 1.25rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgb(255 255 255 / 31%);
+  }
+
+  .timeline-year {
+    font-size: 1.75rem;
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+
+  .timeline-meta {
+    display: block;
+    font-size: var(--fs-small);
+    line-height: 1.55;
+    letter-spacing: 0.03em;
+    color: #aeb9ae;
+    text-transform: uppercase;
+  }
+
+  h3 {
+    margin-block: 0.625rem;
+    font-size: 1.25rem;
+    line-height: 1.35;
+    letter-spacing: -0.035em;
+  }
+
+  p {
+    font-size: 0.9375rem;
+    line-height: 1.8;
+    color: #b8c1b9;
+  }
+
+  @include up($bp-tablet) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 3.125rem 2.1875rem;
+
+    li {
+      display: block;
+      padding-top: 1.6875rem;
+    }
+
+    .timeline-year {
+      display: block;
+      font-size: 2.1875rem; // 35
+    }
+
+    .timeline-meta {
+      margin-top: 2rem;
+    }
+
+    h3 {
+      margin-block: 0.75rem;
+      font-size: 1.3125rem;
+      line-height: 1.4;
+    }
+
+    p {
+      font-size: var(--fs-body);
+    }
+  }
+
+  @include up($bp-desk) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 2.1875rem;
+
+    .timeline-year {
+      font-size: min(3.8vw, 3.375rem);
+    }
+  }
+}
+
+// ===================================================================== CÁCH LÀM VIỆC
+.about-approach {
+  display: grid;
+  gap: 1.5625rem;
+  padding-block: 3.25rem;
+
+  h2 {
+    margin-bottom: 1.5625rem;
+    font-size: 2.1875rem; // 35
+    line-height: 1.15;
+    letter-spacing: -0.035em;
+
+    @include up($bp-tablet) {
+      margin-bottom: 2.1875rem;
+      font-size: 2.375rem; // 38
+    }
+
+    @include up($bp-desk) {
+      font-size: min(4.1vw, 4.1rem);
+    }
+  }
+
+  h2 em {
+    letter-spacing: -0.045em;
+  }
+
+  figure img {
+    width: 100%;
+    aspect-ratio: 1.4 / 1;
+    object-fit: cover;
+
+    @include up($bp-tablet) {
+      aspect-ratio: 1.5 / 1;
+    }
+  }
+
+  figcaption {
+    margin-top: 0.875rem;
+    font-size: var(--fs-small);
+    line-height: 1.55;
+    text-transform: uppercase;
+    color: var(--c-ink-muted);
+  }
+
+  @include up($bp-tablet) {
+    grid-template-columns: 1.1fr 1fr;
+    gap: 2.5rem;
+  }
+
+  @include up($bp-desk) {
+    gap: 6.25rem;
+  }
+}
+
+.approach-list {
+  @include up($bp-tablet) {
+    padding-top: 2.9375rem;
+  }
+
+  article {
+    position: relative;
+    padding: 1.4375rem 0 1.5625rem 2rem;
+    border-top: 1px solid var(--c-line);
+
+    @include up($bp-tablet) {
+      padding: 1.5625rem 0 1.75rem 2.8125rem;
+    }
+  }
+
+  article > span {
+    position: absolute;
+    top: 1.75rem;
+    left: 0;
+    font-size: 0.75rem;
+    line-height: normal;
+    color: var(--c-brand);
+
+    @include up($bp-tablet) {
+      top: 1.8125rem;
+      font-size: var(--fs-small);
+    }
+  }
+
+  h3 {
+    margin-bottom: 0.875rem;
+    font-size: 1.4375rem;
+    line-height: 1.3;
+    letter-spacing: -0.035em;
+
+    @include up($bp-tablet) {
+      font-size: 1.5625rem;
+    }
+  }
+
+  p {
+    font-size: 0.9375rem;
+    line-height: 1.8;
+    color: var(--c-ink-muted);
+
+    @include up($bp-tablet) {
+      font-size: var(--fs-body);
+    }
+  }
+}
+
+// ===================================================================== PHẠM VI
+.about-reach {
+  display: grid;
+  gap: 1.25rem;
+  align-items: center;
+  padding-block: 3.25rem;
+  border-bottom: 1px solid var(--c-line);
+
+  h2 {
+    font-size: 2.1875rem; // 35
+    line-height: 1.15;
+    letter-spacing: -0.035em;
+
+    @include up($bp-tablet) {
+      font-size: 2.375rem; // 38
+    }
+
+    @include up($bp-desk) {
+      font-size: min(4vw, 4rem);
+    }
+  }
+
+  h2 em {
+    letter-spacing: -0.045em;
+  }
+
+  p {
+    margin-bottom: 1.25rem;
+    font-size: 0.9375rem;
+    line-height: 1.8;
+    color: var(--c-ink-muted);
+
+    @include up($bp-tablet) {
+      font-size: var(--fs-body);
+    }
+  }
+
+  @include up($bp-tablet) {
+    grid-template-columns: 1.1fr 1fr;
+    gap: 2.5rem;
+  }
+
+  @include up($bp-desk) {
+    gap: 6.25rem;
+  }
+}
+
+.reach-countries {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8125rem;
+  padding: 1.1875rem 0;
+  margin: 1.5625rem 0;
+  list-style: none;
+  border-block: 1px solid var(--c-line);
+
+  li {
+    font-size: 1.0625rem;
+    line-height: 1.7;
+  }
+
+  @include up($bp-tablet) {
+    gap: 1.375rem;
+    padding-block: 1.4375rem;
+
+    li {
+      font-size: 1.3125rem;
+    }
+  }
+}
+
+// ===================================================================== SỰ GHI NHẬN
+.recognition {
+  display: grid;
+  gap: 2.125rem;
+  align-items: center;
+  padding-block: 3.25rem;
+
+  .award-image {
+    margin-top: 0.25rem;
+    padding: 1.375rem;
+    background: var(--c-surface-warm);
+  }
+
+  .award-image img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: contain;
+  }
+
+  h2 {
+    max-width: 32.5rem;
+    margin-bottom: 1.625rem;
+    font-size: 2.125rem; // 34
+    line-height: 1.12;
+    letter-spacing: -0.035em;
+
+    @include up($bp-tablet) {
+      font-size: 2.375rem; // 38
+    }
+
+    @include up($bp-desk) {
+      font-size: min(3.7vw, 3.7rem);
+    }
+  }
+
+  div > p:not(.eyebrow) {
+    max-width: 35rem;
+    margin-bottom: 1rem;
+    font-size: 0.9375rem;
+    line-height: 1.85;
+    color: var(--c-ink-muted);
+
+    @include up($bp-tablet) {
+      font-size: var(--fs-body);
+    }
+  }
+
+  div > p.small {
+    font-size: var(--fs-caption);
+    line-height: 1.85;
+
+    @include up($bp-tablet) {
+      font-size: var(--fs-small);
+    }
+  }
+
+  .text-link {
+    gap: 1.125rem;
+    margin-top: 0.75rem;
+    font-size: var(--fs-small);
+    line-height: 1.55;
+
+    @include up($bp-tablet) {
+      gap: 2.2rem;
+      font-size: 0.9375rem;
+    }
+  }
+
+  @include up($bp-tablet) {
+    grid-template-columns: 1.04fr 1fr;
+    gap: 2.8125rem;
+
+    .award-image {
+      margin-top: 0;
+      padding: 1.75rem;
+    }
+  }
+
+  @include up($bp-desk) {
+    gap: 7vw;
+
+    .award-image {
+      padding: 3.5vw;
+    }
+  }
+}

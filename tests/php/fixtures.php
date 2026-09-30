@@ -148,6 +148,43 @@ foreach ( $fx_empty ? array() : array(
 	$GLOBALS['fx']['terms'][ $n[0] ] = array( 'chuyen_muc' => array( $n[5] ) );
 }
 
+/* --- Trang tĩnh --- */
+// VG_FX_PAGE_FULL=1: biên tập viên đã chọn ảnh (bìa, cách làm việc, sự ghi nhận). VG_FX_PAGE_OVERRIDE=1: đã nhập chữ ghi đè bản mặc định.
+$page_full     = (bool) getenv( 'VG_FX_PAGE_FULL' );
+$page_override = (bool) getenv( 'VG_FX_PAGE_OVERRIDE' );
+
+fx_post(
+	501,
+	'page',
+	'Về công ty',
+	array_merge(
+		$page_full ? array(
+			'bia_anh'            => fx_image( 'school.jpg' ),
+			'bia_chu_thich_trai' => 'Trường THCS chất lượng cao Bắc Từ Liêm',
+			'bia_chu_thich_phai' => 'Hà Nội, Việt Nam / Ảnh công trình',
+			'cach_lam_anh'       => fx_image( 'german-villa.jpg' ),
+			'cach_lam_chu_thich' => 'Niedernhausen, Đức / Phối cảnh thiết kế',
+			'ghi_nhan_anh'       => fx_image( 'award.jpg' ),
+			'ghi_nhan_anh_alt'   => 'Bằng khen trong tư liệu dự án Bảo tàng Quân đội nhân dân Lào',
+			'ghi_nhan_tieu_de'   => "Niềm tin từ\nnhững công trình.",
+			'ghi_nhan_mo_ta'     => 'Bằng khen của Tổng cục Chính trị Quân đội nhân dân Lào ghi nhận đóng góp trong dự án Bảo tàng Quân đội nhân dân Lào.',
+			'ghi_nhan_chu_thich' => 'Tư liệu mang tên 3SEVEN, tên gọi trước đây của VGARCO.',
+			'ghi_nhan_bai_viet'  => getenv( 'VG_FX_NO_AWARD_POST' ) ? 0 : 301,
+		) : array(),
+		$page_override ? array(
+			// Nội dung độc hại: mọi trường phải được lọc hoặc thoát trước khi in.
+			'hero_tieu_de'   => "Tiêu đề do biên tập viên nhập.<img src=x onerror=alert(1)>\n<em>Ghi đè bản mặc định.</em>",
+			'hero_mo_ta_1'   => '<b>đậm</b><script>alert(1)</script>Dòng ngắn',
+			'hanh_trinh_moc' => array(
+				array( 'nam' => '2013', 'dong_phu' => '19.08.2013', 'tieu_de' => 'Mốc duy nhất', 'mo_ta' => 'Chỉ nhập một mốc.' ),
+				array( 'nam' => '', 'dong_phu' => '', 'tieu_de' => '', 'mo_ta' => '' ), // dòng trống hoàn toàn: phải bị bỏ
+			),
+			'pham_vi_quoc_gia' => "Việt Nam\n\nLào\n  \nĐức\nÁo",
+		) : array()
+	),
+	array( 'url' => '/gioi-thieu/' )
+);
+
 /* --- Cấu hình (ACF Options) --- */
 $GLOBALS['fx']['options'] = $fx_empty ? array() : array(
 	'doi_tac'           => array(
