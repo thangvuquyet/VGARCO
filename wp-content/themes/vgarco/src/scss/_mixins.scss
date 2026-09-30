@@ -1,0 +1,21 @@
+// Điểm gãy bố cục (px). Thiết kế mobile-first: viết kiểu cho màn nhỏ trước, mở rộng bằng up().
+$bp-tablet: 601px; // ≥ : máy tính bảng
+$bp-nav: 1181px; // ≥ : menu ngang thay cho menu thả dọc
+$bp-wide: 1280px;
+$bp-xl: 1400px;
+
+@mixin up($width) {
+  @media (min-width: $width) {
+    @content;
+  }
+}
+
+// Vùng bấm tối thiểu 44 × 44 px (phương án mục 7.8) mà không đổi kích thước nhìn thấy:
+// mở rộng vùng bấm bằng phần tử giả. Phần tử cha cần position: relative.
+@mixin hit-area($block: 0.4rem, $inline: 0.1rem) {
+  &::after {
+    content: '';
+    position: absolute;
+    inset: (-$block) (-$inline);
+  }
+}

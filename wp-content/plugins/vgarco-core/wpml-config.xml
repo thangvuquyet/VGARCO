@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Khai báo với WPML: kiểu nội dung và phân loại nào được dịch.
+  translate="1" = dịch riêng từng ngôn ngữ, chỉ hiện nội dung ĐÃ DỊCH (đúng UC-03 3a và mục 6.7 của phương án).
+  translate="2" (không dùng) sẽ hiện bản tiếng Việt thay thế khi thiếu bản dịch.
+  Cần kiểm chứng trên WPML thật ở spike ngày N2.
+-->
+<wpml-config>
+	<custom-types>
+		<custom-type translate="1">du_an</custom-type>
+		<custom-type translate="1">linh_vuc</custom-type>
+		<custom-type translate="1">tin_tuc</custom-type>
+		<custom-type translate="1">vi_tri</custom-type>
+	</custom-types>
+	<taxonomies>
+		<taxonomy translate="1">loai_cong_trinh</taxonomy>
+		<taxonomy translate="1">chuyen_muc</taxonomy>
+		<taxonomy translate="1">noi_lam_viec</taxonomy>
+		<taxonomy translate="1">phong_ban</taxonomy>
+	</taxonomies>
+</wpml-config>

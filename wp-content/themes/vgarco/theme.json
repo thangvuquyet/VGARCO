@@ -1,0 +1,41 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/theme.json",
+  "version": 3,
+  "settings": {
+    "color": {
+      "custom": false,
+      "customGradient": false,
+      "defaultPalette": false,
+      "defaultGradients": false,
+      "defaultDuotone": false,
+      "palette": [
+        { "slug": "ink", "name": "Chữ chính", "color": "#191b1a" },
+        { "slug": "ink-muted", "name": "Chữ phụ", "color": "#656967" },
+        { "slug": "brand", "name": "Đỏ thương hiệu", "color": "#c30000" },
+        { "slug": "surface", "name": "Nền trang", "color": "#fcfcfa" },
+        { "slug": "surface-warm", "name": "Nền khối phụ", "color": "#eef0eb" }
+      ]
+    },
+    "typography": {
+      "defaultFontSizes": false,
+      "fluid": false,
+      "fontSizes": [
+        { "slug": "small", "name": "Nhỏ", "size": "0.875rem" },
+        { "slug": "body", "name": "Thường", "size": "1rem" },
+        { "slug": "lead", "name": "Dẫn", "size": "1.125rem" }
+      ]
+    },
+    "layout": {
+      "contentSize": "44rem",
+      "wideSize": "86.25rem"
+    },
+    "spacing": {
+      "customSpacingSize": false,
+      "units": ["px", "rem", "%"]
+    }
+  },
+  "styles": {
+    "color": { "background": "#fcfcfa", "text": "#191b1a" },
+    "typography": { "fontSize": "1rem", "lineHeight": "1.7" }
+  }
+}

@@ -1,0 +1,120 @@
+{
+  "$comment": "Danh sách thành phần bên thứ ba của website VGARCO. Yêu cầu 5.7.3: tối đa 12, mỗi thành phần có lý do sử dụng. Ghim phiên bản vào trường 'version' ngay khi cài lên staging lần đầu; sau đó chỉ đổi phiên bản sau khi đã kiểm thử trên staging.",
+  "limit": 12,
+  "wordpress": {
+    "version": null,
+    "php": "8.3"
+  },
+  "plugins": [
+    {
+      "slug": "sitepress-multilingual-cms",
+      "name": "WPML Multilingual CMS",
+      "source": "wpml.org — giấy phép mua theo tài khoản VGARCO",
+      "license": "commercial",
+      "required": true,
+      "version": null,
+      "reason": "Song ngữ Việt–Đức: URL /de/, dịch slug, hreflang. Đặc tả bảng 8.5 chỉ định."
+    },
+    {
+      "slug": "wpml-string-translation",
+      "name": "WPML String Translation",
+      "source": "wpml.org — nằm trong gói Multilingual CMS",
+      "license": "commercial",
+      "required": true,
+      "version": null,
+      "reason": "Dịch slug của kiểu nội dung và phân loại; dịch chuỗi cấu hình."
+    },
+    {
+      "slug": "wpml-translation-management",
+      "name": "WPML Translation Management",
+      "source": "wpml.org — nằm trong gói Multilingual CMS",
+      "license": "commercial",
+      "required": false,
+      "verify": "Xác nhận khi cài staging: nếu gói CMS yêu cầu thành phần này thì tính vào giới hạn 12. Phương án v2 mục 5.5 chưa đếm.",
+      "version": null,
+      "reason": "Trình dịch nâng cao của WPML."
+    },
+    {
+      "slug": "advanced-custom-fields-pro",
+      "name": "ACF PRO",
+      "source": "advancedcustomfields.com — giấy phép mua theo tài khoản VGARCO",
+      "license": "commercial",
+      "required": true,
+      "version": null,
+      "reason": "Trường dữ liệu, repeater, trang cấu hình. Đặc tả bảng 8.5 chỉ định."
+    },
+    {
+      "slug": "acfml",
+      "name": "ACF Multilingual",
+      "source": "wpml.org — nằm trong gói Multilingual CMS",
+      "license": "commercial",
+      "required": true,
+      "version": null,
+      "reason": "Đồng bộ trường ACF giữa hai ngôn ngữ."
+    },
+    {
+      "slug": "fluent-smtp",
+      "name": "FluentSMTP",
+      "source": "wordpress.org",
+      "license": "GPL",
+      "required": true,
+      "version": null,
+      "reason": "Gửi thư hệ thống qua Brevo API; nhật ký thư. Không dùng hàm mail()."
+    },
+    {
+      "slug": "wp-2fa",
+      "name": "WP 2FA",
+      "source": "wordpress.org",
+      "license": "GPL",
+      "required": true,
+      "version": null,
+      "reason": "Bắt buộc xác thực hai lớp cho mọi tài khoản vào trang quản trị (yêu cầu 5.4.5)."
+    },
+    {
+      "slug": "wps-hide-login",
+      "name": "WPS Hide Login",
+      "source": "wordpress.org",
+      "license": "GPL",
+      "required": true,
+      "version": null,
+      "reason": "Đổi đường dẫn đăng nhập (yêu cầu 5.4.5)."
+    },
+    {
+      "slug": "redis-cache",
+      "name": "Redis Object Cache",
+      "source": "wordpress.org",
+      "license": "GPL",
+      "required": true,
+      "version": null,
+      "reason": "Object cache; cũng lưu chỉ mục tìm kiếm dự án và mã bảo mật."
+    },
+    {
+      "slug": "webp-uploads",
+      "name": "Modern Image Formats",
+      "source": "wordpress.org",
+      "license": "GPL",
+      "required": true,
+      "version": null,
+      "reason": "Sinh AVIF/WebP với URL riêng cho từng định dạng."
+    },
+    {
+      "slug": "patchstack",
+      "name": "Patchstack",
+      "source": "wordpress.org",
+      "license": "GPL",
+      "required": true,
+      "version": null,
+      "reason": "Cảnh báo lỗ hổng của thành phần đang dùng (yêu cầu 5.4.9). Gói miễn phí chỉ cảnh báo, không vá ảo."
+    },
+    {
+      "slug": "real-cookie-banner-pro",
+      "name": "Real Cookie Banner",
+      "source": "devowl.io — giấy phép mua theo tài khoản VGARCO",
+      "license": "commercial",
+      "required": false,
+      "conditional": "Chỉ cài nếu chủ đầu tư dùng thống kê truy cập hoặc nhúng dịch vụ bên thứ ba (quyết định 3.2 #4).",
+      "version": null,
+      "reason": "Bảng đồng ý cookie có nhật ký, đạt chuẩn thị trường Đức."
+    }
+  ]
+}

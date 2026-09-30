@@ -1,0 +1,205 @@
+@use '../mixins' as *;
+
+// Menu chính. Dưới 1181 px là danh sách thả dọc mở bằng nút menu; từ 1181 px là hàng ngang,
+// mục có con mở thành một bảng rộng hết chiều ngang dưới thanh đầu trang.
+
+.nav {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: calc(100dvh - var(--header-h));
+  padding: 0.875rem var(--header-pad) 1.5rem;
+  overflow: auto;
+  background: var(--c-surface);
+  border-bottom: 1px solid var(--c-line);
+  box-shadow: var(--shadow-panel);
+
+  &.open {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.nav > a,
+.nav-trigger {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.9375rem 0;
+  font-size: 1.0625rem; // 17
+  font-weight: 550;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  text-align: left;
+  border-bottom: 1px solid var(--c-line);
+
+  &:hover,
+  &[aria-current] {
+    color: var(--c-brand);
+  }
+}
+
+.chevron {
+  width: 6px;
+  height: 6px;
+  border-right: 1px solid currentcolor;
+  border-bottom: 1px solid currentcolor;
+  transform: rotate(45deg) translateY(-2px);
+  transition: transform 0.2s;
+}
+
+.nav-trigger[aria-expanded='true'] .chevron {
+  transform: rotate(225deg) translate(-2px, -1px);
+}
+
+// --- Bảng menu con ---
+.nav-panel {
+  padding: 1.0625rem 0 1.375rem;
+}
+
+.nav-panel-label {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.125rem;
+  font-size: 0.6875rem; // 11
+  letter-spacing: 0.06em;
+  color: var(--c-ink-muted);
+
+  &::before {
+    content: '';
+    flex-shrink: 0;
+    width: 28px;
+    height: 2px;
+    background: var(--c-brand);
+  }
+}
+
+.nav-panel-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+
+  @include up($bp-tablet) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 1.5rem;
+  }
+
+  a {
+    display: block;
+    padding: 0.75rem 0 0.75rem 0.875rem;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    border-bottom: 1px solid var(--c-line);
+
+    @include up($bp-tablet) {
+      padding-left: 0;
+    }
+
+    &:hover,
+    &[aria-current] {
+      color: var(--c-brand);
+      border-color: var(--c-brand);
+    }
+  }
+}
+
+// --- Từ 1181 px: menu ngang ---
+@include up($bp-nav) {
+  .nav {
+    position: static;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.8125rem;
+    margin-left: auto;
+    max-height: none;
+    padding: 0;
+    overflow: visible;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+  }
+
+  .nav-group {
+    position: static; // bảng định vị theo thanh đầu trang, không theo mục cha
+  }
+
+  .nav > a,
+  .nav-trigger {
+    width: auto;
+    padding: 2.3125rem 0; // 37
+    font-size: 1.0625rem; // 17
+    white-space: nowrap;
+    border-bottom: 0;
+
+    // Gạch chân đỏ: mục đang xem hoặc đang mở.
+    &::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      bottom: 1.125rem;
+      left: 0;
+      height: 2px;
+      background: var(--c-brand);
+      transform: scaleX(0);
+      transition: transform 0.2s;
+    }
+
+    &[aria-current]::after,
+    &[aria-expanded='true']::after {
+      transform: scaleX(1);
+    }
+  }
+
+  .nav-panel {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    padding: 1.875rem 3rem 2.5rem;
+    background: var(--c-surface);
+    border-top: 1px solid var(--c-line);
+    border-bottom: 1px solid var(--c-line);
+    box-shadow: var(--shadow-panel);
+  }
+
+  .nav-panel-label {
+    font-size: 0.875rem; // 14
+    letter-spacing: 0.13em;
+  }
+
+  .nav-panel-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0 2rem;
+    max-width: 86.25rem;
+    margin-inline: auto;
+
+    // Bảng có từ 5 mục trở lên (menu Dự án: 7 loại công trình) chia 4 cột.
+    &:has(> :nth-child(5)) {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    a {
+      padding: 0.75rem 0;
+      font-size: 1rem;
+    }
+  }
+}
+
+@include up($bp-xl) {
+  .nav {
+    gap: 1.45vw;
+  }
+
+  .nav > a,
+  .nav-trigger {
+    padding-block: 2.5rem; // 40
+    font-size: 1.125rem; // 18
+  }
+}

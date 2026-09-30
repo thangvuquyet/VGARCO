@@ -1,0 +1,40 @@
+# --- Phụ thuộc và kết quả build ---
+node_modules/
+wp-content/themes/vgarco/dist/
+
+# --- Bí mật và cấu hình môi trường: KHÔNG bao giờ commit ---
+.env
+.env.*
+wp-config.php
+secrets.php
+
+# --- Giấy phép thương mại ---
+# WPML, ACF PRO... đứng tên VGARCO. Tệp .zip cài đặt và khóa giấy phép không được vào Git.
+*.zip
+
+# --- Dữ liệu ---
+*.sql
+*.sql.gz
+*.log
+
+# --- Mã bên thứ ba và lõi WordPress: cài theo plugins.lock.json, không commit ---
+# Chỉ giữ lại mã do nhà thầu viết: vgarco-core, vgarco (theme), vgarco-loader.
+/wp-content/*
+!/wp-content/mu-plugins/
+/wp-content/mu-plugins/*
+!/wp-content/mu-plugins/vgarco-loader.php
+!/wp-content/plugins/
+/wp-content/plugins/*
+!/wp-content/plugins/vgarco-core/
+!/wp-content/themes/
+/wp-content/themes/*
+!/wp-content/themes/vgarco/
+/wp/
+
+# --- Hệ điều hành / trình soạn thảo ---
+.DS_Store
+Thumbs.db
+.idea/
+
+# Kết quả kết xuất của tests/php/render.php
+tests/out/

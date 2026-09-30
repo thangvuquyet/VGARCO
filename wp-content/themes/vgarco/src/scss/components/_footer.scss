@@ -1,0 +1,212 @@
+@use '../mixins' as *;
+
+// Chân trang gọn. Số đo lấy từ bản thiết kế ở 1440 px.
+.footer {
+  position: relative;
+  background: var(--c-surface);
+  border-top: 1px solid var(--c-line);
+}
+
+.footer-main {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  padding: 2.5rem var(--footer-pad) 2.25rem;
+
+  @include up($bp-tablet) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2.5rem 3rem;
+  }
+
+  @include up(1000px) {
+    grid-template-columns: 1.05fr 1.35fr 0.8fr 0.7fr;
+    gap: clamp(2rem, 5vw, 4.5rem);
+  }
+}
+
+.footer-title {
+  display: block;
+  margin-bottom: 1.0625rem;
+  font-size: 0.75rem; // 12
+  font-weight: 700;
+  line-height: 1.7;
+  letter-spacing: 0.11em;
+}
+
+.footer p,
+.footer small {
+  color: var(--c-ink-muted);
+}
+
+// --- Thương hiệu ---
+.footer-brand {
+  .brand {
+    gap: 0.625rem;
+    margin-bottom: 1.25rem;
+
+    .brand-mark {
+      width: 48px;
+      height: 48px;
+    }
+
+    > span {
+      font-size: 1.75rem; // 28
+      letter-spacing: 0.015em;
+    }
+
+    small {
+      margin-top: 0.3125rem;
+      font-size: 0.5625rem; // 9
+      line-height: 1.15;
+      letter-spacing: 0.19em;
+      color: var(--c-ink);
+    }
+  }
+
+  p {
+    max-width: 16.25rem;
+    font-size: var(--fs-small);
+    line-height: 1.65;
+  }
+}
+
+// --- Văn phòng ---
+.footer-office {
+  strong {
+    display: block;
+    font-size: var(--fs-body);
+    line-height: 1.5;
+  }
+
+  p {
+    margin: 0.625rem 0 0.8125rem;
+    font-size: var(--fs-small);
+    line-height: 1.65;
+  }
+}
+
+.footer-inline-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-bottom: 0.25rem;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  line-height: 1.7;
+  border-bottom: 1px solid var(--c-ink);
+
+  svg {
+    width: 1em;
+    height: 1em;
+  }
+
+  &:hover {
+    color: var(--c-brand);
+    border-color: var(--c-brand);
+  }
+}
+
+// --- Điều hướng chân trang ---
+.footer-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+
+  .footer-title {
+    margin-bottom: 0.3125rem;
+  }
+
+  a {
+    font-size: 0.9375rem; // 15
+    line-height: 1.7;
+    color: var(--c-ink-soft);
+
+    &:hover {
+      color: var(--c-brand);
+    }
+  }
+}
+
+// --- Kết nối ---
+.footer-social {
+  display: flex;
+  gap: 0.625rem;
+  margin-bottom: 0.8125rem;
+
+  > a,
+  > span {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    font-size: 0.9375rem;
+    font-weight: 650;
+    color: var(--c-ink-soft);
+    border: 1px solid #c5c9c4; // trang trí; nội dung nhận biết nằm ở biểu tượng và nhãn đọc màn hình
+    border-radius: 50%;
+
+    svg {
+      width: 17px;
+      height: 17px;
+    }
+  }
+
+  > a:hover {
+    color: var(--c-brand);
+    border-color: var(--c-brand);
+  }
+}
+
+.footer-phone {
+  display: block;
+  font-size: 1.0625rem; // 17
+  font-weight: 650;
+  line-height: 1.7;
+  letter-spacing: 0.01em;
+}
+
+.footer-connect small {
+  display: block;
+  margin-top: 0.3125rem;
+  font-size: 0.6875rem; // 11
+  line-height: 1.45;
+}
+
+// --- Dòng cuối ---
+.footer-bottom {
+  display: grid;
+  gap: 0.25rem;
+  padding: 1.125rem var(--footer-pad);
+  font-size: 0.75rem; // 12
+  line-height: 1.7;
+  color: var(--c-ink-muted);
+  border-top: 1px solid var(--c-line);
+
+  @include up($bp-tablet) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+
+    > :nth-child(2) {
+      text-align: center;
+    }
+
+    > :last-child {
+      justify-self: end;
+    }
+  }
+
+  a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+
+    &:hover {
+      color: var(--c-brand);
+    }
+  }
+
+  svg {
+    width: 1em;
+    height: 1em;
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "vgarco-theme",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Build CSS/JS cho theme VGARCO (Vite + Sass).",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite build --watch",
+    "fonts": "node scripts/copy-fonts.mjs"
+  }
+}

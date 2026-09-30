@@ -1,0 +1,70 @@
+@use 'mixins' as *;
+
+// Token thiết kế. Nguồn: đặc tả bảng 6.2 (màu), bảng 6.3 (chữ), tokens.json của bản thiết kế,
+// và giá trị đo được từ bản thiết kế HTML ở 1440 / 1280 / 900 / 390 px.
+:root {
+  color-scheme: light;
+
+  // --- Màu ---
+  --c-ink: #191b1a; // chữ chính, nền nút ngôn ngữ đang chọn
+  --c-ink-soft: #505550; // liên kết chân trang
+  --c-ink-muted: #656967; // chữ phụ
+  --c-brand: #c30000; // logo, cụm từ nhấn, mũi tên
+  --c-label: #a23b35; // nhãn chuyên mục
+  --c-panel: #963a34; // khối kêu gọi liên hệ, nút chính
+  --c-panel-hover: #7d2f2a;
+  --c-surface: #fcfcfa; // nền trang
+  --c-surface-pale: #f3f4f1;
+  --c-surface-warm: #eef0eb; // nền khối xen kẽ
+  --c-surface-dark: #171b19;
+  --c-line: #dcded9; // đường kẻ trang trí, phân cách. KHÔNG dùng làm viền ô nhập (độ tương phản 1,32 : 1)
+  --c-line-strong: #8a8f8c; // viền ô nhập liệu, đạt 3 : 1 với nền trang (3,20 : 1)
+  --c-focus: #de4c24; // vòng tiêu điểm trên nền sáng
+  --c-focus-invert: #fff; // vòng tiêu điểm trên nền đỏ hoặc tối (cam trên đỏ chỉ đạt 1,75 : 1)
+
+  // --- Chữ ---
+  --ff-sans: 'Segoe UI Variable Text', 'Segoe UI', 'VG Sans', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  --ff-accent: 'Lora', Georgia, 'Times New Roman', serif; // chỉ dùng chữ nghiêng, cho cụm từ nhấn trong tiêu đề
+
+  --fs-caption: 0.8125rem; // 13
+  --fs-small: 0.875rem; // 14
+  --fs-body: 1rem; // 16
+  --fs-lead: 1.125rem; // 18
+  --fs-card: clamp(1.25rem, 1.45vw, 1.5rem); // 20–24
+  --fs-headline-a: 2.5rem; // tiêu đề lớn: 40 (mobile) → 44–62 từ 701 px, xem bên dưới
+  --fs-headline-b: 1.875rem; // tiêu đề khối: 30 (mobile) → 32–44
+
+  // --- Bố cục ---
+  --w-content: 86.25rem; // 1380 px — theo bản thiết kế (đặc tả 6.2 ghi 1320: lệch, xem phương án mục 3.1 #12)
+  --header-h: 72px;
+  --header-pad: 1rem;
+  --gutter: 1.25rem;
+  --footer-pad: 1.25rem;
+  --shadow-panel: 0 16px 25px rgb(25 27 26 / 7%);
+
+  @media (min-width: 701px) {
+    --fs-headline-a: clamp(2.75rem, 3.65vw, 3.875rem);
+    --fs-headline-b: clamp(2rem, 2.75vw, 2.75rem);
+  }
+
+  @include up($bp-tablet) {
+    --header-h: 86px;
+    --header-pad: 1.5rem;
+    --gutter: 2.25rem;
+    --footer-pad: 2.25rem;
+  }
+
+  @include up($bp-nav) {
+    --header-h: 106px;
+  }
+
+  @include up($bp-wide) {
+    --gutter: 3.5rem;
+  }
+
+  @include up($bp-xl) {
+    --header-h: 112px;
+    --header-pad: clamp(1.5rem, 3.5vw, 3.5rem);
+    --footer-pad: clamp(1.5rem, 4.4vw, 4.75rem);
+  }
+}
