@@ -7,7 +7,7 @@ import { initNav } from './modules/nav.js';
 const pageModules = {
 	home: () => import( './modules/home.js' ),
 	projects: () => import( './modules/projects.js' ),
-	// project: () => import( './modules/gallery.js' ),
+	project: () => import( './modules/project.js' ),
 	// careers: () => import( './modules/careers.js' ),
 };
 

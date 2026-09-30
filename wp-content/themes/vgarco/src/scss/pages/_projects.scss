@@ -1,10 +1,7 @@
 @use '../mixins' as *;
 
-// Bản thiết kế chuyển sang bố cục rộng đúng ở 1000 px (không phải 1001 px như phần còn lại).
-$bp-1000: 1000px;
-
 // Danh mục dự án (UC-04). Số đo lấy từ bản thiết kế ở 1440 / 1280 / 1000 / 800 / 390 px.
-// Bản thiết kế đổi bố cục ở 601 px (lưới), 701 px (dải tiêu đề), 1001 px và 1181 px (khoảng cách, cỡ chữ).
+// Bản thiết kế đổi bố cục ở 601 px (lưới), 701 px (dải tiêu đề), 1000 px và 1181 px (khoảng cách, cỡ chữ).
 
 // ===================================================================== DẢI TIÊU ĐỀ
 .project-catalogue-head {
@@ -305,7 +302,7 @@ $bp-1000: 1000px;
     }
   }
 
-  @include up($bp-1000) {
+  @include up($bp-desk) {
     column-gap: 2.1875rem;
 
     > .project-card:nth-child(2) {
@@ -383,7 +380,7 @@ $bp-1000: 1000px;
     min-height: 560px;
   }
 
-  @include up($bp-1000) {
+  @include up($bp-desk) {
     min-height: 580px;
   }
 }
@@ -435,7 +432,7 @@ $bp-1000: 1000px;
     }
   }
 
-  @include up($bp-1000) {
+  @include up($bp-desk) {
     padding: 3.4375rem 2.625rem 2.8125rem 2.25rem;
   }
 

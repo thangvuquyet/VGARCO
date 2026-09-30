@@ -50,10 +50,11 @@ function vgarco_lines( string $text ): string {
 /**
  * Đường dẫn vị trí ("Trang chủ / Dự án / Tên dự án"). Mục cuối là trang hiện tại, không có liên kết.
  *
- * @param array[] $trail Mỗi phần tử: [ nhãn, địa chỉ ] — bỏ địa chỉ ở mục cuối.
+ * @param array[] $trail    Mỗi phần tử: [ nhãn, địa chỉ ] — bỏ địa chỉ ở mục cuối.
+ * @param string  $modifier Lớp bổ sung (ví dụ "breadcrumb--detail" cho trang chi tiết).
  */
-function vgarco_breadcrumb( array $trail ): void {
-	echo '<nav class="breadcrumb wrap" aria-label="' . esc_attr__( 'Đường dẫn vị trí', 'vgarco' ) . '"><ol>';
+function vgarco_breadcrumb( array $trail, string $modifier = '' ): void {
+	echo '<nav class="breadcrumb wrap' . ( '' !== $modifier ? ' ' . esc_attr( $modifier ) : '' ) . '" aria-label="' . esc_attr__( 'Đường dẫn vị trí', 'vgarco' ) . '"><ol>';
 	$last = count( $trail ) - 1;
 	foreach ( $trail as $i => $crumb ) {
 		if ( $i === $last ) {

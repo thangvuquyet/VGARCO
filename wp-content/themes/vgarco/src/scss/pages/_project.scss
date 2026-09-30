@@ -1,0 +1,835 @@
+@use '../mixins' as *;
+
+// Chi tiết dự án (UC-05). Số đo lấy từ bản thiết kế ở 1440 / 1100 / 1000 / 900 / 800 / 700 / 390 px.
+// Bản thiết kế đổi bố cục ở 601 px (đường dẫn, đầu trang, ảnh bìa, lưới thông tin), 701 px (khoảng cách dọc, cỡ tiêu đề),
+// 1000 px (hai cột thông tin, bốn ảnh nhỏ, tiêu đề theo vw) và 1181 px (lề của thư viện ảnh).
+
+// ===================================================================== ĐƯỜNG DẪN
+.breadcrumb--detail {
+  padding-block: 1.25rem;
+  font-size: 0.8125rem; // 13
+  border-bottom: 1px solid var(--c-line);
+
+  ol {
+    flex-wrap: nowrap;
+    gap: 0 0.625rem;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  li + li::before {
+    margin-right: 0.625rem;
+  }
+
+  // Tên dự án dài: rút gọn bằng dấu … thay vì đẩy xuống dòng.
+  li:last-child {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  @include up($bp-tablet) {
+    padding-block: 1.875rem 1.625rem;
+    font-size: 0.9375rem; // 15
+
+    ol {
+      column-gap: 1rem;
+    }
+
+    li + li::before {
+      margin-right: 1rem;
+    }
+  }
+}
+
+// ===================================================================== ĐẦU TRANG + ẢNH BÌA
+.project-detail-hero {
+  padding-top: 1.625rem;
+}
+
+.project-detail-head {
+  display: grid;
+  gap: 1.5rem;
+  align-items: end;
+  padding-bottom: 1.75rem;
+
+  .eyebrow {
+    display: inline-block;
+    margin-bottom: 1rem;
+    font-size: 0.9375rem; // 15
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    line-height: 1.45;
+    text-transform: none; // tên loại công trình giữ nguyên chữ hoa/thường
+    color: var(--c-brand);
+
+    &:hover {
+      text-decoration: underline;
+      text-underline-offset: 0.25em;
+    }
+  }
+
+  h1 {
+    font-size: 1.875rem; // 30
+    line-height: 1.04;
+    letter-spacing: -0.045em;
+  }
+
+  @include up($bp-tablet) {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 3.125rem;
+
+    .eyebrow {
+      margin-bottom: 1.375rem;
+      font-size: 1.125rem; // 18
+    }
+
+    h1 {
+      font-size: min(2.5rem, 5.2vw);
+    }
+  }
+
+  @include up($bp-desk) {
+    h1 {
+      font-size: clamp(2.25rem, 3.15vw, 3.5rem);
+    }
+  }
+}
+
+// "01 / 19": vị trí của dự án trong danh mục. Di động bỏ đi cho gọn.
+.project-detail-index {
+  display: none;
+
+  span[aria-hidden] {
+    font-size: 3rem; // 48
+    font-weight: 350;
+    line-height: 1;
+    letter-spacing: -0.06em;
+    color: var(--c-brand);
+  }
+
+  small {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--c-ink-muted);
+  }
+
+  @include up($bp-tablet) {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}
+
+.project-detail-cover {
+  position: relative;
+  height: 330px;
+  overflow: hidden;
+  background: var(--c-surface-warm);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  // Lớp tối nhẹ ở đáy để chú thích trắng đọc được trên mọi ảnh.
+  &::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0;
+    height: 205px;
+    pointer-events: none;
+    background: linear-gradient(transparent, rgb(9 12 14 / 42%));
+  }
+
+  figcaption {
+    position: absolute;
+    right: 1.25rem;
+    bottom: 1rem;
+    left: 1.25rem;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    font-size: 0.6875rem; // 11
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #fff;
+  }
+
+  @include up($bp-tablet) {
+    height: min(72vw, 820px);
+
+    figcaption {
+      right: 3.25rem;
+      bottom: 1.5625rem;
+      left: 3.25rem;
+      font-size: 0.8125rem; // 13
+    }
+  }
+}
+
+// ===================================================================== THÔNG TIN + MÔ TẢ
+.project-detail-story {
+  display: grid;
+  gap: 3.625rem 5.5rem;
+  padding-block: 3rem;
+
+  aside .eyebrow {
+    margin-bottom: 1.75rem;
+    font-size: 1rem;
+    font-weight: 650;
+    letter-spacing: 0.1em;
+    line-height: 1.5;
+    color: var(--c-brand);
+  }
+
+  dl {
+    margin: 0;
+  }
+
+  // Cột thông tin hẹp (≥ 1000 px): các dòng xếp dọc. Cột đầy bề ngang (601–999 px): hai cột để không kéo dài trang.
+  @include up($bp-tablet) {
+    dl {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: 1.75rem;
+    }
+  }
+
+  @include up($bp-desk) {
+    dl {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  dl > div {
+    display: grid;
+    grid-template-columns: 108px minmax(0, 1fr);
+    gap: 1.125rem;
+    padding-block: 1.0625rem;
+    border-top: 1px solid var(--c-line);
+  }
+
+  dt {
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    color: #69706b;
+  }
+
+  dd {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.55;
+  }
+
+  @include up($bp-tablet) {
+    aside .eyebrow {
+      font-size: 1.125rem;
+      line-height: 1.5;
+    }
+
+    dl > div {
+      grid-template-columns: 132px minmax(0, 1fr);
+      gap: 1.75rem;
+      padding-block: 1.25rem;
+    }
+
+    dt {
+      font-size: 1.0625rem;
+    }
+
+    dd {
+      font-size: 1.125rem;
+    }
+  }
+
+  @include up($bp-md) {
+    padding-block: 4.25rem 4.5rem;
+  }
+
+  @include up($bp-desk) {
+    grid-template-columns: minmax(15.625rem, 0.29fr) minmax(0, 0.71fr);
+  }
+}
+
+.project-detail-copy {
+  max-width: 51.25rem;
+
+  .project-kicker {
+    margin-bottom: 1.125rem;
+    font-size: 1.0625rem;
+    line-height: 1.7;
+    color: var(--c-ink-muted);
+  }
+
+  h2 {
+    margin-bottom: 1.5rem;
+  }
+
+  .entry-content {
+    max-width: 43.125rem;
+    font-size: 1.0625rem; // 17
+    line-height: 1.8;
+    color: #454a47;
+
+    > * + * {
+      margin-top: 1.25rem;
+    }
+
+    @include up($bp-tablet) {
+      font-size: 1.1875rem; // 19
+      line-height: 1.9;
+    }
+  }
+}
+
+.project-scope {
+  display: grid;
+  gap: 0.625rem;
+  margin-top: 2.375rem;
+  padding-top: 1.4375rem;
+  border-top: 1px solid var(--c-ink);
+
+  span {
+    font-size: 0.75rem; // 12
+    line-height: 1.7;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--c-ink-muted);
+  }
+
+  strong {
+    font-size: 1.125rem;
+    font-weight: 500;
+    line-height: 1.6;
+  }
+
+  @include up($bp-tablet) {
+    grid-template-columns: 170px minmax(0, 1fr);
+    gap: 2.125rem;
+
+    strong {
+      font-size: 1.25rem;
+    }
+  }
+}
+
+// ===================================================================== THƯ VIỆN ẢNH
+.project-detail-gallery {
+  padding-block: 3rem 3.375rem;
+  background: #f0f1ed;
+
+  @include up($bp-md) {
+    padding-block: 4rem 4.625rem;
+  }
+}
+
+.gallery-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.875rem;
+  margin-bottom: 1.625rem;
+
+  .eyebrow {
+    margin-bottom: 0.875rem;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    letter-spacing: 0.1em;
+    color: var(--c-brand);
+
+    @include up($bp-md) {
+      font-size: var(--fs-caption);
+    }
+  }
+}
+
+// "02 / 05": số ảnh đang xem.
+.gallery-head-meta {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5625rem;
+  color: var(--c-brand);
+
+  span {
+    font-size: 2.5rem; // 40
+    font-weight: 350;
+    line-height: 0.9;
+    letter-spacing: -0.06em;
+  }
+
+  small {
+    font-size: var(--fs-small);
+    line-height: 1.7;
+    color: var(--c-ink-muted);
+  }
+
+  @include up($bp-tablet) {
+    span {
+      font-size: 3.25rem; // 52
+    }
+  }
+}
+
+.project-gallery-stage {
+  position: relative;
+  height: 72vw;
+  overflow: hidden;
+  background: #dfe2dc;
+
+  &:focus-visible {
+    outline-offset: -4px; // khung nằm trong, không bị overflow cắt mất
+  }
+
+  @include up($bp-tablet) {
+    height: min(68vw, 780px);
+  }
+
+  @include up($bp-desk) {
+    height: min(69vw, 780px);
+  }
+}
+
+.gallery-slide {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+
+  &[hidden] {
+    display: none;
+  }
+
+  &.is-active {
+    animation: gallery-in 0.45s ease;
+  }
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  // Lớp tối nhẹ ở đáy: chú thích và nút trắng đọc được trên mọi ảnh.
+  &::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0;
+    height: 45%;
+    pointer-events: none;
+    background: linear-gradient(transparent, rgb(9 12 14 / 55%));
+  }
+
+  figcaption {
+    position: absolute;
+    bottom: 5.125rem;
+    left: 1.125rem;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 1.125rem;
+    font-size: var(--fs-small);
+    line-height: 1.4;
+    color: #fff;
+
+    @include up($bp-tablet) {
+      bottom: 1.75rem;
+      left: 1.75rem;
+      font-size: 1.125rem;
+    }
+
+    @include up($bp-nav) {
+      bottom: 2.375rem;
+      left: 2.375rem;
+    }
+  }
+}
+
+@keyframes gallery-in {
+  from {
+    opacity: 0;
+  }
+}
+
+// Vòng tròn mang số ảnh cạnh chú thích.
+.gallery-caption-index {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  font-size: 0.6875rem;
+  border: 1px solid rgb(255 255 255 / 60%);
+  border-radius: 50%;
+
+  @include up($bp-tablet) {
+    width: 46px;
+    height: 46px;
+    font-size: var(--fs-caption);
+  }
+}
+
+.gallery-watermark {
+  position: absolute;
+  top: 4%;
+  right: -14px;
+  font-size: 22vw;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.08em;
+  pointer-events: none;
+  color: rgb(255 255 255 / 9%);
+
+  @include up($bp-tablet) {
+    font-size: 18vw;
+  }
+}
+
+.gallery-expand,
+.gallery-nav {
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background: rgb(9 12 14 / 40%);
+  border: 1px solid rgb(255 255 255 / 55%);
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background: rgb(9 12 14 / 65%);
+  }
+
+  svg {
+    width: 25px;
+    height: 25px;
+  }
+}
+
+.gallery-nav {
+  width: 56px;
+  height: 56px;
+}
+
+// Nút phóng to: góc trên bên phải, chỉ hiện khi JS sẵn sàng (thuộc tính hidden được bỏ).
+.gallery-expand {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 2;
+  width: 44px;
+  height: 44px;
+
+  &[hidden] {
+    display: none;
+  }
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.project-gallery-stage:has(.gallery-expand:not([hidden])) .gallery-slide img {
+  cursor: zoom-in;
+}
+
+.project-gallery-controls {
+  position: absolute;
+  right: 1.125rem;
+  bottom: 1.125rem;
+  left: 1.125rem;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.625rem;
+
+  &[hidden] {
+    display: none;
+  }
+
+  .project-gallery-progress {
+    flex: 1;
+    justify-content: center;
+  }
+
+  @include up($bp-tablet) {
+    right: 1.75rem;
+    bottom: 1.625rem;
+    left: auto;
+    justify-content: flex-end;
+    gap: 1.25rem;
+
+    .project-gallery-progress {
+      flex: none;
+    }
+  }
+
+  @include up($bp-nav) {
+    right: 2.375rem;
+    bottom: 2.125rem;
+  }
+}
+
+.project-gallery-progress {
+  display: flex;
+  gap: 0.4375rem;
+
+  button {
+    width: 34px;
+    height: 24px;
+    padding: 1px 6px;
+
+    span {
+      display: block;
+      height: 2px;
+      margin-top: 10px;
+      background: rgb(255 255 255 / 45%);
+    }
+
+    &.is-active span {
+      background: #fff;
+    }
+
+    @include up($bp-tablet) {
+      width: 46px;
+    }
+  }
+}
+
+.project-gallery-thumbs {
+  display: flex;
+  gap: 0.625rem;
+  padding: 0.75rem 0 0;
+  margin-block: 0;
+  margin-inline: auto;
+  overflow-x: auto;
+  list-style: none;
+  scroll-snap-type: x proximity;
+
+  li {
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+  }
+
+  a {
+    display: grid;
+    grid-template-columns: 28px 72px minmax(0, 1fr);
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.625rem;
+    font-size: var(--fs-caption);
+    line-height: 1.35;
+    background: rgb(255 255 255 / 48%);
+    border: 1px solid transparent;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background: rgb(255 255 255 / 75%);
+    }
+
+    &.is-active {
+      border-color: var(--c-brand);
+    }
+  }
+
+  img {
+    width: 100%;
+    aspect-ratio: 1.45 / 1;
+    object-fit: cover;
+  }
+
+  .thumb-index {
+    font-size: 0.75rem;
+    color: var(--c-brand);
+  }
+
+  @include up($bp-tablet) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.875rem;
+    padding-top: 1.125rem;
+    overflow-x: visible;
+
+    a {
+      grid-template-columns: 28px 88px minmax(0, 1fr);
+    }
+  }
+
+  @include up($bp-desk) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+// --- Xem ảnh lớn ---
+.gallery-lightbox {
+  width: 100vw;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  padding: 0;
+  margin: 0;
+  color: #fff;
+  background: rgb(9 12 14 / 96%);
+  border: 0;
+
+  &[open] {
+    display: grid;
+    place-items: center;
+  }
+
+  &::backdrop {
+    background: transparent;
+  }
+
+  figure {
+    display: grid;
+    justify-items: center;
+    gap: 0.875rem;
+    margin: 0;
+  }
+
+  img {
+    max-width: min(92vw, 1800px);
+    max-height: 80dvh;
+    object-fit: contain;
+  }
+
+  figcaption {
+    font-size: var(--fs-small);
+    letter-spacing: 0.03em;
+    color: rgb(255 255 255 / 86%);
+  }
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  color: #fff;
+  border: 1px solid rgb(255 255 255 / 55%);
+  border-radius: 50%;
+
+  &:hover {
+    background: rgb(255 255 255 / 15%);
+  }
+
+  svg {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+.lightbox-prev,
+.lightbox-next {
+  position: absolute;
+  top: 50%;
+  translate: 0 -50%;
+}
+
+.lightbox-prev {
+  left: 1rem;
+}
+
+.lightbox-next {
+  right: 1rem;
+}
+
+// Đang xem ảnh lớn thì không cuộn trang phía sau.
+body:has(.gallery-lightbox[open]) {
+  overflow: hidden;
+}
+
+// ===================================================================== DỰ ÁN TIẾP THEO
+.project-detail-next {
+  padding-block: 3rem;
+  color: #fff;
+  background: var(--c-surface-dark);
+
+  .eyebrow {
+    margin-bottom: 1.625rem;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    letter-spacing: 0.1em;
+    color: #b9beb7;
+  }
+
+  @include up($bp-md) {
+    padding-block: 3.625rem 3.875rem;
+
+    .eyebrow {
+      font-size: var(--fs-caption);
+    }
+  }
+}
+
+.project-next-link {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 74px;
+  gap: 2.1875rem;
+  align-items: center;
+  padding-bottom: 1.75rem;
+  border-bottom: 1px solid rgb(255 255 255 / 27%);
+
+  > span:first-child {
+    font-size: 1.875rem; // 30
+    line-height: 1.04;
+    letter-spacing: -0.045em;
+  }
+
+  &:hover > span:first-child {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.15em;
+  }
+
+  @include up($bp-desk) {
+    > span:first-child {
+      font-size: clamp(2.25rem, 3.15vw, 3.5rem);
+    }
+  }
+}
+
+.project-next-arrow {
+  display: grid;
+  place-items: center;
+  width: 74px;
+  height: 74px;
+  border: 1px solid rgb(255 255 255 / 50%);
+  border-radius: 50%;
+  transition: background-color 0.2s ease, color 0.2s ease;
+
+  svg {
+    width: 34px;
+    height: 34px;
+  }
+}
+
+.project-next-link:hover .project-next-arrow {
+  color: var(--c-ink);
+  background: #fff;
+}
+
+.project-next-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 1.125rem;
+  font-size: 0.75rem;
+  color: #b9beb7;
+
+  @include up($bp-tablet) {
+    font-size: var(--fs-small);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gallery-slide.is-active {
+    animation: none;
+  }
+}

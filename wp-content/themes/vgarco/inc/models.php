@@ -126,6 +126,13 @@ function vgarco_image( int $id, array $args = array() ): string {
 	return (string) wp_get_attachment_image( $id, $args['size'], false, $attr );
 }
 
+/**
+ * Địa chỉ tệp ảnh ở một kích thước (dùng cho phóng to). Không có ảnh thì trả chuỗi rỗng.
+ */
+function vgarco_image_url( int $id, string $size = 'vg-2560' ): string {
+	return $id > 0 ? (string) wp_get_attachment_image_url( $id, $size ) : '';
+}
+
 /* -------------------------------------------------------------------------
  * Dự án
  * ---------------------------------------------------------------------- */

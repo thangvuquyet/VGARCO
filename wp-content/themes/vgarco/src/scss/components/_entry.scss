@@ -1,0 +1,75 @@
+@use '../mixins' as *;
+
+// Nội dung do biên tập viên soạn trong trình soạn thảo khối (mô tả dự án, bài viết, trang pháp lý).
+// Chỉ định dạng các khối được phép (inc/editor.php): đoạn, tiêu đề, danh sách, trích dẫn, ảnh, bảng.
+.entry-content {
+  > * + * {
+    margin-top: 1.25rem;
+  }
+
+  h2,
+  h3,
+  h4 {
+    margin-top: 2rem;
+    line-height: 1.25;
+  }
+
+  h3 {
+    font-size: 1.375rem;
+  }
+
+  h4 {
+    font-size: 1.125rem;
+    font-weight: 600;
+  }
+
+  a {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+
+    &:hover {
+      color: var(--c-brand);
+    }
+  }
+
+  ul,
+  ol {
+    padding-left: 1.5rem;
+  }
+
+  li + li {
+    margin-top: 0.5rem;
+  }
+
+  blockquote {
+    padding-left: 1.25rem;
+    font-family: var(--ff-accent);
+    font-style: italic;
+    border-left: 2px solid var(--c-brand);
+  }
+
+  img,
+  video {
+    max-width: 100%;
+    height: auto;
+  }
+
+  figcaption {
+    margin-top: 0.5rem;
+    font-size: var(--fs-small);
+    color: var(--c-ink-muted);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th,
+  td {
+    padding: 0.625rem 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid var(--c-line);
+  }
+}

@@ -117,7 +117,7 @@ foreach ( $fx_empty ? array() : json_decode( (string) file_get_contents( __DIR__
 			'anh_trinh_chieu'    => $featured ? $image : 0,
 			'noi_bat'            => $featured ? '1' : '0',
 			'tieu_bieu'          => $showcase ? '1' : '0',
-			'cong_bo_chu_dau_tu' => ( $row['owner'] || $row['partner'] ) ? '1' : '0',
+			'cong_bo_chu_dau_tu' => ( ( $row['owner'] || $row['partner'] ) && ! getenv( 'VG_FX_HIDE_PARTIES' ) ) ? '1' : '0',
 			'thu_vien'           => $library,
 		),
 		array(
@@ -288,6 +288,11 @@ function wp_get_attachment_image( $id, $size = 'thumbnail', $icon = false, $attr
 		$html .= sprintf( ' %s="%s"', $name, htmlspecialchars( (string) $value, ENT_QUOTES, 'UTF-8' ) );
 	}
 	return "<img{$html}>";
+}
+
+function wp_get_attachment_image_url( $id, $size = 'thumbnail' ) {
+	$img = $GLOBALS['fx']['images'][ $id ] ?? null;
+	return $img ? '/img/' . $img[0] : false;
 }
 
 function wp_kses( $text, $allowed ) {

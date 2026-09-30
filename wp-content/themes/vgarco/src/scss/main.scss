@@ -24,9 +24,11 @@
   @include meta.load-css('components/footer');
   @include meta.load-css('components/section');
   @include meta.load-css('components/breadcrumb');
+  @include meta.load-css('components/entry');
 }
 
 @layer pages {
   @include meta.load-css('pages/home');
   @include meta.load-css('pages/projects');
+  @include meta.load-css('pages/project');
 }

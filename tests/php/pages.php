@@ -79,8 +79,9 @@ function common_checks( DOMXPath $x, string $name ): void {
 	}
 	same( "{$name}: không trùng id", array(), array_keys( array_filter( array_count_values( $ids ), static fn( $c ) => $c > 1 ) ) );
 
+	// Ảnh trong hộp thoại (xem ảnh lớn) do JS điền và chỉ hiện khi mở: không có kích thước cố định, không gây nhảy bố cục.
 	$bad_img = 0;
-	foreach ( q( $x, '//img' ) as $img ) {
+	foreach ( q( $x, '//img[not(ancestor::dialog)]' ) as $img ) {
 		if ( ! $img->hasAttribute( 'alt' ) || ! $img->hasAttribute( 'width' ) || ! $img->hasAttribute( 'height' ) ) {
 			++$bad_img;
 		}
@@ -231,6 +232,85 @@ common_checks( $ce, 'danh mục rỗng' );
 same( 'danh mục rỗng: có thông báo, không có lưới', array( 1, 0 ), array( q( $ce, '//*[' . cls( 'catalogue-empty' ) . ']' )->length, q( $ce, '//*[' . cls( 'catalogue-grid' ) . ']' )->length ) );
 same( 'danh mục rỗng: không có liên kết "Xem tất cả" (đang ở trang tất cả)', 0, q( $ce, '//*[' . cls( 'catalogue-empty' ) . ']//a' )->length );
 same( 'danh mục rỗng: không có khối câu chuyện', 0, q( $ce, '//section[' . cls( 'project-story' ) . ']' )->length );
+
+/* ========================= Chi tiết dự án (UC-05) ========================= */
+
+// 106 = Bảo tàng: đủ thông tin, hai ảnh thư viện, vị trí thứ 6/19.
+$d = render( 'single-du_an', false, 'vi', array( 'VG_FX_ID' => '106' ) );
+common_checks( $d, 'chi tiết dự án' );
+same( 'chi tiết: h1 là tên dự án', 'Bảo tàng Lịch sử Quân đội nhân dân Lào', trim( q( $d, '//h1' )->item( 0 )->textContent ) );
+check( 'chi tiết: nhãn loại công trình là liên kết tới trang loại', 1 === q( $d, '//*[' . cls( 'project-detail-head' ) . ']//a[' . cls( 'eyebrow' ) . ' and starts-with(@href, "/du-an/loai/")]' )->length );
+same( 'chi tiết: đường dẫn 3 cấp', array( 'Trang chủ', 'Dự án', 'Bảo tàng Lịch sử Quân đội nhân dân Lào' ), array_map( static fn( $n ) => trim( $n->textContent ), iterator_to_array( q( $d, '//nav[' . cls( 'breadcrumb' ) . ']//li' ) ) ) );
+check( 'chi tiết: trang thuộc module "project" (data-vg-page)', 1 === q( $d, '//body[@data-vg-page="project"]' )->length );
+
+$cover = q( $d, '//figure[' . cls( 'project-detail-cover' ) . ']/img' )->item( 0 );
+check( 'ảnh bìa: là ảnh LCP — eager + fetchpriority=high', null !== $cover && 'eager' === $cover->getAttribute( 'loading' ) && 'high' === $cover->getAttribute( 'fetchpriority' ) );
+check( 'ảnh bìa: alt nêu loại ảnh và tên dự án', null !== $cover && 'Ảnh công trình — Bảo tàng Lịch sử Quân đội nhân dân Lào' === $cover->getAttribute( 'alt' ) );
+same( 'ảnh bìa: chú thích gồm loại ảnh và địa điểm', array( 'Ảnh công trình', 'Viêng Chăn, Lào' ), array_map( static fn( $n ) => trim( $n->textContent ), iterator_to_array( q( $d, '//figure[' . cls( 'project-detail-cover' ) . ']/figcaption/span' ) ) ) );
+check( 'vị trí: đọc được cho trình đọc màn hình, số hiển thị thì ẩn', str_contains( q( $d, '//p[' . cls( 'project-detail-index' ) . ']/span[' . cls( 'sr-only' ) . ']' )->item( 0 )->textContent, 'Dự án thứ 6 trong 19 dự án' ) && 2 === q( $d, '//p[' . cls( 'project-detail-index' ) . ']/*[@aria-hidden="true"]' )->length );
+same( 'vị trí: "06" và "/ 19"', array( '06', '/ 19' ), array_map( static fn( $n ) => trim( $n->textContent ), iterator_to_array( q( $d, '//p[' . cls( 'project-detail-index' ) . ']/*[@aria-hidden="true"]' ) ) ) );
+
+same( 'thông tin: đúng các dòng có dữ liệu (không ô trống)', array( 'Địa điểm', 'Thời gian', 'Vai trò VGARCO' ), array_map( static fn( $n ) => trim( $n->textContent ), iterator_to_array( q( $d, '//aside//dt' ) ) ) );
+same( 'thông tin: mỗi tên có một giá trị, không rỗng', array( 'Viêng Chăn, Lào', '2019–2020', 'Tư vấn thiết kế cải tạo' ), array_map( static fn( $n ) => trim( $n->textContent ), iterator_to_array( q( $d, '//aside//dd' ) ) ) );
+check( 'mô tả: nội dung biên tập nằm trong .entry-content', 1 === q( $d, '//*[' . cls( 'project-detail-copy' ) . ']/div[' . cls( 'entry-content' ) . ']/p' )->length );
+same( 'mô tả: h2 có ngắt dòng và cụm nhấn', 1, q( $d, '//*[' . cls( 'project-detail-copy' ) . ']/h2[count(br)=1 and count(em)=1]' )->length );
+same( 'phạm vi tham gia: có khối khi có dữ liệu', 'Tư vấn thiết kế cải tạo', trim( q( $d, '//*[' . cls( 'project-scope' ) . ']/strong' )->item( 0 )->textContent ) );
+
+$g = q( $d, '//section[' . cls( 'project-detail-gallery' ) . ']' );
+same( 'thư viện: có đúng một khối', 1, $g->length );
+$slides = q( $d, '//figure[@data-gallery-slide]' );
+same( 'thư viện: 2 ảnh (ngoài ảnh bìa)', 2, $slides->length );
+check( 'thư viện: chỉ ảnh đầu hiển thị, ảnh sau có hidden', 2 === $slides->length && ! $slides->item( 0 )->hasAttribute( 'hidden' ) && $slides->item( 1 )->hasAttribute( 'hidden' ) );
+same( 'thư viện: đúng một ảnh đang chọn', 1, q( $d, '//figure[' . cls( 'gallery-slide' ) . ' and ' . cls( 'is-active' ) . ']' )->length );
+same( 'thư viện: ảnh lazy (ảnh cuối trang, không tranh băng thông với ảnh bìa)', 2, q( $d, '//figure[@data-gallery-slide]/img[@loading="lazy"]' )->length );
+check( 'thư viện: alt là chú thích + tên dự án', 'Ảnh công trình — Bảo tàng Lịch sử Quân đội nhân dân Lào' === q( $d, '(//figure[@data-gallery-slide]/img)[1]' )->item( 0 )->getAttribute( 'alt' ) );
+same( 'thư viện: mỗi ảnh mang địa chỉ ảnh lớn cho phóng to', 2, q( $d, '//figure[@data-gallery-slide and string-length(@data-full) > 0]' )->length );
+same( 'thư viện: nút chuyển ẩn cho tới khi JS sẵn sàng (không có JS thì không có nút chết)', array( 1, 1 ), array( q( $d, '//*[@data-gallery-controls and @hidden]' )->length, q( $d, '//button[@data-gallery-open and @hidden]' )->length ) );
+same( 'thư viện: 2 chấm tiến độ, chấm đầu đang nhấn', array( 'true', 'false' ), array_map( static fn( $b ) => $b->getAttribute( 'aria-pressed' ), iterator_to_array( q( $d, '//button[@data-gallery-dot]' ) ) ) );
+same( 'thư viện: ảnh nhỏ là liên kết thật tới tệp ảnh (dùng được khi không có JS)', 2, q( $d, '//ul[' . cls( 'project-gallery-thumbs' ) . ']//a[starts-with(@href, "/img/")]' )->length );
+check( 'thư viện: ảnh nhỏ đầu có aria-current, ảnh sau thì không', 1 === q( $d, '//a[@data-gallery-thumb and @aria-current="true"]' )->length && '0' === q( $d, '//a[@data-gallery-thumb and @aria-current="true"]' )->item( 0 )->getAttribute( 'data-gallery-thumb' ) );
+same( 'thư viện: ảnh nhỏ có alt rỗng (nhãn nằm ở chữ bên cạnh, tránh đọc hai lần)', 2, q( $d, '//a[@data-gallery-thumb]/img[@alt=""]' )->length );
+check( 'thư viện: khung trình chiếu focus được bằng bàn phím và có nhãn', 1 === q( $d, '//*[@data-gallery-stage and @tabindex="0" and @aria-label != ""]' )->length );
+same( 'thư viện: có vùng thông báo cho trình đọc màn hình khi đổi ảnh', 1, q( $d, '//*[@data-gallery-status and @aria-live="polite"]' )->length );
+check( 'thư viện: định dạng thông báo lấy từ thuộc tính (dịch được)', str_contains( q( $d, '//section[@data-gallery]' )->item( 0 )->getAttribute( 'data-status' ), '%1$d' ) );
+check( 'thư viện: hộp xem ảnh lớn là <dialog> có nhãn; mọi nút trong đó có tên (đóng, trước, sau)', 1 === q( $d, '//dialog[@data-gallery-lightbox and @aria-label != ""]' )->length && 3 === q( $d, '//dialog//button[@aria-label != ""]' )->length && 0 === q( $d, '//dialog//button[not(@aria-label) or @aria-label = ""]' )->length );
+check( 'thư viện: không có thuộc tính tự chạy (WCAG 2.2.2)', 0 === q( $d, '//*[@data-autoplay or @data-interval]' )->length );
+
+$n = q( $d, '//section[' . cls( 'project-detail-next' ) . ']' );
+same( 'dự án tiếp theo: có khối, nền tối khai báo on-dark', 1, q( $d, '//section[' . cls( 'project-detail-next' ) . ' and ' . cls( 'on-dark' ) . ']' )->length );
+check( 'dự án tiếp theo: dự án kế trong danh mục (Biệt thự Niedernhausen)', 1 === q( $d, '//a[' . cls( 'project-next-link' ) . ' and @href="/du-an/107/"]' )->length );
+same( 'dự án tiếp theo: dòng meta gồm loại và địa điểm', array( 'Nhà ở & công trình dân dụng', 'Niedernhausen, CHLB Đức' ), array_map( static fn( $x ) => trim( $x->textContent ), iterator_to_array( q( $d, '//*[' . cls( 'project-next-meta' ) . ']/span' ) ) ) );
+
+// 119 = dự án cuối danh mục: "tiếp theo" quay về dự án đầu (UC-05 8a).
+$last = render( 'single-du_an', false, 'vi', array( 'VG_FX_ID' => '119' ) );
+check( 'dự án cuối: "tiếp theo" quay về dự án đầu tiên', 1 === q( $last, '//a[' . cls( 'project-next-link' ) . ' and @href="/du-an/101/"]' )->length );
+check( 'dự án cuối: vị trí 19 / 19', str_contains( q( $last, '//p[' . cls( 'project-detail-index' ) . ']/span[' . cls( 'sr-only' ) . ']' )->item( 0 )->textContent, 'Dự án thứ 19 trong 19 dự án' ) );
+
+// 104 = Đài kiểm soát không lưu: đủ chủ đầu tư/đối tác, không có ảnh thư viện.
+$t = render( 'single-du_an', false, 'vi', array( 'VG_FX_ID' => '104' ) );
+common_checks( $t, 'chi tiết không thư viện' );
+same( 'không thư viện: ẩn cả khối (UC-05 4a)', 0, q( $t, '//section[' . cls( 'project-detail-gallery' ) . ']' )->length );
+same( 'công bố chủ đầu tư: hiện đủ 5 dòng thông tin', array( 'Địa điểm', 'Thời gian', 'Chủ đầu tư', 'Đối tác', 'Vai trò VGARCO' ), array_map( static fn( $x ) => trim( $x->textContent ), iterator_to_array( q( $t, '//aside//dt' ) ) ) );
+$np = render( 'single-du_an', false, 'vi', array( 'VG_FX_ID' => '104', 'VG_FX_HIDE_PARTIES' => '1' ) );
+same( 'chưa công bố chủ đầu tư: ẩn Chủ đầu tư và Đối tác (mục 3.2 #8)', array( 'Địa điểm', 'Thời gian', 'Vai trò VGARCO' ), array_map( static fn( $x ) => trim( $x->textContent ), iterator_to_array( q( $np, '//aside//dt' ) ) ) );
+check( 'chưa công bố chủ đầu tư: tên đơn vị không lọt vào HTML ở bất kỳ chỗ nào', ! str_contains( (string) file_get_contents( ROOT . '/tests/out/single-du_an-104.html' ), 'Quản lý bay Miền Bắc' ) );
+
+// 109 = Dự án Bản Còn: không có địa điểm, năm, chủ đầu tư, vai trò → không có cột thông tin, không có phạm vi.
+$b = render( 'single-du_an', false, 'vi', array( 'VG_FX_ID' => '109' ) );
+common_checks( $b, 'chi tiết thiếu thông tin' );
+same( 'thiếu thông tin: không có cột thông tin dự án', 0, q( $b, '//aside' )->length );
+same( 'thiếu thông tin: không có khối phạm vi tham gia', 0, q( $b, '//*[' . cls( 'project-scope' ) . ']' )->length );
+same( 'thiếu thông tin: vẫn có phần mô tả', 1, q( $b, '//*[' . cls( 'project-detail-copy' ) . ']/div[' . cls( 'entry-content' ) . ']' )->length );
+same( 'thiếu thông tin: ảnh bìa không có địa điểm thì chú thích dùng tên loại công trình', 'Văn hóa & di tích', trim( q( $b, '//figure[' . cls( 'project-detail-cover' ) . ']/figcaption/span[2]' )->item( 0 )->textContent ) );
+
+// 111 = Cục Biên phòng: chỉ một ảnh thư viện → không có nút chuyển, số đếm, ảnh nhỏ; vẫn phóng to được.
+$one = render( 'single-du_an', false, 'vi', array( 'VG_FX_ID' => '111' ) );
+common_checks( $one, 'chi tiết một ảnh' );
+same( 'một ảnh: đúng 1 ảnh trong thư viện', 1, q( $one, '//figure[@data-gallery-slide]' )->length );
+same( 'một ảnh: không có nút trước/sau, chấm, số đếm, ảnh nhỏ', array( 0, 0, 0, 0 ), array( q( $one, '//*[@data-gallery-controls]' )->length, q( $one, '//button[@data-gallery-dot]' )->length, q( $one, '//*[' . cls( 'gallery-head-meta' ) . ']' )->length, q( $one, '//ul[' . cls( 'project-gallery-thumbs' ) . ']' )->length ) );
+same( 'một ảnh: vẫn có nút phóng to và hộp xem ảnh lớn', array( 1, 1 ), array( q( $one, '//button[@data-gallery-open]' )->length, q( $one, '//dialog[@data-gallery-lightbox]' )->length ) );
+same( 'một ảnh: hộp xem ảnh lớn không có nút trước/sau', 0, q( $one, '//dialog//button[@data-lightbox-prev or @data-lightbox-next]' )->length );
+same( 'một ảnh: chú thích không có số thứ tự "01"', 0, q( $one, '//*[' . cls( 'gallery-caption-index' ) . ']' )->length );
 
 /* ---------- Kết quả ---------- */
 
