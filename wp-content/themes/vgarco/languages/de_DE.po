@@ -1,0 +1,1432 @@
+# VGARCO Theme — tiếng Đức (de_DE).
+# Bản NHÁP: dịch mồi từ bản thiết kế HTML, chờ đối tác Đức hiệu đính. Mục "fuzzy" chưa được dùng.
+msgid ""
+msgstr ""
+"Project-Id-Version: VGARCO Theme\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: de\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Last-Translator: BẢN NHÁP từ bản thiết kế HTML — cần đối tác Đức hiệu đính\n"
+
+#: wp-content/themes/vgarco/footer.php
+msgid "(mở ở thẻ mới)"
+msgstr "(öffnet in neuem Tab)"
+
+#: wp-content/themes/vgarco/inc/template-tags.php
+#, php-format
+msgid "%s — đang cập nhật"
+msgstr "%s — wird aktualisiert"
+
+#: wp-content/themes/vgarco/template-parts/catalogue.php
+#, php-format
+msgid "%s dự án"
+msgid_plural "%s dự án"
+msgstr[0] "%s Projekt"
+msgstr[1] "%s Projekte"
+
+#: wp-content/themes/vgarco/template-parts/project-gallery.php
+#, php-format
+msgid "Ảnh %1$d / %2$d: %3$s"
+msgstr "Bild %1$d / %2$d: %3$s"
+
+#: wp-content/themes/vgarco/inc/models.php
+msgid "Ảnh công trình"
+msgstr "Foto des Bauwerks"
+
+#: wp-content/themes/vgarco/template-parts/project-gallery.php
+msgid "Ảnh tiếp theo"
+msgstr "Nächstes Bild"
+
+#: wp-content/themes/vgarco/template-parts/project-gallery.php
+msgid "Ảnh trước"
+msgstr "Vorheriges Bild"
+
+#: wp-content/themes/vgarco/single-tin_tuc.php
+msgid "Bài tiếp theo"
+msgstr "Nächster Beitrag"
+
+#: wp-content/themes/vgarco/single-tin_tuc.php
+msgid "Bài trước"
+msgstr "Vorheriger Beitrag"
+
+#: wp-content/themes/vgarco/single-tin_tuc.php
+msgid "Bài viết khác"
+msgstr "Weitere Beiträge"
+
+#: wp-content/themes/vgarco/templates/careers.php
+msgid "Bạn có thể gửi hồ sơ giới thiệu qua email để kết nối với đội ngũ VGARCO."
+msgstr "Sie können uns Ihre Bewerbungsunterlagen per E-Mail senden, um mit dem Team von VGARCO in Kontakt zu treten."
+
+#: wp-content/themes/vgarco/templates/apply.php
+msgid "Bạn đã gửi quá nhiều hồ sơ trong thời gian ngắn. Vui lòng thử lại sau."
+msgstr "Sie haben in kurzer Zeit zu viele Bewerbungen gesendet. Bitte versuchen Sie es später erneut."
+
+#: wp-content/themes/vgarco/inc/menus.php wp-content/themes/vgarco/templates/leadership.php
+msgid "Ban lãnh đạo"
+msgstr "Geschäftsleitung"
+
+#: wp-content/themes/vgarco/templates/careers.php
+msgid "Bạn vẫn có thể gửi hồ sơ giới thiệu để được liên hệ khi có vị trí phù hợp."
+msgstr "Sie können uns weiterhin eine Initiativbewerbung senden; wir melden uns, sobald eine passende Stelle frei wird."
+
+#: wp-content/themes/vgarco/front-page.php wp-content/themes/vgarco/templates/contact.php
+msgid "Bắt đầu một dự án"
+msgstr "Ein Projekt beginnen"
+
+#: wp-content/themes/vgarco/templates/about.php
+msgid "Bắt đầu từ khu đất, nhu cầu sử dụng và kỳ vọng của chủ đầu tư để định hình hướng thiết kế."
+msgstr "Grundstück, Nutzungsanforderungen und Erwartungen des Bauherrn bilden den Ausgangspunkt für unseren Entwurf."
+
+#: wp-content/themes/vgarco/templates/about.php
+msgid "Các con số phản ánh hành trình và phạm vi hoạt động trong hồ sơ VGARCO."
+msgstr "Die Zahlen spiegeln den Werdegang und den Tätigkeitsbereich von VGARCO wider."
+
+#: wp-content/themes/vgarco/inc/models.php
+msgid "Các công trình trong hồ sơ VGARCO."
+msgstr "Die Bauwerke im Portfolio von VGARCO."
+
+#: wp-content/themes/vgarco/inc/models.php
+#, php-format
+msgid "Các dự án thuộc nhóm %s."
+msgstr "Projekte der Kategorie %s."
+
+#: wp-content/themes/vgarco/404.php
+msgid "Các mục chính"
+msgstr "Hauptbereiche"
+
+#: wp-content/themes/vgarco/templates/about.php
+msgid "Cách chúng tôi làm việc"
+msgstr "Wie wir arbeiten"
+
+#: wp-content/themes/vgarco/templates/departments.php
+msgid "Cấp thoát nước"
+msgstr "Wasserversorgung und Entwässerung"
+
+#: wp-content/themes/vgarco/template-parts/catalogue.php
+msgid "Câu chuyện một công trình"
+msgstr "Die Geschichte eines Bauwerks"
+
+#: wp-content/themes/vgarco/footer.php
+msgid "Chỉ đường"
+msgstr "Route planen"
+
+#: wp-content/themes/vgarco/templates/apply.php
+msgid "Chỉ nhận CV dạng PDF, DOC hoặc DOCX."
+msgstr "Es werden nur Lebensläufe im Format PDF, DOC oder DOCX akzeptiert."
+
+#: wp-content/themes/vgarco/templates/departments.php
+msgid "Chi phí"
+msgstr "Kosten"
+
+#: wp-content/themes/vgarco/single-tin_tuc.php
+msgid "Chia sẻ"
+msgstr "Teilen"
+
+#: wp-content/themes/vgarco/single-tin_tuc.php
+msgid "Chia sẻ bài viết"
+msgstr "Beitrag teilen"
+
+#: wp-content/themes/vgarco/front-page.php
+msgid "Chia sẻ bối cảnh, nhu cầu và mục tiêu của bạn. VGARCO sẽ cùng trao đổi để xác định bước khởi đầu phù hợp."
+msgstr "Teilen Sie mit uns Kontext, Anforderungen und Ziele. Gemeinsam bestimmen wir einen passenden ersten Schritt."
+
+#: wp-content/themes/vgarco/single-tin_tuc.php
+msgid "Chia sẻ lên Facebook (mở thẻ mới)"
+msgstr "Auf Facebook teilen (öffnet in neuem Tab)"
+
+#: wp-content/themes/vgarco/templates/contact.php
+msgid "Chia sẻ nhu cầu của bạn"
+msgstr "Erzählen Sie uns von Ihrem Vorhaben"
+
+#: wp-content/themes/vgarco/templates/apply.php
+msgid "chính sách bảo vệ dữ liệu"
+msgstr "Datenschutzerklärung"
+
+#: wp-content/themes/vgarco/templates/about.php
+msgid "CHLB Đức"
+msgstr "Deutschland"
+
+#: wp-content/themes/vgarco/template-parts/news-archive.php
+msgid "Chọn chuyên mục tin tức"
+msgstr "Nachrichtenkategorie wählen"
+
+#: wp-content/themes/vgarco/templates/careers.php
+msgid ""
+"Chọn công việc.\n"
+"<em>Cùng tạo dấu ấn.</em>"
+msgstr ""
+"Finden Sie Ihre Aufgabe.\n"
+"<em>Gemeinsam Spuren hinterlassen.</em>"
+
+#: wp-content/themes/vgarco/inc/models.php
+msgid "Chủ đầu tư"
+msgstr "Bauherr"
+
+#: wp-content/themes/vgarco/templates/about.php
+msgid "Chúng tôi kết nối tư duy kiến trúc với nền tảng kỹ thuật, để mỗi công trình tìm thấy lời giải của riêng mình."
+msgstr "Wir verbinden architektonisches Denken mit technischem Wissen, um für jedes Bauwerk eine eigene Lösung zu entwickeln."
+
+#: wp-content/themes/vgarco/front-page.php
+msgid ""
+"Chúng tôi kết nối ý tưởng kiến trúc với\n"
+"năng lực kỹ thuật để tạo nên những\n"
+"không gian có giá trị dài lâu."
+msgstr ""
+"Wir verbinden architektonische Ideen mit\n"
+"technischem Können und schaffen Räume\n"
+"von bleibendem Wert."
+
+#: wp-content/themes/vgarco/templates/about.php
+msgid "Chúng tôi là ai"
+msgstr "Wer wir sind"
+
+#: wp-content/themes/vgarco/front-page.php
+msgid "Chúng tôi theo đuổi những giải pháp rõ ràng, khả thi và có giá trị dài lâu — từ ý tưởng đầu tiên đến khi công trình được đưa vào sử dụng."
+msgstr "Wir entwickeln klare, umsetzbare und dauerhaft wertvolle Lösungen – von der ersten Idee bis zur Inbetriebnahme des Bauwerks."
+
+#: wp-content/themes/vgarco/front-page.php wp-content/themes/vgarco/templates/services.php
+msgid "Chuyên môn"
+msgstr "Fachgebiete"
+
+#: wp-content/themes/vgarco/template-parts/news-archive.php
+msgid "Chưa có bài viết nào trong mục này."
+msgstr "In dieser Kategorie gibt es noch keine Beiträge."
+
+#: wp-content/themes/vgarco/template-parts/catalogue.php
+msgid "Chưa có dự án nào thuộc nhóm này."
+msgstr "In dieser Kategorie gibt es noch keine Projekte."
+
+#: wp-content/themes/vgarco/template-parts/layout/search-dialog.php
+msgid "Chưa có dự án phù hợp. Thử tên địa điểm hoặc loại công trình khác."
+msgstr "Keine passenden Projekte gefunden. Versuchen Sie einen anderen Standort oder Gebäudetyp."
+
+#: wp-content/themes/vgarco/index.php
+msgid "Chưa có nội dung."
+msgstr "Noch keine Inhalte vorhanden."
+
+#: wp-content/themes/vgarco/templates/careers.php
+msgid "Chưa thấy vị trí phù hợp?"
+msgstr "Noch keine passende Stelle gefunden?"
+
+#: wp-content/themes/vgarco/template-parts/layout/search-dialog.php
+msgid "Chưa tìm kiếm được lúc này. Vui lòng thử lại sau."
+msgstr "Die Suche ist gerade nicht verfügbar. Bitte versuchen Sie es später erneut."
+
+#: wp-content/themes/vgarco/templates/careers.php
+msgid "Chưa tìm thấy vị trí phù hợp"
+msgstr "Keine passende Stelle gefunden"
+
+#: wp-content/themes/vgarco/template-parts/layout/search-dialog.php
+#, php-format
+msgid "Có %d dự án phù hợp."
+msgstr "%d passende Projekte gefunden."
+
+#: wp-content/themes/vgarco/template-parts/layout/search-dialog.php
+msgid "Có 1 dự án phù hợp."
+msgstr "1 passendes Projekt gefunden."
+
+#: wp-content/themes/vgarco/templates/apply.php
+msgid "Có lỗi xảy ra phía máy chủ. Hồ sơ chưa được gửi, dữ liệu của bạn vẫn còn — vui lòng thử lại sau ít phút."
+msgstr "Auf dem Server ist ein Fehler aufgetreten. Ihre Bewerbung wurde nicht gesendet, Ihre Eingaben bleiben erhalten — bitte versuchen Sie es in wenigen Minuten erneut."
+
+#: wp-content/themes/vgarco/template-parts/catalogue.php
+msgid "Công trình"
+msgstr "Bauwerk"
+
+#: wp-content/themes/vgarco/templates/about.php
+msgid "Công ty đổi tên thành Công ty TNHH Tư vấn Xây dựng VGARCO."
+msgstr "Das Unternehmen wird in Công ty TNHH Tư vấn Xây dựng VGARCO umbenannt."
+
+#: wp-content/themes/vgarco/templates/about.php
+msgid "Công ty TNHH Tư vấn Xây dựng VGARCO được thành lập ngày 19/08/2013 với tên gọi 3SEVEN. Từ ngày 05/12/2023, công ty chính thức mang tên VGARCO."
+msgstr "VGARCO wurde am 19. August 2013 unter dem Namen 3SEVEN gegründet. Seit dem 5. Dezember 2023 trägt das Unternehmen offiziell den Namen VGARCO."
+
+#: wp-content/themes/vgarco/inc/seo.php wp-content/themes/vgarco/single-vi_tri.php
+msgid "Công việc chính"
+msgstr "Hauptaufgaben"
+
+#: wp-content/themes/vgarco/templates/departments.php
+msgid "Cơ điện"
+msgstr "Gebäudetechnik"
+
+#: wp-content/themes/vgarco/single-vi_tri.php wp-content/themes/vgarco/templates/careers.php
+msgid "Cơ hội nghề nghiệp"
+msgstr "Berufliche Perspektiven"
+
+#: wp-content/themes/vgarco/front-page.php
+msgid ""
+"Cùng đặt nền móng\n"
+"<em>cho điều tiếp theo.</em>"
+msgstr ""
+"Gemeinsam das Fundament legen\n"
+"<em>für das, was kommt.</em>"
+
+#: wp-content/themes/vgarco/templates/careers.php
+msgid ""
+"Cùng làm nghề.\n"
+"Cùng tạo giá trị."
+msgstr ""
+"Gemeinsam unser Fach leben.\n"
+"Gemeinsam Werte schaffen."
+
+#: wp-content/themes/vgarco/templates/apply.php
+msgid "CV của bạn"
+msgstr "Ihr Lebenslauf"
+
+#: wp-content/themes/vgarco/templates/apply.php
+msgid "CV vượt quá 10 MB. Hãy nén hoặc chọn tệp nhỏ hơn."
+msgstr "Der Lebenslauf überschreitet 10 MB. Bitte komprimieren Sie die Datei oder wählen Sie eine kleinere."
+
+#: wp-content/themes/vgarco/template-parts/catalogue.php
+msgid "Danh mục dự án"
+msgstr "Projektübersicht"
+
+#: wp-content/themes/vgarco/template-parts/catalogue.php
+msgid "Danh mục dự án đang được cập nhật."
+msgstr "Die Projektübersicht wird gerade aktualisiert."
+
+#: wp-content/themes/vgarco/front-page.php
+msgid "Danh sách khách hàng và đối tác tiêu biểu"
+msgstr "Ausgewählte Kunden und Partner"
+
+#: wp-content/themes/vgarco/templates/about.php
+msgid "Dấu ấn tại Lào"
+msgstr "Prägende Projekte in Laos"
+
+#: wp-content/themes/vgarco/front-page.php
+msgid "Dấu ấn VGARCO"
+msgstr "Die Handschrift von VGARCO"
+
+#: wp-content/themes/vgarco/inc/menus.php wp-content/themes/vgarco/inc/seo.php wp-content/themes/vgarco/inc/template-tags.php wp-content/themes/vgarco/single-du_an.php wp-content/themes/vgarco/template-parts/catalogue.php
+msgid "Dự án"
+msgstr "Projekte"
+
+#: wp-content/themes/vgarco/front-page.php
+msgid "Dự án nổi bật"
+msgstr "Ausgewählte Projekte"
+
+#: wp-content/themes/vgarco/inc/menus.php
+msgid "DỰ ÁN THEO LOẠI CÔNG TRÌNH"
+msgstr "PROJEKTE NACH GEBÄUDETYP"
+
+#: wp-content/themes/vgarco/single-du_an.php
+#, php-format
+msgid "Dự án thứ %1$d trong %2$d dự án"
+msgstr "Projekt %1$d von %2$d"
+
+#: wp-content/themes/vgarco/single-du_an.php
+msgid "Dự án tiếp theo"
+msgstr "Nächstes Projekt"
+
+#: wp-content/themes/vgarco/front-page.php
+msgid "Dự án tiêu biểu"
+msgstr "Ausgewählte Projekte"
+
+#: wp-content/themes/vgarco/single-vi_tri.php
+msgid "Đã ngừng nhận hồ sơ"
+msgstr "Bewerbungen nicht mehr möglich"
+
+#: wp-content/themes/vgarco/templates/apply.php
+msgid "Đã nhận hồ sơ của bạn. Chúng tôi đã gửi email xác nhận và sẽ liên hệ khi có bước tiếp theo."
+msgstr "Wir haben Ihre Bewerbung erhalten. Eine Bestätigung wurde per E-Mail gesendet; wir melden uns, sobald es weitergeht."
+
+#: wp-content/themes/vgarco/single-tin_tuc.php
+msgid "Đã sao chép liên kết"
+msgstr "Link kopiert"
+
+#: wp-content/themes/vgarco/templates/contact.php
+msgid "Đã sao chép nội dung. Dán vào email của bạn."
+msgstr "Text kopiert. Fügen Sie ihn in Ihre E-Mail ein."
+
+#: wp-content/themes/vgarco/templates/contact.php
+msgid "Đang cập nhật"
+msgstr "Wird aktualisiert"
+
+#: wp-content/themes/vgarco/templates/apply.php
+msgid "Đang gửi…"
+msgstr "Wird gesendet …"
+
+#: wp-content/themes/vgarco/template-parts/layout/search-dialog.php
+msgid "Đang tìm…"
+msgstr "Suche läuft …"
+
+#: wp-content/themes/vgarco/templates/leadership.php
+msgid "Đặt từng quyết định trong mối quan hệ với toàn bộ dự án."
+msgstr "Jede Entscheidung im Zusammenhang mit dem gesamten Projekt betrachten."
+
+#: wp-content/themes/vgarco/templates/apply.php
+msgid "Để nộp hồ sơ trực tuyến, bạn cần bật JavaScript. Hoặc gửi CV tới địa chỉ email tuyển dụng dưới đây."
+msgstr "Für die Online-Bewerbung muss JavaScript aktiviert sein. Alternativ senden Sie Ihren Lebenslauf an die unten stehende E-Mail-Adresse."
+
+#: wp-content/themes/vgarco/front-page.php
+msgid "Đến công trình"
+msgstr "Zum Bauwerk"
+
+#: wp-content/themes/vgarco/header.php
+msgid "Đến nội dung chính"
+msgstr "Zum Hauptinhalt"
+
+#: wp-content/themes/vgarco/front-page.php
+msgid "Đến trang tin tức"
+msgstr "Zu den Neuigkeiten"
+
+#: wp-content/themes/vgarco/404.php
+msgid "Địa chỉ bạn mở có thể đã thay đổi hoặc nội dung không còn. Hãy quay lại trang chủ hoặc chọn một mục bên dưới."
+msgstr "Die aufgerufene Adresse hat sich möglicherweise geändert oder der Inhalt existiert nicht mehr. Kehren Sie zur Startseite zurück oder wählen Sie unten einen Bereich."
+
+#: wp-content/themes/vgarco/templates/apply.php
+msgid "Địa chỉ email"
+msgstr "E-Mail-Adresse"
+
+#: wp-content/themes/vgarco/templates/contact.php
+msgid "Địa chỉ email chưa đúng. Ví dụ: ten@congty.vn"
+msgstr "Die E-Mail-Adresse ist ungültig. Beispiel: name@firma.de"
+
+#: wp-content/themes/vgarco/templates/apply.php
+msgid "Địa chỉ email chưa đúng. Ví dụ: ten@example.com"
+msgstr "Die E-Mail-Adresse ist ungültig. Beispiel: name@beispiel.de"
+
+#: wp-content/themes/vgarco/inc/models.php wp-content/themes/vgarco/single-vi_tri.php wp-content/themes/vgarco/templates/apply.php wp-content/themes/vgarco/templates/careers.php
+msgid "Địa điểm"
+msgstr "Standort"
+
+#: wp-content/themes/vgarco/templates/contact.php
+msgid "Điện thoại"
+msgstr "Telefon"
+
+#: wp-content/themes/vgarco/footer.php
+msgid "Điều hướng chân trang"
+msgstr "Fußzeilennavigation"
+
+#: wp-content/themes/vgarco/header.php
+msgid "Điều hướng chính"
+msgstr "Hauptnavigation"
+
+#: wp-content/themes/vgarco/templates/leadership.php
+msgid "Định hướng hoạt động tư vấn thiết kế, phối hợp chuyên môn và triển khai dự án của VGARCO."
+msgstr "Verantwortung für die fachliche Ausrichtung von Planung, Zusammenarbeit und Projektumsetzung bei VGARCO."
+
+#: wp-content/themes/vgarco/template-parts/project-gallery.php
+msgid "Đóng"
+msgstr "Schließen"
+
+#: wp-content/themes/vgarco/header.php
+msgid "Đóng menu"
+msgstr "Menü schließen"
+
+#: wp-content/themes/vgarco/template-parts/layout/search-dialog.php
+msgid "Đóng tìm kiếm"
+msgstr "Suche schließen"
+
+#: wp-content/themes/vgarco/inc/models.php
+msgid "Đối tác"
+msgstr "Partner"
+
+#: wp-content/themes/vgarco/templates/apply.php
+msgid "Đường dẫn ứng tuyển chưa đúng hoặc vị trí không còn tồn tại."
+msgstr "Der Bewerbungslink ist ungültig oder die Stelle existiert nicht mehr."
+
+#: wp-content/themes/vgarco/inc/template-tags.php
+msgid "Đường dẫn vị trí"
+msgstr "Brotkrumenpfad"
+
+#: wp-content/themes/vgarco/templates/contact.php
+msgid "Email"
+msgstr "E-Mail"
+
+#: wp-content/themes/vgarco/front-page.php
+msgid "Giải pháp được kiểm soát từ ý tưởng đến hồ sơ và giai đoạn triển khai."
+msgstr "Die Lösung wird von der Idee über die Planungsunterlagen bis zur Umsetzung begleitet."
+
+#: wp-content/themes/vgarco/templates/leadership.php
+msgid "Giám đốc"
+msgstr "Geschäftsführer"
+
+#: wp-content/themes/vgarco/inc/menus.php
+msgid "Giới thiệu"
+msgstr "Über uns"
+
+#: wp-content/themes/vgarco/templates/careers.php
+msgid "Giữ kết nối"
+msgstr "In Verbindung bleiben"
+
+#: wp-content/themes/vgarco/front-page.php
+msgid "Góc nhìn từ <em>VGARCO.</em>"
+msgstr "Einblicke von <em>VGARCO.</em>"
+
+#. translators: %s: số điện thoại
+#: wp-content/themes/vgarco/footer.php
+#, php-format
+msgid "Gọi %s"
+msgstr "%s anrufen"
+
+#: wp-content/themes/vgarco/templates/contact.php
+msgid "Gọi trực tiếp"
+msgstr "Direkt anrufen"
+
+#. translators: %s: số điện thoại
+#: wp-content/themes/vgarco/templates/contact.php
+#, php-format
+msgid "Gọi VGARCO qua số %s"
+msgstr "VGARCO unter %s anrufen"
+
+#: wp-content/themes/vgarco/front-page.php
+msgid "Hà Nội, Việt Nam"
+msgstr "Hanoi, Vietnam"
+
+#: wp-content/themes/vgarco/templates/departments.php
+msgid "Hạ tầng kỹ thuật"
+msgstr "Technische Infrastruktur"
+
+#: wp-content/themes/vgarco/single-vi_tri.php
+msgid "Hạn nộp"
+msgstr "Bewerbungsfrist"
+
+#: wp-content/themes/vgarco/templates/about.php
+msgid "Hành trình"
+msgstr "Werdegang"
+
+#: wp-content/themes/vgarco/templates/departments.php
+msgid "Hệ chuyên môn"
+msgstr "Fachbereiche"
+
+#: wp-content/themes/vgarco/templates/careers.php
+msgid "Hiện chưa có vị trí nào đang tuyển"
+msgstr "Derzeit sind keine Stellen ausgeschrieben"
+
+#: wp-content/themes/vgarco/front-page.php
+msgid "Hiểu đúng bối cảnh"
+msgstr "Den Kontext verstehen"
+
+#: wp-content/themes/vgarco/template-parts/project-gallery.php
+msgid "Hình ảnh dự án"
+msgstr "Projektbilder"
+
+#: wp-content/themes/vgarco/templates/services.php
+msgid "Hình ảnh dự án tham khảo"
+msgstr "Referenzbild aus dem Portfolio"
+
+#: wp-content/themes/vgarco/templates/apply.php wp-content/themes/vgarco/templates/contact.php
+msgid "Họ và tên"
+msgstr "Vor- und Nachname"
+
+#: wp-content/themes/vgarco/templates/apply.php
+msgid "Họ và tên của bạn"
+msgstr "Ihr vollständiger Name"
+
+#: wp-content/themes/vgarco/templates/contact.php
+msgid ""
+"Họ và tên: %name%\n"
+"Số điện thoại: %phone%\n"
+"Email: %email%\n"
+"\n"
+"Nội dung:\n"
+"%message%\n"
+"\n"
+"— Soạn từ website VGARCO"
+msgstr ""
+"Name: %name%\n"
+"Telefon: %phone%\n"
+"E-Mail: %email%\n"
+"\n"
+"Nachricht:\n"
+"%message%\n"
+"\n"
+"— Verfasst über die VGARCO-Website"
+
+#: wp-content/themes/vgarco/templates/about.php
+msgid "Hòa Lạc, Hà Nội"
+msgstr "Hòa Lạc, Hanoi"
+
+#: wp-content/themes/vgarco/templates/about.php
+msgid "Hoạt động trong tư vấn thiết kế, giám sát và quản lý dự án, VGARCO kết nối các chuyên môn kiến trúc, kết cấu và kỹ thuật để phát triển giải pháp phù hợp với từng công trình."
+msgstr "VGARCO ist in der Planung, Bauüberwachung und im Projektmanagement tätig. Wir verbinden Architektur, Tragwerksplanung und technische Fachplanung, um für jedes Bauwerk passende Lösungen zu entwickeln."
+
+#: wp-content/themes/vgarco/front-page.php
+msgid "Hoạt động từ 2013"
+msgstr "Aktiv seit 2013"
+
+#: wp-content/themes/vgarco/templates/contact.php
+msgid "Kênh liên hệ VGARCO"
+msgstr "Kontaktkanäle von VGARCO"
+
+#: wp-content/themes/vgarco/footer.php
+msgid "KẾT NỐI"
+msgstr "KONTAKT"
+
+#: wp-content/themes/vgarco/templates/leadership.php
+msgid "Kết nối các bộ môn từ sớm để giảm xung đột ở giai đoạn sau."
+msgstr "Die Fachbereiche früh miteinander verzahnen, um Konflikte in späteren Phasen zu verringern."
+
+#: wp-content/themes/vgarco/templates/about.php
+msgid "Kết nối chuyên môn"
+msgstr "Fachwissen verbinden"
+
+#: wp-content/themes/vgarco/templates/departments.php
+msgid "Kết nối giải pháp kiến trúc với cấu tạo, kết cấu và khả năng thi công."
+msgstr "Die architektonische Lösung mit Konstruktion, Tragwerk und Bauausführung verbinden."
+
+#: wp-content/themes/vgarco/templates/services.php
+msgid "Kết nối kiến trúc và kỹ thuật, từ khảo sát ban đầu đến thiết kế và quản lý triển khai."
+msgstr "Wir verbinden Architektur und Technik – von der ersten Bestandsaufnahme über die Planung bis zur Steuerung der Umsetzung."
+
+#: wp-content/themes/vgarco/templates/about.php
+msgid "Kết nối thiết kế với thực tiễn xây dựng thông qua năng lực tư vấn, giám sát và quản lý dự án."
+msgstr "Mit Beratung, Bauüberwachung und Projektmanagement verbinden wir die Planung mit der Baupraxis."
+
+#: wp-content/themes/vgarco/front-page.php
+msgid "Khách hàng & đối tác"
+msgstr "Kunden & Partner"
+
+#: wp-content/themes/vgarco/footer.php
+msgid "KHÁM PHÁ"
+msgstr "ENTDECKEN"
+
+#: wp-content/themes/vgarco/front-page.php
+msgid "Khám phá các lĩnh vực"
+msgstr "Unsere Leistungen entdecken"
+
+#: wp-content/themes/vgarco/template-parts/catalogue.php
+msgid "Khám phá câu chuyện"
+msgstr "Die Geschichte entdecken"
+
+#: wp-content/themes/vgarco/templates/about.php
+msgid "Khám phá câu chuyện VGARCO"
+msgstr "Die Geschichte von VGARCO entdecken"
+
+#: wp-content/themes/vgarco/front-page.php
+msgid "Khám phá công trình"
+msgstr "Projekte entdecken"
+
+#: wp-content/themes/vgarco/inc/menus.php
+msgid "KHÁM PHÁ VGARCO"
+msgstr "VGARCO ENTDECKEN"
+
+#: wp-content/themes/vgarco/templates/about.php
+msgid "Không giới hạn bởi biên giới"
+msgstr "Ohne Grenzen"
+
+#: wp-content/themes/vgarco/templates/apply.php
+msgid "Không gửi được hồ sơ. Hãy tải lại trang rồi thử lại."
+msgstr "Die Bewerbung konnte nicht gesendet werden. Bitte laden Sie die Seite neu und versuchen Sie es erneut."
+
+#: wp-content/themes/vgarco/templates/apply.php
+msgid "Không kết nối được. Kiểm tra mạng rồi thử lại, dữ liệu của bạn vẫn còn."
+msgstr "Keine Verbindung. Bitte prüfen Sie Ihr Netzwerk und versuchen Sie es erneut — Ihre Eingaben bleiben erhalten."
+
+#: wp-content/themes/vgarco/templates/apply.php
+msgid "Không phân biệt chữ hoa và chữ thường."
+msgstr "Groß- und Kleinschreibung wird nicht beachtet."
+
+#: wp-content/themes/vgarco/templates/contact.php
+msgid "Không sao chép được. Hãy chọn và sao chép nội dung ở khung bên dưới."
+msgstr "Kopieren nicht möglich. Markieren und kopieren Sie den Text im Feld unten."
+
+#: wp-content/themes/vgarco/templates/leadership.php
+msgid "Không tách thiết kế khỏi điều kiện thi công và vận hành."
+msgstr "Den Entwurf nicht von den Bedingungen der Bauausführung und des Betriebs trennen."
+
+#: wp-content/themes/vgarco/inc/template-tags.php
+msgid "Không tìm thấy bài viết này. Bài có thể đã được gỡ hoặc địa chỉ đã thay đổi — bạn có thể xem các tin mới nhất."
+msgstr "Dieser Beitrag wurde nicht gefunden. Er wurde möglicherweise entfernt oder die Adresse hat sich geändert — hier finden Sie die neuesten Meldungen."
+
+#: wp-content/themes/vgarco/inc/template-tags.php
+msgid "Không tìm thấy dự án này. Dự án có thể đã được gỡ hoặc địa chỉ đã thay đổi — bạn có thể xem toàn bộ danh mục dự án."
+msgstr "Dieses Projekt wurde nicht gefunden. Es wurde möglicherweise entfernt oder die Adresse hat sich geändert — Sie können die gesamte Projektübersicht ansehen."
+
+#: wp-content/themes/vgarco/404.php wp-content/themes/vgarco/inc/seo.php
+msgid "Không tìm thấy trang"
+msgstr "Seite nicht gefunden"
+
+#: wp-content/themes/vgarco/404.php
+msgid "Không tìm thấy trang này"
+msgstr "Diese Seite wurde nicht gefunden"
+
+#: wp-content/themes/vgarco/templates/apply.php
+msgid "Không tìm thấy vị trí"
+msgstr "Stelle nicht gefunden"
+
+#: wp-content/themes/vgarco/inc/template-tags.php
+msgid "Không tìm thấy vị trí này. Vị trí có thể đã ngừng nhận hồ sơ — bạn có thể xem các vị trí đang mở."
+msgstr "Diese Stelle wurde nicht gefunden. Möglicherweise werden keine Bewerbungen mehr entgegengenommen — hier sehen Sie die offenen Stellen."
+
+#: wp-content/themes/vgarco/templates/about.php
+msgid "Khởi đầu với 3SEVEN"
+msgstr "Der Anfang mit 3SEVEN"
+
+#: wp-content/themes/vgarco/templates/departments.php
+msgid "Kiểm soát khối lượng, logic chi phí và tính khả thi của phương án."
+msgstr "Mengen, Kostenlogik und Machbarkeit der Lösung überprüfen."
+
+#: wp-content/themes/vgarco/templates/departments.php
+msgid "Kiến trúc"
+msgstr "Architektur"
+
+#: wp-content/themes/vgarco/front-page.php
+msgid "Kiến trúc bắt đầu từ một tầm nhìn"
+msgstr "Architektur beginnt mit einer Vision"
+
+#: wp-content/themes/vgarco/front-page.php
+msgid "Kiến trúc, kết cấu và kỹ thuật được kết nối trong cùng một quy trình làm việc."
+msgstr "Architektur, Tragwerk und Technik werden in einem gemeinsamen Prozess koordiniert."
+
+#: wp-content/themes/vgarco/templates/about.php
+msgid ""
+"Kiến trúc. Kỹ thuật.\n"
+"Một tư duy xuyên suốt."
+msgstr ""
+"Architektur. Technik.\n"
+"Ein gemeinsamer Ansatz."
+
+#: wp-content/themes/vgarco/templates/departments.php
+msgid "Kinh tế xây dựng"
+msgstr "Bauwirtschaft"
+
+#: wp-content/themes/vgarco/templates/departments.php
+msgid "Kỹ thuật"
+msgstr "Technik"
+
+#: wp-content/themes/vgarco/templates/about.php
+msgid "Lào"
+msgstr "Laos"
+
+#: wp-content/themes/vgarco/inc/menus.php wp-content/themes/vgarco/inc/template-tags.php wp-content/themes/vgarco/templates/contact.php
+msgid "Liên hệ"
+msgstr "Kontakt"
+
+#: wp-content/themes/vgarco/front-page.php wp-content/themes/vgarco/inc/template-tags.php
+msgid "Liên hệ VGARCO"
+msgstr "VGARCO kontaktieren"
+
+#: wp-content/themes/vgarco/inc/menus.php wp-content/themes/vgarco/templates/services.php
+msgid "Lĩnh vực hoạt động"
+msgstr "Leistungen"
+
+#: wp-content/themes/vgarco/templates/contact.php
+msgid "Loại công trình, địa điểm, nhu cầu tư vấn…"
+msgstr "Gebäudetyp, Standort, Beratungsbedarf …"
+
+#: wp-content/themes/vgarco/single-vi_tri.php
+msgid "Loại hình"
+msgstr "Beschäftigungsart"
+
+#: wp-content/themes/vgarco/templates/apply.php
+msgid "Mã bảo mật"
+msgstr "Sicherheitscode"
+
+#: wp-content/themes/vgarco/templates/apply.php
+msgid "Mã bảo mật chưa đúng. Chúng tôi đã tạo mã mới, dữ liệu của bạn được giữ nguyên."
+msgstr "Der Sicherheitscode ist nicht korrekt. Wir haben einen neuen Code erzeugt; Ihre Eingaben bleiben erhalten."
+
+#: wp-content/themes/vgarco/templates/apply.php
+msgid "Mã bảo mật gồm 5 ký tự"
+msgstr "Der Sicherheitscode besteht aus 5 Zeichen"
+
+#: wp-content/themes/vgarco/templates/about.php
+msgid "Mang tên VGARCO"
+msgstr "Der neue Name: VGARCO"
+
+#: wp-content/themes/vgarco/front-page.php
+msgid "Mọi phương án bắt đầu từ nhu cầu sử dụng, điều kiện địa điểm và nguồn lực thực tế."
+msgstr "Jeder Entwurf beginnt mit der Nutzung, den Bedingungen des Ortes und den tatsächlich verfügbaren Ressourcen."
+
+#: wp-content/themes/vgarco/templates/about.php
+msgid ""
+"Mỗi bối cảnh khác nhau.\n"
+"<em>Cùng một sự tận tâm.</em>"
+msgstr ""
+"Jeder Kontext ist anders.\n"
+"<em>Unser Engagement bleibt.</em>"
+
+#: wp-content/themes/vgarco/front-page.php
+msgid ""
+"Mỗi công trình,\n"
+"một <em>dấu ấn.</em>"
+msgstr ""
+"Jedes Bauwerk,\n"
+"eine eigene <em>Handschrift.</em>"
+
+#: wp-content/themes/vgarco/front-page.php
+msgid ""
+"Mỗi dự án là một lời giải riêng\n"
+"cho bối cảnh, công năng và con người."
+msgstr ""
+"Jedes Projekt ist eine eigene Antwort\n"
+"auf Kontext, Nutzung und Menschen."
+
+#: wp-content/themes/vgarco/single-du_an.php
+msgid "Một công trình trong hồ sơ VGARCO"
+msgstr "Ein Bauwerk aus dem VGARCO-Portfolio"
+
+#: wp-content/themes/vgarco/templates/contact.php
+msgid ""
+"Một cuộc\n"
+"trò chuyện.\n"
+"<em>Một khởi đầu.</em>"
+msgstr ""
+"Ein\n"
+"Gespräch.\n"
+"<em>Ein Anfang.</em>"
+
+#: wp-content/themes/vgarco/templates/about.php
+msgid ""
+"Một nền tảng.\n"
+"<em>Nhiều dấu mốc.</em>"
+msgstr ""
+"Ein Fundament.\n"
+"<em>Viele Meilensteine.</em>"
+
+#: wp-content/themes/vgarco/header.php
+msgid "Mở menu"
+msgstr "Menü öffnen"
+
+#: wp-content/themes/vgarco/templates/contact.php
+msgid "Mở ở thẻ mới"
+msgstr "In neuem Tab öffnen"
+
+#: wp-content/themes/vgarco/templates/contact.php
+msgid "Mở ứng dụng email với nội dung bạn đã nhập. Bạn xem lại và gửi email tại đó."
+msgstr "Öffnet Ihr E-Mail-Programm mit Ihren Angaben. Dort können Sie die Nachricht prüfen und versenden."
+
+#: wp-content/themes/vgarco/templates/about.php
+msgid "Năm khởi đầu"
+msgstr "Gründungsjahr"
+
+#: wp-content/themes/vgarco/front-page.php
+msgid "Năng lực thực thi"
+msgstr "Umsetzungskompetenz"
+
+#: wp-content/themes/vgarco/templates/contact.php
+#, php-format
+msgid "Nếu ứng dụng email không mở, hãy gửi nội dung dưới đây tới <a href=\"mailto:%1$s\">%1$s</a>."
+msgstr "Falls sich Ihre E-Mail-App nicht öffnet, senden Sie den folgenden Text an <a href=\"mailto:%1$s\">%1$s</a>."
+
+#: wp-content/themes/vgarco/inc/template-tags.php
+msgid "Ngôn ngữ"
+msgstr "Sprache"
+
+#: wp-content/themes/vgarco/templates/leadership.php
+msgid "Nguyên tắc làm việc"
+msgstr "Arbeitsprinzipien"
+
+#: wp-content/themes/vgarco/templates/apply.php
+msgid "Nhấn để chọn và tải lên CV của bạn"
+msgstr "Klicken, um Ihren Lebenslauf auszuwählen und hochzuladen"
+
+#: wp-content/themes/vgarco/template-parts/layout/search-dialog.php
+msgid "Nhập ít nhất 3 ký tự để tìm trong các dự án đang trưng bày."
+msgstr "Geben Sie mindestens 3 Zeichen ein, um die hier gezeigten Projekte zu durchsuchen."
+
+#: wp-content/themes/vgarco/templates/apply.php
+msgid "Nhập mã trong ảnh bên dưới"
+msgstr "Geben Sie den Code aus dem Bild unten ein"
+
+#: wp-content/themes/vgarco/template-parts/layout/search-dialog.php
+msgid "Nhập tên, địa điểm hoặc lĩnh vực"
+msgstr "Name, Standort oder Kategorie eingeben"
+
+#: wp-content/themes/vgarco/templates/departments.php
+msgid ""
+"Nhiều chuyên môn.\n"
+"<em>Một giải pháp thống nhất.</em>"
+msgstr ""
+"Viele Fachgebiete.\n"
+"<em>Eine gemeinsame Lösung.</em>"
+
+#: wp-content/themes/vgarco/templates/leadership.php
+msgid "Nhìn tổng thể"
+msgstr "Das Ganze im Blick"
+
+#: wp-content/themes/vgarco/templates/about.php
+msgid ""
+"Nhìn tổng thể.\n"
+"<em>Làm đến chi tiết.</em>"
+msgstr ""
+"Das Ganze sehen.\n"
+"<em>Bis ins Detail planen.</em>"
+
+#: wp-content/themes/vgarco/templates/about.php
+msgid "Những bối cảnh văn hóa và kỹ thuật khác nhau mở rộng cách nhìn của chúng tôi về kiến trúc và xây dựng."
+msgstr "Unterschiedliche kulturelle und technische Rahmenbedingungen erweitern unseren Blick auf Architektur und Bauen."
+
+#: wp-content/themes/vgarco/front-page.php
+msgid ""
+"Những công trình\n"
+"mang <em>dấu ấn riêng.</em>"
+msgstr ""
+"Bauwerke\n"
+"mit <em>eigener Handschrift.</em>"
+
+#: wp-content/themes/vgarco/front-page.php
+msgid "Những đơn vị đã cùng VGARCO phối hợp trong quá trình tư vấn, thiết kế và triển khai dự án."
+msgstr "Ausgewählte Organisationen, mit denen VGARCO bei Beratung, Planung und Projektumsetzung zusammenarbeitet."
+
+#: wp-content/themes/vgarco/templates/services.php
+msgid "Nội dung đang được cập nhật."
+msgstr "Der Inhalt wird gerade aktualisiert."
+
+#: wp-content/themes/vgarco/templates/contact.php
+msgid "Nội dung email soạn sẵn"
+msgstr "Vorbereiteter E-Mail-Text"
+
+#: wp-content/themes/vgarco/templates/contact.php
+msgid "Nội dung trao đổi"
+msgstr "Ihre Nachricht"
+
+#: wp-content/themes/vgarco/templates/apply.php
+msgid "Nộp đơn ứng tuyển"
+msgstr "Bewerbung absenden"
+
+#: wp-content/themes/vgarco/templates/apply.php
+msgid "PDF, DOC, DOCX · tối đa 10 MB"
+msgstr "PDF, DOC, DOCX · max. 10 MB"
+
+#: wp-content/themes/vgarco/single-du_an.php
+msgid "Phạm vi tham gia"
+msgstr "Leistungsumfang"
+
+#: wp-content/themes/vgarco/inc/template-tags.php
+msgid "Phân trang"
+msgstr "Seitennavigation"
+
+#: wp-content/themes/vgarco/inc/menus.php wp-content/themes/vgarco/single-vi_tri.php wp-content/themes/vgarco/templates/apply.php wp-content/themes/vgarco/templates/careers.php wp-content/themes/vgarco/templates/departments.php
+msgid "Phòng ban"
+msgstr "Abteilungen"
+
+#: wp-content/themes/vgarco/template-parts/catalogue.php
+msgid "Phối cảnh"
+msgstr "Visualisierung"
+
+#: wp-content/themes/vgarco/inc/models.php
+msgid "Phối cảnh thiết kế"
+msgstr "Architekturvisualisierung"
+
+#: wp-content/themes/vgarco/templates/leadership.php
+msgid "Phối hợp chuyên môn"
+msgstr "Fachübergreifende Abstimmung"
+
+#: wp-content/themes/vgarco/templates/departments.php
+msgid "Phối hợp hệ thống điện, thông gió và các yêu cầu kỹ thuật trong công trình."
+msgstr "Elektro-, Lüftungs- und weitere technische Anforderungen im Bauwerk aufeinander abstimmen."
+
+#: wp-content/themes/vgarco/templates/about.php
+msgid "Phối hợp kiến trúc, kết cấu và các bộ môn kỹ thuật trong một giải pháp thống nhất."
+msgstr "Wir führen Architektur, Tragwerksplanung und technische Fachplanungen zu einer stimmigen Gesamtlösung zusammen."
+
+#: wp-content/themes/vgarco/front-page.php
+msgid "Phối hợp xuyên suốt"
+msgstr "Durchgängig koordinieren"
+
+#: wp-content/themes/vgarco/inc/seo.php wp-content/themes/vgarco/single-vi_tri.php
+msgid "Quyền lợi"
+msgstr "Das bieten wir"
+
+#: wp-content/themes/vgarco/templates/leadership.php
+msgid "Quyết định rõ ràng"
+msgstr "Klare Entscheidungen"
+
+#: wp-content/themes/vgarco/single-tin_tuc.php
+msgid "Sao chép liên kết"
+msgstr "Link kopieren"
+
+#: wp-content/themes/vgarco/templates/contact.php
+msgid "Sao chép nội dung"
+msgstr "Text kopieren"
+
+#: wp-content/themes/vgarco/templates/contact.php
+msgid "Soạn email tư vấn"
+msgstr "Beratungsanfrage als E-Mail öffnen"
+
+#: wp-content/themes/vgarco/templates/apply.php wp-content/themes/vgarco/templates/contact.php
+msgid "Số điện thoại"
+msgstr "Telefonnummer"
+
+#: wp-content/themes/vgarco/templates/apply.php
+msgid "Số điện thoại chưa đúng (8–15 chữ số)."
+msgstr "Die Telefonnummer ist ungültig (8–15 Ziffern)."
+
+#: wp-content/themes/vgarco/templates/contact.php
+msgid "Số điện thoại liên hệ"
+msgstr "Ihre Telefonnummer"
+
+#: wp-content/themes/vgarco/templates/about.php
+msgid "Sự ghi nhận"
+msgstr "Anerkennung"
+
+#: wp-content/themes/vgarco/front-page.php
+msgid "Tạm dừng chuyển động"
+msgstr "Animation pausieren"
+
+#: wp-content/themes/vgarco/templates/apply.php
+msgid "Tạo mã bảo mật mới"
+msgstr "Neuen Sicherheitscode erzeugen"
+
+#: wp-content/themes/vgarco/template-parts/news-archive.php
+msgid "Tất cả"
+msgstr "Alle"
+
+#: wp-content/themes/vgarco/inc/models.php
+msgid "Tất cả dự án"
+msgstr "Alle Projekte"
+
+#: wp-content/themes/vgarco/templates/careers.php
+msgid "Tất cả địa điểm"
+msgstr "Alle Standorte"
+
+#: wp-content/themes/vgarco/templates/careers.php
+msgid "Tất cả phòng ban"
+msgstr "Alle Abteilungen"
+
+#: wp-content/themes/vgarco/templates/contact.php
+msgid "Tên của bạn"
+msgstr "Ihr Name"
+
+#: wp-content/themes/vgarco/templates/apply.php
+msgid "Tệp CV không hợp lệ hoặc bị hỏng. Hãy xuất lại thành PDF rồi thử lại."
+msgstr "Die Lebenslaufdatei ist ungültig oder beschädigt. Bitte exportieren Sie sie erneut als PDF und versuchen Sie es noch einmal."
+
+#: wp-content/themes/vgarco/templates/about.php
+msgid "Tham gia thiết kế cải tạo Bảo tàng Lịch sử Quân đội nhân dân Lào, giai đoạn 1 và 2."
+msgstr "Mitwirkung an der Sanierungsplanung des Geschichtsmuseums der Laotischen Volksarmee in zwei Bauabschnitten."
+
+#: wp-content/themes/vgarco/templates/about.php
+msgid "Tham gia thiết kế Học viện Kỹ thuật và Công nghệ An ninh tại Hòa Lạc."
+msgstr "Mitwirkung an der Planung der Akademie für Sicherheitstechnik und -technologie in Hòa Lạc."
+
+#: wp-content/themes/vgarco/templates/about.php
+msgid "Thành lập Công ty TNHH Tư vấn Xây dựng 3SEVEN, đặt nền tảng cho hành trình hôm nay."
+msgstr "Die Gründung des Bauberatungsunternehmens 3SEVEN legt den Grundstein für unseren heutigen Weg."
+
+#: wp-content/themes/vgarco/templates/about.php
+msgid "Thấu hiểu bối cảnh"
+msgstr "Den Kontext verstehen"
+
+#: wp-content/themes/vgarco/front-page.php wp-content/themes/vgarco/templates/leadership.php
+msgid "Theo sát thực tế"
+msgstr "Praxisnah begleiten"
+
+#: wp-content/themes/vgarco/templates/about.php
+msgid "Theo sát triển khai"
+msgstr "Die Umsetzung begleiten"
+
+#: wp-content/themes/vgarco/templates/departments.php
+msgid "Thiết kế"
+msgstr "Entwurf"
+
+#: wp-content/themes/vgarco/front-page.php
+msgid ""
+"Thiết kế tốt bắt đầu\n"
+"từ việc <em>thấu hiểu.</em>"
+msgstr ""
+"Gute Planung beginnt\n"
+"mit <em>Verstehen.</em>"
+
+#: wp-content/themes/vgarco/single-du_an.php
+msgid "Thông tin dự án"
+msgstr "Projektinformationen"
+
+#: wp-content/themes/vgarco/inc/models.php
+msgid "Thời gian"
+msgstr "Zeitraum"
+
+#: wp-content/themes/vgarco/templates/careers.php
+msgid "Thử từ khóa khác hoặc bỏ bớt điều kiện lọc."
+msgstr "Versuchen Sie andere Suchbegriffe oder entfernen Sie einzelne Filter."
+
+#: wp-content/themes/vgarco/templates/departments.php
+msgid "Tích hợp hệ thống cấp nước, thoát nước và yêu cầu vận hành ngay từ thiết kế."
+msgstr "Wasserversorgung, Entwässerung und Betriebsanforderungen bereits im Entwurf integrieren."
+
+#: wp-content/themes/vgarco/templates/about.php
+msgid "Tiếp nối hành trình"
+msgstr "Unser Weg geht weiter"
+
+#: wp-content/themes/vgarco/front-page.php
+msgid "Tiếp tục chuyển động"
+msgstr "Animation fortsetzen"
+
+#: wp-content/themes/vgarco/templates/careers.php
+msgid "Tìm kiếm"
+msgstr "Suche"
+
+#: wp-content/themes/vgarco/header.php wp-content/themes/vgarco/template-parts/layout/search-dialog.php
+msgid "Tìm kiếm dự án"
+msgstr "Projekte suchen"
+
+#: wp-content/themes/vgarco/templates/careers.php
+msgid "Tìm kiếm vị trí tuyển dụng"
+msgstr "Stellensuche"
+
+#: wp-content/themes/vgarco/templates/careers.php
+msgid "Tìm kiếm vị trí, từ khóa…"
+msgstr "Position oder Suchbegriff …"
+
+#: wp-content/themes/vgarco/templates/careers.php
+msgid "Tìm vị trí phù hợp"
+msgstr "Die passende Stelle finden"
+
+#: wp-content/themes/vgarco/inc/menus.php wp-content/themes/vgarco/inc/seo.php wp-content/themes/vgarco/inc/template-tags.php wp-content/themes/vgarco/single-tin_tuc.php wp-content/themes/vgarco/template-parts/news-archive.php
+msgid "Tin tức"
+msgstr "Aktuelles"
+
+#: wp-content/themes/vgarco/front-page.php wp-content/themes/vgarco/template-parts/news-archive.php
+msgid "Tin tức & hoạt động"
+msgstr "Aktuelles & Veranstaltungen"
+
+#: wp-content/themes/vgarco/inc/menus.php
+msgid "TIN TỨC & HOẠT ĐỘNG"
+msgstr "AKTUELLES & VERANSTALTUNGEN"
+
+#: wp-content/themes/vgarco/single-vi_tri.php
+msgid "Tóm tắt vị trí"
+msgstr "Stellenübersicht"
+
+#: wp-content/themes/vgarco/templates/departments.php
+msgid "Tổ chức tiếp cận, mặt bằng ngoài nhà và các kết nối kỹ thuật của khu đất."
+msgstr "Erschließung, Außenanlagen und technische Anschlüsse des Grundstücks organisieren."
+
+#. translators: %s: liên kết tới chính sách bảo vệ dữ liệu
+#: wp-content/themes/vgarco/templates/apply.php
+#, php-format
+msgid "Tôi đồng ý để VGARCO lưu và xử lý hồ sơ này cho mục đích tuyển dụng trong 12 tháng, theo %s."
+msgstr "Ich willige ein, dass VGARCO diese Bewerbung zu Recruiting-Zwecken 12 Monate lang speichert und verarbeitet, gemäß %s."
+
+#: wp-content/themes/vgarco/templates/contact.php
+msgid "Tôi đồng ý sử dụng thông tin trên để VGARCO liên hệ tư vấn."
+msgstr "Ich stimme zu, dass VGARCO die angegebenen Daten verwendet, um mich zur Beratung zu kontaktieren."
+
+#: wp-content/themes/vgarco/templates/careers.php
+msgid "Tra cứu theo tên vị trí, địa điểm và phòng ban."
+msgstr "Suchen Sie nach Position, Standort und Abteilung."
+
+#: wp-content/themes/vgarco/404.php wp-content/themes/vgarco/page.php wp-content/themes/vgarco/single-du_an.php wp-content/themes/vgarco/single-tin_tuc.php wp-content/themes/vgarco/single-vi_tri.php wp-content/themes/vgarco/template-parts/catalogue.php wp-content/themes/vgarco/template-parts/news-archive.php wp-content/themes/vgarco/templates/about.php wp-content/themes/vgarco/templates/apply.php wp-content/themes/vgarco/templates/careers.php wp-content/themes/vgarco/templates/contact.php wp-content/themes/vgarco/templates/departments.php wp-content/themes/vgarco/templates/leadership.php wp-content/themes/vgarco/templates/services.php
+msgid "Trang chủ"
+msgstr "Startseite"
+
+#: wp-content/themes/vgarco/inc/template-tags.php
+msgid "Trang sau"
+msgstr "Nächste Seite"
+
+#: wp-content/themes/vgarco/inc/template-tags.php
+msgid "Trang trước"
+msgstr "Vorherige Seite"
+
+#: wp-content/themes/vgarco/front-page.php
+msgid "Trao đổi với chúng tôi"
+msgstr "Sprechen Sie mit uns"
+
+#: wp-content/themes/vgarco/templates/departments.php
+msgid "Triển khai"
+msgstr "Umsetzung"
+
+#: wp-content/themes/vgarco/template-parts/project-gallery.php
+msgid "trình chiếu"
+msgstr "Diashow"
+
+#: wp-content/themes/vgarco/template-parts/project-gallery.php
+msgid "Trình chiếu hình ảnh dự án"
+msgstr "Diashow der Projektbilder"
+
+#: wp-content/themes/vgarco/templates/leadership.php
+msgid "Trọng tâm điều hành"
+msgstr "Führungsschwerpunkt"
+
+#: wp-content/themes/vgarco/inc/menus.php wp-content/themes/vgarco/inc/seo.php wp-content/themes/vgarco/inc/template-tags.php wp-content/themes/vgarco/single-vi_tri.php wp-content/themes/vgarco/templates/apply.php wp-content/themes/vgarco/templates/careers.php
+msgid "Tuyển dụng"
+msgstr "Karriere"
+
+#: wp-content/themes/vgarco/front-page.php
+msgid "Từ bản vẽ"
+msgstr "Vom Plan"
+
+#: wp-content/themes/vgarco/front-page.php
+msgid "Từ bản vẽ đến công trình"
+msgstr "Vom Plan zum Bauwerk"
+
+#: wp-content/themes/vgarco/single-du_an.php
+msgid ""
+"Từ bối cảnh,\n"
+"<em>đến một giải pháp riêng.</em>"
+msgstr ""
+"Vom Kontext\n"
+"<em>zur eigenen Lösung.</em>"
+
+#: wp-content/themes/vgarco/templates/about.php
+msgid "Từ công trình giáo dục, văn hóa đến hạ tầng và nhà ở, kinh nghiệm của chúng tôi được bồi đắp qua các dự án tại Việt Nam, Lào và Đức."
+msgstr "Unsere Erfahrung wächst mit Projekten in Vietnam, Laos und Deutschland – von Bildungs- und Kulturbauten bis zu Infrastruktur und Wohngebäuden."
+
+#: wp-content/themes/vgarco/front-page.php
+msgid "Tư duy kiến trúc"
+msgstr "Architektonisches Denken"
+
+#: wp-content/themes/vgarco/front-page.php wp-content/themes/vgarco/templates/services.php
+msgid ""
+"Tư duy tổng thể.\n"
+"<em>Chăm chút từng chi tiết.</em>"
+msgstr ""
+"Das Ganze im Blick.\n"
+"<em>Sorgfalt bis ins Detail.</em>"
+
+#: wp-content/themes/vgarco/front-page.php
+msgid "Từ khảo sát ban đầu đến hồ sơ kỹ thuật và công trường, mỗi bộ môn được điều phối trong cùng một logic thiết kế."
+msgstr "Von der ersten Bestandsaufnahme über die Fachplanung bis zur Baustelle werden alle Disziplinen in einer gemeinsamen Entwurfslogik koordiniert."
+
+#: wp-content/themes/vgarco/front-page.php
+msgid "Từ năm 2013, VGARCO kết nối kiến trúc và kỹ thuật trong các dự án tại Việt Nam, Lào và CHLB Đức."
+msgstr "Seit 2013 verbindet VGARCO Architektur und Technik in Projekten in Vietnam, Laos und Deutschland."
+
+#: wp-content/themes/vgarco/templates/about.php
+msgid ""
+"Từ những ý tưởng.\n"
+"<em>Đến giá trị dài lâu.</em>"
+msgstr ""
+"Von ersten Ideen.\n"
+"<em>Zu bleibendem Wert.</em>"
+
+#: wp-content/themes/vgarco/footer.php
+msgid ""
+"Tư vấn thiết kế, giám sát\n"
+"và quản lý dự án xây dựng."
+msgstr ""
+"Planung, Bauüberwachung\n"
+"und Projektmanagement im Bauwesen."
+
+#: wp-content/themes/vgarco/inc/seo.php
+msgid "Tư vấn thiết kế, giám sát và quản lý dự án xây dựng"
+msgstr "Planung, Bauüberwachung und Projektmanagement im Bauwesen"
+
+#: wp-content/themes/vgarco/inc/seo.php
+msgid "Tư vấn thiết kế, giám sát và quản lý dự án xây dựng: công trình ngoại giao, quân sự, giáo dục, văn hóa, y tế và hạ tầng tại Việt Nam, Lào và CHLB Đức."
+msgstr "Planung, Bauüberwachung und Projektmanagement für Bauten aus Diplomatie, Militär, Bildung, Kultur, Gesundheit und Infrastruktur in Vietnam, Laos und Deutschland."
+
+#: wp-content/themes/vgarco/footer.php wp-content/themes/vgarco/header.php
+msgid "TƯ VẤN XÂY DỰNG"
+msgstr "BAUBERATUNG"
+
+#: wp-content/themes/vgarco/templates/about.php
+msgid ""
+"Từ Việt Nam.\n"
+"<em>Vươn ra thế giới.</em>"
+msgstr ""
+"Aus Vietnam.\n"
+"<em>In die Welt.</em>"
+
+#: wp-content/themes/vgarco/templates/leadership.php
+msgid "Từ ý tưởng đến triển khai, mỗi quyết định cần giữ được logic thiết kế, tính khả thi kỹ thuật và mục tiêu sử dụng của công trình."
+msgstr "Von der Idee bis zur Umsetzung muss jede Entscheidung die Entwurfslogik, die technische Machbarkeit und den Nutzungszweck des Bauwerks wahren."
+
+#: wp-content/themes/vgarco/templates/about.php
+msgid "Từng bước phát triển, qua những công trình và những lần cộng tác."
+msgstr "Schritt für Schritt gewachsen – durch gemeinsame Projekte und Zusammenarbeit."
+
+#: wp-content/themes/vgarco/template-parts/project-gallery.php
+msgid ""
+"Từng góc nhìn.\n"
+"<em>Một câu chuyện.</em>"
+msgstr ""
+"Jede Perspektive.\n"
+"<em>Eine Geschichte.</em>"
+
+#: wp-content/themes/vgarco/templates/apply.php
+msgid "Ứng tuyển"
+msgstr "Bewerben"
+
+#: wp-content/themes/vgarco/single-vi_tri.php
+msgid "Ứng tuyển ngay"
+msgstr "Jetzt bewerben"
+
+#: wp-content/themes/vgarco/templates/apply.php
+msgid "Ứng tuyển vị trí"
+msgstr "Auf die Stelle bewerben"
+
+#: wp-content/themes/vgarco/templates/leadership.php
+msgid "Ưu tiên giải pháp có logic, có cơ sở và có khả năng triển khai."
+msgstr "Lösungen bevorzugen, die schlüssig, begründet und umsetzbar sind."
+
+#: wp-content/themes/vgarco/inc/models.php
+msgid "Vai trò VGARCO"
+msgstr "Leistungen von VGARCO"
+
+#: wp-content/themes/vgarco/footer.php
+msgid "VĂN PHÒNG"
+msgstr "BÜRO"
+
+#: wp-content/themes/vgarco/front-page.php wp-content/themes/vgarco/inc/menus.php wp-content/themes/vgarco/templates/about.php
+msgid "Về công ty"
+msgstr "Unternehmen"
+
+#: wp-content/themes/vgarco/templates/about.php
+msgid "Về công ty / Est. 2013"
+msgstr "Über uns / Seit 2013"
+
+#: wp-content/themes/vgarco/footer.php
+msgid "Về đầu trang"
+msgstr "Nach oben"
+
+#: wp-content/themes/vgarco/404.php
+msgid "Về trang chủ"
+msgstr "Zur Startseite"
+
+#: wp-content/themes/vgarco/front-page.php
+msgid "Về VGARCO"
+msgstr "Über VGARCO"
+
+#: wp-content/themes/vgarco/footer.php wp-content/themes/vgarco/header.php
+msgid "VGARCO — Trang chủ"
+msgstr "VGARCO — Startseite"
+
+#: wp-content/themes/vgarco/templates/about.php
+msgid "VGARCO — Tư vấn thiết kế & xây dựng"
+msgstr "VGARCO — Architektur- und Bauberatung"
+
+#: wp-content/themes/vgarco/templates/careers.php
+msgid "VGARCO / People & Practice"
+msgstr "VGARCO / Menschen & Praxis"
+
+#: wp-content/themes/vgarco/templates/about.php
+msgid "VGARCO qua những con số"
+msgstr "VGARCO in Zahlen"
+
+#: wp-content/themes/vgarco/templates/departments.php
+msgid "VGARCO tổ chức công việc theo mô hình phối hợp đa chuyên môn. Mỗi bộ môn giữ một vai trò riêng nhưng cùng tham gia vào một dòng thông tin thống nhất từ ý tưởng đến triển khai."
+msgstr "VGARCO organisiert die Arbeit im Modell der fachübergreifenden Zusammenarbeit. Jede Fachdisziplin hat ihre eigene Rolle, alle arbeiten jedoch vom Entwurf bis zur Umsetzung mit einem gemeinsamen Informationsfluss."
+
+#: wp-content/themes/vgarco/template-parts/layout/search-dialog.php
+msgid "Ví dụ: bảo tàng, trường học…"
+msgstr "Zum Beispiel: Museum, Schule …"
+
+#: wp-content/themes/vgarco/templates/careers.php
+msgid "vị trí"
+msgid_plural "vị trí"
+msgstr[0] "Stelle"
+msgstr[1] "Stellen"
+
+#: wp-content/themes/vgarco/single-vi_tri.php wp-content/themes/vgarco/templates/careers.php
+msgid "Vị trí"
+msgstr "Position"
+
+#: wp-content/themes/vgarco/templates/apply.php
+msgid "Vị trí đang ứng tuyển"
+msgstr "Stelle, auf die Sie sich bewerben"
+
+#: wp-content/themes/vgarco/templates/apply.php
+msgid "Vị trí này đã ngừng nhận hồ sơ"
+msgstr "Für diese Stelle werden keine Bewerbungen mehr angenommen"
+
+#: wp-content/themes/vgarco/templates/apply.php
+msgid "Vị trí này đã ngừng nhận hồ sơ."
+msgstr "Für diese Stelle werden keine Bewerbungen mehr angenommen."
+
+#: wp-content/themes/vgarco/templates/careers.php
+msgid "Vị trí tuyển dụng"
+msgstr "Offene Stellen"
+
+#: wp-content/themes/vgarco/templates/about.php
+msgid "Viêng Chăn, Lào"
+msgstr "Vientiane, Laos"
+
+#: wp-content/themes/vgarco/templates/about.php
+msgid "Việt Nam"
+msgstr "Vietnam"
+
+#: wp-content/themes/vgarco/footer.php
+msgid "VIỆT NAM · LÀO · CHLB ĐỨC"
+msgstr "VIETNAM · LAOS · DEUTSCHLAND"
+
+#: wp-content/themes/vgarco/templates/apply.php
+msgid "Vui lòng chọn tệp CV."
+msgstr "Bitte wählen Sie eine Lebenslaufdatei aus."
+
+#: wp-content/themes/vgarco/templates/contact.php
+msgid "Vui lòng đồng ý để chúng tôi liên hệ tư vấn."
+msgstr "Bitte stimmen Sie zu, damit wir Sie beraten dürfen."
+
+#: wp-content/themes/vgarco/templates/apply.php
+msgid "Vui lòng đồng ý để chúng tôi xử lý hồ sơ."
+msgstr "Bitte stimmen Sie zu, damit wir Ihre Bewerbung verarbeiten dürfen."
+
+#: wp-content/themes/vgarco/templates/apply.php wp-content/themes/vgarco/templates/contact.php
+msgid "Vui lòng nhập trường này."
+msgstr "Bitte füllen Sie dieses Feld aus."
+
+#: wp-content/themes/vgarco/templates/departments.php
+msgid "Xây dựng dân dụng"
+msgstr "Hochbau"
+
+#: wp-content/themes/vgarco/template-parts/project-gallery.php
+#, php-format
+msgid "Xem ảnh %d"
+msgstr "Bild %d ansehen"
+
+#: wp-content/themes/vgarco/template-parts/project-gallery.php
+msgid "Xem ảnh lớn"
+msgstr "Bild vergrößern"
+
+#: wp-content/themes/vgarco/templates/apply.php
+msgid "Xem các vị trí đang tuyển"
+msgstr "Offene Stellen ansehen"
+
+#: wp-content/themes/vgarco/templates/careers.php
+msgid "Xem chi tiết"
+msgstr "Details ansehen"
+
+#. translators: %s: tên vị trí
+#: wp-content/themes/vgarco/templates/careers.php
+#, php-format
+msgid "Xem chi tiết: %s"
+msgstr "Details ansehen: %s"
+
+#: wp-content/themes/vgarco/templates/apply.php
+msgid "Xem lại mô tả công việc"
+msgstr "Stellenbeschreibung erneut ansehen"
+
+#: wp-content/themes/vgarco/template-parts/catalogue.php
+msgid "Xem phối cảnh thiết kế hoặc công trình thực tế"
+msgstr "Entwurfsvisualisierung oder fertiges Bauwerk ansehen"
+
+#: wp-content/themes/vgarco/inc/template-tags.php wp-content/themes/vgarco/template-parts/catalogue.php
+msgid "Xem tất cả dự án"
+msgstr "Alle Projekte ansehen"
+
+#: wp-content/themes/vgarco/templates/careers.php
+msgid "Xem tất cả vị trí"
+msgstr "Alle Stellen ansehen"
+
+#: wp-content/themes/vgarco/inc/template-tags.php
+msgid "Xem tin tức"
+msgstr "Aktuelles ansehen"
+
+#: wp-content/themes/vgarco/front-page.php
+msgid "Xem toàn bộ dự án"
+msgstr "Alle Projekte ansehen"
+
+#: wp-content/themes/vgarco/templates/about.php
+msgid "Xem tư liệu ghi nhận"
+msgstr "Auszeichnung ansehen"
+
+#: wp-content/themes/vgarco/inc/template-tags.php
+msgid "Xem vị trí đang tuyển"
+msgstr "Offene Stellen ansehen"
+
+#: wp-content/themes/vgarco/templates/careers.php
+msgid "Xóa bộ lọc"
+msgstr "Filter zurücksetzen"
+
+#: wp-content/themes/vgarco/templates/departments.php
+msgid "Ý tưởng không gian, công năng, hình thức và trải nghiệm sử dụng."
+msgstr "Ideen für Raum, Funktion, Form und Nutzungserlebnis."
+
+#: wp-content/themes/vgarco/inc/seo.php wp-content/themes/vgarco/single-vi_tri.php
+msgid "Yêu cầu"
+msgstr "Anforderungen"
+
+#: wp-content/themes/vgarco/templates/contact.php
+#, php-format
+msgid "Yêu cầu tư vấn – %s"
+msgstr "Beratungsanfrage – %s"
+
+#: wp-content/themes/vgarco/footer.php
+msgid "Zalo · Facebook đang cập nhật"
+msgstr "Zalo · Facebook werden aktualisiert"

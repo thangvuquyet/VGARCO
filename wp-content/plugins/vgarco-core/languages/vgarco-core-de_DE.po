@@ -1,0 +1,95 @@
+# VGARCO Core — tiếng Đức (de_DE).
+# Bản NHÁP: dịch mồi từ bản thiết kế HTML, chờ đối tác Đức hiệu đính. Mục "fuzzy" chưa được dùng.
+msgid ""
+msgstr ""
+"Project-Id-Version: VGARCO Core\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: de\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Last-Translator: BẢN NHÁP từ bản thiết kế HTML — cần đối tác Đức hiệu đính\n"
+
+#: wp-content/plugins/vgarco-core/inc/careers/apply-wp.php
+msgid "[VGARCO] Hồ sơ ứng tuyển: {vi_tri} — {ten}"
+msgstr ""
+
+#: wp-content/plugins/vgarco-core/inc/careers/jobs.php
+msgid "Bán thời gian"
+msgstr "Teilzeit"
+
+#: wp-content/plugins/vgarco-core/inc/careers/apply-wp.php
+msgid ""
+"Chào {ten},\n"
+"\n"
+"VGARCO đã nhận hồ sơ ứng tuyển vị trí {vi_tri} của bạn. Bộ phận nhân sự sẽ xem hồ sơ và liên hệ nếu có bước tiếp theo.\n"
+"\n"
+"Nếu cần bổ sung thông tin, bạn có thể trả lời trực tiếp email này.\n"
+"\n"
+"Trân trọng,\n"
+"VGARCO"
+msgstr ""
+"Guten Tag {ten},\n"
+"\n"
+"VGARCO hat Ihre Bewerbung für die Stelle {vi_tri} erhalten. Unsere Personalabteilung prüft Ihre Unterlagen und meldet sich bei Ihnen, falls es einen nächsten Schritt gibt.\n"
+"\n"
+"Falls Sie weitere Informationen nachreichen möchten, antworten Sie einfach direkt auf diese E-Mail.\n"
+"\n"
+"Mit freundlichen Grüßen\n"
+"VGARCO"
+
+#: wp-content/plugins/vgarco-core/inc/careers/apply-wp.php
+msgid ""
+"Có hồ sơ ứng tuyển mới.\n"
+"\n"
+"Vị trí: {vi_tri}\n"
+"Họ tên: {ten}\n"
+"Email: {email}\n"
+"Điện thoại: {dien_thoai}\n"
+"Thời điểm: {thoi_diem}\n"
+"Ngôn ngữ: {ngon_ngu}\n"
+"\n"
+"Xem hồ sơ và tải CV (cần đăng nhập): {lien_ket}\n"
+"\n"
+"Bấm \"Trả lời\" để trả lời thẳng ứng viên."
+msgstr ""
+
+#: wp-content/plugins/vgarco-core/inc/helpers.php
+msgid "Dự án trong hồ sơ năng lực"
+msgstr "Projekte im Unternehmensportfolio"
+
+#. translators: 1: ID hồ sơ, 2: tên ứng viên
+#: wp-content/plugins/vgarco-core/inc/careers/apply-wp.php
+#, php-format
+msgid "Hồ sơ #%1$d (%2$s) đã lưu nhưng thư chưa gửi được. Hệ thống sẽ tự thử lại mỗi giờ (tối đa 3 lần)."
+msgstr ""
+
+#. translators: %d: ID hồ sơ
+#: wp-content/plugins/vgarco-core/inc/careers/apply-wp.php
+#, php-format
+msgid "Hồ sơ #%d: thư vẫn chưa gửi được sau 3 lần thử. Cần kiểm tra cấu hình thư (FluentSMTP/Brevo) và liên hệ ứng viên thủ công."
+msgstr ""
+
+#: wp-content/plugins/vgarco-core/inc/helpers.php
+msgid "Năm hình thành và phát triển"
+msgstr "Jahre Unternehmensentwicklung"
+
+#: wp-content/plugins/vgarco-core/inc/helpers.php
+msgid "Nhóm chuyên môn phối hợp"
+msgstr "Koordinierte Fachbereiche"
+
+#: wp-content/plugins/vgarco-core/inc/helpers.php
+msgid "Quốc gia có dự án"
+msgstr "Länder mit Projekten"
+
+#: wp-content/plugins/vgarco-core/inc/careers/jobs.php
+msgid "Thực tập"
+msgstr "Praktikum"
+
+#: wp-content/plugins/vgarco-core/inc/careers/jobs.php
+msgid "Toàn thời gian"
+msgstr "Vollzeit"
+
+#: wp-content/plugins/vgarco-core/inc/careers/apply-wp.php
+msgid "VGARCO đã nhận hồ sơ ứng tuyển của bạn — {vi_tri}"
+msgstr "VGARCO hat Ihre Bewerbung erhalten — {vi_tri}"

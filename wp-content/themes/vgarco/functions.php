@@ -18,3 +18,4 @@ require_once get_theme_file_path( 'inc/models.php' );
 require_once get_theme_file_path( 'inc/content.php' );
 require_once get_theme_file_path( 'inc/menus.php' );
 require_once get_theme_file_path( 'inc/template-tags.php' );
+require_once get_theme_file_path( 'inc/seo.php' );

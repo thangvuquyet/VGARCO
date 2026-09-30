@@ -106,6 +106,7 @@ foreach ( $fx_empty ? array() : json_decode( (string) file_get_contents( __DIR__
 		$row['title'],
 		array(
 			'dia_diem'           => $row['location'],
+			'mo_ta_seo'          => 'museum' === $row['key'] ? 'Mô tả SEO riêng của Bảo tàng Lịch sử Quân đội nhân dân Lào.' : '',
 			'thoi_gian'          => $row['year'],
 			'chu_dau_tu'         => $row['owner'],
 			'doi_tac'            => $row['partner'],
@@ -341,7 +342,10 @@ function get_post_status( $id ) {
 	return isset( $GLOBALS['fx']['posts'][ $id ] ) ? 'publish' : false;
 }
 
-function get_the_title( $id ) {
+function get_the_title( $id = 0 ) {
+	if ( 0 === $id && isset( $GLOBALS['posts'][ $GLOBALS['vg_loop'] ] ) ) {
+		return $GLOBALS['posts'][ $GLOBALS['vg_loop'] ]->title; // trong vòng lặp, như WordPress
+	}
 	return $GLOBALS['fx']['posts'][ $id ]['title'] ?? '';
 }
 

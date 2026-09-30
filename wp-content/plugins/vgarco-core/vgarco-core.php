@@ -19,6 +19,9 @@ define( 'VGARCO_CORE_FILE', __FILE__ );
 define( 'VGARCO_CORE_DIR', plugin_dir_path( __FILE__ ) );
 
 require_once VGARCO_CORE_DIR . 'inc/helpers.php';
+require_once VGARCO_CORE_DIR . 'inc/alerts.php';
+require_once VGARCO_CORE_DIR . 'inc/security-lib.php';
+require_once VGARCO_CORE_DIR . 'inc/cache-lib.php';
 require_once VGARCO_CORE_DIR . 'inc/careers/jobs.php';
 require_once VGARCO_CORE_DIR . 'inc/search-lib.php';
 require_once VGARCO_CORE_DIR . 'inc/careers/captcha.php';
@@ -29,6 +32,8 @@ require_once VGARCO_CORE_DIR . 'inc/post-types.php';
 require_once VGARCO_CORE_DIR . 'inc/careers/apply-wp.php';
 require_once VGARCO_CORE_DIR . 'inc/careers/applications.php';
 require_once VGARCO_CORE_DIR . 'inc/search.php';
+require_once VGARCO_CORE_DIR . 'inc/security.php';
+require_once VGARCO_CORE_DIR . 'inc/cache.php';
 require_once VGARCO_CORE_DIR . 'inc/taxonomies.php';
 require_once VGARCO_CORE_DIR . 'inc/seed.php';
 require_once VGARCO_CORE_DIR . 'inc/fields.php';

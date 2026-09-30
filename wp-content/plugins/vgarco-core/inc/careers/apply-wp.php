@@ -14,20 +14,6 @@ defined( 'ABSPATH' ) || exit;
  * ---------------------------------------------------------------------- */
 
 /**
- * IP người gửi. Sau Cloudflare mọi kết nối đến từ IP Cloudflare nên phải đọc CF-Connecting-IP; máy chủ gốc chỉ nhận
- * kết nối từ Cloudflare (Authenticated Origin Pulls, mục 10.1) nên header này không giả mạo được từ ngoài.
- */
-function vgarco_client_ip(): string {
-	foreach ( array( 'HTTP_CF_CONNECTING_IP', 'REMOTE_ADDR' ) as $key ) {
-		$value = isset( $_SERVER[ $key ] ) ? trim( (string) wp_unslash( $_SERVER[ $key ] ) ) : '';
-		if ( '' !== $value && false !== filter_var( $value, FILTER_VALIDATE_IP ) ) {
-			return $value;
-		}
-	}
-	return '0.0.0.0';
-}
-
-/**
  * IP đã băm có muối: đủ để giới hạn tần suất, không lưu IP gốc (mục 6.4).
  */
 function vgarco_apply_ip_hash( string $ip = '' ): string {
@@ -165,7 +151,7 @@ function vgarco_apply_save_cv( string $tmp, string $ext ): array {
 
 	$check = vgarco_private_dir_check();
 	if ( ! $check['ok'] ) {
-		vgarco_apply_alert( 'Không nhận được CV: ' . $check['message'], true );
+		vgarco_alert( 'Không nhận được CV: ' . $check['message'], true );
 		throw new RuntimeException( $check['message'] );
 	}
 
@@ -340,7 +326,7 @@ function vgarco_apply_mail( int $record_id ): array {
 	update_post_meta( $record_id, 'thu_ung_vien', $result['candidate'] ? 'da_gui' : 'loi' );
 
 	if ( ! $result['hr'] || ! $result['candidate'] ) {
-		vgarco_apply_alert(
+		vgarco_alert(
 			sprintf(
 				/* translators: 1: ID hồ sơ, 2: tên ứng viên */
 				__( 'Hồ sơ #%1$d (%2$s) đã lưu nhưng thư chưa gửi được. Hệ thống sẽ tự thử lại mỗi giờ (tối đa 3 lần).', 'vgarco-core' ),
@@ -388,7 +374,7 @@ function vgarco_apply_retry_mails(): void {
 		update_post_meta( $id, 'thu_thu_lai', $tries + 1 );
 		$result = vgarco_apply_mail( (int) $id );
 		if ( ( ! $result['hr'] || ! $result['candidate'] ) && $tries + 1 >= 3 ) {
-			vgarco_apply_alert(
+			vgarco_alert(
 				sprintf(
 					/* translators: %d: ID hồ sơ */
 					__( 'Hồ sơ #%d: thư vẫn chưa gửi được sau 3 lần thử. Cần kiểm tra cấu hình thư (FluentSMTP/Brevo) và liên hệ ứng viên thủ công.', 'vgarco-core' ),
@@ -400,65 +386,6 @@ function vgarco_apply_retry_mails(): void {
 	}
 }
 add_action( 'vgarco_apply_mail_retry', 'vgarco_apply_retry_mails' );
-
-/* -------------------------------------------------------------------------
- * Cảnh báo
- * ---------------------------------------------------------------------- */
-
-/**
- * Ghi cảnh báo để quản trị viên thấy ở trang quản trị và, nếu đã cấu hình, gửi Telegram (mục 10.6).
- *
- * @param bool $urgent Gửi cả email cho quản trị viên.
- */
-function vgarco_apply_alert( string $message, bool $urgent = false ): void {
-	$alerts   = (array) get_option( 'vgarco_alerts', array() );
-	$alerts[] = array( 'time' => time(), 'message' => $message );
-	update_option( 'vgarco_alerts', array_slice( $alerts, -20 ), false );
-
-	if ( defined( 'VGARCO_TELEGRAM_TOKEN' ) && defined( 'VGARCO_TELEGRAM_CHAT' ) && VGARCO_TELEGRAM_TOKEN && VGARCO_TELEGRAM_CHAT ) {
-		wp_remote_post(
-			'https://api.telegram.org/bot' . rawurlencode( (string) VGARCO_TELEGRAM_TOKEN ) . '/sendMessage',
-			array(
-				'timeout' => 5,
-				'body'    => array( 'chat_id' => (string) VGARCO_TELEGRAM_CHAT, 'text' => '[VGARCO] ' . $message ),
-			)
-		);
-	}
-	if ( $urgent ) {
-		wp_mail( (string) get_option( 'admin_email' ), '[VGARCO] Cảnh báo hệ thống tuyển dụng', $message );
-	}
-}
-
-add_action(
-	'admin_notices',
-	static function (): void {
-		if ( ! current_user_can( 'manage_options' ) ) {
-			return;
-		}
-		$alerts = (array) get_option( 'vgarco_alerts', array() );
-		if ( ! $alerts ) {
-			return;
-		}
-		$last = end( $alerts );
-		printf(
-			'<div class="notice notice-warning"><p><strong>VGARCO:</strong> %s <a href="%s">Đã xem, ẩn cảnh báo</a></p></div>',
-			esc_html( (string) $last['message'] ),
-			esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=vgarco_dismiss_alerts' ), 'vgarco_dismiss_alerts' ) )
-		);
-	}
-);
-
-add_action(
-	'admin_post_vgarco_dismiss_alerts',
-	static function (): void {
-		check_admin_referer( 'vgarco_dismiss_alerts' );
-		if ( current_user_can( 'manage_options' ) ) {
-			delete_option( 'vgarco_alerts' );
-		}
-		wp_safe_redirect( wp_get_referer() ?: admin_url() );
-		exit;
-	}
-);
 
 /* -------------------------------------------------------------------------
  * Đường REST

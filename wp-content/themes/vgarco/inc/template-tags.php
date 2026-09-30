@@ -54,6 +54,7 @@ function vgarco_lines( string $text ): string {
  * @param string  $modifier Lớp bổ sung (ví dụ "breadcrumb--detail" cho trang chi tiết).
  */
 function vgarco_breadcrumb( array $trail, string $modifier = '' ): void {
+	vgarco_breadcrumb_trail( $trail ); // nhớ lại để seo.php in BreadcrumbList ở cuối trang
 	echo '<nav class="breadcrumb wrap' . ( '' !== $modifier ? ' ' . esc_attr( $modifier ) : '' ) . '" aria-label="' . esc_attr__( 'Đường dẫn vị trí', 'vgarco' ) . '"><ol>';
 	$last = count( $trail ) - 1;
 	foreach ( $trail as $i => $crumb ) {
@@ -64,6 +65,20 @@ function vgarco_breadcrumb( array $trail, string $modifier = '' ): void {
 		}
 	}
 	echo '</ol></nav>';
+}
+
+/**
+ * Đường dẫn vị trí của trang hiện tại: đặt khi mẫu trang gọi vgarco_breadcrumb(), đọc ở chân trang để in JSON-LD BreadcrumbList.
+ *
+ * @param array[]|null $set Đặt đường dẫn mới; null để chỉ đọc.
+ * @return array[] Mỗi phần tử: [nhãn, địa chỉ] hoặc [nhãn] cho mục cuối.
+ */
+function vgarco_breadcrumb_trail( ?array $set = null ): array {
+	static $trail = array();
+	if ( null !== $set ) {
+		$trail = $set;
+	}
+	return $trail;
 }
 
 /**
@@ -197,4 +212,72 @@ function vgarco_social_item( string $label, string $url, string $glyph ): void {
 		esc_attr( sprintf( __( '%s — đang cập nhật', 'vgarco' ), $label ) ),
 		esc_html( $glyph )
 	);
+}
+
+/**
+ * Các mục chính cho trang 404 (yêu cầu 35): địa chỉ, nhãn, lời nhắn theo ngữ cảnh. Địa chỉ lấy qua WPML nên đúng ngôn ngữ đang xem.
+ * Mục có 'match' => true dùng để đoán ngữ cảnh từ đường dẫn bị lỗi.
+ *
+ * @return array<string,array{label:string,url:string,message:string,action:string,match:bool}>
+ */
+function vgarco_error_sections(): array {
+	return array(
+		'du_an'   => array(
+			'label'   => __( 'Dự án', 'vgarco' ),
+			'url'     => get_post_type_archive_link( 'du_an' ) ?: home_url( '/du-an/' ),
+			'message' => __( 'Không tìm thấy dự án này. Dự án có thể đã được gỡ hoặc địa chỉ đã thay đổi — bạn có thể xem toàn bộ danh mục dự án.', 'vgarco' ),
+			'action'  => __( 'Xem tất cả dự án', 'vgarco' ),
+			'match'   => true,
+		),
+		'tin_tuc' => array(
+			'label'   => __( 'Tin tức', 'vgarco' ),
+			'url'     => get_post_type_archive_link( 'tin_tuc' ) ?: home_url( '/tin-tuc/' ),
+			'message' => __( 'Không tìm thấy bài viết này. Bài có thể đã được gỡ hoặc địa chỉ đã thay đổi — bạn có thể xem các tin mới nhất.', 'vgarco' ),
+			'action'  => __( 'Xem tin tức', 'vgarco' ),
+			'match'   => true,
+		),
+		'careers' => array(
+			'label'   => __( 'Tuyển dụng', 'vgarco' ),
+			'url'     => vgarco_page_url( 'careers' ),
+			'message' => __( 'Không tìm thấy vị trí này. Vị trí có thể đã ngừng nhận hồ sơ — bạn có thể xem các vị trí đang mở.', 'vgarco' ),
+			'action'  => __( 'Xem vị trí đang tuyển', 'vgarco' ),
+			'match'   => true,
+		),
+		'contact' => array(
+			'label'   => __( 'Liên hệ', 'vgarco' ),
+			'url'     => vgarco_page_url( 'contact' ),
+			'message' => '',
+			'action'  => __( 'Liên hệ VGARCO', 'vgarco' ),
+			'match'   => false,
+		),
+	);
+}
+
+/**
+ * Đoán mục của một đường dẫn: mục nào có đường dẫn là tiền tố của $path (dài nhất thắng). So khớp theo từng đoạn nên
+ * "/tuyen-dung-khac/" không khớp mục "/tuyen-dung/". Không phân biệt hoa thường.
+ *
+ * @param string                     $path     Đường dẫn của yêu cầu bị lỗi, ví dụ "/du-an/khong-co/".
+ * @param array<string,array>        $sections Kết quả của vgarco_error_sections().
+ * @return string Khóa của mục, hoặc '' nếu không mục nào khớp.
+ */
+function vgarco_url_section( string $path, array $sections ): string {
+	$path = strtolower( '/' . trim( $path, '/' ) . '/' );
+	$best = '';
+	$len  = 0;
+
+	foreach ( $sections as $key => $section ) {
+		if ( empty( $section['match'] ) ) {
+			continue;
+		}
+		$prefix = strtolower( '/' . trim( (string) wp_parse_url( (string) $section['url'], PHP_URL_PATH ), '/' ) . '/' );
+		if ( '//' === $prefix || '/' === $prefix ) {
+			continue; // mục nằm ở gốc site: khớp mọi thứ, vô nghĩa
+		}
+		if ( str_starts_with( $path, $prefix ) && strlen( $prefix ) > $len ) {
+			$best = (string) $key;
+			$len  = strlen( $prefix );
+		}
+	}
+	return $best;
 }

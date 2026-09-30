@@ -115,6 +115,20 @@ function vgarco_option( string $path, $fallback = '' ) {
 }
 
 /**
+ * IP người gửi. Sau Cloudflare mọi kết nối đến từ IP Cloudflare nên phải đọc CF-Connecting-IP; máy chủ gốc chỉ nhận
+ * kết nối từ Cloudflare (Authenticated Origin Pulls, mục 10.1) nên header này không giả mạo được từ ngoài.
+ */
+function vgarco_client_ip(): string {
+	foreach ( array( 'HTTP_CF_CONNECTING_IP', 'REMOTE_ADDR' ) as $key ) {
+		$value = isset( $_SERVER[ $key ] ) ? trim( (string) wp_unslash( $_SERVER[ $key ] ) ) : '';
+		if ( '' !== $value && false !== filter_var( $value, FILTER_VALIDATE_IP ) ) {
+			return $value;
+		}
+	}
+	return '0.0.0.0';
+}
+
+/**
  * Chạy $fn trong một ngôn ngữ (WPML và locale của WordPress), rồi trả về như cũ. Mẫu thư mặc định và giá trị đã dịch
  * phải theo ngôn ngữ của người nhận, không theo ngôn ngữ của yêu cầu hiện tại (cron chạy ở ngôn ngữ mặc định).
  */

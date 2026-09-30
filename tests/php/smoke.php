@@ -288,6 +288,38 @@ $icon = vgarco_icon( 'search', 'x' );
 check( 'icon: thêm aria-hidden và class', str_starts_with( $icon, '<svg aria-hidden="true" focusable="false" class="x"' ) );
 check( 'icon: mọi biểu tượng dùng trong mẫu trang đều tồn tại', '' !== vgarco_icon( 'phone' ) && '' !== vgarco_icon( 'arrow-up-right' ) && '' !== vgarco_icon( 'arrow-up' ) );
 
+// Trang 404 theo ngữ cảnh: đoán mục từ đường dẫn bị lỗi.
+if ( ! function_exists( 'wp_parse_url' ) ) {
+	function wp_parse_url( $url, $component = -1 ) {
+		return parse_url( $url, $component );
+	}
+}
+$secs = array(
+	'du_an'   => array( 'url' => 'https://vgarco.vn/du-an/', 'match' => true ),
+	'tin_tuc' => array( 'url' => '/tin-tuc/', 'match' => true ),
+	'careers' => array( 'url' => 'https://vgarco.vn/tuyen-dung/', 'match' => true ),
+	'contact' => array( 'url' => '/lien-he/', 'match' => false ),
+	'goc'     => array( 'url' => 'https://vgarco.vn/', 'match' => true ),
+	'con'     => array( 'url' => '/tuyen-dung/ung-tuyen/', 'match' => true ),
+);
+same( '404: đường dẫn dưới /du-an/ → du_an', 'du_an', vgarco_url_section( '/du-an/bao-tang/', $secs ) );
+same( '404: chính /du-an/ (không có gì phía sau) → du_an', 'du_an', vgarco_url_section( '/du-an/', $secs ) );
+same( '404: thiếu dấu gạch cuối → vẫn khớp', 'du_an', vgarco_url_section( '/du-an', $secs ) );
+same( '404: hoa thường không ảnh hưởng', 'tin_tuc', vgarco_url_section( '/TIN-TUC/Bai-Cu/', $secs ) );
+same( '404: mục dài hơn thắng (/tuyen-dung/ung-tuyen/ hơn /tuyen-dung/)', 'con', vgarco_url_section( '/tuyen-dung/ung-tuyen/x/', $secs ) );
+$secs2 = array(
+	'loai'  => array( 'url' => '/du-an/loai/', 'match' => true ),
+	'du_an' => array( 'url' => '/du-an/', 'match' => true ),
+);
+same( '404: mục dài đứng TRƯỚC mục ngắn vẫn thắng (không phụ thuộc thứ tự khai báo)', 'loai', vgarco_url_section( '/du-an/loai/x/', $secs2 ) );
+same( '404: cùng bộ mục, đường dẫn chỉ khớp mục ngắn', 'du_an', vgarco_url_section( '/du-an/khac/', $secs2 ) );
+same( '404: mục ngắn hơn khi không khớp mục dài', 'careers', vgarco_url_section( '/tuyen-dung/vi-tri/', $secs ) );
+same( '404: tiền tố chung nhưng khác đoạn (/du-an-khac/) → không khớp', '', vgarco_url_section( '/du-an-khac/x/', $secs ) );
+same( '404: mục không có match=true bị bỏ qua (/lien-he/)', '', vgarco_url_section( '/lien-he/x/', $secs ) );
+same( '404: mục ở gốc site không khớp mọi thứ', '', vgarco_url_section( '/khong-biet/', $secs ) );
+same( '404: đường dẫn gốc → không mục nào', '', vgarco_url_section( '/', $secs ) );
+same( '404: đường dẫn rỗng → không mục nào', '', vgarco_url_section( '', $secs ) );
+
 /* ---------- Kết quả ---------- */
 
 echo "\n";

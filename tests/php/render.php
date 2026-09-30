@@ -45,7 +45,11 @@ function do_action( $hook ) {
 		}
 	}
 }
-function add_filter() {}
+// Bộ lọc thật (không chỉ bỏ qua): SEO dùng document_title_parts, document_title_separator và wp_robots.
+$GLOBALS['filters'] = array();
+function add_filter( $hook, $callback, $priority = 10, $args = 1 ) {
+	$GLOBALS['filters'][ $hook ][] = $callback;
+}
 function remove_action() {}
 function wp_enqueue_style( $handle, $src ) {
 	$GLOBALS['styles'][ $handle ] = $src;
@@ -86,8 +90,9 @@ function esc_html_e( $t ) {
 function esc_attr_e( $t ) {
 	echo esc_attr( $t );
 }
+// VG_FX_ABS=1: địa chỉ tuyệt đối như WordPress thật (kiểm tra thẻ canonical/OG/JSON-LD, vốn đòi địa chỉ tuyệt đối).
 function home_url( $path = '' ) {
-	return '/' . ltrim( $path, '/' );
+	return ( getenv( 'VG_FX_ABS' ) ? 'https://vgarco.test' : '' ) . '/' . ltrim( $path, '/' );
 }
 function get_theme_file_path( $p = '' ) {
 	return THEME . '/' . ltrim( $p, '/' );
@@ -98,8 +103,47 @@ function language_attributes() {
 function bloginfo() {
 	echo 'UTF-8';
 }
+// Tiêu đề trang như wp_get_document_title(): phần "title" do template quyết định; theme lọc qua document_title_parts.
+function fx_base_title(): string {
+	$t = $GLOBALS['template'];
+	if ( str_starts_with( $t, 'single-' ) || str_starts_with( $t, 'templates/' ) ) {
+		return get_the_title( $GLOBALS['post_id'] );
+	}
+	return array( 'archive-du_an' => 'Dự án', 'archive-tin_tuc' => 'Tin tức', 'taxonomy-loai_cong_trinh' => $GLOBALS['term'], 'taxonomy-chuyen_muc' => $GLOBALS['term'], '404' => 'Page not found', 'page' => 'Bài thử', 'index' => 'Khung thử' )[ $t ] ?? 'Khung thử';
+}
+// Như wp_robots_no_robots() của lõi WordPress: noindex, cho đi theo liên kết (trang Ứng tuyển tự gọi qua add_filter).
+function wp_robots_no_robots( $robots ) {
+	$robots['noindex'] = true;
+	$robots['follow']  = true;
+	unset( $robots['max-image-preview'] );
+	return $robots;
+}
+function wp_get_environment_type() {
+	return getenv( 'VG_FX_ENV' ) ?: 'production';
+}
+function is_search() {
+	return false;
+}
+function wp_get_attachment_image_src( $id, $size = 'thumbnail' ) {
+	$url = wp_get_attachment_image_url( $id, $size );
+	return $url ? array( 'https://vgarco.test' . $url, 1200, 800 ) : false;
+}
+function wp_get_document_title() {
+	$parts = apply_filters( 'document_title_parts', array( 'title' => fx_base_title(), 'site' => 'VGARCO' ) );
+	return implode( ' ' . apply_filters( 'document_title_separator', '-' ) . ' ', array_filter( $parts ) );
+}
 function wp_head() {
-	echo '<title>Khung thử — VGARCO</title>' . "\n";
+	echo '<title>' . esc_html( wp_get_document_title() ) . '</title>' . "\n";
+	$robots = apply_filters( 'wp_robots', array( 'max-image-preview' => 'large' ) );
+	$out    = array();
+	foreach ( $robots as $name => $value ) {
+		if ( is_string( $value ) ) {
+			$out[] = $name . ':' . $value;
+		} elseif ( $value ) {
+			$out[] = $name;
+		}
+	}
+	echo "<meta name='robots' content='" . esc_attr( implode( ', ', $out ) ) . "'>\n";
 	do_action( 'wp_enqueue_scripts' );
 	do_action( 'wp_head' );
 	foreach ( $GLOBALS['styles'] as $src ) {
@@ -109,7 +153,9 @@ function wp_head() {
 		printf( "<script type=\"module\" src=\"%s\"></script>\n", esc_url( $src ) );
 	}
 }
-function wp_footer() {}
+function wp_footer() {
+	do_action( 'wp_footer' );
+}
 function wp_body_open() {}
 function body_class() {
 	echo 'class="page-' . esc_attr( vgarco_page_key() ) . '"';
@@ -142,14 +188,19 @@ function is_front_page() {
 	return in_array( $GLOBALS['template'], array( 'index', 'front-page' ), true );
 }
 function is_404() {
-	return false;
+	return '404' === $GLOBALS['template'];
+}
+// Đường dẫn bị lỗi của trang 404 (VG_FX_URI=/du-an/khong-co/).
+$_SERVER['REQUEST_URI'] = getenv( 'VG_FX_URI' ) ?: '/khong-co/';
+function wp_parse_url( $url, $component = -1 ) {
+	return parse_url( $url, $component );
+}
+function wp_unslash( $v ) {
+	return $v;
 }
 // $_GET giả từ VG_FX_GET="q=kien&noi-lam-viec=ha-noi" (bộ lọc trang Tuyển dụng, ?id= của trang Ứng tuyển).
 if ( getenv( 'VG_FX_GET' ) ) {
 	parse_str( (string) getenv( 'VG_FX_GET' ), $_GET );
-}
-function wp_unslash( $v ) {
-	return $v;
 }
 function sanitize_text_field( $s ) {
 	return trim( strip_tags( (string) $s ) );
@@ -248,6 +299,9 @@ function get_term_link( $term ) {
 	return ( 'loai_cong_trinh' === $term->taxonomy ? '/du-an/loai/' : '/tin-tuc/chuyen-muc/' ) . $term->slug . '/';
 }
 function apply_filters( $hook, $value = null, ...$args ) {
+	foreach ( $GLOBALS['filters'][ $hook ] ?? array() as $callback ) {
+		$value = $callback( $value, ...$args );
+	}
 	if ( 'wpml_current_language' === $hook ) {
 		return $GLOBALS['lang'];
 	}
@@ -263,24 +317,24 @@ function apply_filters( $hook, $value = null, ...$args ) {
 
 // Vòng lặp giả cho index.php.
 $GLOBALS['posts'] = array( (object) array( 'title' => 'Bài thử', 'content' => '<p>Nội dung thử.</p>' ) );
-$GLOBALS['i']     = -1;
+$GLOBALS['vg_loop']     = -1;
 function have_posts() {
-	return $GLOBALS['i'] + 1 < count( $GLOBALS['posts'] );
+	return $GLOBALS['vg_loop'] + 1 < count( $GLOBALS['posts'] );
 }
 function the_post() {
-	++$GLOBALS['i'];
+	++$GLOBALS['vg_loop'];
 }
-function post_class() {
-	echo 'class="entry"';
+function post_class( $extra = '' ) {
+	echo 'class="' . trim( 'entry ' . $extra ) . '"';
 }
 function the_title() {
-	echo esc_html( $GLOBALS['posts'][ $GLOBALS['i'] ]->title );
+	echo esc_html( $GLOBALS['posts'][ $GLOBALS['vg_loop'] ]->title );
 }
 function the_permalink() {
 	echo '/bai-thu/';
 }
 function the_content() {
-	echo $GLOBALS['posts'][ $GLOBALS['i'] ]->content;
+	echo $GLOBALS['posts'][ $GLOBALS['vg_loop'] ]->content;
 }
 function the_excerpt() {
 	the_content();
@@ -295,6 +349,7 @@ require_once THEME . '/inc/content.php';
 require_once VGARCO_CORE_DIR . 'inc/careers/jobs.php';
 require_once THEME . '/inc/menus.php';
 require_once THEME . '/inc/template-tags.php';
+require_once THEME . '/inc/seo.php';
 require_once THEME . '/inc/enqueue.php';
 
 // Truy vấn chính giả cho trang danh sách tin tức: 9 bài mỗi trang, mới nhất trước, lọc theo chuyên mục nếu có.

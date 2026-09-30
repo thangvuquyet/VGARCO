@@ -107,6 +107,18 @@ function common_checks( DOMXPath $x, string $name ): void {
 	}
 	same( "{$name}: nút không chữ đều có aria-label", 0, $nameless );
 
+	// SEO: tối đa một canonical và một mô tả; mọi khối JSON-LD là JSON hợp lệ có @context.
+	same( "{$name}: tối đa một thẻ canonical", true, q( $x, '//link[@rel="canonical"]' )->length <= 1 );
+	same( "{$name}: tối đa một meta description", true, q( $x, '//meta[@name="description"]' )->length <= 1 );
+	$bad_ld = 0;
+	foreach ( q( $x, '//script[@type="application/ld+json"]' ) as $ld ) {
+		$data = json_decode( $ld->textContent, true );
+		if ( ! is_array( $data ) || 'https://schema.org' !== ( $data['@context'] ?? '' ) ) {
+			++$bad_ld;
+		}
+	}
+	same( "{$name}: mọi khối JSON-LD là JSON hợp lệ", 0, $bad_ld );
+
 	// Tìm kiếm (UC-09): nút ở đầu trang là liên kết dự phòng (không JS vẫn đi được), hộp thoại nằm ngoài <main>.
 	$opener = q( $x, '//header//a[@data-vg-search-open]' );
 	check( "{$name}: nút tìm kiếm là liên kết có địa chỉ và tên đọc được", 1 === $opener->length && '' !== $opener->item( 0 )->getAttribute( 'href' ) && '' !== $opener->item( 0 )->getAttribute( 'aria-label' ) );
@@ -610,6 +622,115 @@ foreach ( array( '999' => 'không tồn tại', '404' => 'quá hạn', '405' => 
 }
 $ac = render( 'templates/apply', false, 'vi', array( 'VG_FX_ID' => '507', 'VG_FX_GET' => 'id=404' ) );
 same( 'ứng tuyển (quá hạn): nói rõ đã ngừng nhận hồ sơ và nêu tên vị trí', array( 'Vị trí này đã ngừng nhận hồ sơ', 'Thực tập sinh kiến trúc' ), array( trim( q( $ac, '//h1' )->item( 0 )->textContent ), trim( q( $ac, '//section[' . cls( 'job-apply-head' ) . ']/p[2]' )->item( 0 )->textContent ) ) );
+
+/* ========================= Trang 404 theo ngữ cảnh (yêu cầu 35) ========================= */
+
+$contexts = array(
+	'/du-an/khong-co/'        => array( '/du-an/', 'Xem tất cả dự án', 'dự án' ),
+	'/du-an/'                 => array( '/du-an/', 'Xem tất cả dự án', 'dự án' ),
+	'/tin-tuc/bai-cu/'        => array( '/tin-tuc/', 'Xem tin tức', 'bài viết' ),
+	'/tuyen-dung/vi-tri-cu/'  => array( '/tuyen-dung/', 'Xem vị trí đang tuyển', 'vị trí' ),
+	'/gioi-thieu/khong-co/'   => null,
+	'/du-an-khac/x/'          => null,
+	'/'                       => null,
+);
+foreach ( $contexts as $uri => $expect ) {
+	$n = render( '404', false, 'vi', array( 'VG_FX_URI' => $uri ) );
+	common_checks( $n, "404 {$uri}" );
+	same( "404 {$uri}: h1 và nhãn 404", array( 'Không tìm thấy trang này', '404' ), array( trim( q( $n, '//h1' )->item( 0 )->textContent ), trim( q( $n, '//section[' . cls( 'error-page' ) . ']/p[' . cls( 'eyebrow' ) . ']' )->item( 0 )->textContent ) ) );
+	$primary = q( $n, '//*[' . cls( 'error-actions' ) . ']/a[' . cls( 'button-primary' ) . ']' );
+	$lead    = trim( q( $n, '//p[' . cls( 'error-lead' ) . ']' )->item( 0 )->textContent );
+	if ( $expect ) {
+		same( "404 {$uri}: nút chính dẫn về mục tương ứng", array( $expect[0], $expect[1] ), array( $primary->item( 0 )->getAttribute( 'href' ), trim( $primary->item( 0 )->textContent ) ) );
+		check( "404 {$uri}: lời nhắn nói đúng ngữ cảnh ({$expect[2]})", str_contains( $lead, $expect[2] ) );
+		same( "404 {$uri}: vẫn có liên kết phụ về trang chủ", 1, q( $n, '//*[' . cls( 'error-actions' ) . ']/a[' . cls( 'text-link' ) . ']' )->length );
+	} else {
+		same( "404 {$uri}: không đoán được mục → nút chính là Về trang chủ", array( 1, 'Về trang chủ' ), array( $primary->length, trim( $primary->item( 0 )->textContent ) ) );
+		check( "404 {$uri}: lời nhắn chung, không nhắc dự án/tin/vị trí", ! preg_match( '/dự án này|bài viết này|vị trí này/u', $lead ) );
+	}
+	same( "404 {$uri}: 4 liên kết mục chính (dự án, tin, tuyển dụng, liên hệ)", array( '/du-an/', '/tin-tuc/', '/tuyen-dung/', '/lien-he/' ), array_map( static fn( $a ) => $a->getAttribute( 'href' ), iterator_to_array( q( $n, '//nav[' . cls( 'error-links' ) . ']//a' ) ) ) );
+	check( "404 {$uri}: đường dẫn bị lỗi không bị in ra trang (chống XSS phản chiếu)", ! str_contains( $n->document->saveHTML(), 'khong-co' ) );
+}
+// Đường dẫn chứa mã độc: không xuất hiện trong HTML.
+$xss = render( '404', false, 'vi', array( 'VG_FX_URI' => '/du-an/"><script>alert(1)</script>/' ) );
+same( '404: đường dẫn chứa <script> không lọt vào HTML', 0, q( $xss, '//script[contains(., "alert(1)")]' )->length );
+$de404 = render( '404', false, 'de', array( 'VG_FX_URI' => '/du-an/x/' ) );
+common_checks( $de404, '404 tiếng Đức' );
+
+/* ========================= SEO cơ bản (mục 8.9) ========================= */
+
+$abs = array( 'VG_FX_ABS' => '1' );
+$meta = static fn( DOMXPath $n, string $q ): string => $n->query( $q )->length ? ( $n->query( $q )->item( 0 )->getAttribute( 'content' ) ?: $n->query( $q )->item( 0 )->getAttribute( 'href' ) ) : '';
+$ld   = static function ( DOMXPath $n, string $type ): array {
+	foreach ( $n->query( '//script[@type="application/ld+json"]' ) as $s ) {
+		$d = json_decode( $s->textContent, true );
+		if ( is_array( $d ) && $type === ( $d['@type'] ?? '' ) ) {
+			return $d;
+		}
+	}
+	return array();
+};
+
+$h = render( 'front-page', false, 'vi', $abs );
+same( 'SEO trang chủ: tiêu đề "VGARCO — khẩu hiệu"', 'VGARCO — Tư vấn thiết kế, giám sát và quản lý dự án xây dựng', trim( q( $h, '//title' )->item( 0 )->textContent ) );
+check( 'SEO trang chủ: có mô tả mặc định, không dài quá 160 ký tự', '' !== $meta( $h, '//meta[@name="description"]' ) && mb_strlen( $meta( $h, '//meta[@name="description"]' ) ) <= 160 );
+same( 'SEO trang chủ: canonical là địa chỉ gốc website', 'https://vgarco.test/', $meta( $h, '//link[@rel="canonical"]' ) );
+same( 'SEO trang chủ: og:title và og:url', array( 'VGARCO — Tư vấn thiết kế, giám sát và quản lý dự án xây dựng', 'https://vgarco.test/' ), array( $meta( $h, '//meta[@property="og:title"]' ), $meta( $h, '//meta[@property="og:url"]' ) ) );
+same( 'SEO trang chủ: robots cho phép lập chỉ mục (production)', 'max-image-preview:large', $meta( $h, '//meta[@name="robots"]' ) );
+$org = $ld( $h, 'Organization' );
+same( 'SEO trang chủ: JSON-LD Organization có tên, điện thoại, địa chỉ, logo', array( 'Công ty TNHH Tư vấn Xây dựng VGARCO', '+84988961666', 'PostalAddress', 'https://vgarco.test/assets/images/logo.svg' ), array( $org['name'] ?? '', $org['telephone'] ?? '', $org['address']['@type'] ?? '', $org['logo'] ?? '' ) );
+same( 'SEO trang chủ: không có BreadcrumbList', array(), $ld( $h, 'BreadcrumbList' ) );
+
+$pd = render( 'single-du_an', false, 'vi', array_merge( $abs, array( 'VG_FX_ID' => '104' ) ) );
+same( 'SEO dự án: tiêu đề "Tên — Dự án — VGARCO"', 'Đài kiểm soát không lưu Đồng Hới — Dự án — VGARCO', trim( q( $pd, '//title' )->item( 0 )->textContent ) );
+check( 'SEO dự án: không có mo_ta_seo thì mô tả lấy từ nội dung', str_starts_with( $meta( $pd, '//meta[@name="description"]' ), 'Dự án đài kiểm soát không lưu' ) );
+same( 'SEO dự án: canonical là địa chỉ dự án', 'https://vgarco.test/du-an/104/', $meta( $pd, '//link[@rel="canonical"]' ) );
+check( 'SEO dự án: og:image tuyệt đối kèm kích thước và mô tả ảnh', str_starts_with( $meta( $pd, '//meta[@property="og:image"]' ), 'https://' ) && '1200' === $meta( $pd, '//meta[@property="og:image:width"]' ) && 'Đài kiểm soát không lưu Đồng Hới' === $meta( $pd, '//meta[@property="og:image:alt"]' ) );
+same( 'SEO dự án: og:type website, locale vi_VN với bản thay thế de_DE', array( 'website', 'vi_VN', 'de_DE' ), array( $meta( $pd, '//meta[@property="og:type"]' ), $meta( $pd, '//meta[@property="og:locale"]' ), $meta( $pd, '//meta[@property="og:locale:alternate"]' ) ) );
+$bc = $ld( $pd, 'BreadcrumbList' );
+same( 'SEO dự án: BreadcrumbList 3 mục, địa chỉ tuyệt đối', array( 3, 'https://vgarco.test/', 'https://vgarco.test/du-an/104/' ), array( count( $bc['itemListElement'] ?? array() ), $bc['itemListElement'][0]['item'] ?? '', $bc['itemListElement'][2]['item'] ?? '' ) );
+same( 'SEO dự án: không có JSON-LD Organization (chỉ trang chủ)', array(), $ld( $pd, 'Organization' ) );
+$pd2 = render( 'single-du_an', false, 'vi', array_merge( $abs, array( 'VG_FX_ID' => '106' ) ) );
+same( 'SEO dự án: có mo_ta_seo thì dùng mo_ta_seo', 'Mô tả SEO riêng của Bảo tàng Lịch sử Quân đội nhân dân Lào.', $meta( $pd2, '//meta[@name="description"]' ) );
+
+$cat = render( 'archive-du_an', false, 'vi', $abs );
+same( 'SEO danh mục: tiêu đề không lặp "Dự án — Dự án"', 'Dự án — VGARCO', trim( q( $cat, '//title' )->item( 0 )->textContent ) );
+same( 'SEO danh mục: canonical là trang danh mục', 'https://vgarco.test/du-an/', $meta( $cat, '//link[@rel="canonical"]' ) );
+$tax = render( 'taxonomy-loai_cong_trinh', false, 'vi', array_merge( $abs, array( 'VG_FX_TERM' => 'giao-duc' ) ) );
+same( 'SEO loại công trình: tiêu đề "Loại — Dự án — VGARCO"', 'giao-duc — Dự án — VGARCO', trim( q( $tax, '//title' )->item( 0 )->textContent ) );
+
+$nw = render( 'single-tin_tuc', false, 'vi', array_merge( $abs, array( 'VG_FX_ID' => '301' ) ) );
+check( 'SEO tin: og:type=article, có article:published_time', 'article' === $meta( $nw, '//meta[@property="og:type"]' ) && '' !== $meta( $nw, '//meta[@property="article:published_time"]' ) );
+check( 'SEO tin: tiêu đề có mục "Tin tức"', str_ends_with( trim( q( $nw, '//title' )->item( 0 )->textContent ), '— Tin tức — VGARCO' ) );
+
+$jo = render( 'single-vi_tri', false, 'vi', array_merge( $abs, array( 'VG_FX_ID' => '401' ) ) );
+$jp = $ld( $jo, 'JobPosting' );
+same( 'SEO vị trí đang mở: có JobPosting (tiêu đề, loại hình, tổ chức)', array( 'Kiến trúc sư thiết kế', 'FULL_TIME', 'Công ty TNHH Tư vấn Xây dựng VGARCO' ), array( $jp['title'] ?? '', $jp['employmentType'] ?? '', $jp['hiringOrganization']['name'] ?? '' ) );
+check( 'SEO vị trí đang mở: mô tả HTML có phần công việc, yêu cầu', str_contains( $jp['description'] ?? '', '<ul><li>' ) );
+foreach ( array( '404' => 'quá hạn', '405' => 'đã đóng' ) as $closed => $why ) {
+	$jc = render( 'single-vi_tri', false, 'vi', array_merge( $abs, array( 'VG_FX_ID' => $closed ) ) );
+	same( "SEO vị trí {$why}: KHÔNG có JobPosting", array(), $ld( $jc, 'JobPosting' ) );
+}
+$cr = render( 'templates/careers', false, 'vi', array_merge( $abs, array( 'VG_FX_ID' => '506' ) ) );
+same( 'SEO trang Tuyển dụng: không có JobPosting (chỉ trang chi tiết mới có)', array(), $ld( $cr, 'JobPosting' ) );
+
+$ap = render( 'templates/apply', false, 'vi', array_merge( $abs, array( 'VG_FX_ID' => '507', 'VG_FX_GET' => 'id=401' ) ) );
+check( 'SEO trang Ứng tuyển: noindex (nhưng vẫn cho theo liên kết)', str_contains( $meta( $ap, '//meta[@name="robots"]' ), 'noindex' ) && ! str_contains( $meta( $ap, '//meta[@name="robots"]' ), 'nofollow' ) );
+$nf = render( '404', false, 'vi', array_merge( $abs, array( 'VG_FX_URI' => '/x/' ) ) );
+check( 'SEO 404: noindex và không có canonical', str_contains( $meta( $nf, '//meta[@name="robots"]' ), 'noindex' ) && 0 === q( $nf, '//link[@rel="canonical"]' )->length );
+check( 'SEO 404: tiêu đề tiếng Việt, không phải "Page not found"', str_starts_with( trim( q( $nf, '//title' )->item( 0 )->textContent ), 'Không tìm thấy trang' ) );
+$st = render( 'front-page', false, 'vi', array_merge( $abs, array( 'VG_FX_ENV' => 'staging' ) ) );
+check( 'SEO staging: noindex VÀ nofollow (toàn bộ môi trường không phải production)', str_contains( $meta( $st, '//meta[@name="robots"]' ), 'noindex' ) && str_contains( $meta( $st, '//meta[@name="robots"]' ), 'nofollow' ) );
+$dh = render( 'front-page', false, 'de', $abs );
+same( 'SEO tiếng Đức: og:locale de_DE, bản thay thế vi_VN', array( 'de_DE', 'vi_VN' ), array( $meta( $dh, '//meta[@property="og:locale"]' ), $meta( $dh, '//meta[@property="og:locale:alternate"]' ) ) );
+
+/* ========================= Trang nội dung chung (trang pháp lý) ========================= */
+
+$p = render( 'page' );
+common_checks( $p, 'trang chung' );
+same( 'trang chung: h1 là tiêu đề trang', 'Bài thử', trim( q( $p, '//h1' )->item( 0 )->textContent ) );
+check( 'trang chung: nội dung nằm trong .entry-content của bài viết .page-basic', 1 === q( $p, '//article[' . cls( 'page-basic' ) . ']/div[' . cls( 'entry-content' ) . ']/p[contains(., "Nội dung thử")]' )->length );
+check( 'trang chung: đường dẫn vị trí kết thúc bằng tiêu đề, mục cuối là aria-current', 1 === q( $p, '//nav[' . cls( 'breadcrumb' ) . ']//li[@aria-current="page" and contains(., "Bài thử")]' )->length );
 
 /* ---------- Kết quả ---------- */
 

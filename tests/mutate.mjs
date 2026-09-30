@@ -315,14 +315,147 @@ const M = [
     "class=\"search-status\" role=\"status\" aria-live=\"polite\"", "class=\"search-status\"", 'pages'],
   ["tìm kiếm: hộp thoại luôn gửi lang=vi", "wp-content/themes/vgarco/template-parts/layout/search-dialog.php",
     "$lang = function_exists( 'apply_filters' ) ? (string) apply_filters( 'wpml_current_language', 'vi' ) : 'vi';", "$lang = 'vi';", 'pages'],
+  ["404: mục ngắn thắng mục dài", "wp-content/themes/vgarco/inc/template-tags.php",
+    "strlen( $prefix ) > $len", "true", 'smoke'],
+  ["404: mục không dùng để đoán vẫn khớp", "wp-content/themes/vgarco/inc/template-tags.php",
+    "if ( empty( $section['match'] ) ) {", "if ( false ) {", 'smoke'],
+  ["404: mục ở gốc site khớp mọi thứ", "wp-content/themes/vgarco/inc/template-tags.php",
+    "if ( '//' === $prefix || '/' === $prefix ) {", "if ( false ) {", 'smoke'],
+  ["404: phân biệt hoa thường trong đường dẫn", "wp-content/themes/vgarco/inc/template-tags.php",
+    "$path = strtolower( '/' . trim( $path, '/' ) . '/' );", "$path = '/' . trim( $path, '/' ) . '/';", 'smoke'],
+  ["404: khớp tiền tố theo ký tự thay vì theo đoạn", "wp-content/themes/vgarco/inc/template-tags.php",
+    "strtolower( '/' . trim( (string) wp_parse_url( (string) $section['url'], PHP_URL_PATH ), '/' ) . '/' )", "strtolower( '/' . trim( (string) wp_parse_url( (string) $section['url'], PHP_URL_PATH ), '/' ) )", 'smoke'],
+  ["404: không nói theo ngữ cảnh", "wp-content/themes/vgarco/404.php",
+    "<?php if ( $current ) : ?>", "<?php if ( false ) : ?>", 'pages'],
+  ["404: lời nhắn luôn là lời nhắn chung", "wp-content/themes/vgarco/404.php",
+    "$current\n\t\t\t\t? $current['message']", "false\n\t\t\t\t? $current['message']", 'pages'],
+  ["404: thiếu tiêu đề H1", "wp-content/themes/vgarco/404.php",
+    "<h1><?php esc_html_e( 'Không tìm thấy trang này', 'vgarco' ); ?></h1>", "<h2><?php esc_html_e( 'Không tìm thấy trang này', 'vgarco' ); ?></h2>", 'pages'],
+  ["trang chung: tiêu đề là H2", "wp-content/themes/vgarco/page.php",
+    "<h1><?php the_title(); ?></h1>", "<h2><?php the_title(); ?></h2>", 'pages'],
+  ["trang chung: mất đường dẫn vị trí", "wp-content/themes/vgarco/page.php",
+    "array( get_the_title() ),", "", 'pages'],
+  ["SEO: mô tả không bị cắt", "wp-content/themes/vgarco/inc/seo-lib.php",
+    "if ( mb_strlen( $text ) <= $max ) {", "if ( true ) {", 'seo'],
+  ["SEO: mô tả giữ thẻ HTML", "wp-content/themes/vgarco/inc/seo-lib.php",
+    "html_entity_decode( strip_tags( $text ), ENT_QUOTES, 'UTF-8' )", "html_entity_decode( $text, ENT_QUOTES, 'UTF-8' )", 'seo'],
+  ["SEO: nhận mọi địa chỉ (javascript:, tương đối)", "wp-content/themes/vgarco/inc/seo-lib.php",
+    "if ( ! preg_match( '#^https?://[^\\s<>\"\\']+$#i', $url ) ) {", "if ( false ) {", 'seo'],
+  ["SEO: giá trị thuộc tính không được thoát", "wp-content/themes/vgarco/inc/seo-lib.php",
+    "htmlspecialchars( $value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8' )", "$value", 'seo'],
+  ["SEO: JSON-LD không mã hóa thẻ (</script> thoát được)", "wp-content/themes/vgarco/inc/seo-lib.php",
+    "JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP", "JSON_UNESCAPED_SLASHES | JSON_HEX_AMP", 'seo'],
+  ["SEO: vị trí đã đóng vẫn có JobPosting", "wp-content/themes/vgarco/inc/seo-lib.php",
+    "if ( empty( $j['open'] ) || ", "if ( false || ", 'seo'],
+  ["SEO: breadcrumb một mục vẫn được in", "wp-content/themes/vgarco/inc/seo-lib.php",
+    "if ( count( $items ) < 2 ) {", "if ( false ) {", 'seo'],
+  ["SEO: hạn nộp không có thật vẫn thành validThrough", "wp-content/themes/vgarco/inc/seo-lib.php",
+    "checkdate( (int) $d[2], (int) $d[3], (int) $d[1] )", "true", 'seo'],
+  ["SEO: Organization không cần tên", "wp-content/themes/vgarco/inc/seo-lib.php",
+    "if ( '' === $data['name'] || '' === $data['url'] ) {", "if ( false ) {", 'seo'],
+  ["SEO: mô tả công việc không thoát HTML", "wp-content/themes/vgarco/inc/seo-lib.php",
+    "htmlspecialchars( $line, ENT_QUOTES, 'UTF-8' )", "$line", 'seo'],
+  ["SEO: luôn dùng twitter summary_large_image", "wp-content/themes/vgarco/inc/seo-lib.php",
+    "'' !== $image ? 'summary_large_image' : 'summary'", "'summary_large_image'", 'seo'],
+  ["SEO: locale thay thế lặp locale hiện tại", "wp-content/themes/vgarco/inc/seo-lib.php",
+    "if ( '' !== (string) $alternate && $alternate !== ( $m['locale'] ?? '' ) ) {", "if ( '' !== (string) $alternate ) {", 'seo'],
+  ["SEO: staging được lập chỉ mục", "wp-content/themes/vgarco/inc/seo.php",
+    "return 'production' !== wp_get_environment_type();", "return false;", 'pages'],
+  ["SEO: trang 404 được lập chỉ mục", "wp-content/themes/vgarco/inc/seo.php",
+    "if ( is_404() || is_search() ||", "if ( is_search() ||", 'pages'],
+  ["SEO: tiêu đề danh mục lặp tên mục", "wp-content/themes/vgarco/inc/seo.php",
+    "if ( '' !== $section && $section !== $title ) {", "if ( '' !== $section ) {", 'pages'],
+  ["SEO: canonical không chuẩn hóa thành tuyệt đối", "wp-content/themes/vgarco/inc/seo.php",
+    "return vgarco_seo_absolute( vgarco_seo_canonical_raw() );", "return vgarco_seo_canonical_raw();", 'pages'],
+  ["SEO: vị trí quá hạn vẫn có JobPosting (tầng trang)", "wp-content/themes/vgarco/inc/seo.php",
+    "'open'             => $job['open'],", "'open'             => true,", 'pages'],
+  ["SEO: bỏ mo_ta_seo, luôn lấy từ nội dung", "wp-content/themes/vgarco/inc/seo.php",
+    "trim( (string) get_field( 'mo_ta_seo', $id ) ) ?: (string) get_post_field( 'post_content', $id )", "(string) get_post_field( 'post_content', $id )", 'pages'],
+  ["SEO: Organization in ở mọi trang", "wp-content/themes/vgarco/inc/seo.php",
+    "if ( is_front_page() ) {\n\t\t\techo vgarco_seo_jsonld( vgarco_seo_org(", "if ( true ) {\n\t\t\techo vgarco_seo_jsonld( vgarco_seo_org(", 'pages'],
+  ["SEO: không in BreadcrumbList", "wp-content/themes/vgarco/inc/seo.php",
+    "if ( $trail ) {", "if ( false ) {", 'pages'],
+  ["SEO: bản tiếng Đức vẫn báo vi_VN", "wp-content/themes/vgarco/inc/seo.php",
+    "$locale      = str_starts_with( (string) determine_locale(), 'de' ) ? 'de_DE' : 'vi_VN';", "$locale      = 'vi_VN';", 'pages'],
+  ["dịch: .po không thoát xuống dòng", "scripts/i18n/po.mjs",
+    ".replace( /\\n/g, '\\\\n' ).replace( /\\r/g, '\\\\r' )", ".replace( /\\r/g, '\\\\r' )", 'i18n'],
+  ["dịch: .mo chứa cả mục fuzzy", "scripts/i18n/po.mjs",
+    "return ! e.flags.includes( 'fuzzy' ) && e.str.some( ( s ) => s !== '' );", "return e.str.some( ( s ) => s !== '' );", 'i18n'],
+  ["dịch: .mo không sắp theo byte", "scripts/i18n/po.mjs",
+    ".sort( ( a, b ) => Buffer.compare( a.key, b.key ) );", ";", 'i18n'],
+  ["dịch: ngữ cảnh ghép sai ký tự phân cách", "scripts/i18n/po.mjs",
+    "e.ctxt + '\\x04'", "e.ctxt + '\\x05'", 'i18n'],
+  ["dịch: .mo thiếu NUL cuối chuỗi", "scripts/i18n/po.mjs",
+    "chunks.push( key, Buffer.from( [ 0 ] ) );", "chunks.push( key );", 'i18n'],
+  ["dịch: trích chuỗi bỏ qua kiểm tra domain", "scripts/i18n/extract.mjs",
+    "phpLiteral( args[ spec.domain ] ) !== domain", "false", 'i18n'],
+  ["dịch: trích nhầm cả khai báo hàm __()", "scripts/i18n/extract.mjs",
+    "if ( /(?:function\\s+|->|::)$/.test( before ) ) {", "if ( false ) {", 'i18n'],
+  ["dịch: chuỗi nháy kép có biến bị coi là chuỗi thuần", "scripts/i18n/extract.mjs",
+    "/^\"((?:[^\"\\\\$]|\\\\.)*)\"$/s", "/^\"((?:[^\"\\\\]|\\\\.)*)\"$/s", 'i18n'],
+  ["dịch: chuỗi động không được báo", "scripts/i18n/extract.mjs",
+    "dynamic.push( `${ file }:${ line } ${ m[ 1 ] }( ${ ( args[ spec.id ] ?? '' ).trim().slice( 0, 50 ) } )` );", ";", 'i18n'],
+  ["dịch: gộp bản dịch ghi đè bản sửa tay", "scripts/i18n/sync.mjs",
+    "if ( prev && prev.str.some( Boolean ) ) {", "if ( false ) {", 'i18n'],
+  ["dịch: bản dịch sai %s không bị loại", "scripts/i18n/sync.mjs",
+    "if ( e.str.some( Boolean ) && e.str.some( ( t ) => t && placeholders( t ).join() !== placeholders( p.id ).join() ) ) {", "if ( false ) {", 'i18n'],
+  ["dịch: tiêu đề ghép thiếu một dòng vẫn được dùng", "scripts/i18n/sync.mjs",
+    "if ( parts.every( ( p ) => p !== null ) ) {", "if ( parts.some( ( p ) => p !== null ) ) {", 'i18n'],
+  ["dịch: mục không còn trong mã vẫn được giữ", "scripts/i18n/sync.mjs",
+    "for ( const p of pot.filter( ( e ) => e.id !== '' ) ) {", "for ( const p of [ ...pot.filter( ( e ) => e.id !== '' ), ...existing.filter( ( e ) => e.id !== '' ) ] ) {", 'i18n'],
+  ["dịch: không kiểm tra .mo khớp .po", "scripts/i18n/sync.mjs",
+    "if ( ! compiled.equals( moBuffer ) ) {", "if ( false ) {", 'i18n'],
+  ["khóa đăng nhập: lượt sai cũ hơn cửa sổ vẫn tính", "wp-content/plugins/vgarco-core/inc/security-lib.php",
+    "static fn( int $t ): bool => $t > $now - $window && $t <= $now", "static fn( int $t ): bool => $t <= $now", 'security'],
+  ["khóa đăng nhập: khóa IP 10 lần thay vì 5", "wp-content/plugins/vgarco-core/inc/security-lib.php",
+    "const VGARCO_LOCK_IP_MAX        = 5;", "const VGARCO_LOCK_IP_MAX        = 10;", 'security'],
+  ["khóa đăng nhập: thử khi đang khóa kéo dài khóa", "wp-content/plugins/vgarco-core/inc/security-lib.php",
+    "if ( $state['until'] > $now ) {\n\t\treturn array( 'state' => $state, 'triggered' => false );\n\t}", "", 'security'],
+  ["khóa đăng nhập: khóa tính từ lượt đầu thay vì lượt kích hoạt", "wp-content/plugins/vgarco-core/inc/security-lib.php",
+    "'until' => $now + $duration ), 'triggered' => true", "'until' => $attempts[0] + $duration ), 'triggered' => true", 'security'],
+  ["khóa đăng nhập: không xóa lượt sai sau khi khóa", "wp-content/plugins/vgarco-core/inc/security-lib.php",
+    "array( 'state' => array( 'attempts' => array(), 'until' => $now + $duration ), 'triggered' => true )", "array( 'state' => array( 'attempts' => $attempts, 'until' => $now + $duration ), 'triggered' => true )", 'security'],
+  ["khóa đăng nhập: tên đăng nhập phân biệt hoa thường", "wp-content/plugins/vgarco-core/inc/security-lib.php",
+    "'user' === $kind ? mb_strtolower( trim( $value ) ) : trim( $value )", "trim( $value )", 'security'],
+  ["khóa đăng nhập: khóa lưu chứa IP dạng rõ", "wp-content/plugins/vgarco-core/inc/security-lib.php",
+    "'vg_lock_' . $kind . '_' . substr( hash_hmac( 'sha256', $value, $salt ), 0, 32 )", "'vg_lock_' . $kind . '_' . $value", 'security'],
+  ["khóa đăng nhập: thông báo lỗi nói rõ mật khẩu sai", "wp-content/plugins/vgarco-core/inc/security-lib.php",
+    "return 'Thông tin đăng nhập không đúng hoặc", "return 'Mật khẩu sai hoặc", 'security'],
+  ["khóa đăng nhập: thiếu mã lỗi lộ tài khoản", "wp-content/plugins/vgarco-core/inc/security-lib.php",
+    "'invalid_username', 'incorrect_password', 'invalid_email', 'invalidcombo', 'empty_username', 'empty_password'", "'incorrect_password', 'invalid_email', 'invalidcombo', 'empty_username', 'empty_password'", 'security'],
+  ["cache: token đi trong URL thay vì header", "wp-content/plugins/vgarco-core/inc/cache-lib.php",
+    "'Authorization' => 'Bearer ' . $token,", "'Authorization' => 'Bearer x',", 'security'],
+  ["cache: cho token có xuống dòng (chèn header)", "wp-content/plugins/vgarco-core/inc/cache-lib.php",
+    "|| preg_match( '/[\\s\\r\\n]/', $token )", "", 'security'],
+  ["cache: chỉ xóa theo URL thay vì toàn bộ", "wp-content/plugins/vgarco-core/inc/cache-lib.php",
+    "'body'    => '{\"purge_everything\":true}'", "'body'    => '{\"files\":[]}'", 'security'],
+  ["cache: hồ sơ ứng tuyển làm xóa cache", "wp-content/plugins/vgarco-core/inc/cache-lib.php",
+    "return array( 'page', 'du_an', 'linh_vuc', 'tin_tuc', 'vi_tri' );", "return array( 'page', 'du_an', 'linh_vuc', 'tin_tuc', 'vi_tri', 'ho_so_ut' );", 'security'],
+  ["cache: bản nháp cũng làm xóa cache", "wp-content/plugins/vgarco-core/inc/cache-lib.php",
+    "return 'publish' === $new_status || 'publish' === $old_status;", "return true;", 'security'],
+  ["cache: gỡ bài khỏi xuất bản không xóa cache", "wp-content/plugins/vgarco-core/inc/cache-lib.php",
+    "return 'publish' === $new_status || 'publish' === $old_status;", "return 'publish' === $new_status;", 'security'],
+  ["cache: HTTP 200 nhưng success=false coi là thành công", "wp-content/plugins/vgarco-core/inc/cache-lib.php",
+    "if ( 200 === $status && is_array( $data ) && ! empty( $data['success'] ) ) {", "if ( 200 === $status ) {", 'security'],
+  ["cache: cron hằng ngày lặp lại đúng giờ hiện tại", "wp-content/plugins/vgarco-core/inc/cache-lib.php",
+    "if ( $next->getTimestamp() <= $now ) {", "if ( $next->getTimestamp() < $now ) {", 'security'],
+  ["cache: cron tính theo UTC thay vì múi giờ website", "wp-content/plugins/vgarco-core/inc/cache-lib.php",
+    "$tz    = new DateTimeZone( $timezone );", "$tz    = new DateTimeZone( 'UTC' );", 'security'],
 ];
 
 let caught = 0, missed = 0, skipped = 0;
-for (const [name, file, from, to, suite = 'smoke'] of M) {
+// node tests/mutate.mjs "khóa đăng nhập"  → chỉ chạy các đột biến có tên chứa chuỗi đó (chạy nhanh khi đang viết thêm)
+const only = process.argv[2];
+for (const [name, file, from, to, suite = 'smoke'] of M.filter(([n]) => !only || n.includes(only))) {
   rmSync(work, { recursive: true, force: true });
   mkdirSync(join(work, 'tests'), { recursive: true });
-  cpSync(join(src, 'wp-content'), join(work, 'wp-content'), { recursive: true });
+  // Bỏ node_modules và dist (rất nặng, kiểm thử PHP không cần): mỗi lần sao chép nhanh hơn hàng chục lần.
+  cpSync(join(src, 'wp-content'), join(work, 'wp-content'), { recursive: true, filter: (from) => !/[\\/](node_modules|dist)([\\/]|$)/.test(from) });
   cpSync(join(src, 'tests', 'php'), join(work, 'tests', 'php'), { recursive: true });
+  if (suite === 'i18n') {
+    cpSync(join(src, 'scripts'), join(work, 'scripts'), { recursive: true });
+    cpSync(join(src, 'tests', 'i18n.mjs'), join(work, 'tests', 'i18n.mjs'));
+  }
 
   const path = join(work, file);
   const text = readFileSync(path, 'utf8').replace(/\r\n/g, '\n');
@@ -331,7 +464,9 @@ for (const [name, file, from, to, suite = 'smoke'] of M) {
   writeFileSync(path, text.replace(from, () => to));
 
   const extra = suite === 'apply' ? ['-d', 'extension=gd', '-d', 'extension=fileinfo', '-d', 'extension=zip'] : [];
-  const r = spawnSync(php, ['-d', `extension_dir=${ext}`, '-d', 'extension=mbstring', ...extra, join(work, 'tests', 'php', `${suite}.php`)], { encoding: 'utf8' });
+  const r = suite === 'i18n'
+    ? spawnSync(process.execPath, [join(work, 'tests', 'i18n.mjs')], { encoding: 'utf8' })
+    : spawnSync(php, ['-d', `extension_dir=${ext}`, '-d', 'extension=mbstring', ...extra, join(work, 'tests', 'php', `${suite}.php`)], { encoding: 'utf8' });
   const out = (r.stdout || '') + (r.stderr || '');
   const red = out.match(/THẤT BẠI (\d+)/);
   if (red) { caught++; console.log(`${name.padEnd(50)} => bắt được (${red[1]} phép kiểm đỏ)`); }
