@@ -184,7 +184,7 @@
     font-size: 0.75rem;
     line-height: normal;
     letter-spacing: 0.03em;
-    color: #e05441;
+    color: #ea6452; // 5,07 : 1 trên #1b201d (bản thiết kế #e05441 chỉ đạt 4,34 : 1)
 
     @include up($bp-md) {
       flex-basis: 18px;

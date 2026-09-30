@@ -266,7 +266,8 @@
   margin-bottom: 1.875rem; // 23 px + 7 px trên nút (hai lề của khối không cộng dồn được vì nút là khối)
 }
 
-.consent-label {
+// Chỉ trong biểu mẫu liên hệ (nền tối): chữ trắng. Biểu mẫu ứng tuyển có nền sáng và tự đặt màu ở _careers.scss.
+.contact-form .consent-label {
   display: flex;
   align-items: flex-start;
   gap: 0.625rem;

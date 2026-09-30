@@ -107,6 +107,18 @@ function common_checks( DOMXPath $x, string $name ): void {
 	}
 	same( "{$name}: nút không chữ đều có aria-label", 0, $nameless );
 
+	// Thứ tự tiêu đề (WCAG 1.3.1 / axe heading-order): không nhảy cấp (h1 → h3). Hộp thoại ngoài <main> được bỏ qua.
+	$level = 0;
+	$skips = array();
+	foreach ( q( $x, '//main//*[self::h1 or self::h2 or self::h3 or self::h4 or self::h5 or self::h6][not(ancestor::dialog)]' ) as $h ) {
+		$n = (int) substr( $h->nodeName, 1 );
+		if ( $level > 0 && $n > $level + 1 ) {
+			$skips[] = 'h' . $level . ' → h' . $n . ' (' . mb_substr( trim( $h->textContent ), 0, 30 ) . ')';
+		}
+		$level = $n;
+	}
+	same( "{$name}: tiêu đề không nhảy cấp", array(), $skips );
+
 	// UC-10 2a: khung thông báo "nội dung đang được dịch" có sẵn nhưng ẩn (JS chỉ mở khi người dùng vừa chuyển sang trang chưa có bản dịch).
 	$notice = q( $x, '//main/div[@data-lang-notice]' );
 	check( "{$name}: khung thông báo chuyển ngôn ngữ ẩn sẵn, có role=status, có chữ và nút đóng có tên", 1 === $notice->length && $notice->item( 0 )->hasAttribute( 'hidden' ) && 'status' === $notice->item( 0 )->getAttribute( 'role' ) && '' !== trim( $notice->item( 0 )->textContent ) && 1 === q( $x, '//main/div[@data-lang-notice]/button[@data-lang-notice-close and string-length(@aria-label) > 0]' )->length );
@@ -660,6 +672,13 @@ $xss = render( '404', false, 'vi', array( 'VG_FX_URI' => '/du-an/"><script>alert
 same( '404: đường dẫn chứa <script> không lọt vào HTML', 0, q( $xss, '//script[contains(., "alert(1)")]' )->length );
 $de404 = render( '404', false, 'de', array( 'VG_FX_URI' => '/du-an/x/' ) );
 common_checks( $de404, '404 tiếng Đức' );
+
+/* ========================= Quy tắc SCSS tĩnh (lỗi axe đã gặp) ========================= */
+
+$contact_scss = (string) file_get_contents( ROOT . '/wp-content/themes/vgarco/src/scss/pages/_contact.scss' );
+$careers_scss = (string) file_get_contents( ROOT . '/wp-content/themes/vgarco/src/scss/pages/_careers.scss' );
+check( 'SCSS: chữ trắng của ô đồng ý chỉ áp dụng trong biểu mẫu liên hệ (nền tối), không toàn cục — nếu không ô đồng ý ở biểu mẫu ứng tuyển (nền sáng) thành chữ trắng trên nền trắng', 1 === preg_match( '/^\.contact-form \.consent-label \{/m', $contact_scss ) && 0 === preg_match( '/^\.consent-label \{/m', $contact_scss ) );
+check( 'SCSS: ô đồng ý ở biểu mẫu ứng tuyển có màu chữ tối tường minh', 1 === preg_match( '/\.job-apply-form \.consent-label \{[^}]*color: var\(--c-ink\);/s', $careers_scss ) );
 
 /* ========================= Bộ chuyển ngôn ngữ (UC-10) ========================= */
 

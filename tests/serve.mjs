@@ -13,6 +13,7 @@ const theme = join( root, '..', 'wp-content', 'themes', 'vgarco' );
 // /img/ : ảnh thật của bản thiết kế HTML, chỉ để khung thử có ảnh. Đặt VG_IMG_DIR để đổi nơi lấy ảnh.
 const imgDir = process.env.VG_IMG_DIR ?? 'C:/Users/ThangVq/OneDrive - Mobifone/Documents/ChatGPT/Project1/vgarco-preview/assets';
 const roots = {
+	'/axe/': join( theme, 'node_modules', 'axe-core' ), // kiểm tra trợ năng (tests/a11y.md)
 	'/js/': join( theme, 'src', 'js' ),
 	'/dist/': join( theme, 'dist' ),
 	'/img/': imgDir,

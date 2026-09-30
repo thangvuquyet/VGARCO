@@ -74,6 +74,7 @@ vgarco_breadcrumb(
 			</ul>
 		<?php endif; ?>
 	</div>
+	<h2 class="sr-only"><?php esc_html_e( 'Hệ chuyên môn', 'vgarco' ); ?></h2>
 	<div class="discipline-matrix">
 		<?php foreach ( $disciplines as $i => $discipline ) : ?>
 			<article>

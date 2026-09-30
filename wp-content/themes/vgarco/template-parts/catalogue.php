@@ -45,6 +45,7 @@ vgarco_breadcrumb( $trail );
 
 <section class="section wrap projects-section catalogue" id="du-an">
 	<?php if ( $catalogue['projects'] ) : ?>
+		<h2 class="sr-only"><?php esc_html_e( 'Danh mục dự án', 'vgarco' ); ?></h2>
 		<div class="catalogue-grid<?php echo $term ? ' is-filtered' : ''; ?>">
 			<?php foreach ( $catalogue['projects'] as $project ) : ?>
 				<?php get_template_part( 'template-parts/cards/project', null, array( 'project' => $project, 'arrow' => true ) ); ?>
