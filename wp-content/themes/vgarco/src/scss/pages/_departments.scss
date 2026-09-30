@@ -7,9 +7,12 @@
   gap: 3.375rem;
   padding-block: 1.625rem 2.125rem;
 
+  @include up($bp-md) {
+    padding-block: 2rem 2.75rem;
+  }
+
   @include up($bp-desk) {
     grid-template-columns: 1fr 2fr;
-    padding-block: 2rem 2.75rem;
   }
 }
 

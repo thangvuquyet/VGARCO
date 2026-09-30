@@ -28,7 +28,7 @@
     font-size: 0.9em;
     color: #bbc4b7; // đỏ thương hiệu trên nền đen chỉ đạt 3,7 : 1
 
-    @include up($bp-md) {
+    @include up($bp-tablet) {
       display: inline;
       font-size: 0.94em;
     }
@@ -46,22 +46,34 @@
     color: #bbc1bb;
   }
 
-  @include up($bp-md) {
+  @include up($bp-tablet) {
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
-    gap: 3.125rem;
+    gap: 1.875rem;
 
     .section-description {
       max-width: 19.375rem;
       margin-top: 0;
     }
   }
+
+  @include up($bp-desk) {
+    gap: 3.125rem;
+  }
 }
 
 .services-body {
   display: grid;
   gap: 1.75rem;
+
+  // 601–999 px: ảnh 2 phần, danh sách 3 phần (bản thiết kế đo ở 620 / 700 / 900 px); từ 1000 px ảnh rộng hơn.
+  @include up($bp-tablet) {
+    &:has(.service-image) {
+      grid-template-columns: 2fr 3fr;
+      gap: 2rem;
+    }
+  }
 
   @include up($bp-desk) {
     &:has(.service-image) {
@@ -123,7 +135,8 @@
   }
 
   @include up($bp-tablet) {
-    aspect-ratio: 2 / 1;
+    aspect-ratio: auto;
+    min-height: 28.125rem;
 
     figcaption {
       right: 1.6875rem;
@@ -133,11 +146,6 @@
     small {
       font-size: 0.75rem;
     }
-  }
-
-  @include up($bp-desk) {
-    aspect-ratio: auto;
-    min-height: 28.125rem;
   }
 }
 
