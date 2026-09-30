@@ -257,6 +257,29 @@ fx_post(
 	array( 'url' => '/gioi-thieu/' )
 );
 
+// Trang chủ (500): VG_FX_PAGE_OVERRIDE=1 → đã nhập chữ ghi đè (có nội dung độc hại để kiểm tra việc lọc/thoát).
+fx_post(
+	500,
+	'page',
+	'Trang chủ',
+	$page_override ? array(
+		'hero_nhan'    => 'Nhãn <b>ghi đè</b>',
+		'hero_tieu_de' => "Khẩu hiệu mới.<img src=x onerror=alert(1)>\n<em>Của biên tập viên.</em>",
+		'hero_mo_ta'   => "Dòng 1 <script>alert(1)</script>\nDòng 2",
+		'hero_nut'     => 'Nút ghi đè',
+		'dai_chu'      => getenv( 'VG_FX_BAND_ONE' ) ? 'Chỉ một cụm' : "Cụm một\n\n  Cụm hai  \nCụm ba\nCụm bốn",
+		'gt_doan_1'    => 'Đoạn giới thiệu mới.',
+		'nguyen_tac'   => array(
+			array( 'tieu_de' => 'Nguyên tắc A', 'mo_ta' => 'Mô tả A' ),
+			array( 'tieu_de' => '', 'mo_ta' => '' ),
+			array( 'tieu_de' => 'Nguyên tắc B', 'mo_ta' => 'Mô tả B' ),
+		),
+		'cta_tieu_de'  => "Kêu gọi mới\n<em>nhấn mạnh.</em>",
+		'cta_lien_ket' => 'Liên hệ ngay',
+	) : array(),
+	array( 'url' => '/' )
+);
+
 // Ban lãnh đạo (502), Phòng ban (503), Lĩnh vực (504), Liên hệ (505). VG_FX_PAGE_OVERRIDE=1: đã nhập chữ ghi đè / thành viên.
 fx_post(
 	502,

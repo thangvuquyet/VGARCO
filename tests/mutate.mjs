@@ -455,6 +455,14 @@ const M = [
     "$fallbacks[ $code ] = (string) apply_filters( 'wpml_permalink', $target, $code );", "$fallbacks[ $code ] = (string) $target;", 'pages'],
   ["chuyển ngôn ngữ: khung thông báo hiện sẵn", "wp-content/themes/vgarco/header.php",
     "data-lang-notice role=\"status\" hidden>", "data-lang-notice role=\"status\">", 'pages'],
+  ["trang chủ nhập: dải chữ một cụm vẫn được dùng", "wp-content/themes/vgarco/front-page.php",
+    "if ( count( $band ) < 2 ) {", "if ( false ) {", 'pages'],
+  ["trang chủ nhập: nhãn không đọc ô đã nhập", "wp-content/themes/vgarco/front-page.php",
+    "echo esc_html( $t( 'hero_nhan', __( 'Kiến trúc bắt đầu từ một tầm nhìn', 'vgarco' ) ) );", "echo esc_html( __( 'Kiến trúc bắt đầu từ một tầm nhìn', 'vgarco' ) );", 'pages'],
+  ["trang chủ nhập: nhãn không thoát HTML", "wp-content/themes/vgarco/front-page.php",
+    "echo esc_html( $t( 'hero_nhan', __( 'Kiến trúc bắt đầu từ một tầm nhìn', 'vgarco' ) ) );", "echo $t( 'hero_nhan', __( 'Kiến trúc bắt đầu từ một tầm nhìn', 'vgarco' ) );", 'pages'],
+  ["trang chủ nhập: khẩu hiệu không lọc thẻ", "wp-content/themes/vgarco/front-page.php",
+    "vgarco_field_heading( 'hero_tieu_de',", "vgarco_field_text( 'hero_tieu_de',", 'pages'],
 ];
 
 let caught = 0, missed = 0, skipped = 0;

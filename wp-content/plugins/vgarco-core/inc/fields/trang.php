@@ -28,6 +28,19 @@ function vgarco_location_page_template( string $template ): array {
 	);
 }
 
+/** Quy tắc vị trí: chỉ hiện ở trang được đặt làm trang chủ (Cài đặt → Đọc). */
+function vgarco_location_front_page(): array {
+	return array(
+		array(
+			array(
+				'param'    => 'page_type',
+				'operator' => '==',
+				'value'    => 'front_page',
+			),
+		),
+	);
+}
+
 /** Khung chung của một nhóm trường trang. */
 function vgarco_page_group( string $key, string $title, string $template, array $fields ): array {
 	return array(
@@ -76,6 +89,89 @@ function vgarco_page_heading_field( Closure $b, string $name, string $label ): a
 
 function vgarco_page_tab( Closure $b, string $name, string $label ): array {
 	return $b( $name, $label, 'tab', 'ignore', array( 'placement' => 'top' ) );
+}
+
+/**
+ * Trang chủ (mục 6.5: khẩu hiệu, đoạn giới thiệu, 3 nguyên tắc, lời dẫn các khối, nội dung CTA). Chỉ số và đối tác lấy từ trang Cấu hình;
+ * dự án nổi bật/tiêu biểu, lĩnh vực và tin tức lấy từ chính các kiểu nội dung đó. Mọi ô có bản mặc định trong mẫu: để trống thì dùng bản mặc định.
+ */
+function vgarco_fields_page_home(): array {
+	$b  = vgarco_field_builder( 'home' );
+	$nt = vgarco_field_builder( 'home_nt' );
+
+	$group = vgarco_page_group(
+		'group_vg_page_home',
+		'Nội dung trang chủ',
+		'',
+		array(
+			vgarco_page_tab( $b, 'tab_hero', 'Đầu trang' ),
+			vgarco_page_text_field( $b, 'hero_nhan', 'Nhãn trên tiêu đề', 'Mặc định: Kiến trúc bắt đầu từ một tầm nhìn.' ),
+			vgarco_page_heading_field( $b, 'hero_tieu_de', 'Khẩu hiệu (tiêu đề chính)' ),
+			vgarco_page_area_field( $b, 'hero_mo_ta', 'Đoạn mô tả', 'Xuống dòng ở chỗ muốn ngắt dòng.', 3 ),
+			vgarco_page_text_field( $b, 'hero_nut', 'Nút — dòng chính', 'Mặc định: Khám phá công trình. Liên kết tới danh mục dự án.' ),
+			vgarco_page_text_field( $b, 'hero_nut_nhan', 'Nút — dòng phụ', 'Mặc định: Dấu ấn VGARCO.' ),
+			vgarco_page_text_field( $b, 'hero_chan_1', 'Chú thích chân — địa điểm', 'Mặc định: Hà Nội, Việt Nam.' ),
+			vgarco_page_text_field( $b, 'hero_chan_2', 'Chú thích chân — năm', 'Mặc định: Hoạt động từ 2013.' ),
+			vgarco_page_text_field( $b, 'hero_rail_1', 'Thanh dọc — chữ thứ nhất', 'Mặc định: Từ bản vẽ.' ),
+			vgarco_page_text_field( $b, 'hero_rail_2', 'Thanh dọc — chữ thứ hai', 'Mặc định: Đến công trình.' ),
+
+			vgarco_page_tab( $b, 'tab_dai_chu', 'Dải chữ' ),
+			vgarco_page_area_field( $b, 'dai_chu', 'Các cụm chữ', 'Mỗi dòng một cụm, ít nhất 2 cụm. Để trống thì dùng: Tư duy kiến trúc / Năng lực thực thi / Dấu ấn VGARCO.', 4 ),
+
+			vgarco_page_tab( $b, 'tab_gioi_thieu', 'Về VGARCO' ),
+			vgarco_page_text_field( $b, 'gt_nhan', 'Nhãn khối', 'Mặc định: Về VGARCO.' ),
+			vgarco_page_heading_field( $b, 'gt_tieu_de', 'Tiêu đề' ),
+			vgarco_page_area_field( $b, 'gt_doan_1', 'Đoạn 1', 'Thông tin pháp lý phải khớp giấy đăng ký kinh doanh.', 3 ),
+			vgarco_page_area_field( $b, 'gt_doan_2', 'Đoạn 2', '', 3 ),
+			vgarco_page_text_field( $b, 'gt_lien_ket', 'Liên kết', 'Mặc định: Về công ty.' ),
+			$b(
+				'nguyen_tac',
+				'Ba nguyên tắc',
+				'repeater',
+				'translate',
+				array(
+					'layout'       => 'block',
+					'min'          => 0,
+					'max'          => 3,
+					'button_label' => 'Thêm nguyên tắc',
+					'instructions' => 'Đúng 3 nguyên tắc theo thiết kế. Để trống toàn bộ thì dùng 3 nguyên tắc mặc định.',
+					'sub_fields'   => array(
+						$nt( 'tieu_de', 'Tiêu đề', 'text', 'translate' ),
+						$nt( 'mo_ta', 'Mô tả', 'textarea', 'translate', array( 'rows' => 2, 'new_lines' => '' ) ),
+					),
+				)
+			),
+
+			vgarco_page_tab( $b, 'tab_du_an', 'Dự án tiêu biểu' ),
+			vgarco_page_text_field( $b, 'da_nhan', 'Nhãn khối', 'Mặc định: Dự án tiêu biểu. Ba dự án được đánh dấu "Tiêu biểu" ở mục Dự án.' ),
+			vgarco_page_heading_field( $b, 'da_tieu_de', 'Tiêu đề' ),
+			vgarco_page_area_field( $b, 'da_mo_ta', 'Mô tả ngắn' ),
+			vgarco_page_text_field( $b, 'da_lien_ket', 'Liên kết', 'Mặc định: Xem toàn bộ dự án.' ),
+
+			vgarco_page_tab( $b, 'tab_chuyen_mon', 'Chuyên môn' ),
+			vgarco_page_text_field( $b, 'cm_nhan', 'Nhãn khối', 'Mặc định: Chuyên môn. Ba lĩnh vực đầu có phần tóm tắt trang chủ hiển thị ở đây.' ),
+			vgarco_page_heading_field( $b, 'cm_tieu_de', 'Tiêu đề' ),
+			vgarco_page_area_field( $b, 'cm_mo_ta', 'Mô tả ngắn' ),
+			vgarco_page_text_field( $b, 'cm_lien_ket', 'Liên kết', 'Mặc định: Khám phá các lĩnh vực.' ),
+
+			vgarco_page_tab( $b, 'tab_doi_tac', 'Khách hàng và đối tác' ),
+			vgarco_page_text_field( $b, 'dt_nhan', 'Nhãn khối', 'Danh sách đơn vị nhập ở trang Cấu hình VGARCO.' ),
+			vgarco_page_area_field( $b, 'dt_mo_ta', 'Mô tả ngắn' ),
+
+			vgarco_page_tab( $b, 'tab_tin_tuc', 'Tin tức' ),
+			vgarco_page_text_field( $b, 'tt_nhan', 'Nhãn khối', 'Mặc định: Tin tức & hoạt động. Khối ẩn khi chưa có bài nào.' ),
+			vgarco_page_heading_field( $b, 'tt_tieu_de', 'Tiêu đề' ),
+			vgarco_page_text_field( $b, 'tt_lien_ket', 'Liên kết', 'Mặc định: Đến trang tin tức.' ),
+
+			vgarco_page_tab( $b, 'tab_cta', 'Kêu gọi liên hệ' ),
+			vgarco_page_text_field( $b, 'cta_nhan', 'Nhãn khối', 'Mặc định: Bắt đầu một dự án.' ),
+			vgarco_page_heading_field( $b, 'cta_tieu_de', 'Tiêu đề' ),
+			vgarco_page_area_field( $b, 'cta_mo_ta', 'Mô tả ngắn', '', 3 ),
+			vgarco_page_text_field( $b, 'cta_lien_ket', 'Liên kết', 'Mặc định: Trao đổi với chúng tôi. Liên kết tới trang Liên hệ.' ),
+		)
+	);
+	$group['location'] = vgarco_location_front_page();
+	return $group;
 }
 
 /**
@@ -381,6 +477,7 @@ function vgarco_fields_page_careers(): array {
  */
 function vgarco_fields_trang(): array {
 	return array(
+		vgarco_fields_page_home(),
 		vgarco_fields_page_about(),
 		vgarco_fields_page_leadership(),
 		vgarco_fields_page_departments(),

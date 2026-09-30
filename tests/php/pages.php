@@ -639,6 +639,25 @@ foreach ( array( '999' => 'không tồn tại', '404' => 'quá hạn', '405' => 
 $ac = render( 'templates/apply', false, 'vi', array( 'VG_FX_ID' => '507', 'VG_FX_GET' => 'id=404' ) );
 same( 'ứng tuyển (quá hạn): nói rõ đã ngừng nhận hồ sơ và nêu tên vị trí', array( 'Vị trí này đã ngừng nhận hồ sơ', 'Thực tập sinh kiến trúc' ), array( trim( q( $ac, '//h1' )->item( 0 )->textContent ), trim( q( $ac, '//section[' . cls( 'job-apply-head' ) . ']/p[2]' )->item( 0 )->textContent ) ) );
 
+/* ========================= Trang chủ: chữ do biên tập viên nhập (mục 6.5) ========================= */
+
+$ho = render( 'front-page', false, 'vi', array( 'VG_FX_ID' => '500', 'VG_FX_PAGE_OVERRIDE' => '1' ) );
+common_checks( $ho, 'trang chủ (đã nhập chữ)' );
+same( 'trang chủ nhập: nhãn ghi đè, thẻ HTML bị thoát thành chữ', array( 'Nhãn <b>ghi đè</b>', 0 ), array( trim( q( $ho, '//section[' . cls( 'hero' ) . ']//p[' . cls( 'eyebrow' ) . ']' )->item( 0 )->textContent ), q( $ho, '//section[' . cls( 'hero' ) . ']//p[' . cls( 'eyebrow' ) . ']/b' )->length ) );
+$h1 = q( $ho, '//h1' )->item( 0 );
+same( 'trang chủ nhập: khẩu hiệu ghi đè giữ <em>, không lọt <img>/onerror', array( 'Khẩu hiệu mới.', 'Của biên tập viên.', 0, false ), array( trim( $h1->childNodes->item( 0 )->textContent ), trim( q( $ho, '//h1/em' )->item( 0 )->textContent ), q( $ho, '//h1//img' )->length, str_contains( $ho->document->saveHTML(), 'onerror' ) ) );
+same( 'trang chủ nhập: đoạn mô tả có <br> từ xuống dòng, không có <script>', array( 1, 0 ), array( q( $ho, '//p[' . cls( 'hero-description' ) . ']/br' )->length, q( $ho, '//p[' . cls( 'hero-description' ) . ']//script' )->length ) );
+same( 'trang chủ nhập: nút ghi đè, dòng phụ giữ mặc định', array( 'Nút ghi đè', 'Dấu ấn VGARCO' ), array( trim( q( $ho, '//a[' . cls( 'hero-explore' ) . ']/span[2]/text()[1]' )->item( 0 )->textContent ), trim( q( $ho, '//a[' . cls( 'hero-explore' ) . ']//small' )->item( 0 )->textContent ) ) );
+same( 'trang chủ nhập: dải chữ theo các dòng đã nhập (bỏ dòng trống, cắt khoảng trắng)', array( 'Cụm một', 'Cụm hai', 'Cụm ba', 'Cụm bốn' ), array_map( static fn( $n ) => trim( $n->textContent ), iterator_to_array( q( $ho, '(//div[' . cls( 'marquee-group' ) . '])[1]/span' ) ) ) );
+same( 'trang chủ nhập: đoạn 1 ghi đè, đoạn 2 giữ mặc định', array( 'Đoạn giới thiệu mới.', true ), array( trim( q( $ho, '//div[' . cls( 'home-about-copy' ) . ']/p[1]' )->item( 0 )->textContent ), str_starts_with( trim( q( $ho, '//div[' . cls( 'home-about-copy' ) . ']/p[2]' )->item( 0 )->textContent ), 'Chúng tôi theo đuổi' ) ) );
+same( 'trang chủ nhập: nguyên tắc chỉ hiện dòng đã nhập, bỏ dòng trống, đánh số lại', array( array( '01', 'Nguyên tắc A', 'Mô tả A' ), array( '02', 'Nguyên tắc B', 'Mô tả B' ) ), array_map( static fn( $a ) => array( trim( $ho->query( './span', $a )->item( 0 )->textContent ), trim( $ho->query( './h3', $a )->item( 0 )->textContent ), trim( $ho->query( './p', $a )->item( 0 )->textContent ) ), iterator_to_array( q( $ho, '//div[' . cls( 'home-methods' ) . ']/article' ) ) ) );
+same( 'trang chủ nhập: CTA ghi đè tiêu đề (có <em>) và liên kết', array( 'Kêu gọi mới', 'nhấn mạnh.', 'Liên hệ ngay' ), array( trim( q( $ho, '//section[' . cls( 'page-cta' ) . ']//h2' )->item( 0 )->childNodes->item( 0 )->textContent ), trim( q( $ho, '//section[' . cls( 'page-cta' ) . ']//h2/em' )->item( 0 )->textContent ), trim( q( $ho, '//section[' . cls( 'page-cta' ) . ']//a[' . cls( 'text-link' ) . ']' )->item( 0 )->textContent ) ) );
+same( 'trang chủ nhập: ô không nhập vẫn là bản mặc định (nhãn CTA, liên kết Về công ty)', array( 'Bắt đầu một dự án', 'Về công ty' ), array( trim( q( $ho, '//section[' . cls( 'page-cta' ) . ']//p[' . cls( 'section-label' ) . ']' )->item( 0 )->textContent ), trim( q( $ho, '//div[' . cls( 'home-about-copy' ) . ']/a' )->item( 0 )->textContent ) ) );
+$hb = render( 'front-page', false, 'vi', array( 'VG_FX_ID' => '500', 'VG_FX_PAGE_OVERRIDE' => '1', 'VG_FX_BAND_ONE' => '1' ) );
+same( 'trang chủ nhập: dải chữ chỉ có 1 cụm thì dùng 3 cụm mặc định', array( 'Tư duy kiến trúc', 'Năng lực thực thi', 'Dấu ấn VGARCO' ), array_map( static fn( $n ) => trim( $n->textContent ), iterator_to_array( q( $hb, '(//div[' . cls( 'marquee-group' ) . '])[1]/span' ) ) ) );
+$hd = render( 'front-page', false, 'vi', array( 'VG_FX_ID' => '500' ) );
+same( 'trang chủ: có trang chủ tĩnh nhưng chưa nhập gì → đúng bản mặc định (3 nguyên tắc)', array( 3, 'Hiểu đúng bối cảnh' ), array( q( $hd, '//div[' . cls( 'home-methods' ) . ']/article' )->length, trim( q( $hd, '//div[' . cls( 'home-methods' ) . ']/article[1]/h3' )->item( 0 )->textContent ) ) );
+
 /* ========================= Trang 404 theo ngữ cảnh (yêu cầu 35) ========================= */
 
 $contexts = array(
