@@ -230,6 +230,7 @@ function printf_( ...$a ) {
 	printf( ...$a );
 }
 
+require ROOT . '/wp-content/themes/vgarco/inc/models.php';
 require ROOT . '/wp-content/themes/vgarco/inc/menus.php';
 require ROOT . '/wp-content/themes/vgarco/inc/template-tags.php';
 

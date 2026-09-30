@@ -5,7 +5,7 @@ import { initNav } from './modules/nav.js';
 // Module theo trang: chỉ tải khi trang cần. Khóa lấy từ data-vg-page của thẻ <body> (vgarco_page_key() trong PHP).
 // Vite tự tách mỗi import() thành một tệp riêng có mã băm.
 const pageModules = {
-	// home: () => import( './modules/home.js' ),
+	home: () => import( './modules/home.js' ),
 	// project: () => import( './modules/gallery.js' ),
 	// careers: () => import( './modules/careers.js' ),
 };

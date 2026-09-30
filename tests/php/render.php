@@ -82,9 +82,6 @@ function esc_html_e( $t ) {
 function esc_attr_e( $t ) {
 	echo esc_attr( $t );
 }
-function get_field( $n, $p = false ) {
-	return null;
-}
 function home_url( $path = '' ) {
 	return '/' . ltrim( $path, '/' );
 }
@@ -119,8 +116,8 @@ function wp_date( $f ) {
 function sanitize_key( $k ) {
 	return strtolower( preg_replace( '/[^a-z0-9_\-]/i', '', $k ) );
 }
-function get_template_part( $slug ) {
-	require THEME . '/' . $slug . '.php';
+function get_template_part( $slug, $name = null, $args = array() ) {
+	require THEME . '/' . $slug . '.php'; // $args nhìn thấy được trong mẫu, như WordPress
 }
 function get_header() {
 	require THEME . '/header.php';
@@ -208,19 +205,23 @@ function the_excerpt() {
 
 /* ---------- Nạp mã thật và kết xuất ---------- */
 
+require_once __DIR__ . '/fixtures.php';
 require_once VGARCO_CORE_DIR . 'inc/helpers.php';
+require_once THEME . '/inc/models.php';
 require_once THEME . '/inc/menus.php';
 require_once THEME . '/inc/template-tags.php';
 require_once THEME . '/inc/enqueue.php';
 
+$template = $argv[2] ?? 'index';
 ob_start();
-require THEME . '/index.php';
+require THEME . '/' . $template . '.php';
 $html = ob_get_clean();
 
 $out = ROOT . '/tests/out';
 if ( ! is_dir( $out ) ) {
 	mkdir( $out, 0777, true );
 }
-file_put_contents( $out . '/frame.html', $html );
+$name = array( 'index' => 'frame', 'front-page' => 'home' )[ $template ] ?? $template;
+file_put_contents( $out . '/' . $name . '.html', $html );
 
-echo 'Đã kết xuất ' . strlen( $html ) . " byte → tests/out/frame.html, không có cảnh báo PHP.\n";
+echo 'Đã kết xuất ' . strlen( $html ) . " byte → tests/out/$name.html, không có cảnh báo PHP.\n";

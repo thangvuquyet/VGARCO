@@ -105,6 +105,7 @@ h3 em {
   display: inline-flex;
   align-items: center;
   gap: 2.2rem;
+  min-height: 2.5rem;
   padding-bottom: 0.5rem;
   font-size: var(--fs-body);
   font-weight: 500;
@@ -112,8 +113,8 @@ h3 em {
   border-bottom: 1px solid #aeb1b5;
 
   svg {
-    width: 1.1em;
-    height: 1.1em;
+    width: 0.95em;
+    height: 0.95em;
   }
 
   &:hover {

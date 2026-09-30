@@ -66,10 +66,10 @@ function vgarco_default_menu( string $location ): array {
 
 	if ( 'footer' === $location ) {
 		return array(
-			vgarco_menu_node( __( 'Giới thiệu', 'vgarco' ), home_url( '/gioi-thieu/' ) ),
+			vgarco_menu_node( __( 'Giới thiệu', 'vgarco' ), vgarco_page_url( 'about' ) ),
 			vgarco_menu_node( __( 'Dự án', 'vgarco' ), $archive( 'du_an', '/du-an/' ) ),
-			vgarco_menu_node( __( 'Lĩnh vực hoạt động', 'vgarco' ), home_url( '/linh-vuc-hoat-dong/' ) ),
-			vgarco_menu_node( __( 'Liên hệ', 'vgarco' ), home_url( '/lien-he/' ) ),
+			vgarco_menu_node( __( 'Lĩnh vực hoạt động', 'vgarco' ), vgarco_page_url( 'services' ) ),
+			vgarco_menu_node( __( 'Liên hệ', 'vgarco' ), vgarco_page_url( 'contact' ) ),
 		);
 	}
 
@@ -80,16 +80,16 @@ function vgarco_default_menu( string $location ): array {
 	return array(
 		vgarco_menu_node(
 			__( 'Giới thiệu', 'vgarco' ),
-			home_url( '/gioi-thieu/' ),
+			vgarco_page_url( 'about' ),
 			$in_about,
 			__( 'KHÁM PHÁ VGARCO', 'vgarco' ),
 			array(
-				vgarco_menu_node( __( 'Về công ty', 'vgarco' ), home_url( '/gioi-thieu/' ), is_page( 'gioi-thieu' ) ),
-				vgarco_menu_node( __( 'Ban lãnh đạo', 'vgarco' ), home_url( '/gioi-thieu/ban-lanh-dao/' ), is_page( 'ban-lanh-dao' ) ),
-				vgarco_menu_node( __( 'Phòng ban', 'vgarco' ), home_url( '/gioi-thieu/phong-ban/' ), is_page( 'phong-ban' ) ),
+				vgarco_menu_node( __( 'Về công ty', 'vgarco' ), vgarco_page_url( 'about' ), is_page( 'gioi-thieu' ) ),
+				vgarco_menu_node( __( 'Ban lãnh đạo', 'vgarco' ), vgarco_page_url( 'leadership' ), is_page( 'ban-lanh-dao' ) ),
+				vgarco_menu_node( __( 'Phòng ban', 'vgarco' ), vgarco_page_url( 'departments' ), is_page( 'phong-ban' ) ),
 			)
 		),
-		vgarco_menu_node( __( 'Lĩnh vực hoạt động', 'vgarco' ), home_url( '/linh-vuc-hoat-dong/' ), is_page( 'linh-vuc-hoat-dong' ) ),
+		vgarco_menu_node( __( 'Lĩnh vực hoạt động', 'vgarco' ), vgarco_page_url( 'services' ), is_page( 'linh-vuc-hoat-dong' ) ),
 		vgarco_menu_node(
 			__( 'Dự án', 'vgarco' ),
 			$archive( 'du_an', '/du-an/' ),
@@ -104,8 +104,8 @@ function vgarco_default_menu( string $location ): array {
 			__( 'TIN TỨC & HOẠT ĐỘNG', 'vgarco' ),
 			vgarco_taxonomy_menu_children( 'chuyen_muc' )
 		),
-		vgarco_menu_node( __( 'Tuyển dụng', 'vgarco' ), home_url( '/tuyen-dung/' ), is_singular( 'vi_tri' ) || is_page( 'tuyen-dung' ) ),
-		vgarco_menu_node( __( 'Liên hệ', 'vgarco' ), home_url( '/lien-he/' ), is_page( 'lien-he' ) ),
+		vgarco_menu_node( __( 'Tuyển dụng', 'vgarco' ), vgarco_page_url( 'careers' ), is_singular( 'vi_tri' ) || is_page( 'tuyen-dung' ) ),
+		vgarco_menu_node( __( 'Liên hệ', 'vgarco' ), vgarco_page_url( 'contact' ), is_page( 'lien-he' ) ),
 	);
 }
 

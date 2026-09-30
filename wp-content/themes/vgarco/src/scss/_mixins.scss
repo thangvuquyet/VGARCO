@@ -1,5 +1,7 @@
 // Điểm gãy bố cục (px). Thiết kế mobile-first: viết kiểu cho màn nhỏ trước, mở rộng bằng up().
 $bp-tablet: 601px; // ≥ : máy tính bảng
+$bp-md: 701px; // ≥ : lưới 2–3 cột, tiêu đề khối nằm ngang
+$bp-lg: 1001px; // ≥ : bố cục máy tính (hero 3 cột, lưới dự án 3 cột)
 $bp-nav: 1181px; // ≥ : menu ngang thay cho menu thả dọc
 $bp-wide: 1280px;
 $bp-xl: 1400px;

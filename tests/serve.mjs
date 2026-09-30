@@ -9,9 +9,12 @@ import { fileURLToPath } from 'node:url';
 const root = fileURLToPath( new URL( '.', import.meta.url ) );
 // Thứ tự quan trọng: tiền tố dài trước, "/" cuối cùng.
 const theme = join( root, '..', 'wp-content', 'themes', 'vgarco' );
+// /img/ : ảnh thật của bản thiết kế HTML, chỉ để khung thử có ảnh. Đặt VG_IMG_DIR để đổi nơi lấy ảnh.
+const imgDir = process.env.VG_IMG_DIR ?? 'C:/Users/ThangVq/OneDrive - Mobifone/Documents/ChatGPT/Project1/vgarco-preview/assets';
 const roots = {
 	'/js/': join( theme, 'src', 'js' ),
 	'/dist/': join( theme, 'dist' ),
+	'/img/': imgDir,
 	'/': join( root, 'out' ),
 };
 const types = {
@@ -20,12 +23,16 @@ const types = {
 	'.css': 'text/css; charset=utf-8',
 	'.woff2': 'font/woff2',
 	'.json': 'application/json; charset=utf-8',
+	'.jpg': 'image/jpeg',
+	'.jpeg': 'image/jpeg',
+	'.png': 'image/png',
+	'.svg': 'image/svg+xml',
 };
 
 createServer( async ( req, res ) => {
 	const path = decodeURIComponent( new URL( req.url, 'http://x' ).pathname );
 	const prefix = Object.keys( roots ).find( ( p ) => path.startsWith( p ) );
-	const base = roots[ prefix ];
+	const base = normalize( roots[ prefix ] ); // chuẩn hóa dấu phân cách để phép kiểm tra chống thoát thư mục đúng trên Windows
 	const file = normalize( join( base, path.slice( prefix.length ) || 'frame.html' ) );
 
 	if ( ! file.startsWith( base + sep ) && file !== base ) {

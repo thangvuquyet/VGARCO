@@ -22,4 +22,9 @@
   @include meta.load-css('components/header');
   @include meta.load-css('components/nav');
   @include meta.load-css('components/footer');
+  @include meta.load-css('components/section');
+}
+
+@layer pages {
+  @include meta.load-css('pages/home');
 }

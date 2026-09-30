@@ -1,0 +1,1027 @@
+@use '../mixins' as *;
+
+// Trang chủ. Số đo lấy từ bản thiết kế HTML ở 1440 và 390 px; giữa hai mốc theo điểm gãy của theme.
+// Khác bản thiết kế có chủ ý:
+//  - dưới 1001 px hero xếp dọc (bản thiết kế xẹp khung ảnh về 0 px ở 700–899 px);
+//  - chữ phụ của dòng chú thích hero dùng --c-ink-muted (bản gốc #92968F chỉ đạt 2,9 : 1);
+//  - dấu ✳ của dải chữ vẽ bằng SVG (bản gốc là ký tự emoji, hiện ô vuông xanh trên Windows).
+
+@keyframes marquee-ltr {
+  from {
+    transform: translateX(-50%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+// ===================================================================== HERO
+.hero {
+  --hero-pad: clamp(1.25rem, 3.33vw, 3rem);
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 0 var(--hero-pad) 1.5rem;
+
+  @include up($bp-lg) {
+    display: grid;
+    grid-template-columns: minmax(0, 0.36fr) 150px minmax(0, 0.64fr);
+    grid-template-rows: 558px;
+    padding-block: 18px 24px;
+  }
+}
+
+.hero-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 2.375rem 0 1.625rem;
+
+  .eyebrow {
+    margin-bottom: 1.3125rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.055em;
+
+    @include up($bp-md) {
+      margin-bottom: 2.1875rem;
+      font-size: var(--fs-caption);
+      letter-spacing: 0.09em;
+    }
+  }
+
+  @include up($bp-lg) {
+    padding: 2.625rem 1.375rem 0 0.5rem;
+  }
+}
+
+.hero-description {
+  max-width: 24.375rem;
+  margin: 1.25rem 0;
+  font-size: 0.9375rem;
+  line-height: 1.75;
+  color: var(--c-ink-muted);
+
+  @include up($bp-md) {
+    margin: 1.625rem 0 1.5rem;
+    font-size: var(--fs-body);
+  }
+}
+
+.hero-explore {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.7;
+
+  small {
+    display: block;
+    margin-top: 0.4375rem;
+    font-size: 0.6875rem;
+    font-weight: 400;
+    line-height: 1.3;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--c-ink-muted);
+  }
+
+  &:hover .round-arrow {
+    background: var(--c-brand);
+  }
+
+  @include up($bp-md) {
+    gap: 1.125rem;
+    font-size: 1.0625rem;
+
+    small {
+      font-size: var(--fs-small);
+      line-height: 1.4;
+    }
+  }
+}
+
+.hero-footnote {
+  display: none;
+
+  @include up($bp-lg) {
+    display: flex;
+    gap: 2.625rem;
+    margin-top: auto;
+    padding-top: 2.5rem;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--c-ink-muted);
+  }
+}
+
+// "TỪ BẢN VẼ → ĐẾN CÔNG TRÌNH": ngang trên di động, dọc ở cột giữa trên máy tính.
+.hero-process-rail {
+  display: grid;
+  grid-template-columns: auto auto auto 1fr;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 0 1rem;
+  border-block: 1px solid var(--c-line);
+
+  .process-line {
+    width: 30px;
+    height: 1px;
+    background: var(--c-brand);
+  }
+
+  strong {
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--c-brand);
+  }
+
+  .process-arrow {
+    font-size: 1.125rem;
+    line-height: 1.7;
+    color: var(--c-brand);
+  }
+
+  &:hover strong {
+    color: var(--c-panel);
+  }
+
+  @include up($bp-lg) {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 0 1.25rem 0 1.75rem;
+    overflow: hidden;
+    border: 0;
+
+    .process-line {
+      position: absolute;
+      top: 18%;
+      bottom: 18%;
+      left: 1.75rem;
+      width: 1px;
+      height: auto;
+      background: linear-gradient(var(--c-brand), #d9dcd6 65%, transparent);
+    }
+
+    strong,
+    .process-arrow {
+      margin-left: 1.125rem;
+    }
+
+    .process-arrow {
+      margin-block: 0.1875rem;
+      font-size: 1.75rem;
+      line-height: 1;
+    }
+  }
+}
+
+// --- Khung ảnh trình chiếu ---
+.hero-frame {
+  position: relative;
+  aspect-ratio: 7 / 5;
+  overflow: hidden;
+  background: #dce1dc;
+
+  @include up($bp-tablet) {
+    aspect-ratio: 16 / 10;
+  }
+
+  @include up($bp-lg) {
+    aspect-ratio: auto;
+    background: #111;
+  }
+}
+
+.showcase-media {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+
+  // Lớp tối dần ở đáy để chữ trắng đọc được trên mọi ảnh.
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(rgb(8 10 9 / 0%) 38%, rgb(8 10 9 / 64%));
+  }
+}
+
+.showcase-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 52%;
+  filter: saturate(0.94) contrast(1.02);
+  opacity: 0;
+  transition: opacity 0.7s ease;
+
+  &.is-active {
+    opacity: 1;
+  }
+
+  @include up($bp-lg) {
+    object-position: 50% 64%;
+  }
+}
+
+// Lưới ba cột chia ảnh, chữ VG chìm: điểm nhấn trang trí của bản thiết kế.
+.showcase-grid {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0.35;
+  background:
+    linear-gradient(
+      90deg,
+      transparent calc(33.33% - 0.5px),
+      rgb(255 255 255 / 16%) 33.33%,
+      transparent calc(33.33% + 0.5px),
+      transparent calc(66.66% - 0.5px),
+      rgb(255 255 255 / 13%) 66.66%,
+      transparent calc(66.66% + 0.5px)
+    ),
+    linear-gradient(transparent calc(50% - 0.5px), rgb(255 255 255 / 10%) 50%, transparent calc(50% + 0.5px));
+
+  @include up($bp-lg) {
+    opacity: 0.55;
+  }
+}
+
+.showcase-watermark {
+  position: absolute;
+  top: -14px;
+  right: -20px;
+  z-index: 2;
+  font-size: 105px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.12em;
+  color: rgb(255 255 255 / 9.4%);
+  pointer-events: none;
+  user-select: none;
+
+  @include up($bp-lg) {
+    top: -44px;
+    font-size: 228px;
+  }
+}
+
+// Chú thích của từng ảnh, chuyển mờ dần cùng ảnh. Chú thích không hoạt động bị ẩn khỏi trình đọc màn hình và bàn phím.
+.showcase-caption {
+  position: absolute;
+  right: 1.125rem;
+  bottom: 1.125rem;
+  left: 1.125rem;
+  z-index: 4;
+  color: #fff;
+  visibility: hidden;
+  opacity: 0;
+  transition:
+    opacity 0.7s ease,
+    visibility 0s 0.7s;
+
+  &.is-active {
+    visibility: visible;
+    opacity: 1;
+    transition: opacity 0.7s ease;
+  }
+
+  .eyebrow {
+    display: block;
+    margin-bottom: 0.625rem;
+    font-size: 0.5625rem; // 9
+    letter-spacing: 0.09em;
+    color: #fff;
+  }
+
+  small {
+    display: block;
+    margin-top: 0.75rem;
+    font-size: 0.6875rem;
+    line-height: 1.7;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: rgb(255 255 255 / 78%);
+  }
+
+  @include up($bp-lg) {
+    right: 150px;
+    bottom: 30px;
+    left: 34px;
+
+    .eyebrow {
+      font-size: 0.75rem; // 12
+    }
+  }
+}
+
+.hero-project-link {
+  display: flex;
+  align-items: center;
+  gap: 0.9375rem;
+  max-width: 38.75rem;
+  font-size: clamp(1.375rem, 2.7vw, 2.4rem);
+  font-weight: 520;
+  line-height: 1.06;
+  letter-spacing: -0.045em;
+  color: #fff;
+
+  svg {
+    flex-shrink: 0;
+    width: 0.8em;
+    height: 0.8em;
+  }
+
+  &:hover span {
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+}
+
+// ===================================================================== DẢI CHỮ
+.marquee {
+  position: relative;
+  overflow: hidden;
+  font-size: 1.0625rem; // 17
+  font-weight: 450;
+  line-height: 1.7;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  border-block: 1px solid var(--c-line);
+
+  @include up($bp-md) {
+    font-size: clamp(1.0625rem, 1.6vw, 1.75rem);
+    letter-spacing: -0.035em;
+  }
+}
+
+.marquee-track,
+.partner-track {
+  display: flex;
+  width: max-content;
+  animation: marquee-ltr 40s linear infinite; // trái sang phải, theo đặc tả HUONG_DAN
+}
+
+.partner-track {
+  animation-duration: 70s;
+}
+
+.marquee-group {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-around;
+  gap: 2rem;
+  min-width: 100vw;
+  padding: 1.5rem 3.75rem 1.5rem 1.5625rem;
+
+  @include up($bp-md) {
+    gap: 5vw;
+    padding: 1.5rem 5rem 1.5rem 2.5rem;
+  }
+
+  .asterisk {
+    flex-shrink: 0;
+    width: 1.3em;
+    height: 1.3em;
+    color: var(--c-brand);
+  }
+}
+
+// Một nút dừng chung cho hero và cả hai dải chạy (UC-01 3a).
+.motion-toggle {
+  position: absolute;
+  top: 50%;
+  right: 0.5rem;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 33px;
+  height: 33px;
+  color: var(--c-ink);
+  background: var(--c-surface);
+  border: 1px solid var(--c-line-strong);
+  transform: translateY(-50%);
+
+  @include hit-area(0.6rem, 0.6rem);
+
+  svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .icon-play {
+    display: none;
+  }
+
+  &[aria-pressed='true'] {
+    .icon-pause {
+      display: none;
+    }
+
+    .icon-play {
+      display: block;
+    }
+  }
+
+  @include up($bp-md) {
+    right: 0.625rem;
+    width: 36px;
+    height: 36px;
+  }
+}
+
+// Trạng thái dừng: JS đặt lên <body>; giảm chuyển động của hệ điều hành cũng dừng cả hai dải.
+.is-paused {
+  .marquee-track,
+  .partner-track {
+    animation-play-state: paused;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track,
+  .partner-track {
+    animation: none;
+  }
+}
+
+// ===================================================================== VỀ VGARCO
+.section {
+  padding-block: 2.75rem;
+}
+
+.home-about {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+
+  .section-label {
+    grid-column: 1 / -1;
+  }
+
+  @include up($bp-md) {
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 0.42fr);
+    align-items: start;
+    column-gap: 5.125rem;
+    padding-block: 3.5rem 2.625rem;
+  }
+}
+
+.home-about-copy {
+  max-width: 47.5rem;
+
+  p {
+    max-width: 42.5rem;
+    margin-top: 1rem;
+    font-size: 0.9375rem;
+    line-height: 1.75;
+    color: var(--c-ink-muted);
+
+    @include up($bp-md) {
+      font-size: 1.0625rem;
+      line-height: 1.78;
+    }
+  }
+
+  .text-link {
+    margin-top: 1.125rem;
+  }
+}
+
+.home-facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  padding-top: 1.5625rem;
+  border-top: 1px solid var(--c-line);
+
+  strong {
+    display: block;
+    margin-bottom: 0.5625rem;
+    font-size: 2.625rem;
+    font-weight: 400;
+    line-height: 1;
+    color: var(--c-ink);
+
+    span {
+      font-size: 1.5625rem;
+      color: var(--c-brand);
+    }
+  }
+
+  p > span {
+    display: block;
+    font-size: 0.75rem;
+    line-height: 1.55;
+    color: var(--c-ink-muted);
+  }
+
+  @include up($bp-md) {
+    grid-template-columns: 1fr;
+    gap: 1.4375rem;
+    padding: 0 0 0 2.625rem;
+    border-top: 0;
+    border-left: 1px solid var(--c-line);
+
+    p {
+      padding-bottom: 1.375rem;
+      border-bottom: 1px solid var(--c-line);
+
+      &:last-child {
+        padding-bottom: 0;
+        border-bottom: 0;
+      }
+    }
+
+    strong {
+      font-size: clamp(2.625rem, 4vw, 3.5625rem);
+    }
+
+    p > span {
+      font-size: 0.9375rem;
+    }
+  }
+}
+
+.home-methods {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1fr;
+  margin-top: 0.5rem;
+  border-top: 1px solid var(--c-line);
+
+  article {
+    padding: 1.375rem 0;
+    border-bottom: 1px solid var(--c-line);
+
+    &:last-child {
+      padding-bottom: 0;
+      border-bottom: 0;
+    }
+  }
+
+  article > span {
+    display: block;
+    margin-bottom: 1.125rem;
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    line-height: 1.7;
+    letter-spacing: 0.08em;
+    color: var(--c-label);
+  }
+
+  h3 {
+    margin-bottom: 0.6875rem;
+    font-size: 1.375rem;
+  }
+
+  p {
+    font-size: 0.9375rem;
+    line-height: 1.72;
+    color: var(--c-ink-muted);
+  }
+
+  @include up($bp-md) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-top: 1rem;
+
+    article {
+      padding: 1.875rem 2.125rem 0;
+      border-bottom: 0;
+
+      &:first-child {
+        padding-left: 0;
+      }
+
+      & + article {
+        border-left: 1px solid var(--c-line);
+      }
+    }
+  }
+}
+
+// ===================================================================== DỰ ÁN TIÊU BIỂU
+.projects-section {
+  @include up($bp-md) {
+    padding-block: 3.25rem 3.5rem;
+  }
+}
+
+.project-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2.125rem;
+
+  @include up($bp-md) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @include up($bp-lg) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.projects-archive {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.125rem;
+  margin-top: 2.375rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--c-line);
+
+  @include up($bp-md) {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 1.875rem;
+  }
+}
+
+// ===================================================================== CHUYÊN MÔN
+.home-services {
+  padding-block: 2.875rem;
+  background: var(--c-surface-warm);
+  border-block: 1px solid #d8ddd5;
+
+  > .wrap {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2.25rem;
+
+    @include up($bp-md) {
+      grid-template-columns: 0.95fr 1.05fr;
+      column-gap: 8vw;
+    }
+  }
+
+  @include up($bp-md) {
+    padding-block: 3.625rem;
+  }
+}
+
+// Khối này nền xanh xám: chữ nhấn dùng đỏ nhạt của nhãn thay vì đỏ thương hiệu (bản thiết kế).
+.home-services h2 em {
+  color: var(--c-label);
+}
+
+.home-services-copy {
+  max-width: 36.875rem;
+  margin: 1.5rem 0 0;
+  font-size: 0.9375rem;
+  line-height: 1.75;
+  color: var(--c-ink-muted);
+
+  @include up($bp-md) {
+    font-size: 1.0625rem;
+  }
+}
+
+.home-services .text-link {
+  margin-top: 1.125rem;
+}
+
+.service-preview-list {
+  border-top: 1px solid #c4cac1;
+
+  a {
+    display: flex;
+    align-items: baseline;
+    gap: 1.25rem;
+    padding: 1.3125rem 0;
+    font-size: 1.125rem;
+    line-height: 1.7;
+    border-bottom: 1px solid #c4cac1;
+
+    @include up($bp-md) {
+      padding-block: 1.5625rem;
+      font-size: 1.3125rem;
+    }
+
+    &:hover {
+      color: var(--c-brand);
+    }
+  }
+
+  .service-num {
+    font-size: var(--fs-caption);
+    color: var(--c-ink-muted);
+  }
+
+  .service-note {
+    margin-left: auto;
+    font-size: 0.9375rem;
+    color: var(--c-ink-muted);
+    text-align: right;
+
+    @include up($bp-md) {
+      font-size: 1.0625rem;
+    }
+  }
+}
+
+// ===================================================================== ĐỐI TÁC
+.partners-strip {
+  padding-block: 3rem 3.25rem;
+  border-bottom: 1px solid var(--c-line);
+
+  @include up($bp-md) {
+    padding-block: 3.875rem 4.125rem;
+  }
+}
+
+.partners-head {
+  display: grid;
+  gap: 1.125rem;
+  margin-bottom: 1.5625rem;
+
+  @include up($bp-lg) {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr);
+    align-items: end;
+    column-gap: 3.125rem;
+    margin-bottom: 2.125rem;
+  }
+}
+
+.partners-note {
+  max-width: 32.5rem;
+  font-size: 0.9375rem;
+  line-height: 1.72;
+  color: var(--c-ink-muted);
+
+  @include up($bp-lg) {
+    justify-self: end;
+    font-size: var(--fs-body);
+  }
+}
+
+// Dải đối tác tràn hết chiều ngang màn hình.
+.partner-marquee {
+  overflow: hidden;
+  background: var(--c-surface);
+  border-block: 1px solid var(--c-line);
+}
+
+// Bề rộng nhóm cố định theo số đối tác (không theo nội dung): mỗi nhóm ít nhất bằng màn hình, mỗi cột ít nhất --partner-min.
+// Nhờ vậy tên dài xuống dòng trong cột thay vì kéo giãn cả dải.
+.partner-group {
+  --partner-min: 220px;
+
+  display: grid;
+  flex: 0 0 auto;
+  grid-template-columns: repeat(var(--n, 5), minmax(0, 1fr));
+  width: max(100vw, calc(var(--n, 5) * var(--partner-min)));
+
+  @include up($bp-md) {
+    --partner-min: 276px;
+  }
+}
+
+.partner-logo {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 7.75rem;
+  padding: 1.125rem 1rem;
+  border-left: 1px solid var(--c-line);
+
+  strong {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: 0.035em;
+    text-transform: uppercase;
+
+    @include up($bp-md) {
+      font-size: clamp(0.9375rem, 1.15vw, 1.0625rem);
+    }
+  }
+
+  small {
+    margin-top: 0.4375rem;
+    font-size: 0.75rem;
+    line-height: 1.45;
+    letter-spacing: 0.035em;
+    color: var(--c-ink-muted);
+  }
+
+  @include up($bp-md) {
+    min-height: 9.125rem;
+    padding: 1.5rem 1.375rem;
+  }
+}
+
+.partner-monogram {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  margin-bottom: 1.125rem;
+  font-size: var(--fs-caption);
+  font-weight: 750;
+  letter-spacing: 0.02em;
+  border: 1px solid var(--c-ink);
+  border-radius: 50%;
+}
+
+// ===================================================================== TIN TỨC
+.home-news {
+  border-bottom: 1px solid var(--c-line);
+
+  @include up($bp-md) {
+    padding-block: 3.5rem;
+  }
+}
+
+.home-news-head {
+  display: grid;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+
+  @include up($bp-md) {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 2.5rem;
+  }
+}
+
+.home-news-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.875rem;
+
+  @include up($bp-md) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.home-news-card {
+  display: block;
+  padding-bottom: 1.125rem;
+  border-bottom: 1px solid var(--c-line);
+
+  img {
+    width: 100%;
+    aspect-ratio: 1.48 / 1;
+    object-fit: cover;
+  }
+
+  .eyebrow {
+    display: block;
+    margin: 0.9375rem 0 0.5625rem;
+    line-height: 1.5;
+    letter-spacing: 0.1em;
+    color: var(--c-brand);
+  }
+
+  h3 {
+    font-size: 1.25rem;
+    line-height: 1.32;
+    letter-spacing: -0.02em;
+
+    @include up($bp-md) {
+      font-size: 1.375rem;
+    }
+  }
+
+  p {
+    margin-top: 0.5625rem;
+    font-size: 0.9375rem;
+    line-height: 1.7;
+    color: var(--c-ink-muted);
+
+    @include up($bp-md) {
+      font-size: var(--fs-body);
+    }
+  }
+
+  &:hover h3 {
+    color: var(--c-brand);
+  }
+}
+
+// ===================================================================== KÊU GỌI LIÊN HỆ
+.page-cta {
+  overflow: hidden;
+  color: #fff;
+  background: var(--c-panel);
+
+  > .wrap {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.625rem;
+    padding-block: 2.5625rem;
+
+    @include up($bp-md) {
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      column-gap: 4rem;
+    }
+  }
+
+  .section-label {
+    margin-bottom: 1.25rem;
+    color: #fff;
+  }
+
+  h2 {
+    max-width: 47.5rem;
+    font-size: var(--fs-headline-a);
+    line-height: 1.08;
+    letter-spacing: -0.045em;
+  }
+
+  // Chữ nhấn trên nền đỏ: trắng, không đỏ (đỏ trên đỏ không đọc được).
+  h2 em {
+    color: inherit;
+  }
+
+  .cta-support {
+    max-width: 38.75rem;
+    margin-top: 0.75rem;
+    font-size: 0.9375rem;
+    line-height: 1.72;
+    color: #f3e5e2;
+
+    @include up($bp-md) {
+      font-size: 1.0625rem;
+    }
+  }
+
+  .text-link {
+    margin-top: 1rem;
+    font-size: 0.9375rem;
+    border-color: rgb(255 255 255 / 50%);
+
+    &:hover {
+      color: #fff;
+      border-color: #fff;
+    }
+  }
+}
+
+.cta-circle {
+  position: relative;
+  display: grid;
+  place-items: center;
+  justify-self: start;
+  width: 68px;
+  height: 68px;
+  color: #fff;
+  border: 1px solid rgb(255 255 255 / 56.5%);
+  border-radius: 50%;
+
+  // Vòng ngoài mỏng, chỉ có nét trên và dưới.
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-block: 1px solid rgb(255 255 255 / 50%);
+    border-radius: 50%;
+    transform: scale(1.31);
+    transition: transform 0.4s ease;
+  }
+
+  svg {
+    width: 29px;
+    height: 29px;
+  }
+
+  &:hover::before {
+    transform: scale(1.45);
+  }
+
+  @include up($bp-md) {
+    justify-self: end;
+    width: 86px;
+    height: 86px;
+
+    &::before {
+      transform: scale(1.34);
+    }
+
+    svg {
+      width: 38px;
+      height: 38px;
+    }
+  }
+}
