@@ -19,6 +19,7 @@ define( 'VGARCO_CORE_FILE', __FILE__ );
 define( 'VGARCO_CORE_DIR', plugin_dir_path( __FILE__ ) );
 
 require_once VGARCO_CORE_DIR . 'inc/helpers.php';
+require_once VGARCO_CORE_DIR . 'inc/careers/jobs.php';
 require_once VGARCO_CORE_DIR . 'inc/post-types.php';
 require_once VGARCO_CORE_DIR . 'inc/taxonomies.php';
 require_once VGARCO_CORE_DIR . 'inc/seed.php';

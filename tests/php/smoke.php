@@ -122,7 +122,7 @@ check( '"Y tế" có trong danh sách (chưa có dự án nhưng phải tạo s�
 
 // --- Trường ACF: cấu trúc hợp lệ ---
 $groups = vgarco_field_groups();
-same( 'số nhóm trường (4 kiểu nội dung + 2 nhóm cấu hình + 5 nhóm trang)', 11, count( $groups ) );
+same( 'số nhóm trường (4 kiểu nội dung + 2 nhóm cấu hình + 6 nhóm trang)', 12, count( $groups ) );
 
 $keys  = array();
 $names = array();

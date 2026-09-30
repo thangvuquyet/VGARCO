@@ -144,8 +144,47 @@ function is_front_page() {
 function is_404() {
 	return false;
 }
+// $_GET giả từ VG_FX_GET="q=kien&noi-lam-viec=ha-noi" (bộ lọc trang Tuyển dụng, ?id= của trang Ứng tuyển).
+if ( getenv( 'VG_FX_GET' ) ) {
+	parse_str( (string) getenv( 'VG_FX_GET' ), $_GET );
+}
+function wp_unslash( $v ) {
+	return $v;
+}
+function sanitize_text_field( $s ) {
+	return trim( strip_tags( (string) $s ) );
+}
+function absint( $n ) {
+	return abs( (int) $n );
+}
+function selected( $value, $current ) {
+	if ( (string) $value === (string) $current ) {
+		echo ' selected="selected"';
+	}
+}
+function add_query_arg( $key, $value, $url ) {
+	return $url . ( str_contains( $url, '?' ) ? '&' : '?' ) . rawurlencode( $key ) . '=' . rawurlencode( (string) $value );
+}
+function rest_url( $path = '' ) {
+	return '/wp-json/' . ltrim( $path, '/' );
+}
+function get_post_type( $id ) {
+	return $GLOBALS['fx']['posts'][ $id ]['type'] ?? false;
+}
+// Bỏ dấu: bảng ký tự tiếng Việt + Đức (WordPress có sẵn remove_accents với bảng đầy đủ hơn).
+function remove_accents( $s ) {
+	static $map = null;
+	$map ??= array_merge(
+		array_combine(
+			mb_str_split( 'àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđÀÁẠẢÃÂẦẤẬẨẪĂẰẮẶẲẴÈÉẸẺẼÊỀẾỆỂỄÌÍỊỈĨÒÓỌỎÕÔỒỐỘỔỖƠỜỚỢỞỠÙÚỤỦŨƯỪỨỰỬỮỲÝỴỶỸĐ' ),
+			mb_str_split( 'aaaaaaaaaaaaaaaaaeeeeeeeeeeeiiiiiooooooooooooooooouuuuuuuuuuuyyyyydAAAAAAAAAAAAAAAAAEEEEEEEEEEEIIIIIOOOOOOOOOOOOOOOOOUUUUUUUUUUUYYYYYD' )
+		),
+		array( 'ä' => 'ae', 'ö' => 'oe', 'ü' => 'ue', 'Ä' => 'Ae', 'Ö' => 'Oe', 'Ü' => 'Ue', 'ß' => 'ss' )
+	);
+	return strtr( (string) $s, $map );
+}
 function is_singular( $type = '' ) {
-	$types = array( 'single-du_an' => 'du_an', 'single-tin_tuc' => 'tin_tuc' );
+	$types = array( 'single-du_an' => 'du_an', 'single-tin_tuc' => 'tin_tuc', 'single-vi_tri' => 'vi_tri' );
 	return isset( $types[ $GLOBALS['template'] ] ) && ( '' === $type || $types[ $GLOBALS['template'] ] === $type );
 }
 function is_post_type_archive( $type = '' ) {
@@ -250,6 +289,7 @@ require_once __DIR__ . '/fixtures.php';
 require_once VGARCO_CORE_DIR . 'inc/helpers.php';
 require_once THEME . '/inc/models.php';
 require_once THEME . '/inc/content.php';
+require_once VGARCO_CORE_DIR . 'inc/careers/jobs.php';
 require_once THEME . '/inc/menus.php';
 require_once THEME . '/inc/template-tags.php';
 require_once THEME . '/inc/enqueue.php';

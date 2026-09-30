@@ -499,6 +499,98 @@ same( 'bài đầu danh sách: không có "Bài trước", còn "Bài tiếp the
 $al = render( 'single-tin_tuc', false, 'vi', array( 'VG_FX_ID' => '301' ) );
 same( 'bài cuối danh sách: không có "Bài tiếp theo", còn "Bài trước" (UC-06 7a)', array( 1, 0 ), array( q( $al, '//a[' . cls( 'nav-prev' ) . ']' )->length, q( $al, '//a[' . cls( 'nav-next' ) . ']' )->length ) );
 
+/* ========================= Tuyển dụng (UC-07) và ứng tuyển (UC-08) ========================= */
+
+$card_titles = static fn( DOMXPath $d ): array => array_map( static fn( $n ) => trim( $n->textContent ), iterator_to_array( q( $d, '//article[' . cls( 'job-card' ) . ' and not(@hidden)]//h3' ) ) );
+
+// --- Danh sách ---
+$j = render( 'templates/careers', false, 'vi', array( 'VG_FX_ID' => '506' ) );
+common_checks( $j, 'tuyển dụng' );
+check( 'tuyển dụng: trang thuộc module "careers" (data-vg-page)', 1 === q( $j, '//body[@data-vg-page="careers"]' )->length );
+same( 'tuyển dụng: h1 có ngắt dòng và cụm nhấn', 1, q( $j, '//h1[count(br)=1 and count(em)=1]' )->length );
+same( 'tuyển dụng: chỉ vị trí ĐANG NHẬN — bỏ vị trí quá hạn và vị trí đã đóng; hạn nộp là hôm nay vẫn còn nhận', array( 'Kiến trúc sư thiết kế', 'Kỹ sư kết cấu', 'Kỹ sư giám sát' ), $card_titles( $j ) );
+same( 'tuyển dụng: số lượng "03 vị trí"', array( '03', 'vị trí' ), array( trim( q( $j, '//p[@data-job-count]/strong' )->item( 0 )->textContent ), trim( q( $j, '//p[@data-job-count]/span' )->item( 0 )->textContent ) ) );
+check( 'tuyển dụng: vùng số lượng báo cho trình đọc màn hình khi đổi (aria-live)', 1 === q( $j, '//p[@data-job-count and @aria-live="polite"]' )->length );
+same( 'tuyển dụng: thẻ đánh số 01–03, số ẩn khỏi trình đọc màn hình', array( '01', '02', '03' ), array_map( static fn( $n ) => trim( $n->textContent ), iterator_to_array( q( $j, '//article[' . cls( 'job-card' ) . ']/span[' . cls( 'job-number' ) . ' and @aria-hidden="true"]' ) ) ) );
+same( 'tuyển dụng: dòng thông tin gồm nơi làm việc, phòng ban, loại hình', array( 'Hà Nội', 'Kiến trúc', 'Toàn thời gian' ), array_map( static fn( $n ) => trim( $n->textContent ), iterator_to_array( q( $j, '(//article[' . cls( 'job-card' ) . ']//ul[' . cls( 'job-meta' ) . '])[1]/li' ) ) ) );
+check( 'tuyển dụng: mỗi thẻ mang chuỗi tìm kiếm đã bỏ dấu và slug lọc cho JS', 'kien truc su thiet ke' === substr( q( $j, '(//article[' . cls( 'job-card' ) . '])[1]' )->item( 0 )->getAttribute( 'data-search' ), 0, 21 ) && 'ha-noi' === q( $j, '(//article[' . cls( 'job-card' ) . '])[1]' )->item( 0 )->getAttribute( 'data-location' ) && 'kien-truc' === q( $j, '(//article[' . cls( 'job-card' ) . '])[1]' )->item( 0 )->getAttribute( 'data-department' ) );
+check( 'tuyển dụng: liên kết chi tiết có tên riêng cho từng vị trí (không 3 nút cùng chữ "Xem chi tiết")', 3 === q( $j, '//a[' . cls( 'job-detail-button' ) . ' and starts-with(@aria-label, "Xem chi tiết: ")]' )->length );
+same( 'tuyển dụng: bộ lọc chỉ có nơi làm việc / phòng ban đang có vị trí', array( array( 'Tất cả địa điểm', 'Hà Nội', 'Nghệ An' ), array( 'Tất cả phòng ban', 'Kiến trúc', 'Xây dựng dân dụng', 'Giám sát thi công' ) ), array( array_map( static fn( $n ) => trim( $n->textContent ), iterator_to_array( q( $j, '//select[@name="noi-lam-viec"]/option' ) ) ), array_map( static fn( $n ) => trim( $n->textContent ), iterator_to_array( q( $j, '//select[@name="phong-ban"]/option' ) ) ) ) );
+check( 'tuyển dụng: biểu mẫu tìm là GET, có role=search, mọi ô có nhãn (không JS vẫn lọc được)', 1 === q( $j, '//form[@role="search" and @method="get" and @data-job-form]' )->length && 3 === count( array_filter( array( 'job-keyword', 'job-location', 'job-department' ), static fn( $i ) => 1 === q( $j, '//label[@for="' . $i . '"]' )->length ) ) );
+same( 'tuyển dụng: chưa lọc thì nút "Xóa bộ lọc" và thông báo rỗng đều ẩn', array( 1, 1 ), array( q( $j, '//a[@data-job-reset and ' . cls( 'job-reset' ) . ' and @hidden]' )->length, q( $j, '//div[@data-job-empty and @hidden]' )->length ) );
+check( 'tuyển dụng: khối "Chưa thấy vị trí phù hợp?" có liên kết mailto tới email chung', 1 === q( $j, '//section[' . cls( 'career-connect' ) . ']//a[@href="mailto:vgarco.cc@gmail.com"]' )->length );
+
+// --- Lọc bằng URL (không JS) ---
+$jf = render( 'templates/careers', false, 'vi', array( 'VG_FX_ID' => '506', 'VG_FX_GET' => 'q=kien+truc&noi-lam-viec=ha-noi' ) );
+same( 'lọc: "kien truc" (không dấu) + Hà Nội → chỉ Kiến trúc sư', array( 'Kiến trúc sư thiết kế' ), $card_titles( $jf ) );
+same( 'lọc: số lượng cập nhật "01", số thứ tự tính lại, ô nhập giữ giá trị, nơi làm việc được chọn', array( '01', 'kien truc', 'ha-noi' ), array( trim( q( $jf, '//p[@data-job-count]/strong' )->item( 0 )->textContent ), q( $jf, '//input[@name="q"]' )->item( 0 )->getAttribute( 'value' ), q( $jf, '//select[@name="noi-lam-viec"]/option[@selected]' )->item( 0 )->getAttribute( 'value' ) ) );
+same( 'lọc: hiện nút "Xóa bộ lọc" khi đang lọc', 0, q( $jf, '//a[' . cls( 'job-reset' ) . ' and @hidden]' )->length );
+$jc = render( 'templates/careers', false, 'vi', array( 'VG_FX_ID' => '506', 'VG_FX_GET' => 'q=Ki%E1%BA%BFn+tr%C3%BAc' ) );
+same( 'lọc: gõ có dấu "Kiến trúc" cho cùng kết quả', array( 'Kiến trúc sư thiết kế' ), $card_titles( $jc ) );
+$jd = render( 'templates/careers', false, 'vi', array( 'VG_FX_ID' => '506', 'VG_FX_GET' => 'phong-ban=giam-sat-thi-cong' ) );
+same( 'lọc: theo phòng ban', array( 'Kỹ sư giám sát' ), $card_titles( $jd ) );
+same( 'lọc: số thứ tự của thẻ còn lại là "01" (đếm lại theo kết quả, không giữ số cũ "03")', '01', trim( q( $jd, '//article[' . cls( 'job-card' ) . ' and not(@hidden)]/span[' . cls( 'job-number' ) . ']' )->item( 0 )->textContent ) );
+$jm = render( 'templates/careers', false, 'vi', array( 'VG_FX_ID' => '506', 'VG_FX_GET' => 'q=ky+su+ket+cau' ) );
+same( 'lọc: nhiều từ khóa — mọi từ đều phải có ("ky su ket cau" chỉ khớp Kỹ sư kết cấu, không khớp Kỹ sư giám sát)', array( 'Kỹ sư kết cấu' ), $card_titles( $jm ) );
+$jn = render( 'templates/careers', false, 'vi', array( 'VG_FX_ID' => '506', 'VG_FX_GET' => 'q=zzzz' ) );
+same( 'lọc: không có kết quả → thông báo hiện, có liên kết "Xem tất cả vị trí", số lượng "00" (UC-07 5a/5b)', array( 0, 0, '00', 1 ), array( count( $card_titles( $jn ) ), q( $jn, '//div[@data-job-empty and @hidden]' )->length, trim( q( $jn, '//p[@data-job-count]/strong' )->item( 0 )->textContent ), q( $jn, '//div[@data-job-empty]//a[@data-job-reset]' )->length ) );
+$ji = render( 'templates/careers', false, 'vi', array( 'VG_FX_ID' => '506', 'VG_FX_GET' => 'noi-lam-viec=khong-co&phong-ban=cung-khong-co' ) );
+same( 'lọc: giá trị không có trong danh sách bị bỏ qua (không tin URL) — vẫn hiện đủ 3 vị trí', 3, count( $card_titles( $ji ) ) );
+$jx = render( 'templates/careers', false, 'vi', array( 'VG_FX_ID' => '506', 'VG_FX_GET' => 'q=' . rawurlencode( '"><script>alert(1)</script>' ) ) );
+same( 'an toàn: từ khóa độc hại trong URL không thành thẻ script', 0, q( $jx, '//main//script' )->length );
+$jl = render( 'templates/careers', false, 'vi', array( 'VG_FX_ID' => '506', 'VG_FX_GET' => 'q=' . str_repeat( 'a', 300 ) ) );
+same( 'lọc: từ khóa dài bị cắt ở 100 ký tự', 100, strlen( q( $jl, '//input[@name="q"]' )->item( 0 )->getAttribute( 'value' ) ) );
+
+// --- Chưa có vị trí nào (UC-07 3a) ---
+$j0 = render( 'templates/careers', false, 'vi', array( 'VG_FX_ID' => '506', 'VG_FX_NO_JOBS' => '1' ) );
+common_checks( $j0, 'tuyển dụng rỗng' );
+same( 'chưa có vị trí: thông báo, không có biểu mẫu tìm/thẻ, vẫn có khối "Chưa thấy vị trí phù hợp?" (3a, 3b)', array( 1, 0, 0, 1 ), array( q( $j0, '//*[' . cls( 'jobs-empty' ) . ']' )->length, q( $j0, '//form[@data-job-form]' )->length, q( $j0, '//article[' . cls( 'job-card' ) . ']' )->length, q( $j0, '//section[' . cls( 'career-connect' ) . ']' )->length ) );
+
+// --- Chi tiết vị trí ---
+$v = render( 'single-vi_tri', false, 'vi', array( 'VG_FX_ID' => '401' ) );
+common_checks( $v, 'chi tiết vị trí' );
+same( 'chi tiết vị trí: h1, đường dẫn 3 cấp', array( 'Kiến trúc sư thiết kế', array( 'Trang chủ', 'Tuyển dụng', 'Kiến trúc sư thiết kế' ) ), array( trim( q( $v, '//h1' )->item( 0 )->textContent ), array_map( static fn( $n ) => trim( $n->textContent ), iterator_to_array( q( $v, '//nav[' . cls( 'breadcrumb' ) . ']//li' ) ) ) ) );
+check( 'chi tiết vị trí: nút "Ứng tuyển ngay" trỏ tới trang ứng tuyển kèm ID vị trí', 1 === q( $v, '//a[' . cls( 'job-apply-primary' ) . ' and @href="/ung-tuyen/?id=401"]' )->length && 0 === q( $v, '//*[' . cls( 'job-closed' ) . ']' )->length );
+same( 'chi tiết vị trí: ba khối danh sách, dòng trống bị bỏ và cắt khoảng trắng', array( 3, 2, 1 ), array( q( $v, '//div[' . cls( 'job-detail-content' ) . ']/section[1]//li' )->length, q( $v, '//div[' . cls( 'job-detail-content' ) . ']/section[2]//li' )->length, q( $v, '//div[' . cls( 'job-detail-content' ) . ']/section[3]//li' )->length ) );
+same( 'chi tiết vị trí: cột tóm tắt có địa điểm, phòng ban, loại hình, hạn nộp', array( 'Địa điểm', 'Phòng ban', 'Loại hình', 'Hạn nộp' ), array_map( static fn( $n ) => trim( $n->textContent ), iterator_to_array( q( $v, '//aside//dt' ) ) ) );
+same( 'chi tiết vị trí: hạn nộp dùng thẻ <time datetime> đúng ngày', array( date( 'Y-m-d', strtotime( '+30 days' ) ), date( 'd/m/Y', strtotime( '+30 days' ) ) ), array( q( $v, '//aside//time' )->item( 0 )->getAttribute( 'datetime' ), trim( q( $v, '//aside//time' )->item( 0 )->textContent ) ) );
+$v2 = render( 'single-vi_tri', false, 'vi', array( 'VG_FX_ID' => '402' ) );
+same( 'chi tiết vị trí: không có hạn nộp thì ẩn dòng "Hạn nộp"', array( 'Địa điểm', 'Phòng ban', 'Loại hình' ), array_map( static fn( $n ) => trim( $n->textContent ), iterator_to_array( q( $v2, '//aside//dt' ) ) ) );
+$v3 = render( 'single-vi_tri', false, 'vi', array( 'VG_FX_ID' => '403' ) );
+same( 'chi tiết vị trí: hạn nộp là hôm nay vẫn nhận (có nút ứng tuyển)', 1, q( $v3, '//a[' . cls( 'job-apply-primary' ) . ']' )->length );
+$v4 = render( 'single-vi_tri', false, 'vi', array( 'VG_FX_ID' => '404' ) );
+same( 'chi tiết vị trí: quá hạn → hiện "Đã ngừng nhận hồ sơ", ẩn nút ứng tuyển (UC-07 7a)', array( 0, 1, 'Đã ngừng nhận hồ sơ' ), array( q( $v4, '//a[' . cls( 'job-apply-primary' ) . ']' )->length, q( $v4, '//p[' . cls( 'job-closed' ) . ' and @role="status"]' )->length, trim( q( $v4, '//p[' . cls( 'job-closed' ) . ']' )->item( 0 )->textContent ) ) );
+$v5 = render( 'single-vi_tri', false, 'vi', array( 'VG_FX_ID' => '405' ) );
+same( 'chi tiết vị trí: đóng thủ công → cũng ngừng nhận dù không có hạn', array( 0, 1 ), array( q( $v5, '//a[' . cls( 'job-apply-primary' ) . ']' )->length, q( $v5, '//p[' . cls( 'job-closed' ) . ']' )->length ) );
+
+// --- Ứng tuyển ---
+$a = render( 'templates/apply', false, 'vi', array( 'VG_FX_ID' => '507', 'VG_FX_GET' => 'id=401' ) );
+common_checks( $a, 'ứng tuyển' );
+check( 'ứng tuyển: trang thuộc module "apply" (data-vg-page)', 1 === q( $a, '//body[@data-vg-page="apply"]' )->length );
+same( 'ứng tuyển: h1 là tên vị trí; đường dẫn 4 cấp', array( 'Kiến trúc sư thiết kế', array( 'Trang chủ', 'Tuyển dụng', 'Kiến trúc sư thiết kế', 'Ứng tuyển' ) ), array( trim( q( $a, '//h1' )->item( 0 )->textContent ), array_map( static fn( $n ) => trim( $n->textContent ), iterator_to_array( q( $a, '//nav[' . cls( 'breadcrumb' ) . ']//li' ) ) ) ) );
+$af = q( $a, '//form[@id="job-apply-form"]' );
+check( 'ứng tuyển: biểu mẫu ẩn cho tới khi JS sẵn sàng, gửi tới REST API, không phải trang thường', 1 === $af->length && $af->item( 0 )->hasAttribute( 'hidden' ) && '/wp-json/vgarco/v1/apply' === $af->item( 0 )->getAttribute( 'data-endpoint' ) && '/wp-json/vgarco/v1/apply/token' === $af->item( 0 )->getAttribute( 'data-token-endpoint' ) && '' === $af->item( 0 )->getAttribute( 'action' ) );
+same( 'ứng tuyển: gửi kèm ID vị trí và ngôn ngữ; mã token để trống chờ JS cấp', array( '401', 'vi', '' ), array( q( $a, '//input[@name="job_id"]' )->item( 0 )->getAttribute( 'value' ), q( $a, '//input[@name="lang"]' )->item( 0 )->getAttribute( 'value' ), q( $a, '//input[@name="token"]' )->item( 0 )->getAttribute( 'value' ) ) );
+same( 'ứng tuyển: bắt buộc họ tên, email, điện thoại, CV, mã bảo mật, đồng ý', array( 'name', 'email', 'phone', 'cv', 'captcha', 'consent' ), array_map( static fn( $n ) => $n->getAttribute( 'name' ), iterator_to_array( q( $a, '//form[@id="job-apply-form"]//*[@required and @aria-required="true"]' ) ) ) );
+check( 'ứng tuyển: ô đồng ý không tích sẵn', 0 === q( $a, '//input[@name="consent" and @checked]' )->length );
+$cv = q( $a, '//input[@name="cv"]' )->item( 0 );
+check( 'ứng tuyển: ô CV chỉ nhận .pdf .doc .docx và có mô tả giới hạn 10 MB', '.pdf,.doc,.docx' === $cv->getAttribute( 'accept' ) && str_contains( trim( q( $a, '//small[@id="apply-cv-hint"]' )->item( 0 )->textContent ), '10 MB' ) && '10485760' === $af->item( 0 )->getAttribute( 'data-max-size' ) );
+$hp = q( $a, '//div[' . cls( 'field-trap' ) . ']' );
+check( 'ứng tuyển: trường bẫy ẩn khỏi người dùng (aria-hidden, tabindex=-1, không autocomplete) nhưng vẫn là ô nhập thật', 1 === $hp->length && 'true' === $hp->item( 0 )->getAttribute( 'aria-hidden' ) && 1 === q( $a, '//div[' . cls( 'field-trap' ) . ']/input[@name="website" and @tabindex="-1" and @autocomplete="off"]' )->length );
+check( 'ứng tuyển: mọi ô có nhãn, ô bắt buộc trỏ tới vùng báo lỗi có thật', 0 === count( array_filter( iterator_to_array( q( $a, '//form[@id="job-apply-form"]//*[(self::input or self::textarea) and @id and not(@type="hidden") and not(ancestor::div[' . cls( 'field-trap' ) . '])]' ) ), static fn( $n ) => 0 === q( $a, '//label[@for="' . $n->getAttribute( 'id' ) . '"]' )->length && 0 === q( $a, '//label//*[@id="' . $n->getAttribute( 'id' ) . '"]' )->length ) ) && 0 === count( array_filter( iterator_to_array( q( $a, '//form[@id="job-apply-form"]//*[@required]' ) ), static fn( $n ) => 1 !== q( $a, '//*[@id="' . ( explode( ' ', $n->getAttribute( 'aria-describedby' ) )[ count( explode( ' ', $n->getAttribute( 'aria-describedby' ) ) ) - 1 ] ) . '"]' )->length ) ) );
+check( 'ứng tuyển: ảnh mã bảo mật có mô tả, nút tạo mã mới có tên', 1 === q( $a, '//img[@data-captcha-image and @alt != ""]' )->length && 1 === q( $a, '//button[@data-captcha-refresh and @aria-label != ""]' )->length );
+check( 'ứng tuyển: vùng báo lỗi chung có role=alert; mọi thông báo lỗi/thành công dịch được qua data-*', 1 === q( $a, '//p[@data-feedback and @role="alert"]' )->length && $af->item( 0 )->hasAttribute( 'data-msg-captcha' ) && $af->item( 0 )->hasAttribute( 'data-msg-success' ) && $af->item( 0 )->hasAttribute( 'data-msg-rate' ) && $af->item( 0 )->hasAttribute( 'data-msg-closed' ) );
+check( 'ứng tuyển: có <noscript> chỉ đường thay thế (email tuyển dụng) vì thiếu JS thì không nộp được', str_contains( (string) file_get_contents( ROOT . '/tests/out/templates-apply-507.html' ), '<noscript>' ) && str_contains( (string) file_get_contents( ROOT . '/tests/out/templates-apply-507.html' ), 'mailto:vgarco.cc@gmail.com' ) );
+check( 'ứng tuyển: ô đồng ý có liên kết tới chính sách dữ liệu, mở thẻ mới có noopener', 1 === q( $a, '//label[' . cls( 'consent-label' ) . ']//a[@href="/chinh-sach-bao-ve-du-lieu/" and @target="_blank" and contains(@rel, "noopener")]' )->length );
+same( 'ứng tuyển: cột tóm tắt có tên vị trí, địa điểm, phòng ban và liên kết xem lại mô tả', array( 'Kiến trúc sư thiết kế', array( 'Địa điểm', 'Phòng ban' ), '/tuyen-dung/401/' ), array( trim( q( $a, '//aside[' . cls( 'job-apply-summary' ) . ']/h2' )->item( 0 )->textContent ), array_map( static fn( $n ) => trim( $n->textContent ), iterator_to_array( q( $a, '//aside//dt' ) ) ), q( $a, '//aside[' . cls( 'job-apply-summary' ) . ']/a' )->item( 0 )->getAttribute( 'href' ) ) );
+
+foreach ( array( '999' => 'không tồn tại', '404' => 'quá hạn', '405' => 'đã đóng', '506' => 'không phải vị trí (một trang)', '' => 'thiếu id' ) as $bad => $why ) {
+	$ab = render( 'templates/apply', false, 'vi', array( 'VG_FX_ID' => '507', 'VG_FX_GET' => '' === $bad ? '' : 'id=' . $bad ) );
+	same( "ứng tuyển ({$why}): không hiện biểu mẫu, có đường về danh sách vị trí", array( 0, 1 ), array( q( $ab, '//form[@id="job-apply-form"]' )->length, q( $ab, '//section[' . cls( 'job-apply-head' ) . ']//a[@href="/tuyen-dung/"]' )->length ) );
+}
+$ac = render( 'templates/apply', false, 'vi', array( 'VG_FX_ID' => '507', 'VG_FX_GET' => 'id=404' ) );
+same( 'ứng tuyển (quá hạn): nói rõ đã ngừng nhận hồ sơ và nêu tên vị trí', array( 'Vị trí này đã ngừng nhận hồ sơ', 'Thực tập sinh kiến trúc' ), array( trim( q( $ac, '//h1' )->item( 0 )->textContent ), trim( q( $ac, '//section[' . cls( 'job-apply-head' ) . ']/p[2]' )->item( 0 )->textContent ) ) );
+
 /* ---------- Kết quả ---------- */
 
 echo "\n";

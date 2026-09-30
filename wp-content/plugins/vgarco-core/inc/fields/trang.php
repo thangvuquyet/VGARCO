@@ -336,6 +336,45 @@ function vgarco_fields_page_contact(): array {
 }
 
 /**
+ * Trang Tuyển dụng: mở đầu (ảnh nền tùy chọn), lời dẫn khối tìm việc, khối "Chưa thấy vị trí phù hợp?".
+ * Danh sách vị trí lấy từ mục "Vị trí tuyển dụng".
+ */
+function vgarco_fields_page_careers(): array {
+	$b = vgarco_field_builder( 'tuyen_dung' );
+
+	return vgarco_page_group(
+		'group_vg_page_careers',
+		'Nội dung trang Tuyển dụng',
+		'templates/careers.php',
+		array(
+			vgarco_page_tab( $b, 'tab_hero', 'Đầu trang' ),
+			vgarco_page_text_field( $b, 'hero_nhan', 'Nhãn đầu trang', 'Mặc định: Cơ hội nghề nghiệp.' ),
+			vgarco_page_heading_field( $b, 'hero_tieu_de', 'Tiêu đề' ),
+			$b(
+				'hero_anh',
+				'Ảnh nền',
+				'image',
+				'copy',
+				array(
+					'return_format' => 'id',
+					'preview_size'  => 'medium',
+					'library'       => 'all',
+					'instructions'  => 'Ảnh ngang rộng. Không chọn thì dùng nền tối. Chữ trắng nằm trên ảnh nên chọn ảnh không quá sáng.',
+				)
+			),
+			vgarco_page_text_field( $b, 'hero_chu_thich_nho', 'Dòng nhỏ ở góc phải', 'Mặc định: VGARCO / People & Practice.' ),
+			vgarco_page_area_field( $b, 'hero_chu_thich', 'Câu ở góc phải', 'Xuống dòng ở chỗ muốn ngắt.' ),
+			vgarco_page_tab( $b, 'tab_jobs', 'Khối tìm việc' ),
+			vgarco_page_text_field( $b, 'jobs_tieu_de', 'Tiêu đề' ),
+			vgarco_page_text_field( $b, 'jobs_mo_ta', 'Mô tả ngắn' ),
+			vgarco_page_tab( $b, 'tab_connect', 'Chưa thấy vị trí phù hợp?' ),
+			vgarco_page_text_field( $b, 'connect_tieu_de', 'Tiêu đề' ),
+			vgarco_page_area_field( $b, 'connect_mo_ta', 'Mô tả', 'Địa chỉ email lấy từ Cấu hình VGARCO (email tuyển dụng; trống thì dùng email chung).', 3 ),
+		)
+	);
+}
+
+/**
  * Tất cả nhóm trường của trang tĩnh.
  *
  * @return array[]
@@ -347,5 +386,6 @@ function vgarco_fields_trang(): array {
 		vgarco_fields_page_departments(),
 		vgarco_fields_page_services(),
 		vgarco_fields_page_contact(),
+		vgarco_fields_page_careers(),
 	);
 }

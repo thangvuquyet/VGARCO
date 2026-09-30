@@ -154,6 +154,40 @@ foreach ( $fx_empty ? array() : array(
 	);
 }
 
+/* --- Vị trí tuyển dụng --- */
+// VG_FX_NO_JOBS=1: chưa có vị trí nào. Hạn nộp tính theo ngày chạy kiểm thử để kết quả không phụ thuộc lịch.
+$today    = date( 'Ymd' );
+$in_month = date( 'Ymd', strtotime( '+30 days' ) );
+$yesterday = date( 'Ymd', strtotime( '-1 day' ) );
+foreach ( ( $fx_empty || getenv( 'VG_FX_NO_JOBS' ) ) ? array() : array(
+	// id, tiêu đề, nơi làm việc, phòng ban, loại hình, trạng thái, hạn nộp
+	array( 401, 'Kiến trúc sư thiết kế', 'ha-noi', 'kien-truc', 'toan_thoi_gian', 'dang_nhan', $in_month ),
+	array( 402, 'Kỹ sư kết cấu', 'ha-noi', 'xay-dung-dan-dung', 'toan_thoi_gian', 'dang_nhan', '' ),
+	array( 403, 'Kỹ sư giám sát', 'nghe-an', 'giam-sat-thi-cong', 'toan_thoi_gian', 'dang_nhan', $today ),
+	array( 404, 'Thực tập sinh kiến trúc', 'ha-noi', 'kien-truc', 'thuc_tap', 'dang_nhan', $yesterday ),
+	array( 405, 'Kế toán tổng hợp', 'ha-noi', 'kien-truc', 'toan_thoi_gian', 'da_dong', '' ),
+) as $j ) {
+	fx_post(
+		$j[0],
+		'vi_tri',
+		$j[1],
+		array(
+			'loai_hinh'   => $j[4],
+			'trang_thai'  => $j[5],
+			'han_nop'     => $j[6],
+			'tom_tat'     => 'Tóm tắt của vị trí ' . $j[1] . '.',
+			'mo_ta_chung' => 'Mô tả chung của vị trí ' . $j[1] . '.',
+			'cong_viec'   => "Công việc một\n\nCông việc hai\n  Công việc ba  ",
+			'yeu_cau'     => "Yêu cầu một\nYêu cầu hai",
+			'quyen_loi'   => "Quyền lợi một",
+		),
+		array( 'url' => '/tuyen-dung/' . $j[0] . '/', 'date' => '2026-09-1' . ( $j[0] - 400 ) )
+	);
+	$GLOBALS['fx']['terms'][ $j[0] ] = array( 'noi_lam_viec' => array( $j[2] ), 'phong_ban' => array( $j[3] ) );
+}
+fx_post( 506, 'page', 'Tuyển dụng', array(), array( 'url' => '/tuyen-dung/' ) );
+fx_post( 507, 'page', 'Ứng tuyển', array(), array( 'url' => '/ung-tuyen/' ) );
+
 /* --- Tin tức --- */
 foreach ( $fx_empty ? array() : array(
 	array( 301, 'Từ ý tưởng đến một công trình có thể vận hành', 'Một quy trình rõ ràng giúp kiến trúc, kỹ thuật và triển khai cùng đi theo một mục tiêu.', 'tower.jpg', 'Góc nhìn chuyên môn', 'tin-tuc-cong-ty' ),
@@ -275,6 +309,11 @@ $GLOBALS['fx']['options'] = $fx_empty ? array() : array(
 );
 
 $GLOBALS['fx']['term_names'] = $types + array(
+	'ha-noi'            => 'Hà Nội',
+	'nghe-an'           => 'Nghệ An',
+	'kien-truc'         => 'Kiến trúc',
+	'xay-dung-dan-dung' => 'Xây dựng dân dụng',
+	'giam-sat-thi-cong' => 'Giám sát thi công',
 	'tin-tuc-cong-ty'   => 'Tin tức công ty',
 	'thong-tin-bao-chi' => 'Thông tin báo chí',
 	'su-kien'           => 'Sự kiện',

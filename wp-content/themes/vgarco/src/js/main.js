@@ -10,6 +10,8 @@ const pageModules = {
 	services: () => import( './modules/services.js' ),
 	contact: () => import( './modules/contact.js' ),
 	article: () => import( './modules/article.js' ),
+	careers: () => import( './modules/careers.js' ),
+	apply: () => import( './modules/apply.js' ),
 	project: () => import( './modules/project.js' ),
 	// careers: () => import( './modules/careers.js' ),
 };

@@ -488,6 +488,134 @@ function vgarco_services(): array {
 }
 
 /* -------------------------------------------------------------------------
+ * Tuyển dụng
+ * ---------------------------------------------------------------------- */
+
+/**
+ * Một vị trí tuyển dụng dưới dạng mảng thuần.
+ *
+ * @return array id, title, url, apply_url, summary, description, responsibilities[], requirements[], benefits[],
+ *               location{slug,name}, department{slug,name}, type, type_label, deadline (Ymd hoặc ''), open (bool), search (chuỗi đã bỏ dấu).
+ */
+function vgarco_job( int $id ): array {
+	$term = static function ( string $taxonomy ) use ( $id ): array {
+		$terms = get_the_terms( $id, $taxonomy );
+		$first = is_array( $terms ) && $terms ? reset( $terms ) : null;
+		return array(
+			'slug' => $first ? (string) $first->slug : '',
+			'name' => $first ? html_entity_decode( $first->name, ENT_QUOTES, 'UTF-8' ) : '',
+		);
+	};
+	$lines = static fn( string $name ): array => vgarco_split_lines( (string) get_field( $name, $id ) );
+
+	$type     = (string) ( get_field( 'loai_hinh', $id ) ?: 'toan_thoi_gian' );
+	$location = $term( 'noi_lam_viec' );
+	$dept     = $term( 'phong_ban' );
+	$summary  = trim( (string) get_field( 'tom_tat', $id ) );
+	$title    = get_the_title( $id );
+
+	return array(
+		'id'               => $id,
+		'title'            => $title,
+		'url'              => (string) get_permalink( $id ),
+		'apply_url'        => add_query_arg( 'id', $id, vgarco_page_url( 'apply' ) ),
+		'summary'          => $summary,
+		'description'      => trim( (string) get_field( 'mo_ta_chung', $id ) ),
+		'responsibilities' => $lines( 'cong_viec' ),
+		'requirements'     => $lines( 'yeu_cau' ),
+		'benefits'         => $lines( 'quyen_loi' ),
+		'location'         => $location,
+		'department'       => $dept,
+		'type'             => $type,
+		'type_label'       => vgarco_job_type_label( $type ),
+		'deadline'         => trim( (string) get_field( 'han_nop', $id ) ),
+		'open'             => vgarco_job_is_open( $id ),
+		'search'           => vgarco_fold( implode( ' ', array( $title, $summary, $location['name'], $dept['name'], vgarco_job_type_label( $type ) ) ) ),
+	);
+}
+
+/**
+ * Các vị trí đang nhận hồ sơ (UC-07), mới đăng trước. Quy mô dưới 30 vị trí nên render hết ra trang.
+ *
+ * @return array[] Xem vgarco_job().
+ */
+function vgarco_open_jobs(): array {
+	$ids = get_posts(
+		array(
+			'post_type'        => 'vi_tri',
+			'post_status'      => 'publish',
+			'posts_per_page'   => 100,
+			'orderby'          => array(
+				'menu_order' => 'ASC',
+				'date'       => 'DESC',
+			),
+			'fields'           => 'ids',
+			'no_found_rows'    => true,
+			'suppress_filters' => false,
+		)
+	);
+
+	$jobs = array();
+	foreach ( $ids as $id ) {
+		$job = vgarco_job( (int) $id );
+		if ( $job['open'] ) {
+			$jobs[] = $job;
+		}
+	}
+	return $jobs;
+}
+
+/**
+ * Các giá trị của hai bộ lọc, chỉ gồm nơi làm việc và phòng ban đang có vị trí (không hiện lựa chọn cho kết quả rỗng).
+ *
+ * @param array[] $jobs Kết quả của vgarco_open_jobs().
+ * @return array{locations: array<string,string>, departments: array<string,string>} slug => tên.
+ */
+function vgarco_job_filters( array $jobs ): array {
+	$out = array( 'locations' => array(), 'departments' => array() );
+	foreach ( $jobs as $job ) {
+		if ( '' !== $job['location']['slug'] ) {
+			$out['locations'][ $job['location']['slug'] ] = $job['location']['name'];
+		}
+		if ( '' !== $job['department']['slug'] ) {
+			$out['departments'][ $job['department']['slug'] ] = $job['department']['name'];
+		}
+	}
+	return $out;
+}
+
+/**
+ * Lọc danh sách theo từ khóa (mọi từ đều phải có, không phân biệt dấu/hoa thường), nơi làm việc, phòng ban.
+ * Dùng khi không có JS (biểu mẫu GET) và cho URL chia sẻ; JS lọc tại chỗ theo cùng quy tắc.
+ *
+ * @param array[] $jobs Danh sách vị trí.
+ * @return array[]
+ */
+function vgarco_filter_jobs( array $jobs, string $query, string $location, string $department ): array {
+	$words = array_filter( preg_split( '/s+/u', vgarco_fold( trim( $query ) ) ) ?: array() );
+
+	return array_values(
+		array_filter(
+			$jobs,
+			static function ( array $job ) use ( $words, $location, $department ): bool {
+				if ( '' !== $location && $job['location']['slug'] !== $location ) {
+					return false;
+				}
+				if ( '' !== $department && $job['department']['slug'] !== $department ) {
+					return false;
+				}
+				foreach ( $words as $word ) {
+					if ( ! str_contains( $job['search'], $word ) ) {
+						return false;
+					}
+				}
+				return true;
+			}
+		)
+	);
+}
+
+/* -------------------------------------------------------------------------
  * Tin tức
  * ---------------------------------------------------------------------- */
 
