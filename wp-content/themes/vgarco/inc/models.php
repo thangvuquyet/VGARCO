@@ -445,6 +445,48 @@ function vgarco_home_services( int $count = 3 ): array {
 	return $services;
 }
 
+/**
+ * Danh sách lĩnh vực cho trang Lĩnh vực hoạt động (UC-03), theo "Thứ tự" đã đặt. Nhóm chưa dịch tự vắng ở bản DE nhờ WPML.
+ *
+ * @return array[] Mỗi phần tử: id, title, anchor, description (HTML), reference (dự án tham khảo, xem vgarco_project) hoặc null.
+ */
+function vgarco_services(): array {
+	$ids = get_posts(
+		array(
+			'post_type'        => 'linh_vuc',
+			'post_status'      => 'publish',
+			'posts_per_page'   => -1,
+			'orderby'          => array(
+				'menu_order' => 'ASC',
+				'title'      => 'ASC',
+			),
+			'fields'           => 'ids',
+			'no_found_rows'    => true,
+			'suppress_filters' => false,
+		)
+	);
+
+	$services = array();
+	foreach ( $ids as $id ) {
+		$anchor = trim( (string) get_field( 'neo', $id ) );
+		$ref_id = (int) get_field( 'du_an_tham_khao', $id );
+		$ref    = ( $ref_id > 0 && 'publish' === get_post_status( $ref_id ) ) ? vgarco_project( $ref_id ) : null;
+		// Dự án tham khảo không có ảnh thì coi như không có: khung ảnh giữ ảnh hiện tại.
+		if ( $ref && ( $ref['card_image'] ?: $ref['hero_image'] ) <= 0 ) {
+			$ref = null;
+		}
+
+		$services[] = array(
+			'id'          => $id,
+			'title'       => get_the_title( $id ),
+			'anchor'      => '' !== $anchor ? $anchor : (string) $id,
+			'description' => (string) apply_filters( 'the_content', (string) get_post_field( 'post_content', $id ) ),
+			'reference'   => $ref,
+		);
+	}
+	return $services;
+}
+
 /* -------------------------------------------------------------------------
  * Tin tức
  * ---------------------------------------------------------------------- */

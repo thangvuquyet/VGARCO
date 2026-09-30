@@ -1,0 +1,105 @@
+@use '../mixins' as *;
+
+// Phòng ban (UC-02). Số đo lấy từ bản thiết kế ở 390 và 1440 px.
+
+.department-editorial {
+  display: grid;
+  gap: 3.375rem;
+  padding-block: 1.625rem 2.125rem;
+
+  @include up($bp-desk) {
+    grid-template-columns: 1fr 2fr;
+    padding-block: 2rem 2.75rem;
+  }
+}
+
+.department-intro {
+  .eyebrow {
+    margin-bottom: 1.375rem;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    letter-spacing: 0.1em;
+    color: var(--c-brand);
+
+    @include up($bp-md) {
+      margin-bottom: 1.75rem;
+      font-size: var(--fs-caption);
+    }
+  }
+
+  // Di động: dòng nhấn nằm riêng một dòng, nhỏ hơn 8% so với dòng trên.
+  h1 em {
+    display: block;
+    font-size: 0.92em;
+
+    @include up($bp-md) {
+      display: inline;
+      font-size: 1em;
+    }
+  }
+
+  > p:not(.eyebrow) {
+    max-width: 32.5rem;
+    margin-block: 1.125rem 1.25rem;
+    font-size: 1.0625rem;
+    line-height: 1.78;
+    color: var(--c-ink-muted);
+  }
+}
+
+.department-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5625rem;
+  padding: 0;
+  margin: 1.25rem 0 0;
+  list-style: none;
+
+  li {
+    padding: 0.4375rem 0.6875rem;
+    font-size: 0.75rem;
+    line-height: 1.7;
+    color: #5d645e;
+    border: 1px solid var(--c-line);
+  }
+}
+
+.discipline-matrix {
+  display: grid;
+  border-top: 1px solid var(--c-line);
+
+  article {
+    padding-block: 1.375rem;
+    border-bottom: 1px solid var(--c-line);
+  }
+
+  article > span {
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1.7;
+    letter-spacing: 0.08em;
+    color: var(--c-brand);
+  }
+
+  h3 {
+    margin-block: 1.5rem 0.625rem;
+    font-size: 1.375rem;
+    line-height: 1.16;
+    letter-spacing: -0.035em;
+  }
+
+  p {
+    font-size: 0.9375rem;
+    line-height: 1.7;
+    color: var(--c-ink-muted);
+  }
+
+  @include up($bp-tablet) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    article {
+      min-height: 11.5625rem;
+      padding: 1.625rem 1.75rem;
+    }
+  }
+}

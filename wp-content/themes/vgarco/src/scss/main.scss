@@ -32,4 +32,8 @@
   @include meta.load-css('pages/projects');
   @include meta.load-css('pages/project');
   @include meta.load-css('pages/about');
+  @include meta.load-css('pages/leadership');
+  @include meta.load-css('pages/departments');
+  @include meta.load-css('pages/services');
+  @include meta.load-css('pages/contact');
 }

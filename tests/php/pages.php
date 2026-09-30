@@ -361,6 +361,85 @@ same( 'an toàn: <img onerror> trong tiêu đề bị loại', 0, q( $o, '//img[
 same( 'an toàn: <script> trong ô chữ bị thoát, không thành thẻ script trong trang', 0, q( $o, '//main//script' )->length );
 check( 'an toàn: chữ "<b>đậm</b>" trong ô chữ hiển thị nguyên văn, không thành thẻ', 0 === q( $o, '//main//b' )->length && str_contains( q( $o, '//*[' . cls( 'masthead-bottom' ) . ']/p[1]' )->item( 0 )->textContent, '<b>đậm</b>' ) );
 
+/* ========================= Ban lãnh đạo, Phòng ban, Lĩnh vực, Liên hệ ========================= */
+
+// --- Ban lãnh đạo ---
+$l = render( 'templates/leadership', false, 'vi', array( 'VG_FX_ID' => '502' ) );
+common_checks( $l, 'ban lãnh đạo' );
+same( 'lãnh đạo: h1 chỉ dành cho trình đọc màn hình ("Ban lãnh đạo")', array( 'Ban lãnh đạo', 1 ), array( trim( q( $l, '//h1' )->item( 0 )->textContent ), q( $l, '//h1[' . cls( 'sr-only' ) . ']' )->length ) );
+same( 'lãnh đạo: một thành viên mặc định, tên ở h2', array( 1, 'Vũ Duy Hùng' ), array( q( $l, '//section[' . cls( 'leadership-content' ) . ']' )->length, trim( q( $l, '//section[' . cls( 'leadership-content' ) . ']//h2' )->item( 0 )->textContent ) ) );
+same( 'lãnh đạo: chưa có ảnh thì hiện chữ cái đầu "VH", ẩn khỏi trình đọc màn hình', array( 'VH', 'true' ), array( substr( trim( q( $l, '//div[' . cls( 'leader-monogram' ) . ']' )->item( 0 )->textContent ), 0, 2 ), q( $l, '//div[' . cls( 'leader-monogram' ) . ']' )->item( 0 )->getAttribute( 'aria-hidden' ) ) );
+check( 'lãnh đạo: đơn vị lấy từ Cấu hình (tên công ty)', 'Công ty TNHH Tư vấn Xây dựng VGARCO' === trim( q( $l, '//p[' . cls( 'leadership-company' ) . ']' )->item( 0 )->textContent ) );
+same( 'lãnh đạo: có vai trò và trọng tâm điều hành', array( 1, 1 ), array( q( $l, '//p[' . cls( 'leadership-note' ) . ']' )->length, q( $l, '//div[' . cls( 'leader-statement' ) . ']' )->length ) );
+same( 'lãnh đạo: 4 nguyên tắc đánh số 01–04, số ẩn khỏi trình đọc màn hình', array( '01', '02', '03', '04' ), array_map( static fn( $n ) => trim( $n->textContent ), iterator_to_array( q( $l, '//div[' . cls( 'leadership-principle-grid' ) . ']/article/span[@aria-hidden="true"]' ) ) ) );
+
+$lo = render( 'templates/leadership', false, 'vi', array( 'VG_FX_ID' => '502', 'VG_FX_PAGE_OVERRIDE' => '1', 'VG_FX_PAGE_FULL' => '1' ) );
+common_checks( $lo, 'ban lãnh đạo nhiều thành viên' );
+same( 'lãnh đạo: nhiều thành viên đúng thứ tự đã nhập (UC-02 4a)', array( 'Nguyễn Văn An', 'Trần Thị <b>Bình</b>' ), array_map( static fn( $n ) => trim( $n->textContent ), iterator_to_array( q( $lo, '//section[' . cls( 'leadership-content' ) . ']//h2' ) ) ) );
+same( 'lãnh đạo: có ảnh thì dùng ảnh (lazy, alt là chức danh + tên), không có chữ cái đầu', array( 1, 1, 'lazy' ), array( q( $lo, '//figure[' . cls( 'leader-photo' ) . ']/img' )->length, q( $lo, '//div[' . cls( 'leader-monogram' ) . ']' )->length, q( $lo, '//figure[' . cls( 'leader-photo' ) . ']/img' )->item( 0 )->getAttribute( 'loading' ) ) );
+same( 'lãnh đạo: đơn vị nhập riêng thắng tên công ty', 'Đơn vị khác', trim( q( $lo, '(//p[' . cls( 'leadership-company' ) . '])[2]' )->item( 0 )->textContent ) );
+same( 'lãnh đạo: thành viên không có vai trò/trọng tâm thì ẩn khối đó (không ô trống)', array( 1, 1 ), array( q( $lo, '//section[' . cls( 'leadership-content' ) . ']//p[' . cls( 'leadership-note' ) . ']' )->length, q( $lo, '//section[' . cls( 'leadership-content' ) . ']//div[' . cls( 'leader-statement' ) . ']' )->length ) );
+same( 'an toàn: <b> trong họ tên hiển thị nguyên văn, không thành thẻ', 0, q( $lo, '//main//b' )->length );
+same( 'lãnh đạo: nhập một nguyên tắc thì chỉ hiện một', 1, q( $lo, '//div[' . cls( 'leadership-principle-grid' ) . ']/article' )->length );
+
+// --- Phòng ban ---
+$d2 = render( 'templates/departments', false, 'vi', array( 'VG_FX_ID' => '503' ) );
+common_checks( $d2, 'phòng ban' );
+same( 'phòng ban: h1 có ngắt dòng và cụm nhấn', 1, q( $d2, '//h1[count(br)=1 and count(em)=1]' )->length );
+same( 'phòng ban: 4 nhãn (UC-02)', array( 'Thiết kế', 'Kỹ thuật', 'Chi phí', 'Triển khai' ), array_map( static fn( $n ) => trim( $n->textContent ), iterator_to_array( q( $d2, '//ul[' . cls( 'department-tags' ) . ']/li' ) ) ) );
+same( 'phòng ban: 6 bộ môn đánh số 01–06', array( 6, '01', '06' ), array( q( $d2, '//div[' . cls( 'discipline-matrix' ) . ']/article' )->length, trim( q( $d2, '(//div[' . cls( 'discipline-matrix' ) . ']/article/span)[1]' )->item( 0 )->textContent ), trim( q( $d2, '(//div[' . cls( 'discipline-matrix' ) . ']/article/span)[6]' )->item( 0 )->textContent ) ) );
+check( 'phòng ban: trang thuộc module "departments" (data-vg-page)', 1 === q( $d2, '//body[@data-vg-page="departments"]' )->length );
+
+$d3 = render( 'templates/departments', false, 'vi', array( 'VG_FX_ID' => '503', 'VG_FX_PAGE_OVERRIDE' => '1' ) );
+same( 'phòng ban: bản nhập thắng — nhãn bỏ dòng trống và khoảng trắng', array( 'Thiết kế', 'Kỹ thuật' ), array_map( static fn( $n ) => trim( $n->textContent ), iterator_to_array( q( $d3, '//ul[' . cls( 'department-tags' ) . ']/li' ) ) ) );
+same( 'phòng ban: dòng bộ môn trống hoàn toàn bị bỏ, số thứ tự liền nhau', array( 'Bộ môn A', '01', 'Bộ môn B', '02' ), array( trim( q( $d3, '(//div[' . cls( 'discipline-matrix' ) . ']/article/h3)[1]' )->item( 0 )->textContent ), trim( q( $d3, '(//div[' . cls( 'discipline-matrix' ) . ']/article/span)[1]' )->item( 0 )->textContent ), trim( q( $d3, '(//div[' . cls( 'discipline-matrix' ) . ']/article/h3)[2]' )->item( 0 )->textContent ), trim( q( $d3, '(//div[' . cls( 'discipline-matrix' ) . ']/article/span)[2]' )->item( 0 )->textContent ) ) );
+
+// --- Lĩnh vực hoạt động ---
+$s = render( 'templates/services', false, 'vi', array( 'VG_FX_ID' => '504' ) );
+common_checks( $s, 'lĩnh vực' );
+check( 'lĩnh vực: trang thuộc module "services" (data-vg-page)', 1 === q( $s, '//body[@data-vg-page="services"]' )->length );
+same( 'lĩnh vực: 6 nhóm đúng thứ tự, mỗi nhóm có neo (UC-03)', array( 'thiet-ke-kien-truc', 'thiet-ke-ket-cau', 'ha-tang-canh-quan-co-dien', 'lap-du-an-quan-ly-du-an', 'giam-sat-thi-cong', 'tham-tra-khao-sat' ), array_map( static fn( $n ) => $n->getAttribute( 'id' ), iterator_to_array( q( $s, '//details[' . cls( 'service-item' ) . ']' ) ) ) );
+same( 'lĩnh vực: chỉ nhóm đầu mở sẵn', array( 1, 'thiet-ke-kien-truc' ), array( q( $s, '//details[@open]' )->length, q( $s, '//details[@open]' )->item( 0 )->getAttribute( 'id' ) ) );
+same( 'lĩnh vực: mọi nhóm có mô tả', 6, q( $s, '//details[' . cls( 'service-item' ) . ']/div[' . cls( 'service-body' ) . ']/p' )->length );
+same( 'lĩnh vực: số thứ tự ở tiêu đề nhóm ẩn khỏi trình đọc màn hình', 6, q( $s, '//summary/span[' . cls( 'num' ) . ' and @aria-hidden="true"]' )->length );
+$fig = q( $s, '//figure[' . cls( 'service-image' ) . ']' );
+same( 'lĩnh vực: khung ảnh hiển thị sẵn dự án tham khảo của nhóm đầu, ghi rõ là ảnh tham khảo', array( 1, 'Phối cảnh thiết kế — Biệt thự tại Niedernhausen', 'Hình ảnh dự án tham khảo' ), array( $fig->length, q( $s, '//figure[' . cls( 'service-image' ) . ']/img' )->item( 0 )->getAttribute( 'alt' ), trim( q( $s, '//figure[' . cls( 'service-image' ) . ']//small' )->item( 0 )->textContent ) ) );
+check( 'lĩnh vực: nhóm có dự án tham khảo mang địa chỉ ảnh, tên và số thứ tự cho JS', 6 === q( $s, '//details[@data-image and @data-alt and @data-ref and @data-number]' )->length );
+check( 'lĩnh vực: liên kết từ trang chủ (#neo) trỏ tới đúng nhóm có mặt trên trang', 3 === count( array_filter( array( 'thiet-ke-kien-truc', 'lap-du-an-quan-ly-du-an', 'giam-sat-thi-cong' ), static fn( $a ) => 1 === q( $x, '//section[' . cls( 'service-preview-list' ) . ' or ' . cls( 'home-services' ) . ']//a[substring(@href, string-length(@href) - string-length("#' . $a . '") + 1) = "#' . $a . '"]' )->length ) ) );
+
+$sn = render( 'templates/services', false, 'vi', array( 'VG_FX_ID' => '504', 'VG_FX_NO_REF' => '1' ) );
+same( 'lĩnh vực: không nhóm nào có dự án tham khảo thì ẩn khung ảnh, danh sách vẫn đủ', array( 0, 6 ), array( q( $sn, '//figure[' . cls( 'service-image' ) . ']' )->length, q( $sn, '//details[' . cls( 'service-item' ) . ']' )->length ) );
+$se = render( 'templates/services', true, 'vi', array( 'VG_FX_ID' => '504' ) );
+common_checks( $se, 'lĩnh vực rỗng' );
+same( 'lĩnh vực: chưa có nhóm nào thì báo đang cập nhật, không có danh sách', array( 0, 1 ), array( q( $se, '//details' )->length, q( $se, '//*[' . cls( 'services-empty' ) . ']' )->length ) );
+
+// --- Liên hệ ---
+$c2 = render( 'templates/contact', false, 'vi', array( 'VG_FX_ID' => '505' ) );
+common_checks( $c2, 'liên hệ' );
+check( 'liên hệ: trang thuộc module "contact" (data-vg-page)', 1 === q( $c2, '//body[@data-vg-page="contact"]' )->length );
+same( 'liên hệ: h1 có 2 chỗ ngắt dòng và cụm nhấn', 1, q( $c2, '//h1[count(br)=2 and count(em)=1]' )->length );
+check( 'liên hệ: số điện thoại bấm để gọi (tel:) khớp Cấu hình', 1 === q( $c2, '//a[' . cls( 'contact-phone' ) . ' and @href="tel:+84988961666" and normalize-space(.)="0988 961 666"]' )->length );
+check( 'liên hệ: email là liên kết mailto: khớp Cấu hình', 1 === q( $c2, '//a[' . cls( 'contact-email' ) . ' and @href="mailto:vgarco.cc@gmail.com"]' )->length );
+same( 'liên hệ: Zalo và Facebook chưa có địa chỉ thì hiện "Đang cập nhật", không phải liên kết (yêu cầu 29)', array( 2, 0, array( 'Đang cập nhật', 'Đang cập nhật' ) ), array( q( $c2, '//span[' . cls( 'contact-channel' ) . ' and ' . cls( 'is-pending' ) . ']' )->length, q( $c2, '//span[' . cls( 'contact-channel' ) . ']//a' )->length, array_map( static fn( $n ) => trim( $n->textContent ), iterator_to_array( q( $c2, '//span[' . cls( 'is-pending' ) . ']//small' ) ) ) ) );
+$form = q( $c2, '//form[@id="contact-form"]' );
+same( 'liên hệ: biểu mẫu KHÔNG gửi về máy chủ — action là mailto:, không có địa chỉ http(s)', array( 1, true ), array( $form->length, str_starts_with( $form->item( 0 )->getAttribute( 'action' ), 'mailto:' ) ) );
+same( 'liên hệ: 3 ô bắt buộc (họ tên, email, nội dung) + đồng ý; số điện thoại không bắt buộc', array( 'name', 'email', 'message', 'consent' ), array_map( static fn( $n ) => $n->getAttribute( 'name' ), iterator_to_array( q( $c2, '//form[@id="contact-form"]//*[@required and @aria-required="true"]' ) ) ) );
+check( 'liên hệ: ô đồng ý không tích sẵn', 0 === q( $c2, '//input[@name="consent" and @checked]' )->length );
+$controls = iterator_to_array( q( $c2, '//form[@id="contact-form"]//*[(self::input or self::textarea) and @id and not(@readonly)]' ) );
+check( 'liên hệ: 5 ô nhập, mỗi ô có nhãn (for/id hoặc bọc trong label)', 5 === count( $controls ) && 0 === count( array_filter( $controls, static fn( $n ) => 0 === q( $c2, '//label[@for="' . $n->getAttribute( 'id' ) . '"]' )->length && 0 === q( $c2, '//label//*[@id="' . $n->getAttribute( 'id' ) . '"]' )->length ) ) );
+check( 'liên hệ: ô bắt buộc trỏ tới vùng báo lỗi có thật (aria-describedby)', 0 === count( array_filter( iterator_to_array( q( $c2, '//form[@id="contact-form"]//*[@required]' ) ), static fn( $n ) => 1 !== q( $c2, '//*[@id="' . $n->getAttribute( 'aria-describedby' ) . '"]' )->length ) ) );
+check( 'liên hệ: nội dung giới hạn 1.500 ký tự (kiểm thử mailto UC-11)', 1 === q( $c2, '//textarea[@name="message" and @maxlength="1500"]' )->length );
+check( 'liên hệ: phương án dự phòng ẩn sẵn, có ô nội dung chỉ đọc và nút sao chép', 1 === q( $c2, '//*[@data-fallback and @hidden]//textarea[@readonly]' )->length && 1 === q( $c2, '//*[@data-fallback]//button[@data-copy]' )->length );
+check( 'liên hệ: mẫu tiêu đề và nội dung email có chỗ điền và dịch được (data-*)', str_contains( $form->item( 0 )->getAttribute( 'data-subject' ), '%s' ) && str_contains( $form->item( 0 )->getAttribute( 'data-body' ), '%message%' ) && '' !== $form->item( 0 )->getAttribute( 'data-msg-required' ) );
+check( 'liên hệ: có vùng trạng thái cho trình đọc màn hình', 1 === q( $c2, '//*[@data-status and @role="status"]' )->length );
+same( 'liên hệ: không có thẻ script nội tuyến hay tài nguyên bên ngoài trong nội dung', 0, q( $c2, '//main//script | //main//*[starts-with(@src, "http") or starts-with(@href, "http")]' )->length );
+
+// Bài tư liệu và dự án tham khảo chưa xuất bản không được lộ ra công khai.
+$ad = render( 'templates/about', false, 'vi', array( 'VG_FX_ID' => '501', 'VG_FX_PAGE_FULL' => '1', 'VG_FX_AWARD_DRAFT' => '1' ) );
+same( 'ghi nhận: bài tư liệu chưa xuất bản thì ẩn nút, giữ khối', array( 1, 0 ), array( q( $ad, '//section[@id="ghi-nhan"]' )->length, q( $ad, '//section[@id="ghi-nhan"]//a' )->length ) );
+$rd = render( 'templates/services', false, 'vi', array( 'VG_FX_ID' => '504', 'VG_FX_REF_DRAFT' => '1' ) );
+same( 'lĩnh vực: dự án tham khảo chưa xuất bản bị bỏ — nhóm đó không có ảnh, khung ảnh dùng dự án kế tiếp', array( 0, 5, 'Phối cảnh thiết kế — Đài kiểm soát không lưu Đồng Hới' ), array( q( $rd, '//details[@id="thiet-ke-kien-truc" and @data-image]' )->length, q( $rd, '//details[@data-image]' )->length, q( $rd, '//figure[' . cls( 'service-image' ) . ']/img' )->item( 0 )->getAttribute( 'alt' ) ) );
+
 /* ---------- Kết quả ---------- */
 
 echo "\n";

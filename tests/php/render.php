@@ -112,7 +112,7 @@ function wp_head() {
 function wp_footer() {}
 function wp_body_open() {}
 function body_class() {
-	echo 'class="' . esc_attr( vgarco_page_key() ) . '"';
+	echo 'class="page-' . esc_attr( vgarco_page_key() ) . '"';
 }
 function wp_date( $f ) {
 	return date( $f );

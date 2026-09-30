@@ -209,6 +209,133 @@ function vgarco_fields_page_about(): array {
 }
 
 /**
+ * Trang Ban lãnh đạo: danh sách thành viên theo thứ tự nhập (UC-02 4a) và các nguyên tắc làm việc.
+ */
+function vgarco_fields_page_leadership(): array {
+	$b  = vgarco_field_builder( 'lanh_dao' );
+	$tv = vgarco_field_builder( 'lanh_dao_tv' );
+	$nt = vgarco_field_builder( 'lanh_dao_nt' );
+
+	return vgarco_page_group(
+		'group_vg_page_leadership',
+		'Nội dung trang Ban lãnh đạo',
+		'templates/leadership.php',
+		array(
+			$b(
+				'thanh_vien',
+				'Thành viên ban lãnh đạo',
+				'repeater',
+				'translate',
+				array(
+					'layout'       => 'block',
+					'min'          => 0,
+					'button_label' => 'Thêm thành viên',
+					'instructions' => 'Hiển thị theo đúng thứ tự ở đây. Kéo thả để đổi thứ tự. Để trống toàn bộ thì dùng thành viên mặc định trong hồ sơ.',
+					'sub_fields'   => array(
+						$tv( 'anh', 'Ảnh chân dung', 'image', 'copy', array( 'return_format' => 'id', 'preview_size' => 'medium', 'library' => 'all', 'instructions' => 'Không bắt buộc. Không có ảnh thì hiển thị chữ cái đầu của họ tên.' ) ),
+						$tv( 'chuc_danh', 'Chức danh', 'text', 'translate', array( 'instructions' => 'Ví dụ: Giám đốc.' ) ),
+						$tv( 'ho_ten', 'Họ và tên', 'text', 'copy' ),
+						$tv( 'don_vi', 'Đơn vị', 'text', 'translate', array( 'instructions' => 'Để trống thì dùng tên công ty trong Cấu hình VGARCO.' ) ),
+						$tv( 'vai_tro', 'Vai trò', 'textarea', 'translate', array( 'rows' => 3, 'new_lines' => '' ) ),
+						$tv( 'trong_tam', 'Trọng tâm điều hành', 'textarea', 'translate', array( 'rows' => 3, 'new_lines' => '' ) ),
+					),
+				)
+			),
+			$b(
+				'nguyen_tac',
+				'Nguyên tắc làm việc',
+				'repeater',
+				'translate',
+				array(
+					'layout'       => 'block',
+					'min'          => 0,
+					'max'          => 8,
+					'button_label' => 'Thêm nguyên tắc',
+					'instructions' => 'Theo đặc tả có 4 nguyên tắc. Để trống toàn bộ thì dùng 4 nguyên tắc mặc định.',
+					'sub_fields'   => array(
+						$nt( 'tieu_de', 'Tiêu đề', 'text', 'translate' ),
+						$nt( 'mo_ta', 'Mô tả', 'textarea', 'translate', array( 'rows' => 2, 'new_lines' => '' ) ),
+					),
+				)
+			),
+		)
+	);
+}
+
+/**
+ * Trang Phòng ban: mở đầu, 4 nhãn, 6 bộ môn.
+ */
+function vgarco_fields_page_departments(): array {
+	$b  = vgarco_field_builder( 'phong_ban' );
+	$bm = vgarco_field_builder( 'phong_ban_bm' );
+
+	return vgarco_page_group(
+		'group_vg_page_departments',
+		'Nội dung trang Phòng ban',
+		'templates/departments.php',
+		array(
+			vgarco_page_text_field( $b, 'hero_nhan', 'Nhãn đầu trang', 'Mặc định: Hệ chuyên môn.' ),
+			vgarco_page_heading_field( $b, 'hero_tieu_de', 'Tiêu đề' ),
+			vgarco_page_area_field( $b, 'hero_mo_ta', 'Mô tả', '', 4 ),
+			vgarco_page_area_field( $b, 'nhan', 'Bốn nhóm', 'Mỗi dòng một nhãn. Mặc định: Thiết kế, Kỹ thuật, Chi phí, Triển khai.', 5 ),
+			$b(
+				'bo_mon',
+				'Các bộ môn',
+				'repeater',
+				'translate',
+				array(
+					'layout'       => 'block',
+					'min'          => 0,
+					'max'          => 12,
+					'button_label' => 'Thêm bộ môn',
+					'instructions' => 'Theo đặc tả có 6 bộ môn. Để trống toàn bộ thì dùng 6 bộ môn mặc định.',
+					'sub_fields'   => array(
+						$bm( 'tieu_de', 'Tên bộ môn', 'text', 'translate' ),
+						$bm( 'mo_ta', 'Mô tả', 'textarea', 'translate', array( 'rows' => 2, 'new_lines' => '' ) ),
+					),
+				)
+			),
+		)
+	);
+}
+
+/**
+ * Trang Lĩnh vực hoạt động: chỉ phần mở đầu. Danh sách lĩnh vực nhập ở mục "Lĩnh vực hoạt động" (mỗi lĩnh vực một bài).
+ */
+function vgarco_fields_page_services(): array {
+	$b = vgarco_field_builder( 'lv_trang' );
+
+	return vgarco_page_group(
+		'group_vg_page_services',
+		'Nội dung trang Lĩnh vực hoạt động',
+		'templates/services.php',
+		array(
+			vgarco_page_tab( $b, 'tab_hero', 'Đầu trang' ),
+			vgarco_page_heading_field( $b, 'hero_tieu_de', 'Tiêu đề' ),
+			vgarco_page_area_field( $b, 'hero_mo_ta', 'Câu mô tả', '', 3 ),
+		)
+	);
+}
+
+/**
+ * Trang Liên hệ: chỉ phần mở đầu. Điện thoại, email, mạng xã hội lấy từ Cấu hình VGARCO.
+ */
+function vgarco_fields_page_contact(): array {
+	$b = vgarco_field_builder( 'lien_he_trang' );
+
+	return vgarco_page_group(
+		'group_vg_page_contact',
+		'Nội dung trang Liên hệ',
+		'templates/contact.php',
+		array(
+			vgarco_page_text_field( $b, 'hero_nhan', 'Nhãn đầu trang', 'Mặc định: Bắt đầu một dự án.' ),
+			vgarco_page_heading_field( $b, 'hero_tieu_de', 'Tiêu đề' ),
+			vgarco_page_text_field( $b, 'form_tieu_de', 'Tiêu đề biểu mẫu', 'Mặc định: Chia sẻ nhu cầu của bạn.' ),
+		)
+	);
+}
+
+/**
  * Tất cả nhóm trường của trang tĩnh.
  *
  * @return array[]
@@ -216,5 +343,9 @@ function vgarco_fields_page_about(): array {
 function vgarco_fields_trang(): array {
 	return array(
 		vgarco_fields_page_about(),
+		vgarco_fields_page_leadership(),
+		vgarco_fields_page_departments(),
+		vgarco_fields_page_services(),
+		vgarco_fields_page_contact(),
 	);
 }

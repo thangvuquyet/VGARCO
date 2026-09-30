@@ -1,0 +1,354 @@
+@use '../mixins' as *;
+
+// Liên hệ (UC-11). Số đo lấy từ bản thiết kế ở 390 và 1440 px. Chữ trắng mờ trên nền #963a34 được nâng độ đục
+// để đạt 4,5 : 1 (bản thiết kế dùng 0,73–0,81).
+
+.contact {
+  padding-block: 1.75rem 2.5rem;
+  color: #fff;
+  background: var(--c-panel);
+
+  @include up($bp-md) {
+    padding-block: 2.125rem 3.125rem;
+  }
+}
+
+.contact-layout {
+  display: grid;
+  gap: 2.6875rem;
+
+  @include up($bp-desk) {
+    grid-template-columns: 1.15fr 1fr;
+    gap: clamp(3rem, 7.64vw, 6.875rem);
+  }
+}
+
+.contact-intro {
+  .eyebrow {
+    margin-bottom: 1.5625rem;
+    font-size: 0.75rem;
+    line-height: 1.55;
+    letter-spacing: 0.1em;
+    color: rgb(255 255 255 / 88%);
+
+    @include up($bp-md) {
+      margin-bottom: 2.125rem;
+      font-size: var(--fs-caption);
+    }
+  }
+
+  h1 {
+    margin-bottom: 1.8125rem;
+    font-size: clamp(3.625rem, 5.8vw, 5.8rem);
+    line-height: 1.07;
+    letter-spacing: -0.05em;
+
+    @include up($bp-desk) {
+      margin-bottom: 2.5rem;
+      line-height: 1.04;
+    }
+  }
+
+  h1 em {
+    font-size: 0.82em;
+    line-height: 1.05;
+    letter-spacing: -0.07em;
+    white-space: nowrap;
+    color: #fff; // đỏ thương hiệu trên nền đỏ sẽ biến mất
+  }
+}
+
+.contact-phone {
+  display: block;
+  margin-bottom: 0.3125rem;
+  font-size: 1.5625rem;
+  line-height: 1.7;
+  letter-spacing: -0.025em;
+
+  @include up($bp-md) {
+    font-size: 1.625rem;
+  }
+
+  &:hover,
+  &:focus-visible {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+}
+
+.contact-email {
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  color: rgb(255 255 255 / 88%);
+
+  &:hover {
+    color: #fff;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+}
+
+.contact-channels {
+  display: grid;
+  margin-top: 2.375rem;
+  border-block: 1px solid rgb(255 255 255 / 27%);
+
+  @include up($bp-md) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.contact-channel {
+  display: flex;
+  align-items: center;
+  gap: 0.9375rem;
+  min-height: 82px;
+  padding: 1.125rem 1.375rem;
+
+  & + & {
+    border-top: 1px solid rgb(255 255 255 / 27%);
+
+    @include up($bp-md) {
+      border-top: 0;
+      border-left: 1px solid rgb(255 255 255 / 27%);
+    }
+  }
+
+  strong {
+    display: block;
+    font-size: 0.9375rem;
+    font-weight: 650;
+    line-height: 1.35;
+  }
+
+  small {
+    display: block;
+    margin-top: 0.1875rem;
+    font-size: var(--fs-caption);
+    line-height: 1.4;
+    color: #f7ebe9;
+  }
+
+  &.is-pending {
+    color: #f7ebe9;
+  }
+
+  &:is(a):hover {
+    background: rgb(255 255 255 / 8%);
+  }
+}
+
+.channel-icon {
+  display: grid;
+  flex: 0 0 38px;
+  place-items: center;
+  height: 38px;
+  font-size: 1.0625rem;
+  font-weight: 750;
+  border: 1px solid rgb(255 255 255 / 55%);
+  border-radius: 50%;
+
+  svg {
+    width: 19px;
+    height: 19px;
+  }
+}
+
+// ===================================================================== BIỂU MẪU
+.contact-form {
+  padding-top: 0.375rem;
+
+  h2 {
+    margin-bottom: 1.6875rem;
+    font-size: 1.4375rem; // 23
+    line-height: 1.16;
+    letter-spacing: -0.035em;
+
+    @include up($bp-md) {
+      margin-bottom: 2rem;
+    }
+  }
+}
+
+// Hai cột ở mọi cỡ màn hình (bản thiết kế giữ tên và số điện thoại cạnh nhau cả ở 390 px).
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 1.375rem;
+
+  @include up($bp-md) {
+    column-gap: 1.5625rem;
+  }
+}
+
+.contact-form .field {
+  margin-bottom: 1.4375rem;
+
+  label:not(.consent-label) {
+    display: block;
+    font-size: var(--fs-small);
+    line-height: 1.7;
+
+    @include up($bp-md) {
+      font-size: 0.9375rem;
+    }
+  }
+
+  input:not([type='checkbox']),
+  textarea {
+    display: block;
+    width: 100%;
+    padding: 0.5625rem 0 0.6875rem;
+    font: inherit;
+    font-size: var(--fs-body);
+    line-height: 1.7;
+    color: #fff;
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid rgb(255 255 255 / 62%);
+    border-radius: 0;
+    resize: vertical;
+
+    &::placeholder {
+      color: rgb(255 255 255 / 78%);
+    }
+
+    &:hover {
+      border-bottom-color: #fff;
+    }
+
+    &[aria-invalid='true'] {
+      border-bottom: 2px solid #fff;
+    }
+  }
+}
+
+.field-error {
+  display: block;
+  margin-top: 0.375rem;
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  line-height: 1.5;
+  color: #ffdcd6;
+
+  &:empty {
+    display: none;
+  }
+}
+
+.contact-form .consent {
+  max-width: 26.25rem;
+  margin-bottom: 1.875rem; // 23 px + 7 px trên nút (hai lề của khối không cộng dồn được vì nút là khối)
+}
+
+.consent-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  font-size: var(--fs-caption);
+  line-height: 1.7;
+  color: rgb(255 255 255 / 92%);
+
+  @include up($bp-md) {
+    font-size: var(--fs-small);
+  }
+
+  input {
+    flex: 0 0 auto;
+    width: 1.0625rem;
+    height: 1.0625rem;
+    margin: 0.1875rem 0.1875rem 0.1875rem 0.25rem;
+    accent-color: #fff;
+  }
+}
+
+.button-light {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2.1875rem;
+  width: 100%;
+  min-height: 50px;
+  padding: 0.75rem 1.25rem;
+  margin-top: 0.4375rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.7;
+  color: var(--c-panel);
+  background: #fff;
+  transition: background-color 0.2s ease;
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  &:hover {
+    background: #f7ebe9;
+  }
+
+  @include up($bp-md) {
+    min-height: 54px;
+    padding: 0.875rem 1.4375rem;
+  }
+}
+
+.form-hint,
+.form-status {
+  margin-top: 0.9375rem;
+  font-size: var(--fs-caption);
+  line-height: 1.6;
+  color: rgb(255 255 255 / 90%);
+
+  @include up($bp-md) {
+    font-size: var(--fs-small);
+  }
+}
+
+.form-status:empty {
+  display: none;
+}
+
+// Phương án dự phòng sau khi soạn email: địa chỉ, nội dung soạn sẵn, nút sao chép.
+.form-fallback {
+  margin-top: 1.25rem;
+  padding: 1rem;
+  border: 1px solid rgb(255 255 255 / 45%);
+
+  &[hidden] {
+    display: none;
+  }
+
+  p {
+    font-size: var(--fs-small);
+    line-height: 1.6;
+  }
+
+  a {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  textarea {
+    width: 100%;
+    margin-top: 0.75rem;
+    padding: 0.625rem;
+    font: inherit;
+    font-size: var(--fs-small);
+    color: #fff;
+    background: rgb(0 0 0 / 15%);
+    border: 1px solid rgb(255 255 255 / 30%);
+  }
+}
+
+.button-ghost {
+  margin-top: 0.75rem;
+  padding: 0.5rem 1rem;
+  font-size: var(--fs-small);
+  color: #fff;
+  border: 1px solid rgb(255 255 255 / 70%);
+
+  &:hover {
+    background: rgb(255 255 255 / 12%);
+  }
+}

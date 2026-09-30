@@ -130,12 +130,28 @@ foreach ( $fx_empty ? array() : json_decode( (string) file_get_contents( __DIR__
 }
 
 /* --- Lĩnh vực --- */
+// id, tiêu đề, neo, tóm tắt trang chủ (rỗng = không hiện ở trang chủ), thứ tự, dự án tham khảo (ID), mô tả.
+// Thứ tự và mô tả theo bản thiết kế. Trang chủ lấy 3 nhóm đầu có tóm tắt: kiến trúc, lập dự án, giám sát.
 foreach ( $fx_empty ? array() : array(
-	array( 201, 'Thiết kế kiến trúc', 'thiet-ke-kien-truc', 'Ý tưởng · Hồ sơ' ),
-	array( 202, 'Quản lý dự án', 'quan-ly-du-an', 'Tiến độ · Chi phí' ),
-	array( 203, 'Giám sát thi công', 'giam-sat-thi-cong', 'Chất lượng · Hiện trường' ),
+	array( 201, 'Tư vấn thiết kế kiến trúc', 'thiet-ke-kien-truc', 'Ý tưởng · Hồ sơ', 1, 107, 'Thiết kế quy hoạch, kiến trúc công trình, nội ngoại thất; phát triển phương án từ ý tưởng đến hồ sơ thiết kế.' ),
+	array( 204, 'Thiết kế kết cấu', 'thiet-ke-ket-cau', '', 2, 104, 'Giải pháp kết cấu cho công trình dân dụng và công nghiệp, phối hợp với kiến trúc và các bộ môn kỹ thuật.' ),
+	array( 205, 'Hạ tầng, cảnh quan & cơ điện', 'ha-tang-canh-quan-co-dien', '', 3, 110, 'Thiết kế hạ tầng kỹ thuật, cảnh quan, điện, cấp thoát nước, thông gió và phòng cháy chữa cháy.' ),
+	array( 202, 'Lập dự án & quản lý dự án', 'lap-du-an-quan-ly-du-an', 'Tiến độ · Chi phí', 4, 105, 'Báo cáo nghiên cứu khả thi, tổng mức đầu tư, dự toán; hồ sơ mời thầu, đánh giá dự thầu và quản lý dự án.' ),
+	array( 203, 'Giám sát thi công', 'giam-sat-thi-cong', 'Chất lượng · Hiện trường', 5, 106, 'Giám sát xây dựng, hoàn thiện và lắp đặt thiết bị công trình trong quá trình triển khai.' ),
+	array( 206, 'Thẩm tra & khảo sát', 'tham-tra-khao-sat', '', 6, getenv( 'VG_FX_NO_REF' ) ? 0 : 108, 'Thẩm tra thiết kế và dự toán; khảo sát địa chất công trình, địa chất thủy văn và địa hình.' ),
 ) as $s ) {
-	fx_post( $s[0], 'linh_vuc', $s[1], array( 'neo' => $s[2], 'tom_tat_trang_chu' => $s[3], 'hien_trang_chu' => '1' ) );
+	fx_post(
+		$s[0],
+		'linh_vuc',
+		$s[1],
+		array(
+			'neo'               => $s[2],
+			'tom_tat_trang_chu' => $s[3],
+			'hien_trang_chu'    => '' !== $s[3] ? '1' : '0',
+			'du_an_tham_khao'   => getenv( 'VG_FX_NO_REF' ) ? 0 : $s[5],
+		),
+		array( 'menu_order' => $s[4], 'content' => '<p>' . htmlspecialchars( $s[6], ENT_QUOTES, 'UTF-8' ) . '</p>' )
+	);
 }
 
 /* --- Tin tức --- */
@@ -185,6 +201,38 @@ fx_post(
 	array( 'url' => '/gioi-thieu/' )
 );
 
+// Ban lãnh đạo (502), Phòng ban (503), Lĩnh vực (504), Liên hệ (505). VG_FX_PAGE_OVERRIDE=1: đã nhập chữ ghi đè / thành viên.
+fx_post(
+	502,
+	'page',
+	'Ban lãnh đạo',
+	$page_override ? array(
+		'thanh_vien' => array(
+			array( 'anh' => 0, 'chuc_danh' => 'Tổng giám đốc', 'ho_ten' => 'Nguyễn Văn An', 'don_vi' => '', 'vai_tro' => 'Vai trò 1', 'trong_tam' => '' ),
+			array( 'anh' => $page_full ? fx_image( 'german-villa.jpg' ) : 0, 'chuc_danh' => 'Phó giám đốc', 'ho_ten' => 'Trần Thị <b>Bình</b>', 'don_vi' => 'Đơn vị khác', 'vai_tro' => '', 'trong_tam' => 'Trọng tâm 2' ),
+		),
+		'nguyen_tac' => array( array( 'tieu_de' => 'Chỉ một nguyên tắc', 'mo_ta' => 'Mô tả.' ) ),
+	) : array(),
+	array( 'url' => '/gioi-thieu/ban-lanh-dao/' )
+);
+fx_post(
+	503,
+	'page',
+	'Phòng ban',
+	$page_override ? array(
+		'hero_tieu_de' => "Tiêu đề ghi đè.\n<em>Của biên tập viên.</em>",
+		'nhan'         => "Thiết kế\n\n  Kỹ thuật  ",
+		'bo_mon'       => array(
+			array( 'tieu_de' => 'Bộ môn A', 'mo_ta' => 'Mô tả A' ),
+			array( 'tieu_de' => '', 'mo_ta' => '' ),
+			array( 'tieu_de' => 'Bộ môn B', 'mo_ta' => 'Mô tả B' ),
+		),
+	) : array(),
+	array( 'url' => '/gioi-thieu/phong-ban/' )
+);
+fx_post( 504, 'page', 'Lĩnh vực hoạt động', array(), array( 'url' => '/linh-vuc-hoat-dong/' ) );
+fx_post( 505, 'page', 'Liên hệ', array(), array( 'url' => '/lien-he/' ) );
+
 /* --- Cấu hình (ACF Options) --- */
 $GLOBALS['fx']['options'] = $fx_empty ? array() : array(
 	'doi_tac'           => array(
@@ -223,6 +271,12 @@ function get_field( $name, $post_id = false ) {
 function get_post_status( $id ) {
 	if ( getenv( 'VG_FX_STORY_DRAFT' ) && 106 === $id ) {
 		return 'draft'; // dự án của khối câu chuyện đã bị gỡ về bản nháp
+	}
+	if ( getenv( 'VG_FX_AWARD_DRAFT' ) && 301 === $id ) {
+		return 'draft'; // bài tư liệu ở khối "Sự ghi nhận" chưa xuất bản
+	}
+	if ( getenv( 'VG_FX_REF_DRAFT' ) && 107 === $id ) {
+		return 'draft'; // dự án tham khảo của nhóm lĩnh vực đầu tiên chưa xuất bản
 	}
 	return isset( $GLOBALS['fx']['posts'][ $id ] ) ? 'publish' : false;
 }

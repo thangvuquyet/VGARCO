@@ -1,0 +1,234 @@
+@use '../mixins' as *;
+
+// Lĩnh vực hoạt động (UC-03). Số đo lấy từ bản thiết kế ở 390 và 1440 px.
+
+.services {
+  padding-block: 1.75rem 2.5rem;
+  color: var(--c-surface);
+  background: #1b201d;
+
+  @include up($bp-md) {
+    padding-block: 2.125rem 3.125rem;
+  }
+
+  .eyebrow {
+    margin-bottom: 1.25rem;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    letter-spacing: 0.1em;
+    color: #fff;
+
+    @include up($bp-md) {
+      font-size: var(--fs-caption);
+    }
+  }
+
+  h1 em {
+    display: block;
+    font-size: 0.9em;
+    color: #bbc4b7; // đỏ thương hiệu trên nền đen chỉ đạt 3,7 : 1
+
+    @include up($bp-md) {
+      display: inline;
+      font-size: 0.94em;
+    }
+  }
+}
+
+.services-head {
+  display: grid;
+  margin-bottom: 2.125rem;
+
+  .section-description {
+    margin-top: 1.25rem;
+    font-size: 1.0625rem;
+    line-height: 1.75;
+    color: #bbc1bb;
+  }
+
+  @include up($bp-md) {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 3.125rem;
+
+    .section-description {
+      max-width: 19.375rem;
+      margin-top: 0;
+    }
+  }
+}
+
+.services-body {
+  display: grid;
+  gap: 1.75rem;
+
+  @include up($bp-desk) {
+    &:has(.service-image) {
+      grid-template-columns: 0.74fr 1fr;
+      gap: 5.3125rem;
+    }
+  }
+}
+
+.service-image {
+  position: relative;
+  aspect-ratio: 1.27 / 1;
+  margin: 0;
+  overflow: hidden;
+  background: #2a302c;
+
+  img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  // Lớp tối nhẹ ở đáy để chú thích trắng đọc được trên mọi ảnh.
+  &::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0;
+    height: 40%;
+    pointer-events: none;
+    background: linear-gradient(transparent, rgb(9 12 14 / 60%));
+  }
+
+  figcaption {
+    position: absolute;
+    right: 1.125rem;
+    bottom: 1.5rem;
+    left: 1.125rem;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    font-size: var(--fs-small);
+    line-height: 1.55;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #fff;
+  }
+
+  small {
+    display: block;
+    margin-top: 0.4375rem;
+    font-size: 0.6875rem;
+    line-height: 1.6;
+    letter-spacing: 0.04em;
+    color: #e1e6df;
+  }
+
+  @include up($bp-tablet) {
+    aspect-ratio: 2 / 1;
+
+    figcaption {
+      right: 1.6875rem;
+      left: 1.6875rem;
+    }
+
+    small {
+      font-size: 0.75rem;
+    }
+  }
+
+  @include up($bp-desk) {
+    aspect-ratio: auto;
+    min-height: 28.125rem;
+  }
+}
+
+.service-list {
+  border-top: 1px solid #626a61;
+}
+
+.service-item {
+  border-bottom: 1px solid #465046;
+
+  summary {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding-block: 1.25rem;
+    font-size: 1.0625rem;
+    line-height: 1.7;
+    letter-spacing: -0.02em;
+    color: #fff;
+    cursor: pointer;
+    list-style: none;
+
+    @include up($bp-md) {
+      gap: 1.5rem;
+      padding-block: 1.4375rem;
+      font-size: 1.25rem;
+    }
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+  }
+
+  .num {
+    flex: 0 0 14px;
+    font-size: 0.75rem;
+    line-height: normal;
+    letter-spacing: 0.03em;
+    color: #e05441;
+
+    @include up($bp-md) {
+      flex-basis: 18px;
+      font-size: var(--fs-caption);
+    }
+  }
+
+  .plus {
+    flex: 0 0 20px;
+    margin-left: auto;
+    font-size: 1.3125rem;
+    font-weight: 300;
+    line-height: 1.2;
+    text-align: center;
+    transition: transform 0.2s ease;
+
+    @include up($bp-md) {
+      flex-basis: 24px;
+      font-size: 1.5rem;
+    }
+  }
+
+  &[open] .plus {
+    transform: rotate(45deg);
+  }
+}
+
+.service-body {
+  max-width: 31.25rem;
+  padding-left: 1.75rem;
+  margin-bottom: 1.5625rem;
+  font-size: 0.9375rem;
+  line-height: 1.8;
+  color: #b9c2b8;
+
+  > * + * {
+    margin-top: 0.75em;
+  }
+
+  @include up($bp-md) {
+    padding-left: 2.625rem;
+    font-size: var(--fs-body);
+    line-height: 1.75;
+  }
+}
+
+.services-empty {
+  color: #bbc1bb;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .service-item .plus {
+    transition: none;
+  }
+}

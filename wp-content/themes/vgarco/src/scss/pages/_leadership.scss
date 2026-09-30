@@ -1,0 +1,195 @@
+@use '../mixins' as *;
+
+// Ban lãnh đạo (UC-02). Số đo lấy từ bản thiết kế ở 390 và 1440 px; nấc giữa (701–999 px) xếp hai cột như máy tính.
+
+.leadership-content {
+  display: grid;
+  gap: 1.875rem;
+  align-items: center;
+  padding-block: 1.625rem 2.125rem;
+
+  & + & {
+    border-top: 1px solid var(--c-line);
+  }
+
+  .eyebrow {
+    margin-bottom: 1.375rem;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    letter-spacing: 0.1em;
+    color: var(--c-brand);
+
+    @include up($bp-md) {
+      margin-bottom: 1.75rem;
+      font-size: var(--fs-caption);
+    }
+  }
+
+  h2 {
+    margin-bottom: 1.25rem;
+    font-size: 2.375rem; // 38
+    line-height: 1.2;
+    letter-spacing: -0.035em;
+
+    @include up($bp-md) {
+      font-size: min(4.5vw, 4.5rem);
+      line-height: 1.16;
+    }
+  }
+
+  @include up($bp-md) {
+    grid-template-columns: 2fr 3fr;
+    gap: clamp(2rem, 6.25vw, 5.625rem);
+    padding-block: 2.125rem 2rem;
+  }
+}
+
+// Hình đại diện: ảnh chân dung, hoặc chữ cái đầu của họ tên trên nền tối khi chưa có ảnh.
+.leader-monogram,
+.leader-photo {
+  min-height: 290px;
+  margin: 0;
+  background: #1b201d;
+
+  @include up($bp-md) {
+    min-height: 370px;
+  }
+}
+
+.leader-monogram {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--ff-accent);
+  font-size: 5.9375rem; // 95
+  font-style: italic;
+  line-height: 1;
+  letter-spacing: -0.07em;
+  color: #fff;
+
+  span {
+    margin-top: 1.5625rem;
+    font-family: var(--ff-sans);
+    font-size: var(--fs-small);
+    font-style: normal;
+    line-height: 1.55;
+    letter-spacing: 0.09em;
+    color: #b8c1b9;
+  }
+
+  @include up($bp-md) {
+    font-size: min(8.33vw, 8.33rem);
+  }
+}
+
+.leader-photo img {
+  width: 100%;
+  height: 100%;
+  min-height: inherit;
+  object-fit: cover;
+}
+
+.leadership-company {
+  margin-bottom: 1.875rem;
+  font-weight: 600;
+}
+
+.leadership-note {
+  max-width: 32.5rem;
+  margin-block: 1.375rem 1.875rem;
+  padding-top: 1.375rem;
+  font-size: 1.0625rem;
+  line-height: 1.75;
+  color: var(--c-ink-muted);
+  border-top: 1px solid var(--c-line);
+}
+
+.leader-statement {
+  max-width: 40.625rem;
+  margin-top: 1.875rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--c-line);
+
+  span {
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1.7;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--c-brand);
+  }
+
+  p {
+    margin-top: 0.875rem;
+    font-size: 1.0625rem;
+    line-height: 1.7;
+
+    @include up($bp-md) {
+      font-size: 1.1875rem;
+    }
+  }
+}
+
+// ===================================================================== NGUYÊN TẮC
+.leadership-principles {
+  padding-bottom: 3.25rem;
+
+  .eyebrow {
+    margin-bottom: 1.5rem;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    letter-spacing: 0.1em;
+    color: var(--c-brand);
+
+    @include up($bp-md) {
+      font-size: var(--fs-caption);
+    }
+  }
+}
+
+.leadership-principle-grid {
+  display: grid;
+  gap: 1.75rem 0;
+  border-top: 1px solid var(--c-line);
+
+  article {
+    padding-block: 1.25rem;
+    border-bottom: 1px solid #cdd2ca;
+  }
+
+  article > span {
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1.7;
+    letter-spacing: 0.08em;
+    color: var(--c-brand);
+  }
+
+  h3 {
+    margin-block: 1.25rem 0.5625rem;
+    font-size: 1.25rem;
+    line-height: 1.16;
+    letter-spacing: -0.035em;
+  }
+
+  p {
+    font-size: var(--fs-small);
+    line-height: 1.7;
+    color: var(--c-ink-muted);
+  }
+
+  @include up($bp-tablet) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0;
+
+    article {
+      padding: 1.5625rem 1.5rem 0 0;
+      border-bottom: 0;
+    }
+  }
+
+  @include up($bp-desk) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
