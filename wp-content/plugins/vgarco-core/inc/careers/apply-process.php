@@ -24,6 +24,7 @@ defined( 'ABSPATH' ) || exit;
 
 const VGARCO_APPLY_MIN_SECONDS      = 4;
 const VGARCO_APPLY_MAX_SECONDS      = 7200;
+const VGARCO_CAPTCHA_TTL            = 600; // mã bảo mật sống 10 phút; MAX_SECONDS là chặn phụ nếu hạn của token bị nới
 const VGARCO_APPLY_CONSENT_VERSION  = '2026-09';
 
 /**

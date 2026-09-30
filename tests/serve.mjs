@@ -5,6 +5,7 @@ import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { extname, join, normalize, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { execFile } from 'node:child_process';
 
 const root = fileURLToPath( new URL( '.', import.meta.url ) );
 // Thứ tự quan trọng: tiền tố dài trước, "/" cuối cùng.
@@ -29,8 +30,28 @@ const types = {
 	'.svg': 'image/svg+xml',
 };
 
+// Đường REST tìm kiếm giả: chạy đúng vgarco_search_rank() của plugin qua PHP (tests/php/search-endpoint.php).
+const php = process.env.PHP ?? 'C:/Users/ThangVq/tools/php/php.exe';
+const phpExt = process.env.PHP_EXT ?? 'C:/Users/ThangVq/tools/php/ext';
+const searchEndpoint = ( query, res ) =>
+	execFile( php, [ '-d', 'extension_dir=' + phpExt, '-d', 'extension=mbstring', join( root, 'php', 'search-endpoint.php' ), query ], { encoding: 'utf8' }, ( error, stdout ) => {
+		res.writeHead( error ? 500 : 200, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'public, max-age=300' } );
+		res.end( error ? '{"code":"server"}' : stdout );
+	} );
+
 createServer( async ( req, res ) => {
-	const path = decodeURIComponent( new URL( req.url, 'http://x' ).pathname );
+	const url = new URL( req.url, 'http://x' );
+	const path = decodeURIComponent( url.pathname );
+	if ( path === '/wp-json/vgarco/v1/search' ) {
+		// Giống REST thật: thiếu q hoặc lang sai → 400.
+		const lang = url.searchParams.get( 'lang' );
+		if ( ! url.searchParams.has( 'q' ) || ! [ 'vi', 'de' ].includes( lang ) ) {
+			res.writeHead( 400, { 'Content-Type': 'application/json' } ).end( '{"code":"rest_invalid_param"}' );
+			return;
+		}
+		searchEndpoint( url.searchParams.get( 'q' ), res );
+		return;
+	}
 	const prefix = Object.keys( roots ).find( ( p ) => path.startsWith( p ) );
 	const base = normalize( roots[ prefix ] ); // chuẩn hóa dấu phân cách để phép kiểm tra chống thoát thư mục đúng trên Windows
 	const file = normalize( join( base, path.slice( prefix.length ) || 'frame.html' ) );

@@ -76,6 +76,8 @@ $facebook = (string) vgarco_option( 'mang_xa_hoi.facebook' );
 	</div>
 </footer>
 
+<?php get_template_part( 'template-parts/layout/search-dialog' ); ?>
+
 <?php wp_footer(); ?>
 </body>
 </html>

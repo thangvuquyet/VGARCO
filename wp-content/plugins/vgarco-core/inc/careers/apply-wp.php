@@ -39,7 +39,7 @@ function vgarco_apply_ip_hash( string $ip = '' ): string {
  * ---------------------------------------------------------------------- */
 
 /**
- * Cấp token mới cùng ảnh mã bảo mật. Chỉ lưu BĂM của mã; token sống 2 giờ (khớp giới hạn thời gian điền biểu mẫu).
+ * Cấp token mới cùng ảnh mã bảo mật. Chỉ lưu BĂM của mã; token sống 10 phút (mục 8.3 bước 0). Quá hạn thì máy chủ báo mã sai, cấp mã mới và giữ nguyên dữ liệu người dùng đã nhập.
  *
  * @return array{token: string, image: string}
  */
@@ -53,7 +53,7 @@ function vgarco_apply_token_issue(): array {
 			'issued' => time(),
 			'hash'   => vgarco_captcha_hash( $code, wp_salt( 'auth' ) ),
 		),
-		VGARCO_APPLY_MAX_SECONDS + 60
+		VGARCO_CAPTCHA_TTL
 	);
 
 	return array(
@@ -255,23 +255,6 @@ function vgarco_apply_insert( array $data ): int {
 /* -------------------------------------------------------------------------
  * Thư (mục 8.3 bước 12 và mục 10a)
  * ---------------------------------------------------------------------- */
-
-/**
- * Chạy $fn trong một ngôn ngữ (WPML và locale của WordPress), rồi trả về như cũ. Mẫu thư mặc định và giá trị đã dịch
- * phải theo ngôn ngữ của người nhận, không theo ngôn ngữ của yêu cầu hiện tại (cron chạy ở ngôn ngữ mặc định).
- */
-function vgarco_with_language( string $lang, callable $fn ) {
-	do_action( 'wpml_switch_language', $lang );
-	$switched = function_exists( 'switch_to_locale' ) && switch_to_locale( 'de' === $lang ? 'de_DE' : 'vi' );
-	try {
-		return $fn();
-	} finally {
-		if ( $switched ) {
-			restore_previous_locale();
-		}
-		do_action( 'wpml_switch_language', null );
-	}
-}
 
 /**
  * Mẫu thư: giá trị nhập ở trang Cấu hình (nhóm "Mẫu thư"), thiếu thì dùng mặc định trong mã.

@@ -115,6 +115,23 @@ function vgarco_option( string $path, $fallback = '' ) {
 }
 
 /**
+ * Chạy $fn trong một ngôn ngữ (WPML và locale của WordPress), rồi trả về như cũ. Mẫu thư mặc định và giá trị đã dịch
+ * phải theo ngôn ngữ của người nhận, không theo ngôn ngữ của yêu cầu hiện tại (cron chạy ở ngôn ngữ mặc định).
+ */
+function vgarco_with_language( string $lang, callable $fn ) {
+	do_action( 'wpml_switch_language', $lang );
+	$switched = function_exists( 'switch_to_locale' ) && switch_to_locale( 'de' === $lang ? 'de_DE' : 'vi' );
+	try {
+		return $fn();
+	} finally {
+		if ( $switched ) {
+			restore_previous_locale();
+		}
+		do_action( 'wpml_switch_language', null );
+	}
+}
+
+/**
  * Liên kết "Chỉ đường" mở Google Maps ở thẻ mới (yêu cầu 30). Không nhúng bản đồ.
  */
 function vgarco_directions_url(): string {

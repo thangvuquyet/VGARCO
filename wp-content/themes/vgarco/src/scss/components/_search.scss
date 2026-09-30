@@ -1,0 +1,200 @@
+@use '../mixins' as *;
+
+// Hộp thoại tìm kiếm dự án (UC-09). Nguồn: #search-dialog của bản thiết kế HTML (740 px, đệm 48 / 35×24, ô nhập chỉ có gạch chân,
+// kết quả là dãy ảnh nhỏ + tên + "địa điểm · năm").
+//
+// Khác bản thiết kế, có chủ đích:
+//  - ô nhập giữ dấu hiệu tiêu điểm nhìn thấy được (gạch chân đậm màu cam); bản thiết kế bỏ hẳn viền tiêu điểm (WCAG 2.4.7);
+//  - chữ phụ dưới tên dự án 13–14 px (bản thiết kế 12 px ở máy tính);
+//  - kết quả là liên kết tới trang dự án, không phải nút mở cửa sổ con.
+
+.search-dialog {
+  width: 740px;
+  max-width: calc(100% - 2.25rem);
+  max-height: 90svh;
+  padding: 0;
+  overflow: auto;
+  color: var(--c-ink);
+  background: #fff;
+  border: 0;
+
+  &::backdrop {
+    background: rgb(9 12 17 / 74%);
+    backdrop-filter: blur(5px);
+  }
+}
+
+// Đang mở hộp thoại thì không cuộn trang phía sau.
+body:has(.search-dialog[open]) {
+  overflow: hidden;
+}
+
+.search-panel {
+  position: relative;
+  padding: 2.1875rem 1.5rem;
+
+  @include up($bp-tablet) {
+    padding: 3rem;
+  }
+
+  h2 {
+    margin: 0.9375rem 0 1.75rem;
+    padding-right: 3rem; // chừa chỗ cho nút đóng
+    font-size: 1.6875rem;
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+
+    @include up($bp-tablet) {
+      font-size: 2.125rem;
+    }
+  }
+
+  label {
+    display: block;
+    font-size: 0.875rem;
+    color: var(--c-ink-muted);
+
+    @include up($bp-tablet) {
+      font-size: 0.9375rem;
+    }
+  }
+
+  input {
+    display: block;
+    width: 100%;
+    padding: 0.9375rem 0;
+    margin-bottom: 1.25rem;
+    font: inherit;
+    font-size: 1.125rem;
+    color: var(--c-ink);
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--c-line-strong);
+    border-radius: 0;
+    appearance: none;
+
+    &::placeholder {
+      color: var(--c-ink-muted);
+    }
+
+    // Dấu hiệu tiêu điểm: gạch chân dày thêm màu cam, không đổi kích thước ô.
+    &:focus-visible {
+      outline: none;
+      border-bottom-color: var(--c-focus);
+      box-shadow: 0 1px 0 0 var(--c-focus);
+    }
+
+    // Xóa nút "x" mặc định của ô search trên Chrome/Safari: đã có nút đóng cả hộp thoại.
+    &::-webkit-search-cancel-button {
+      appearance: none;
+    }
+  }
+}
+
+.search-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 38px;
+  height: 38px;
+  color: var(--c-ink);
+  background: #fff;
+  border: 1px solid var(--c-line);
+  border-radius: 50%;
+
+  @include up($bp-tablet) {
+    top: 1.375rem;
+    right: 1.375rem;
+    width: 40px;
+    height: 40px;
+  }
+
+  &:hover {
+    color: var(--c-brand);
+    border-color: var(--c-brand);
+  }
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.search-status {
+  margin: 0;
+  font-size: var(--fs-small);
+  line-height: 1.5;
+  color: var(--c-ink-muted);
+}
+
+.search-results {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+
+  &[hidden] {
+    display: none;
+  }
+
+  li {
+    border-bottom: 1px solid var(--c-line);
+  }
+
+  a {
+    display: flex;
+    gap: 1.25rem;
+    align-items: center;
+    padding: 1.125rem 0;
+    color: var(--c-ink);
+    text-decoration: none;
+
+    &:hover .search-result-title {
+      color: var(--c-brand);
+    }
+  }
+
+  img {
+    flex: none;
+    width: 68px;
+    height: 56px;
+    object-fit: cover;
+    background: var(--c-surface-pale);
+
+    @include up($bp-tablet) {
+      width: 90px;
+      height: 64px;
+    }
+  }
+}
+
+.search-result-text {
+  min-width: 0;
+  font-size: 0.875rem;
+  line-height: 1.4;
+
+  @include up($bp-tablet) {
+    font-size: 1rem;
+  }
+
+  small {
+    display: block;
+    margin-top: 0.3125rem;
+    font-size: 0.8125rem;
+    color: var(--c-ink-muted);
+
+    @include up($bp-tablet) {
+      font-size: 0.875rem;
+    }
+  }
+}
+
+.search-result-title {
+  transition: color 0.15s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .search-result-title {
+    transition: none;
+  }
+}

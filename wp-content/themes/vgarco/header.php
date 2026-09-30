@@ -31,9 +31,10 @@ defined( 'ABSPATH' ) || exit;
 	</nav>
 
 	<div class="header-actions">
-		<button type="button" class="icon-button search-open" data-vg-search-open aria-label="<?php esc_attr_e( 'Tìm kiếm dự án', 'vgarco' ); ?>">
+		<?php // Không có JS thì là liên kết tới danh mục dự án; JS chặn liên kết và mở hộp thoại tìm kiếm (template-parts/layout/search-dialog.php). ?>
+		<a class="icon-button search-open" href="<?php echo esc_url( get_post_type_archive_link( 'du_an' ) ?: home_url( '/du-an/' ) ); ?>" data-vg-search-open aria-label="<?php esc_attr_e( 'Tìm kiếm dự án', 'vgarco' ); ?>">
 			<?php echo vgarco_icon( 'search' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- SVG của theme. ?>
-		</button>
+		</a>
 		<?php vgarco_language_switcher(); ?>
 		<button type="button" class="icon-button menu-toggle" aria-expanded="false" aria-controls="main-nav"
 			aria-label="<?php esc_attr_e( 'Mở menu', 'vgarco' ); ?>"

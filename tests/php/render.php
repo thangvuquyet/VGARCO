@@ -248,6 +248,9 @@ function get_term_link( $term ) {
 	return ( 'loai_cong_trinh' === $term->taxonomy ? '/du-an/loai/' : '/tin-tuc/chuyen-muc/' ) . $term->slug . '/';
 }
 function apply_filters( $hook, $value = null, ...$args ) {
+	if ( 'wpml_current_language' === $hook ) {
+		return $GLOBALS['lang'];
+	}
 	if ( 'wpml_active_languages' === $hook ) {
 		$vi = 'vi' === $GLOBALS['lang'];
 		return array(

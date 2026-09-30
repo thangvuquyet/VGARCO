@@ -106,6 +106,24 @@ function common_checks( DOMXPath $x, string $name ): void {
 		}
 	}
 	same( "{$name}: nút không chữ đều có aria-label", 0, $nameless );
+
+	// Tìm kiếm (UC-09): nút ở đầu trang là liên kết dự phòng (không JS vẫn đi được), hộp thoại nằm ngoài <main>.
+	$opener = q( $x, '//header//a[@data-vg-search-open]' );
+	check( "{$name}: nút tìm kiếm là liên kết có địa chỉ và tên đọc được", 1 === $opener->length && '' !== $opener->item( 0 )->getAttribute( 'href' ) && '' !== $opener->item( 0 )->getAttribute( 'aria-label' ) );
+	$dialog = q( $x, '//dialog[@id="search-dialog"]' );
+	same( "{$name}: đúng một hộp thoại tìm kiếm", 1, $dialog->length );
+	if ( 1 === $dialog->length ) {
+		$d = $dialog->item( 0 );
+		same( "{$name}: hộp thoại tìm kiếm nằm ngoài <main>", 0, q( $x, '//main//dialog[@id="search-dialog"]' )->length );
+		check( "{$name}: hộp thoại có tên (aria-labelledby trỏ tới tiêu đề)", 1 === q( $x, '//*[@id="' . $d->getAttribute( 'aria-labelledby' ) . '" and self::h2]' )->length );
+		check( "{$name}: địa chỉ REST và ngôn ngữ", str_contains( $d->getAttribute( 'data-endpoint' ), 'vgarco/v1/search' ) && in_array( $d->getAttribute( 'data-lang' ), array( 'vi', 'de' ), true ) && '3' === $d->getAttribute( 'data-min' ) );
+		$missing = array_filter( array( 'hint', 'empty', 'error', 'loading', 'one', 'many' ), static fn( $m ) => '' === $d->getAttribute( 'data-msg-' . $m ) );
+		same( "{$name}: đủ thông báo đã dịch cho JS", array(), array_values( $missing ) );
+		check( "{$name}: thông báo nhiều kết quả có %d", str_contains( $d->getAttribute( 'data-msg-many' ), '%d' ) );
+		check( "{$name}: ô nhập có nhãn, kiểu search, mô tả bằng dòng trạng thái", 1 === q( $x, '//dialog[@id="search-dialog"]//label[@for="search-input"]' )->length && 1 === q( $x, '//dialog[@id="search-dialog"]//input[@id="search-input" and @type="search" and @aria-describedby="search-status"]' )->length );
+		check( "{$name}: dòng trạng thái là vùng thông báo (role=status), danh sách kết quả ẩn sẵn", 1 === q( $x, '//dialog[@id="search-dialog"]//*[@id="search-status" and @role="status"]' )->length && 1 === q( $x, '//dialog[@id="search-dialog"]//ul[@id="search-results" and @hidden]' )->length );
+		check( "{$name}: nút đóng có tên đọc được", 1 === q( $x, '//dialog[@id="search-dialog"]//button[@data-search-close and string-length(@aria-label) > 0]' )->length );
+	}
 }
 
 /* ========================= Trang chủ, có nội dung ========================= */
@@ -155,6 +173,8 @@ check( 'CTA: hai liên kết tới trang Liên hệ', 2 === q( $x, '//section[' 
 
 // Ngôn ngữ: bản tiếng Đức chưa có bản dịch thì hiện chuỗi gốc (không rỗng, không lỗi).
 $de = render( 'front-page', false, 'de' );
+common_checks( $de, 'trang chủ tiếng Đức' );
+same( 'trang chủ tiếng Đức: hộp thoại tìm kiếm gửi lang=de', 'de', q( $de, '//dialog[@id="search-dialog"]' )->item( 0 )->getAttribute( 'data-lang' ) );
 check( 'trang chủ tiếng Đức: vẫn đủ nội dung (chuỗi chưa dịch giữ tiếng Việt)', 1 === q( $de, '//h1' )->length && q( $de, '//h1' )->item( 0 )->textContent !== '' );
 
 /* ========================= Trang chủ, website mới cài ========================= */
@@ -273,7 +293,7 @@ same( 'thư viện: ảnh nhỏ có alt rỗng (nhãn nằm ở chữ bên cạn
 check( 'thư viện: khung trình chiếu focus được bằng bàn phím và có nhãn', 1 === q( $d, '//*[@data-gallery-stage and @tabindex="0" and @aria-label != ""]' )->length );
 same( 'thư viện: có vùng thông báo cho trình đọc màn hình khi đổi ảnh', 1, q( $d, '//*[@data-gallery-status and @aria-live="polite"]' )->length );
 check( 'thư viện: định dạng thông báo lấy từ thuộc tính (dịch được)', str_contains( q( $d, '//section[@data-gallery]' )->item( 0 )->getAttribute( 'data-status' ), '%1$d' ) );
-check( 'thư viện: hộp xem ảnh lớn là <dialog> có nhãn; mọi nút trong đó có tên (đóng, trước, sau)', 1 === q( $d, '//dialog[@data-gallery-lightbox and @aria-label != ""]' )->length && 3 === q( $d, '//dialog//button[@aria-label != ""]' )->length && 0 === q( $d, '//dialog//button[not(@aria-label) or @aria-label = ""]' )->length );
+check( 'thư viện: hộp xem ảnh lớn là <dialog> có nhãn; mọi nút trong đó có tên (đóng, trước, sau)', 1 === q( $d, '//dialog[@data-gallery-lightbox and @aria-label != ""]' )->length && 3 === q( $d, '//dialog[@data-gallery-lightbox]//button[@aria-label != ""]' )->length && 0 === q( $d, '//dialog[@data-gallery-lightbox]//button[not(@aria-label) or @aria-label = ""]' )->length );
 check( 'thư viện: không có thuộc tính tự chạy (WCAG 2.2.2)', 0 === q( $d, '//*[@data-autoplay or @data-interval]' )->length );
 
 $n = q( $d, '//section[' . cls( 'project-detail-next' ) . ']' );

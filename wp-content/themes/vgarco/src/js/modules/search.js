@@ -1,0 +1,236 @@
+// Hộp thoại tìm kiếm dự án (UC-09). Tải khi người dùng chạm vào nút tìm kiếm (main.js).
+// Mọi chữ hiển thị lấy từ thuộc tính data-msg-* do PHP sinh (đã dịch); kết quả dựng bằng DOM (textContent), không dùng innerHTML.
+
+const DEBOUNCE_MS = 200;
+
+let dialog;
+let input;
+let status;
+let list;
+let opener = null;
+let controller = null;
+let timer = 0;
+let ready = false;
+const cache = new Map();
+
+/** Chỉ nhận địa chỉ http(s) hoặc tương đối: kết quả từ máy chủ, nhưng không bao giờ chấp nhận javascript:. */
+function safeUrl( value ) {
+	try {
+		const url = new URL( value, location.href );
+		return url.protocol === 'http:' || url.protocol === 'https:' ? url.href : '';
+	} catch {
+		return '';
+	}
+}
+
+const normalize = ( text ) => text.trim().replace( /\s+/g, ' ' );
+const length = ( text ) => [ ...text ].length; // ký tự, không phải đơn vị UTF-16
+
+function setStatus( message ) {
+	status.textContent = message;
+}
+
+function clearResults() {
+	list.replaceChildren();
+	list.hidden = true;
+}
+
+function showHint() {
+	controller?.abort();
+	clearResults();
+	setStatus( dialog.dataset.msgHint );
+}
+
+function render( results ) {
+	list.replaceChildren();
+
+	if ( ! results.length ) {
+		list.hidden = true;
+		setStatus( dialog.dataset.msgEmpty );
+		return;
+	}
+
+	for ( const result of results ) {
+		const href = safeUrl( result.url );
+		if ( ! href ) {
+			continue;
+		}
+
+		const item = document.createElement( 'li' );
+		const link = document.createElement( 'a' );
+		link.href = href;
+
+		const thumb = result.thumb ? safeUrl( result.thumb ) : '';
+		if ( thumb ) {
+			const image = document.createElement( 'img' );
+			image.src = thumb;
+			image.alt = '';
+			image.width = 90;
+			image.height = 64;
+			image.loading = 'lazy';
+			link.append( image );
+		}
+
+		const text = document.createElement( 'span' );
+		text.className = 'search-result-text';
+		const title = document.createElement( 'span' );
+		title.className = 'search-result-title';
+		title.textContent = result.title;
+		text.append( title );
+
+		const meta = [ result.location, result.years ].filter( Boolean ).join( ' · ' );
+		if ( meta ) {
+			const small = document.createElement( 'small' );
+			small.textContent = meta;
+			text.append( small );
+		}
+
+		link.append( text );
+		item.append( link );
+		list.append( item );
+	}
+
+	list.hidden = list.children.length === 0;
+	setStatus( results.length === 1 ? dialog.dataset.msgOne : dialog.dataset.msgMany.replace( '%d', String( results.length ) ) );
+}
+
+async function search() {
+	const query = normalize( input.value );
+	if ( length( query ) < Number( dialog.dataset.min || 3 ) ) {
+		showHint();
+		return;
+	}
+
+	const key = query.toLowerCase();
+	if ( cache.has( key ) ) {
+		render( cache.get( key ) );
+		return;
+	}
+
+	controller?.abort();
+	controller = new AbortController();
+	const { signal } = controller;
+
+	// Địa chỉ luôn cùng nguồn gốc với trang (staging, www/không www), giữ nguyên ?rest_route= nếu site dùng đường dẫn mặc định.
+	const endpoint = new URL( dialog.dataset.endpoint, location.href );
+	const url = new URL( endpoint.pathname + endpoint.search, location.origin );
+	url.searchParams.set( 'q', query );
+	url.searchParams.set( 'lang', dialog.dataset.lang );
+
+	list.setAttribute( 'aria-busy', 'true' );
+	setStatus( dialog.dataset.msgLoading );
+
+	try {
+		const response = await fetch( url, { signal, headers: { Accept: 'application/json' } } );
+		if ( ! response.ok ) {
+			throw new Error( String( response.status ) );
+		}
+		const data = await response.json();
+		const results = Array.isArray( data.results ) ? data.results : [];
+		cache.set( key, results );
+		// Người dùng đã gõ tiếp trong lúc chờ: bỏ kết quả cũ.
+		if ( normalize( input.value ).toLowerCase() === key ) {
+			render( results );
+		}
+	} catch ( error ) {
+		if ( error.name === 'AbortError' ) {
+			return;
+		}
+		clearResults();
+		setStatus( dialog.dataset.msgError );
+	} finally {
+		if ( controller?.signal === signal ) {
+			list.removeAttribute( 'aria-busy' );
+		}
+	}
+}
+
+// Dọn dẹp khi đóng: hủy yêu cầu đang chờ, trả tiêu điểm về nút tìm kiếm (UC-09 2a). Chạy được nhiều lần không hại.
+function afterClose() {
+	clearTimeout( timer );
+	controller?.abort();
+	opener?.focus();
+}
+
+// Đóng bằng nút hoặc bấm nền: tự dọn dẹp ngay, không chờ sự kiện "close" (Esc vẫn qua sự kiện "close" bên dưới).
+function closeSearch() {
+	dialog.close();
+	afterClose();
+}
+
+function init() {
+	if ( ready ) {
+		return;
+	}
+	ready = true;
+
+	dialog = document.querySelector( '[data-search-dialog]' );
+	input = dialog.querySelector( '#search-input' );
+	status = dialog.querySelector( '#search-status' );
+	list = dialog.querySelector( '#search-results' );
+
+	input.addEventListener( 'input', () => {
+		clearTimeout( timer );
+		timer = setTimeout( search, DEBOUNCE_MS );
+	} );
+
+	dialog.querySelector( '[data-search-close]' ).addEventListener( 'click', closeSearch );
+
+	// Bấm ra ngoài (vào nền tối — chính <dialog>, không phải khung nội dung) thì đóng.
+	dialog.addEventListener( 'click', ( event ) => {
+		if ( event.target === dialog ) {
+			closeSearch();
+		}
+	} );
+
+	// Esc (và mọi cách đóng khác do trình duyệt xử lý) đi qua sự kiện "close".
+	dialog.addEventListener( 'close', afterClose );
+
+	// Mũi tên xuống/lên đi qua danh sách kết quả; Enter theo liên kết như thường.
+	dialog.addEventListener( 'keydown', ( event ) => {
+		if ( event.key !== 'ArrowDown' && event.key !== 'ArrowUp' ) {
+			return;
+		}
+		const links = [ ...list.querySelectorAll( 'a' ) ];
+		if ( ! links.length ) {
+			return;
+		}
+		const at = links.indexOf( document.activeElement );
+		let next;
+		if ( event.key === 'ArrowDown' ) {
+			next = at === -1 ? links[ 0 ] : links[ at + 1 ];
+		} else {
+			next = at > 0 ? links[ at - 1 ] : input;
+		}
+		if ( next ) {
+			event.preventDefault();
+			next.focus();
+		}
+	} );
+}
+
+/**
+ * Mở hộp thoại; con trỏ vào ô nhập (UC-09 bước 2).
+ *
+ * @param {HTMLElement} trigger Nút tìm kiếm — nơi trả tiêu điểm khi đóng.
+ */
+export function openSearch( trigger ) {
+	init();
+	opener = trigger ?? null;
+
+	// Trình duyệt quá cũ không có <dialog>.showModal: đi theo liên kết dự phòng tới danh mục dự án.
+	if ( typeof dialog.showModal !== 'function' ) {
+		if ( trigger?.href ) {
+			location.href = trigger.href;
+		}
+		return;
+	}
+
+	if ( ! dialog.open ) {
+		dialog.showModal();
+	}
+	input.focus();
+	input.select();
+}
+
+export default function () {}
