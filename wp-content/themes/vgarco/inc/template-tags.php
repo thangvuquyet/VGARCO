@@ -67,6 +67,44 @@ function vgarco_breadcrumb( array $trail, string $modifier = '' ): void {
 }
 
 /**
+ * Phân trang (UC-06: quá 9 bài thì chia trang). Không có gì để in khi chỉ một trang.
+ *
+ * @param int      $current Trang hiện tại (từ 1).
+ * @param int      $total   Tổng số trang.
+ * @param callable $url     Nhận số trang, trả địa chỉ.
+ */
+function vgarco_pagination( int $current, int $total, callable $url ): string {
+	if ( $total < 2 ) {
+		return '';
+	}
+	$current = max( 1, min( $current, $total ) );
+
+	$item = static function ( string $label, int $page, string $aria = '', bool $is_current = false ) use ( $url ): string {
+		if ( $is_current ) {
+			return sprintf( '<li><span aria-current="page">%s</span></li>', esc_html( $label ) );
+		}
+		return sprintf(
+			'<li><a href="%s"%s>%s</a></li>',
+			esc_url( $url( $page ) ),
+			'' !== $aria ? ' aria-label="' . esc_attr( $aria ) . '"' : '',
+			esc_html( $label )
+		);
+	};
+
+	$html = '<nav class="pagination" aria-label="' . esc_attr__( 'Phân trang', 'vgarco' ) . '"><ul>';
+	if ( $current > 1 ) {
+		$html .= $item( '←', $current - 1, __( 'Trang trước', 'vgarco' ) );
+	}
+	for ( $page = 1; $page <= $total; $page++ ) {
+		$html .= $item( (string) $page, $page, '', $page === $current );
+	}
+	if ( $current < $total ) {
+		$html .= $item( '→', $current + 1, __( 'Trang sau', 'vgarco' ) );
+	}
+	return $html . '</ul></nav>';
+}
+
+/**
  * Số có chữ số 0 đứng đầu ("07"), dùng cho số thứ tự và số lượng ở tiêu đề trang.
  */
 function vgarco_pad( int $number ): string {

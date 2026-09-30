@@ -521,21 +521,93 @@ function vgarco_latest_news( int $count = 3 ): array {
 		)
 	);
 
-	$news = array();
-	foreach ( $ids as $id ) {
-		$terms  = get_the_terms( $id, 'chuyen_muc' );
-		$term   = is_array( $terms ) && $terms ? reset( $terms ) : null;
-		$label  = trim( (string) get_field( 'nhan_chu_de', $id ) );
-		$news[] = array(
-			'id'       => (int) $id,
-			'title'    => get_the_title( $id ),
-			'url'      => (string) get_permalink( $id ),
-			'excerpt'  => vgarco_excerpt( (int) $id ),
-			'image_id' => (int) get_post_thumbnail_id( $id ),
-			'label'    => '' !== $label ? $label : ( $term ? html_entity_decode( $term->name, ENT_QUOTES, 'UTF-8' ) : '' ),
-			'category' => $term ? html_entity_decode( $term->name, ENT_QUOTES, 'UTF-8' ) : '',
-			'date'     => get_the_date( 'm.Y', $id ),
+	return array_map( 'vgarco_news_item', array_map( 'intval', $ids ) );
+}
+
+/**
+ * Một bài tin tức dưới dạng mảng thuần.
+ *
+ * @return array id, title, url, excerpt, image_id, label (nhãn chủ đề hoặc tên chuyên mục), category, topic (nhãn chủ đề, có thể rỗng), date (tháng.năm), iso (Y-m-d).
+ */
+function vgarco_news_item( int $id ): array {
+	$terms = get_the_terms( $id, 'chuyen_muc' );
+	$term  = is_array( $terms ) && $terms ? reset( $terms ) : null;
+	$label = trim( (string) get_field( 'nhan_chu_de', $id ) );
+	$name  = $term ? html_entity_decode( $term->name, ENT_QUOTES, 'UTF-8' ) : '';
+
+	return array(
+		'id'       => $id,
+		'title'    => get_the_title( $id ),
+		'url'      => (string) get_permalink( $id ),
+		'excerpt'  => vgarco_excerpt( $id ),
+		'image_id' => (int) get_post_thumbnail_id( $id ),
+		'label'    => '' !== $label ? $label : $name,
+		'category' => $name,
+		'topic'    => $label,
+		'date'     => get_the_date( 'm.Y', $id ),
+		'iso'      => get_the_date( 'Y-m-d', $id ),
+	);
+}
+
+/**
+ * Các chuyên mục tin tức (3 mục) cho bộ lọc, kèm mục nào đang xem.
+ *
+ * @param int $current_id term_id đang xem; 0 = xem tất cả.
+ * @return array[] Mỗi phần tử: name, url, current.
+ */
+function vgarco_news_categories( int $current_id = 0 ): array {
+	$terms = get_terms(
+		array(
+			'taxonomy'   => 'chuyen_muc',
+			'hide_empty' => false,
+			'orderby'    => 'term_id',
+		)
+	);
+	$out   = array();
+	foreach ( is_array( $terms ) ? $terms : array() as $term ) {
+		$url = get_term_link( $term );
+		if ( is_wp_error( $url ) ) {
+			continue;
+		}
+		$out[] = array(
+			'name'    => html_entity_decode( $term->name, ENT_QUOTES, 'UTF-8' ),
+			'url'     => $url,
+			'current' => $current_id > 0 && (int) $term->term_id === $current_id,
 		);
 	}
-	return $news;
+	return $out;
+}
+
+/**
+ * Bài tin tức đầy đủ (UC-06): nội dung, đoạn dẫn, ảnh đầu bài, bài trước/sau theo thứ tự danh sách (mới nhất trước).
+ * "Bài trước" là bài đứng trước trong danh sách (mới hơn); bài đầu không có bài trước, bài cuối không có bài sau (7a).
+ *
+ * @return array item (vgarco_news_item), content (HTML), lead, caption, prev, next (item hoặc null).
+ */
+function vgarco_news_article( int $id ): array {
+	$ids = array_map(
+		'intval',
+		get_posts(
+			array(
+				'post_type'        => 'tin_tuc',
+				'post_status'      => 'publish',
+				'posts_per_page'   => -1,
+				'orderby'          => 'date',
+				'order'            => 'DESC',
+				'fields'           => 'ids',
+				'no_found_rows'    => true,
+				'suppress_filters' => false,
+			)
+		)
+	);
+	$pos = array_search( $id, $ids, true );
+
+	return array(
+		'item'    => vgarco_news_item( $id ),
+		'content' => (string) apply_filters( 'the_content', (string) get_post_field( 'post_content', $id ) ),
+		'lead'    => trim( (string) get_field( 'doan_dan', $id ) ),
+		'caption' => trim( (string) get_field( 'chu_thich_anh', $id ) ),
+		'prev'    => ( false !== $pos && $pos > 0 ) ? vgarco_news_item( $ids[ $pos - 1 ] ) : null,
+		'next'    => ( false !== $pos && $pos < count( $ids ) - 1 ) ? vgarco_news_item( $ids[ $pos + 1 ] ) : null,
+	);
 }

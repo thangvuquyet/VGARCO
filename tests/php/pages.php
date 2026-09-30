@@ -440,6 +440,65 @@ same( 'ghi nhận: bài tư liệu chưa xuất bản thì ẩn nút, giữ kh�
 $rd = render( 'templates/services', false, 'vi', array( 'VG_FX_ID' => '504', 'VG_FX_REF_DRAFT' => '1' ) );
 same( 'lĩnh vực: dự án tham khảo chưa xuất bản bị bỏ — nhóm đó không có ảnh, khung ảnh dùng dự án kế tiếp', array( 0, 5, 'Phối cảnh thiết kế — Đài kiểm soát không lưu Đồng Hới' ), array( q( $rd, '//details[@id="thiet-ke-kien-truc" and @data-image]' )->length, q( $rd, '//details[@data-image]' )->length, q( $rd, '//figure[' . cls( 'service-image' ) . ']/img' )->item( 0 )->getAttribute( 'alt' ) ) );
 
+/* ========================= Tin tức (UC-06) ========================= */
+
+$titles = static fn( DOMXPath $d, string $expr ): array => array_map( static fn( $n ) => trim( $n->textContent ), iterator_to_array( q( $d, $expr ) ) );
+
+// --- Danh sách: tất cả ---
+$n1 = render( 'archive-tin_tuc' );
+common_checks( $n1, 'tin tức' );
+check( 'tin tức: trang thuộc module "news" (data-vg-page)', 1 === q( $n1, '//body[@data-vg-page="news"]' )->length );
+same( 'tin tức: h1 là nhãn "Tin tức & hoạt động"', 'Tin tức & hoạt động', trim( q( $n1, '//h1' )->item( 0 )->textContent ) );
+same( 'tin tức: bộ lọc là liên kết thật — Tất cả + 3 chuyên mục', array( 'Tất cả', 'Tin tức công ty', 'Thông tin báo chí', 'Sự kiện' ), $titles( $n1, '//nav[' . cls( 'news-filters' ) . ']//a' ) );
+same( 'tin tức: đang xem "Tất cả" (aria-current)', array( 'Tất cả' ), $titles( $n1, '//nav[' . cls( 'news-filters' ) . ']//a[@aria-current="page"]' ) );
+same( 'tin tức: mới nhất trước', array( 'Chia sẻ chuyên môn cùng đội ngũ VGARCO', 'Dấu ấn hợp tác trong các dự án quốc tế', 'Từ ý tưởng đến một công trình có thể vận hành' ), $titles( $n1, '//div[' . cls( 'news-list' ) . ']//h2' ) );
+same( 'tin tức: dòng có ngày <time datetime> và nhãn chủ đề', array( '2026-09-03', 'Sự kiện' ), array( q( $n1, '(//div[' . cls( 'news-list' ) . ']//time)[1]' )->item( 0 )->getAttribute( 'datetime' ), trim( q( $n1, '(//div[' . cls( 'news-row-meta' ) . ']/small)[1]' )->item( 0 )->textContent ) ) );
+same( 'tin tức: ảnh nhỏ lazy và alt rỗng (tiêu đề bên cạnh đã mô tả — tránh đọc hai lần)', array( 3, 3 ), array( q( $n1, '//figure//img[@loading="lazy" and @alt=""]' )->length, q( $n1, '//article[' . cls( 'news-row' ) . ']//img' )->length ) );
+same( 'tin tức: ít bài thì không có phân trang', 0, q( $n1, '//nav[' . cls( 'pagination' ) . ']' )->length );
+same( 'tin tức: mọi dòng là liên kết tới bài', 3, q( $n1, '//article[' . cls( 'news-row' ) . ']/a[starts-with(@href, "/tin-tuc/")]' )->length );
+
+// --- Phân trang: 23 bài = 3 trang, 9 bài mỗi trang ---
+$p1 = render( 'archive-tin_tuc', false, 'vi', array( 'VG_FX_NEWS_MANY' => '1' ) );
+same( 'phân trang: trang 1 có 9 bài', 9, q( $p1, '//article[' . cls( 'news-row' ) . ']' )->length );
+same( 'phân trang: trang 1 — có 1,2,3 và "→", không có "←"; trang hiện tại là chữ, không là liên kết', array( '1', '2', '3', '→' ), $titles( $p1, '//nav[' . cls( 'pagination' ) . ']//li' ) );
+same( 'phân trang: trang 1 đánh dấu aria-current và không có liên kết về chính nó', array( '1', 0 ), array( trim( q( $p1, '//nav[' . cls( 'pagination' ) . ']//span[@aria-current="page"]' )->item( 0 )->textContent ), q( $p1, '//nav[' . cls( 'pagination' ) . ']//a[.="1"]' )->length ) );
+check( 'phân trang: số 2 và nút sau cùng trỏ tới trang 2; nút sau có nhãn cho trình đọc màn hình', 2 === q( $p1, '//nav[' . cls( 'pagination' ) . ']//a[@href="/tin-tuc/page/2/"]' )->length && 1 === q( $p1, '//nav[' . cls( 'pagination' ) . ']//a[@aria-label="Trang sau" and @href="/tin-tuc/page/2/"]' )->length );
+$p2 = render( 'archive-tin_tuc', false, 'vi', array( 'VG_FX_NEWS_MANY' => '1', 'VG_FX_PAGED' => '2' ) );
+same( 'phân trang: trang 2 — 9 bài, có cả "←" và "→"', array( 9, '←', '→' ), array( q( $p2, '//article[' . cls( 'news-row' ) . ']' )->length, $titles( $p2, '//nav[' . cls( 'pagination' ) . ']//li' )[0], $titles( $p2, '//nav[' . cls( 'pagination' ) . ']//li' )[4] ) );
+$p3 = render( 'archive-tin_tuc', false, 'vi', array( 'VG_FX_NEWS_MANY' => '1', 'VG_FX_PAGED' => '3' ) );
+same( 'phân trang: trang cuối — 5 bài, có "←", không có "→"', array( 5, '←', 0 ), array( q( $p3, '//article[' . cls( 'news-row' ) . ']' )->length, $titles( $p3, '//nav[' . cls( 'pagination' ) . ']//li' )[0], q( $p3, '//nav[' . cls( 'pagination' ) . ']//a[@aria-label="Trang sau"]' )->length ) );
+
+// --- Theo chuyên mục ---
+$k = render( 'taxonomy-chuyen_muc', false, 'vi', array( 'VG_FX_TERM' => 'su-kien' ) );
+common_checks( $k, 'tin tức theo chuyên mục' );
+same( 'chuyên mục: chỉ bài của mục "Sự kiện"', array( 'Chia sẻ chuyên môn cùng đội ngũ VGARCO' ), $titles( $k, '//div[' . cls( 'news-list' ) . ']//h2' ) );
+same( 'chuyên mục: nút của mục đang xem được đánh dấu', array( 'Sự kiện' ), $titles( $k, '//nav[' . cls( 'news-filters' ) . ']//a[@aria-current="page"]' ) );
+same( 'chuyên mục: đường dẫn 3 cấp', array( 'Trang chủ', 'Tin tức', 'Sự kiện' ), $titles( $k, '//nav[' . cls( 'breadcrumb' ) . ']//li' ) );
+check( 'chuyên mục: bộ lọc trỏ tới địa chỉ các mục', 1 === q( $k, '//nav[' . cls( 'news-filters' ) . ']//a[@href="/tin-tuc/chuyen-muc/su-kien/"]' )->length );
+$ke = render( 'taxonomy-chuyen_muc', true, 'vi', array( 'VG_FX_TERM' => 'thong-tin-bao-chi' ) );
+common_checks( $ke, 'chuyên mục rỗng' );
+same( 'chuyên mục rỗng: thông báo, giữ bộ lọc và mục đang chọn (UC-06 4a)', array( 1, 0, array( 'Thông tin báo chí' ) ), array( q( $ke, '//*[' . cls( 'news-empty' ) . ']' )->length, q( $ke, '//div[' . cls( 'news-list' ) . ']' )->length, $titles( $ke, '//nav[' . cls( 'news-filters' ) . ']//a[@aria-current="page"]' ) ) );
+
+// --- Chi tiết ---
+$a1 = render( 'single-tin_tuc', false, 'vi', array( 'VG_FX_ID' => '302' ) );
+common_checks( $a1, 'chi tiết tin' );
+check( 'chi tiết tin: trang thuộc module "article" (data-vg-page)', 1 === q( $a1, '//body[@data-vg-page="article"]' )->length );
+same( 'chi tiết tin: h1 là tiêu đề, nhãn là chuyên mục', array( 'Dấu ấn hợp tác trong các dự án quốc tế', 'Thông tin báo chí' ), array( trim( q( $a1, '//h1' )->item( 0 )->textContent ), trim( q( $a1, '//header[' . cls( 'news-article-head' ) . ']/div/p[' . cls( 'eyebrow' ) . ']' )->item( 0 )->textContent ) ) );
+same( 'chi tiết tin: đường dẫn Trang chủ / Tin tức / tiêu đề', array( 'Trang chủ', 'Tin tức', 'Dấu ấn hợp tác trong các dự án quốc tế' ), $titles( $a1, '//nav[' . cls( 'breadcrumb' ) . ']//li' ) );
+same( 'chi tiết tin: ngày và nhãn chủ đề', array( '2026-09-02', 'Thông tin báo chí' ), array( q( $a1, '//p[' . cls( 'news-article-meta' ) . ']/time' )->item( 0 )->getAttribute( 'datetime' ), trim( q( $a1, '//p[' . cls( 'news-article-meta' ) . ']/span' )->item( 0 )->textContent ) ) );
+$cov = q( $a1, '//figure[' . cls( 'news-article-cover' ) . ']/img' )->item( 0 );
+check( 'chi tiết tin: ảnh đầu bài là ảnh LCP — eager + fetchpriority=high, alt là chú thích', null !== $cov && 'eager' === $cov->getAttribute( 'loading' ) && 'high' === $cov->getAttribute( 'fetchpriority' ) && 'Chú thích ảnh 302' === $cov->getAttribute( 'alt' ) );
+same( 'chi tiết tin: chú thích ảnh hiển thị dưới ảnh', 'Chú thích ảnh 302', trim( q( $a1, '//figure[' . cls( 'news-article-cover' ) . ']/figcaption' )->item( 0 )->textContent ) );
+same( 'chi tiết tin: đoạn dẫn, tiêu đề phụ, trích dẫn, ảnh minh họa (UC-06)', array( 1, 2, 1, 1 ), array( q( $a1, '//p[' . cls( 'article-lead' ) . ']' )->length, q( $a1, '//div[' . cls( 'news-article-body' ) . ']/h2' )->length, q( $a1, '//div[' . cls( 'news-article-body' ) . ']/blockquote' )->length, q( $a1, '//div[' . cls( 'news-article-body' ) . ']//figure' )->length ) );
+$fb = q( $a1, '//a[' . cls( 'share-facebook' ) . ']' )->item( 0 );
+check( 'chia sẻ: Facebook là liên kết thật mở thẻ mới, có noopener, địa chỉ bài được mã hóa (6b)', null !== $fb && str_starts_with( $fb->getAttribute( 'href' ), 'https://www.facebook.com/sharer/sharer.php?u=%2Ftin-tuc%2F302%2F' ) && '_blank' === $fb->getAttribute( 'target' ) && str_contains( $fb->getAttribute( 'rel' ), 'noopener' ) && '' !== $fb->getAttribute( 'aria-label' ) );
+check( 'chia sẻ: nút sao chép liên kết ẩn cho tới khi có JS (6a), mang địa chỉ bài và nhãn dịch được', 1 === q( $a1, '//button[@data-copy-link="/tin-tuc/302/" and @hidden and @data-done != "" and @aria-label != ""]' )->length && 1 === q( $a1, '//*[@data-copy-status and @role="status"]' )->length );
+same( 'bài trước / sau: bài 302 có cả hai — trước là bài mới hơn (303), sau là bài cũ hơn (301)', array( '/tin-tuc/303/', '/tin-tuc/301/' ), array( q( $a1, '//nav[' . cls( 'news-article-nav' ) . ']/a[' . cls( 'nav-prev' ) . ']' )->item( 0 )->getAttribute( 'href' ), q( $a1, '//nav[' . cls( 'news-article-nav' ) . ']/a[' . cls( 'nav-next' ) . ']' )->item( 0 )->getAttribute( 'href' ) ) );
+$af = render( 'single-tin_tuc', false, 'vi', array( 'VG_FX_ID' => '303' ) );
+same( 'bài đầu danh sách: không có "Bài trước", còn "Bài tiếp theo" (UC-06 7a)', array( 0, 1 ), array( q( $af, '//a[' . cls( 'nav-prev' ) . ']' )->length, q( $af, '//a[' . cls( 'nav-next' ) . ']' )->length ) );
+$al = render( 'single-tin_tuc', false, 'vi', array( 'VG_FX_ID' => '301' ) );
+same( 'bài cuối danh sách: không có "Bài tiếp theo", còn "Bài trước" (UC-06 7a)', array( 1, 0 ), array( q( $al, '//a[' . cls( 'nav-prev' ) . ']' )->length, q( $al, '//a[' . cls( 'nav-next' ) . ']' )->length ) );
+
 /* ---------- Kết quả ---------- */
 
 echo "\n";

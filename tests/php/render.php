@@ -145,16 +145,31 @@ function is_404() {
 	return false;
 }
 function is_singular( $type = '' ) {
-	return 'single-du_an' === $GLOBALS['template'] && ( '' === $type || 'du_an' === $type );
+	$types = array( 'single-du_an' => 'du_an', 'single-tin_tuc' => 'tin_tuc' );
+	return isset( $types[ $GLOBALS['template'] ] ) && ( '' === $type || $types[ $GLOBALS['template'] ] === $type );
 }
 function is_post_type_archive( $type = '' ) {
-	return 'archive-du_an' === $GLOBALS['template'] && ( '' === $type || 'du_an' === $type );
+	$types = array( 'archive-du_an' => 'du_an', 'archive-tin_tuc' => 'tin_tuc' );
+	return isset( $types[ $GLOBALS['template'] ] ) && ( '' === $type || $types[ $GLOBALS['template'] ] === $type );
+}
+function fx_template_taxonomy(): string {
+	return array( 'taxonomy-loai_cong_trinh' => 'loai_cong_trinh', 'taxonomy-chuyen_muc' => 'chuyen_muc' )[ $GLOBALS['template'] ] ?? '';
 }
 function is_tax( $taxonomy = '', $term = '' ) {
-	if ( 'taxonomy-loai_cong_trinh' !== $GLOBALS['template'] || ( '' !== $taxonomy && 'loai_cong_trinh' !== $taxonomy ) ) {
+	$current = fx_template_taxonomy();
+	if ( '' === $current || ( '' !== $taxonomy && $current !== $taxonomy ) ) {
 		return false;
 	}
 	return '' === $term || (int) $term === (int) get_queried_object()->term_id;
+}
+function wp_list_pluck( $list, $field ) {
+	return array_map( static fn( $o ) => is_object( $o ) ? $o->$field : $o[ $field ], (array) $list );
+}
+function get_query_var( $name ) {
+	return 'paged' === $name ? (int) getenv( 'VG_FX_PAGED' ) : '';
+}
+function get_pagenum_link( $page ) {
+	return '/tin-tuc/page/' . (int) $page . '/';
 }
 function _n( $single, $plural, $number ) {
 	return 1 === (int) $number ? $single : $plural;
@@ -167,7 +182,7 @@ function get_queried_object() {
 		'term_id'  => crc32( $GLOBALS['term'] ),
 		'slug'     => $GLOBALS['term'],
 		'name'     => $GLOBALS['fx']['term_names'][ $GLOBALS['term'] ] ?? $GLOBALS['term'],
-		'taxonomy' => 'loai_cong_trinh',
+		'taxonomy' => fx_template_taxonomy() ?: 'loai_cong_trinh',
 	);
 }
 function get_queried_object_id() {
@@ -184,7 +199,9 @@ function get_terms( $args ) {
 	$out = array();
 	$id  = 1;
 	foreach ( vgarco_seed_term_map()[ $args['taxonomy'] ] ?? array() as $slug => $name ) {
-		$out[] = (object) array( 'term_id' => $id++, 'slug' => $slug, 'name' => html_entity_decode( $name ), 'taxonomy' => $args['taxonomy'] );
+		// term_id = crc32(slug), giống get_queried_object() và bộ lọc theo loại của fixtures.
+		$out[] = (object) array( 'term_id' => crc32( $slug ), 'slug' => $slug, 'name' => html_entity_decode( $name ), 'taxonomy' => $args['taxonomy'] );
+		++$id;
 	}
 	return $out;
 }
@@ -236,6 +253,20 @@ require_once THEME . '/inc/content.php';
 require_once THEME . '/inc/menus.php';
 require_once THEME . '/inc/template-tags.php';
 require_once THEME . '/inc/enqueue.php';
+
+// Truy vấn chính giả cho trang danh sách tin tức: 9 bài mỗi trang, mới nhất trước, lọc theo chuyên mục nếu có.
+if ( in_array( $GLOBALS['template'], array( 'archive-tin_tuc', 'taxonomy-chuyen_muc' ), true ) ) {
+	$query = array( 'post_type' => 'tin_tuc', 'orderby' => 'date' );
+	if ( '' !== $GLOBALS['term'] ) {
+		$query['tax_query'] = array( array( 'taxonomy' => 'chuyen_muc', 'terms' => array( crc32( $GLOBALS['term'] ) ) ) );
+	}
+	$all   = get_posts( $query );
+	$paged = max( 1, (int) getenv( 'VG_FX_PAGED' ) );
+	$GLOBALS['wp_query'] = (object) array(
+		'posts'         => array_map( static fn( $id ) => (object) array( 'ID' => $id ), array_slice( $all, ( $paged - 1 ) * 9, 9 ) ),
+		'max_num_pages' => (int) ceil( count( $all ) / 9 ),
+	);
+}
 
 $template = $GLOBALS['template'];
 ob_start();

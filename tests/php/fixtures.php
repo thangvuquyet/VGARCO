@@ -156,12 +156,33 @@ foreach ( $fx_empty ? array() : array(
 
 /* --- Tin tức --- */
 foreach ( $fx_empty ? array() : array(
-	array( 301, 'Từ ý tưởng đến một công trình có thể vận hành', 'Một quy trình rõ ràng giúp kiến trúc, kỹ thuật và triển khai cùng đi theo một mục tiêu.', 'tower.jpg', 'Góc nhìn chuyên môn', 'tin-tuc' ),
-	array( 302, 'Dấu ấn hợp tác trong các dự án quốc tế', 'Thông tin về hoạt động hợp tác và các dự án của VGARCO.', 'museum-render.jpg', 'Thông tin báo chí', 'bao-chi' ),
+	array( 301, 'Từ ý tưởng đến một công trình có thể vận hành', 'Một quy trình rõ ràng giúp kiến trúc, kỹ thuật và triển khai cùng đi theo một mục tiêu.', 'tower.jpg', 'Góc nhìn chuyên môn', 'tin-tuc-cong-ty' ),
+	array( 302, 'Dấu ấn hợp tác trong các dự án quốc tế', 'Thông tin về hoạt động hợp tác và các dự án của VGARCO.', 'museum-render.jpg', 'Thông tin báo chí', 'thong-tin-bao-chi' ),
 	array( 303, 'Chia sẻ chuyên môn cùng đội ngũ VGARCO', 'Các hoạt động chia sẻ chuyên môn và kết nối cùng đội ngũ VGARCO.', 'german-villa.jpg', 'Sự kiện', 'su-kien' ),
 ) as $n ) {
-	fx_post( $n[0], 'tin_tuc', $n[1], array( 'nhan_chu_de' => $n[4] ), array( 'excerpt' => $n[2], 'thumb' => fx_image( $n[3] ), 'date' => '2026-09-0' . ( $n[0] - 300 ), 'url' => '/tin-tuc/' . $n[0] . '/' ) );
+	fx_post(
+		$n[0],
+		'tin_tuc',
+		$n[1],
+		array( 'nhan_chu_de' => $n[4], 'doan_dan' => 'Đoạn dẫn của ' . $n[1] . '.', 'chu_thich_anh' => 'Chú thích ảnh ' . $n[0] ),
+		array(
+			'excerpt' => $n[2],
+			'thumb'   => fx_image( $n[3] ),
+			'date'    => '2026-09-0' . ( $n[0] - 300 ),
+			'url'     => '/tin-tuc/' . $n[0] . '/',
+			'content' => '<p>Đoạn mở đầu của bài.</p><h2>Một cách tiếp cận thống nhất</h2><p>Nội dung tiếp theo.</p><blockquote>Giá trị của một giải pháp nằm ở khả năng giữ được logic thiết kế.</blockquote><figure><img src="/img/tower.jpg" alt="Hình minh họa" width="1200" height="900"><figcaption>Góc nhìn dự án</figcaption></figure><h2>Từ trao đổi đến triển khai</h2><p>Đoạn kết.</p>',
+		)
+	);
 	$GLOBALS['fx']['terms'][ $n[0] ] = array( 'chuyen_muc' => array( $n[5] ) );
+}
+// VG_FX_NEWS_MANY=1: thêm 20 bài cũ hơn (tổng 23 bài = 3 trang) để thử phân trang.
+if ( getenv( 'VG_FX_NEWS_MANY' ) && ! $fx_empty ) {
+	$cats = array( 'tin-tuc-cong-ty', 'thong-tin-bao-chi', 'su-kien' );
+	for ( $i = 0; $i < 20; $i++ ) {
+		$id = 310 + $i;
+		fx_post( $id, 'tin_tuc', 'Bài số ' . ( $i + 1 ), array( 'nhan_chu_de' => '' ), array( 'excerpt' => 'Tóm tắt bài ' . ( $i + 1 ), 'date' => date( 'Y-m-d', strtotime( '2026-08-30 -' . $i . ' days' ) ), 'url' => '/tin-tuc/' . $id . '/' ) );
+		$GLOBALS['fx']['terms'][ $id ] = array( 'chuyen_muc' => array( $cats[ $i % 3 ] ) );
+	}
 }
 
 /* --- Trang tĩnh --- */
@@ -254,9 +275,9 @@ $GLOBALS['fx']['options'] = $fx_empty ? array() : array(
 );
 
 $GLOBALS['fx']['term_names'] = $types + array(
-	'tin-tuc'  => 'Tin tức công ty',
-	'bao-chi'  => 'Thông tin báo chí',
-	'su-kien'  => 'Sự kiện',
+	'tin-tuc-cong-ty'   => 'Tin tức công ty',
+	'thong-tin-bao-chi' => 'Thông tin báo chí',
+	'su-kien'           => 'Sự kiện',
 );
 
 /* ========== Hàm giả ========== */

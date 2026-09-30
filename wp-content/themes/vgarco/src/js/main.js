@@ -9,6 +9,7 @@ const pageModules = {
 	projects: () => import( './modules/projects.js' ),
 	services: () => import( './modules/services.js' ),
 	contact: () => import( './modules/contact.js' ),
+	article: () => import( './modules/article.js' ),
 	project: () => import( './modules/project.js' ),
 	// careers: () => import( './modules/careers.js' ),
 };
