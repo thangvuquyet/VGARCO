@@ -54,40 +54,79 @@ $types = array(
 	'van-hoa'    => 'Văn hóa & di tích',
 	'ha-tang'    => 'Công nghiệp & hạ tầng',
 	'nha-o'      => 'Nhà ở & công trình dân dụng',
+	'y-te'       => 'Y tế', // chưa có dự án nào: thử trạng thái danh mục rỗng (UC-04 5b)
 );
 
-/* --- Dự án --- */
-$p = array(
-	// id, tiêu đề, địa điểm, thời gian, loại, ảnh, loại ảnh, nổi bật, tiêu biểu
-	array( 101, 'Nhà Đại sứ', '', '', 'ngoai-giao', 'project-images/ambassador-05.jpg', 'thiet_ke', true, false ),
-	array( 102, 'Tổng Lãnh sự quán Việt Nam tại Savannakhet', 'Savannakhet, Lào', '2016', 'ngoai-giao', 'project-images/savannakhet-pctt.jpg', 'thiet_ke', true, false ),
-	array( 103, 'Công trình Đặc công', '', '', 'quoc-phong', 'project-images/specialforces-06.jpg', 'thiet_ke', true, false ),
-	array( 104, 'Đài kiểm soát không lưu Đồng Hới', 'Đồng Hới, Việt Nam', '2025', 'ha-tang', 'tower.jpg', 'thiet_ke', false, true ),
-	array( 105, 'Học viện Kỹ thuật và Công nghệ An ninh', 'Hòa Lạc, Hà Nội', '2025–2026', 'giao-duc', 'academy.png', 'thiet_ke', false, true ),
-	array( 106, 'Bảo tàng Lịch sử Quân đội nhân dân Lào', 'Viêng Chăn, Lào', '2019–2020', 'van-hoa', 'museum-built.jpg', 'cong_trinh', false, true ),
-	array( 107, 'Biệt thự tại Niedernhausen', 'Niedernhausen, CHLB Đức', '2022', 'nha-o', 'german-villa.jpg', 'thiet_ke', false, false ),
+/* --- Dự án: 19 dự án trong hồ sơ (tests/php/data/projects.json, lấy từ bản thiết kế HTML) ---
+ * Bảy dự án đầu giữ ID và cờ nổi bật/tiêu biểu mà các phép kiểm tra trang chủ dựa vào.
+ * VG_FX_ORDER=proto: sắp theo thứ tự của bản thiết kế (để so sánh bố cục danh mục với bản thiết kế). */
+$category_slug = array(
+	'diplomatic'     => 'ngoai-giao',
+	'security'       => 'quoc-phong',
+	'education'      => 'giao-duc',
+	'culture'        => 'van-hoa',
+	'infrastructure' => 'ha-tang',
+	'residential'    => 'nha-o',
 );
-foreach ( $fx_empty ? array() : $p as $row ) {
-	list( $id, $title, $where, $years, $type, $file, $kind, $featured, $showcase ) = $row;
-	$image = fx_image( $file );
+// key => [ID, ảnh đại diện, loại ảnh, nổi bật, tiêu biểu]
+$pinned = array(
+	'ambassador'    => array( 101, 'project-images/ambassador-05.jpg', 'thiet_ke', true, false ),
+	'savannakhet'   => array( 102, 'project-images/savannakhet-pctt.jpg', 'thiet_ke', true, false ),
+	'specialforces' => array( 103, 'project-images/specialforces-06.jpg', 'thiet_ke', true, false ),
+	'tower'         => array( 104, 'tower.jpg', 'thiet_ke', false, true ),
+	'academy'       => array( 105, 'academy.png', 'thiet_ke', false, true ),
+	'museum'        => array( 106, 'museum-built.jpg', 'cong_trinh', false, true ),
+	'villa'         => array( 107, 'german-villa.jpg', 'thiet_ke', false, false ),
+);
+$proto_order = (bool) getenv( 'VG_FX_ORDER' );
+$next_id     = 108;
+
+foreach ( $fx_empty ? array() : json_decode( (string) file_get_contents( __DIR__ . '/data/projects.json' ), true ) as $row ) {
+	$pin      = $pinned[ $row['key'] ] ?? null;
+	$id       = $pin ? $pin[0] : $next_id++;
+	$image    = fx_image( $pin ? $pin[1] : $row['image'] );
+	$kind     = $pin ? $pin[2] : $row['kind'];
+	$featured = $pin ? $pin[3] : false;
+	$showcase = $pin ? $pin[4] : false;
+
+	// Thư viện = các ảnh ngoài ảnh đầu trang. Bản thiết kế bỏ ảnh đầu của mảng gallery vì nó là ảnh bìa.
+	$library = array();
+	foreach ( array_slice( $row['gallery'], 1 ) as $i => $file ) {
+		$label     = $row['labels'][ $i + 1 ] ?? 'Phối cảnh thiết kế';
+		$library[] = array(
+			'anh'       => fx_image( $file ),
+			'loai_anh'  => str_starts_with( $label, 'Ảnh công trình' ) || str_starts_with( $label, 'Ảnh thi công' ) ? 'cong_trinh' : 'thiet_ke',
+			'chu_thich' => $label,
+		);
+	}
+
 	fx_post(
 		$id,
 		'du_an',
-		$title,
+		$row['title'],
 		array(
-			'dia_diem'          => $where,
-			'thoi_gian'         => $years,
-			'loai_anh_dai_dien' => $kind,
-			'anh_the'           => $image,
-			'anh_dau_trang'     => $image,
-			'anh_trinh_chieu'   => $featured ? $image : 0,
-			'noi_bat'           => $featured ? '1' : '0',
-			'tieu_bieu'         => $showcase ? '1' : '0',
-			'cong_bo_chu_dau_tu' => '0',
+			'dia_diem'           => $row['location'],
+			'thoi_gian'          => $row['year'],
+			'chu_dau_tu'         => $row['owner'],
+			'doi_tac'            => $row['partner'],
+			'vai_tro'            => $row['role'],
+			'pham_vi'            => $row['role'],
+			'loai_anh_dai_dien'  => $kind,
+			'anh_the'            => $image,
+			'anh_dau_trang'      => $image,
+			'anh_trinh_chieu'    => $featured ? $image : 0,
+			'noi_bat'            => $featured ? '1' : '0',
+			'tieu_bieu'          => $showcase ? '1' : '0',
+			'cong_bo_chu_dau_tu' => ( $row['owner'] || $row['partner'] ) ? '1' : '0',
+			'thu_vien'           => $library,
 		),
-		array( 'url' => '/du-an/' . $id . '/' )
+		array(
+			'url'        => '/du-an/' . $id . '/',
+			'menu_order' => $proto_order ? $row['order'] : $id,
+			'content'    => '<p>' . htmlspecialchars( $row['description'], ENT_QUOTES, 'UTF-8' ) . '</p>',
+		)
 	);
-	$GLOBALS['fx']['terms'][ $id ] = array( 'loai_cong_trinh' => array( $type ) );
+	$GLOBALS['fx']['terms'][ $id ] = array( 'loai_cong_trinh' => array( $category_slug[ $row['category'] ] ) );
 }
 
 /* --- Lĩnh vực --- */
@@ -119,6 +158,14 @@ $GLOBALS['fx']['options'] = $fx_empty ? array() : array(
 		array( 'ten' => 'Học viện Kỹ thuật & Công nghệ An ninh', 'viet_tat' => 'HA', 'mo_ta' => 'Đào tạo chuyên ngành' ),
 	),
 	'anh_hero_mac_dinh' => fx_image( 'project-images/ambassador-05.jpg' ),
+	'cau_chuyen'       => array(
+		'du_an'        => 106,
+		'tieu_de'      => "Giữ lại ký ức.
+<em>Viết tiếp giá trị.</em>",
+		'mo_ta'        => 'Cải tạo Bảo tàng Lịch sử Quân đội nhân dân Lào. Một hành trình từ phương án thiết kế đến hình hài công trình thực tế.',
+		'anh_thiet_ke' => fx_image( 'museum-render.jpg' ),
+		'anh_thuc_te'  => getenv( 'VG_FX_NO_BUILT' ) ? 0 : fx_image( 'museum-built.jpg' ), // VG_FX_NO_BUILT=1: chưa có ảnh công trình (UC-04 6b)
+	),
 );
 
 $GLOBALS['fx']['term_names'] = $types + array(
@@ -134,6 +181,13 @@ function get_field( $name, $post_id = false ) {
 		return $GLOBALS['fx']['options'][ $name ] ?? null;
 	}
 	return $GLOBALS['fx']['fields'][ $post_id ][ $name ] ?? null;
+}
+
+function get_post_status( $id ) {
+	if ( getenv( 'VG_FX_STORY_DRAFT' ) && 106 === $id ) {
+		return 'draft'; // dự án của khối câu chuyện đã bị gỡ về bản nháp
+	}
+	return isset( $GLOBALS['fx']['posts'][ $id ] ) ? 'publish' : false;
 }
 
 function get_the_title( $id ) {
@@ -191,6 +245,22 @@ function get_posts( $args = array() ) {
 	}
 	if ( 'page' === $type ) {
 		return array(); // trang tĩnh: dùng địa chỉ dự phòng
+	}
+	if ( ! empty( $args['tax_query'] ) ) {
+		foreach ( $args['tax_query'] as $clause ) {
+			$posts = array_filter(
+				$posts,
+				static function ( $p, $id ) use ( $clause ) {
+					foreach ( $GLOBALS['fx']['terms'][ $id ][ $clause['taxonomy'] ] ?? array() as $slug ) {
+						if ( in_array( crc32( $slug ), array_map( 'intval', $clause['terms'] ), true ) ) {
+							return true;
+						}
+					}
+					return false;
+				},
+				ARRAY_FILTER_USE_BOTH
+			);
+		}
 	}
 	if ( ! empty( $args['post__not_in'] ) ) {
 		$posts = array_diff_key( $posts, array_flip( $args['post__not_in'] ) );

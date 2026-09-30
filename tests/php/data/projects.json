@@ -1,0 +1,449 @@
+[
+ {
+  "key": "museum",
+  "order": 0,
+  "title": "Bảo tàng Lịch sử Quân đội nhân dân Lào",
+  "category": "culture",
+  "location": "Viêng Chăn, Lào",
+  "year": "2019–2020",
+  "image": "project-images/museum-05.jpg",
+  "position": "",
+  "gallery": [
+   "project-images/museum-05.jpg",
+   "project-images/museum-16.jpeg",
+   "project-images/museum-01.jpg"
+  ],
+  "labels": [
+   "Phối cảnh thiết kế",
+   "Ảnh công trình",
+   "Phối cảnh tổng thể"
+  ],
+  "owner": "",
+  "partner": "",
+  "role": "Tư vấn thiết kế cải tạo",
+  "description": "Cải tạo Bảo tàng Lịch sử Quân đội nhân dân Lào, giai đoạn 1 và 2. Dự án thể hiện năng lực thiết kế và triển khai công trình văn hóa của VGARCO.",
+  "kind": "thiet_ke"
+ },
+ {
+  "key": "school",
+  "order": 1,
+  "title": "Trường THCS chất lượng cao Bắc Từ Liêm",
+  "category": "education",
+  "location": "Bắc Từ Liêm, Hà Nội",
+  "year": "2019",
+  "image": "project-images/school-00.jpg",
+  "position": "",
+  "gallery": [
+   "project-images/school-00.jpg",
+   "project-images/school-03.jpg",
+   "project-images/school-13.jpg"
+  ],
+  "labels": [
+   "Phối cảnh thiết kế",
+   "Phối cảnh sân trường",
+   "Ảnh công trình"
+  ],
+  "owner": "",
+  "partner": "",
+  "role": "",
+  "description": "Công trình trường trung học cơ sở chất lượng cao tại Bắc Từ Liêm, Hà Nội, thuộc danh mục dự án trong hồ sơ năng lực VGARCO.",
+  "kind": "thiet_ke"
+ },
+ {
+  "key": "bancon",
+  "order": 2,
+  "title": "Dự án Bản Còn",
+  "category": "culture",
+  "location": "",
+  "year": "",
+  "image": "project-images/bancon-14.png",
+  "position": "",
+  "gallery": [
+   "project-images/bancon-14.png",
+   "project-images/bancon-04.png",
+   "project-images/bancon-07.png"
+  ],
+  "labels": [
+   "Phối cảnh tổng thể",
+   "Phối cảnh cảnh quan",
+   "Mặt bằng tổng thể"
+  ],
+  "owner": "",
+  "partner": "",
+  "role": "",
+  "description": "Dự án Bản Còn với giải pháp tổ chức không gian cảnh quan, công trình điểm nhấn và hệ thống sân vườn trong một tổng thể hài hòa.",
+  "kind": "thiet_ke"
+ },
+ {
+  "key": "tower",
+  "order": 3,
+  "title": "Đài kiểm soát không lưu Đồng Hới",
+  "category": "infrastructure",
+  "location": "Đồng Hới, Việt Nam",
+  "year": "2025",
+  "image": "tower.jpg",
+  "position": "center 70%",
+  "gallery": [],
+  "labels": [],
+  "owner": "Công ty Quản lý bay Miền Bắc",
+  "partner": "Công ty CP Kiến trúc và Xây dựng AVITYCO",
+  "role": "Thiết kế concept · Lập báo cáo nghiên cứu khả thi",
+  "description": "Dự án đài kiểm soát không lưu tại Cảng hàng không Đồng Hới. VGARCO tham gia thiết kế ý tưởng và lập báo cáo nghiên cứu khả thi cùng đối tác AVITYCO.",
+  "kind": "thiet_ke"
+ },
+ {
+  "key": "academy",
+  "order": 4,
+  "title": "Học viện Kỹ thuật và Công nghệ An ninh",
+  "category": "education",
+  "location": "Hòa Lạc, Hà Nội",
+  "year": "2025–2026",
+  "image": "academy.png",
+  "position": "",
+  "gallery": [],
+  "labels": [],
+  "owner": "Học viện Kỹ thuật và Công nghệ An ninh",
+  "partner": "Công ty CP Kiến trúc Việt",
+  "role": "Thiết kế concept · Lập báo cáo nghiên cứu khả thi · Thiết kế bản vẽ thi công",
+  "description": "Dự án tại Hòa Lạc, Hà Nội. Phạm vi tham gia của VGARCO trải từ thiết kế ý tưởng và nghiên cứu khả thi đến triển khai bản vẽ thi công.",
+  "kind": "thiet_ke"
+ },
+ {
+  "key": "villa",
+  "order": 5,
+  "title": "Biệt thự tại Niedernhausen",
+  "category": "residential",
+  "location": "Niedernhausen, CHLB Đức",
+  "year": "2022",
+  "image": "german-villa.jpg",
+  "position": "",
+  "gallery": [],
+  "labels": [],
+  "owner": "",
+  "partner": "FBN STUDIO Ferri Nguyen GbR",
+  "role": "Triển khai thiết kế bản vẽ thi công",
+  "description": "Neubau eines Einfamilienhauses tại Schwalbenweg 2, Niedernhausen. VGARCO phối hợp với FBN STUDIO Ferri Nguyen GbR triển khai hồ sơ thiết kế bản vẽ thi công.",
+  "kind": "thiet_ke"
+ },
+ {
+  "key": "hidumi",
+  "order": 6,
+  "title": "Khu nghỉ dưỡng Hidumi Hoàng Mai",
+  "category": "residential",
+  "location": "Hoàng Mai, Nghệ An",
+  "year": "2018",
+  "image": "project-images/hidumi-02.jpg",
+  "position": "",
+  "gallery": [
+   "project-images/hidumi-02.jpg",
+   "project-images/hidumi-01.jpg",
+   "project-images/hidumi-03.jpg"
+  ],
+  "labels": [
+   "Phối cảnh thiết kế",
+   "Phối cảnh mặt đứng",
+   "Phối cảnh tổng thể"
+  ],
+  "owner": "Công ty CP Khoa học Xanh Hidumi Pharma",
+  "partner": "",
+  "role": "Thiết kế concept · Thiết kế cơ sở · Thiết kế bản vẽ thi công",
+  "description": "Dự án khu nghỉ dưỡng tại Hoàng Mai, Nghệ An. VGARCO tham gia từ thiết kế ý tưởng, thiết kế cơ sở đến hồ sơ bản vẽ thi công.",
+  "kind": "thiet_ke"
+ },
+ {
+  "key": "borderdept",
+  "order": 7,
+  "title": "Công trình Cục Biên phòng",
+  "category": "security",
+  "location": "",
+  "year": "",
+  "image": "project-images/borderdept-01.jpg",
+  "position": "",
+  "gallery": [
+   "project-images/borderdept-01.jpg",
+   "project-images/borderdept-03.jpg"
+  ],
+  "labels": [
+   "Phối cảnh tổng thể",
+   "Phối cảnh mặt đứng"
+  ],
+  "owner": "",
+  "partner": "",
+  "role": "",
+  "description": "Công trình thuộc nhóm quân sự và an ninh, được tổ chức theo mô hình khu làm việc tập trung với các khối chức năng và không gian cảnh quan đồng bộ.",
+  "kind": "thiet_ke"
+ },
+ {
+  "key": "civilenforce",
+  "order": 8,
+  "title": "Cục Thi hành án dân sự Bình Chánh",
+  "category": "diplomatic",
+  "location": "Bình Chánh, TP. Hồ Chí Minh",
+  "year": "",
+  "image": "project-images/civilenforce-01.png",
+  "position": "",
+  "gallery": [
+   "project-images/civilenforce-01.png",
+   "project-images/civilenforce-02.png"
+  ],
+  "labels": [
+   "Phối cảnh mặt đứng",
+   "Phối cảnh tổng thể"
+  ],
+  "owner": "",
+  "partner": "",
+  "role": "",
+  "description": "Phương án công trình cơ quan công quyền với hình khối trang trọng, rõ ràng và tổ chức lối tiếp cận thuận tiện.",
+  "kind": "thiet_ke"
+ },
+ {
+  "key": "specialforces",
+  "order": 9,
+  "title": "Công trình Đặc công",
+  "category": "security",
+  "location": "",
+  "year": "",
+  "image": "project-images/specialforces-00.jpg",
+  "position": "",
+  "gallery": [
+   "project-images/specialforces-00.jpg",
+   "project-images/specialforces-06.jpg",
+   "project-images/specialforces-02.jpg"
+  ],
+  "labels": [
+   "Phối cảnh công trình",
+   "Phối cảnh khối chức năng",
+   "Phối cảnh tổng thể"
+  ],
+  "owner": "",
+  "partner": "",
+  "role": "",
+  "description": "Dự án thuộc nhóm công trình quân sự, tổ chức các khối chức năng trong một tổng thể có tính kỷ luật, rõ trục và thuận lợi cho vận hành.",
+  "kind": "thiet_ke"
+ },
+ {
+  "key": "bp214",
+  "order": 10,
+  "title": "Đồn Biên phòng 214",
+  "category": "security",
+  "location": "",
+  "year": "",
+  "image": "project-images/bp214-01.jpg",
+  "position": "",
+  "gallery": [
+   "project-images/bp214-01.jpg",
+   "project-images/bp214-02.jpg",
+   "project-images/bp214-04.jpg"
+  ],
+  "labels": [
+   "Phối cảnh cổng vào",
+   "Phối cảnh tổng thể",
+   "Phối cảnh toàn khu"
+  ],
+  "owner": "",
+  "partner": "",
+  "role": "",
+  "description": "Phương án quy hoạch và kiến trúc Đồn Biên phòng 214, bố trí các khối chức năng phù hợp điều kiện địa hình và yêu cầu vận hành.",
+  "kind": "thiet_ke"
+ },
+ {
+  "key": "preschool",
+  "order": 11,
+  "title": "Trường mầm non Xuân Đỉnh",
+  "category": "education",
+  "location": "Hà Nội",
+  "year": "",
+  "image": "project-images/preschool-01.jpg",
+  "position": "",
+  "gallery": [
+   "project-images/preschool-01.jpg",
+   "project-images/preschool-03.jpg",
+   "project-images/preschool-04.jpg"
+  ],
+  "labels": [
+   "Phối cảnh tổng thể",
+   "Phối cảnh kiến trúc",
+   "Phối cảnh trên cao"
+  ],
+  "owner": "",
+  "partner": "",
+  "role": "",
+  "description": "Thiết kế trường mầm non với tổ chức mặt bằng linh hoạt, không gian sân trong và màu sắc thân thiện với trẻ nhỏ.",
+  "kind": "thiet_ke"
+ },
+ {
+  "key": "ambassador",
+  "order": 12,
+  "title": "Nhà Đại sứ",
+  "category": "diplomatic",
+  "location": "",
+  "year": "",
+  "image": "project-images/ambassador-05.jpg",
+  "position": "",
+  "gallery": [
+   "project-images/ambassador-05.jpg",
+   "project-images/ambassador-built.jpg",
+   "project-images/ambassador-interior.jpg"
+  ],
+  "labels": [
+   "Phối cảnh thiết kế",
+   "Ảnh công trình",
+   "Không gian nội thất"
+  ],
+  "owner": "",
+  "partner": "",
+  "role": "",
+  "description": "Công trình nhà đại sứ với ngôn ngữ kiến trúc trang trọng, kết hợp không gian tiếp khách, làm việc và các khu chức năng đối ngoại.",
+  "kind": "thiet_ke"
+ },
+ {
+  "key": "conhue2b",
+  "order": 13,
+  "title": "Trường Tiểu học Cổ Nhuế 2B",
+  "category": "education",
+  "location": "Cổ Nhuế, Hà Nội",
+  "year": "",
+  "image": "project-images/conhue-02.jpg",
+  "position": "",
+  "gallery": [
+   "project-images/conhue-02.jpg",
+   "project-images/conhue-01.jpg",
+   "project-images/conhue-05.jpg"
+  ],
+  "labels": [
+   "Phối cảnh sân trường",
+   "Phối cảnh cổng trường",
+   "Ảnh công trình"
+  ],
+  "owner": "",
+  "partner": "",
+  "role": "",
+  "description": "Thiết kế trường tiểu học với các khối lớp học bao quanh sân trung tâm, tạo không gian học tập sáng, thông thoáng và dễ nhận diện.",
+  "kind": "thiet_ke"
+ },
+ {
+  "key": "taytuu",
+  "order": 14,
+  "title": "Trường THCS Tây Tựu",
+  "category": "education",
+  "location": "Tây Tựu, Hà Nội",
+  "year": "",
+  "image": "project-images/taytuu-01.jpg",
+  "position": "",
+  "gallery": [
+   "project-images/taytuu-01.jpg",
+   "project-images/taytuu-05.jpg",
+   "project-images/taytuu-02.jpg"
+  ],
+  "labels": [
+   "Phối cảnh mặt đứng",
+   "Ảnh công trình",
+   "Phối cảnh tổng thể"
+  ],
+  "owner": "",
+  "partner": "",
+  "role": "",
+  "description": "Công trình trường THCS với hình thức kiến trúc hiện đại, tổ chức khối học tập rõ ràng và các khoảng sân xanh phục vụ học sinh.",
+  "kind": "thiet_ke"
+ },
+ {
+  "key": "savannakhet",
+  "order": 15,
+  "title": "Tổng Lãnh sự quán Việt Nam tại Savannakhet",
+  "category": "diplomatic",
+  "location": "Savannakhet, Lào",
+  "year": "",
+  "image": "project-images/savannakhet-pcg.jpg",
+  "position": "",
+  "gallery": [
+   "project-images/savannakhet-pcg.jpg",
+   "project-images/savannakhet-pctt.jpg",
+   "project-images/savannakhet-pano.jpg"
+  ],
+  "labels": [
+   "Phối cảnh công trình",
+   "Phối cảnh tổng thể",
+   "Tổng hợp phương án"
+  ],
+  "owner": "",
+  "partner": "",
+  "role": "",
+  "description": "Dự án cơ quan ngoại giao tại Savannakhet, Lào, với ngôn ngữ kiến trúc trang trọng và tổ chức khuôn viên phù hợp hoạt động đối ngoại.",
+  "kind": "thiet_ke"
+ },
+ {
+  "key": "tongocvan",
+  "order": 16,
+  "title": "Công trình Tô Ngọc Vân",
+  "category": "residential",
+  "location": "Tô Ngọc Vân, Hà Nội",
+  "year": "",
+  "image": "project-images/tongocvan-02.jpg",
+  "position": "",
+  "gallery": [
+   "project-images/tongocvan-02.jpg",
+   "project-images/tongocvan-03.jpg",
+   "project-images/tongocvan-04.jpg"
+  ],
+  "labels": [
+   "Phối cảnh mặt đứng",
+   "Phối cảnh kiến trúc",
+   "Phối cảnh trên cao"
+  ],
+  "owner": "",
+  "partner": "",
+  "role": "",
+  "description": "Công trình đô thị trên tuyến Tô Ngọc Vân với hình khối đứng gọn, mặt đứng hiện đại và các khoảng xanh xen cài theo tầng.",
+  "kind": "thiet_ke"
+ },
+ {
+  "key": "politicalschool",
+  "order": 17,
+  "title": "Trường Lý luận Chính trị Quân đội nhân dân Lào",
+  "category": "education",
+  "location": "Lào",
+  "year": "",
+  "image": "project-images/politicalschool-01.jpg",
+  "position": "",
+  "gallery": [
+   "project-images/politicalschool-01.jpg",
+   "project-images/politicalschool-02.jpg",
+   "project-images/politicalschool-05.jpg"
+  ],
+  "labels": [
+   "Phối cảnh mặt đứng",
+   "Phối cảnh khối hội trường",
+   "Ảnh công trình"
+  ],
+  "owner": "",
+  "partner": "",
+  "role": "",
+  "description": "Dự án trường lý luận chính trị với tổ chức kiến trúc trang trọng, hệ mái đặc trưng và các khối đào tạo được bố trí theo trục rõ ràng.",
+  "kind": "thiet_ke"
+ },
+ {
+  "key": "politicalcenter",
+  "order": 18,
+  "title": "Trung tâm Bồi dưỡng Chính trị",
+  "category": "education",
+  "location": "Việt Nam",
+  "year": "",
+  "image": "project-images/politicalcenter-01.jpg",
+  "position": "",
+  "gallery": [
+   "project-images/politicalcenter-01.jpg",
+   "project-images/politicalcenter-02.jpg",
+   "project-images/politicalcenter-03.jpg"
+  ],
+  "labels": [
+   "Phối cảnh mặt đứng",
+   "Phối cảnh tổng thể",
+   "Ảnh thi công"
+  ],
+  "owner": "",
+  "partner": "",
+  "role": "",
+  "description": "Công trình trung tâm bồi dưỡng chính trị với hình thức kiến trúc hành chính hiện đại và các không gian đào tạo được tổ chức tập trung.",
+  "kind": "thiet_ke"
+ }
+]

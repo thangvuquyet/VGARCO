@@ -48,6 +48,31 @@ function vgarco_lines( string $text ): string {
 }
 
 /**
+ * Đường dẫn vị trí ("Trang chủ / Dự án / Tên dự án"). Mục cuối là trang hiện tại, không có liên kết.
+ *
+ * @param array[] $trail Mỗi phần tử: [ nhãn, địa chỉ ] — bỏ địa chỉ ở mục cuối.
+ */
+function vgarco_breadcrumb( array $trail ): void {
+	echo '<nav class="breadcrumb wrap" aria-label="' . esc_attr__( 'Đường dẫn vị trí', 'vgarco' ) . '"><ol>';
+	$last = count( $trail ) - 1;
+	foreach ( $trail as $i => $crumb ) {
+		if ( $i === $last ) {
+			printf( '<li aria-current="page"><span>%s</span></li>', esc_html( $crumb[0] ) );
+		} else {
+			printf( '<li><a href="%s">%s</a></li>', esc_url( $crumb[1] ), esc_html( $crumb[0] ) );
+		}
+	}
+	echo '</ol></nav>';
+}
+
+/**
+ * Số có chữ số 0 đứng đầu ("07"), dùng cho số thứ tự và số lượng ở tiêu đề trang.
+ */
+function vgarco_pad( int $number ): string {
+	return sprintf( '%02d', $number );
+}
+
+/**
  * Khóa loại trang: JS dùng để nạp đúng module (data-vg-page ở thẻ body).
  */
 function vgarco_page_key(): string {

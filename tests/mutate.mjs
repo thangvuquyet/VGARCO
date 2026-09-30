@@ -47,10 +47,32 @@ const M = [
   ['icon: bỏ chặn tên nguy hiểm', 'wp-content/themes/vgarco/inc/template-tags.php', "'/^[a-z0-9-]+$/'", "'/./'"],
   ['validate slug: cho phép chữ hoa', 'wp-content/plugins/vgarco-core/inc/fields.php',
     "'/^[a-z0-9]+(?:-[a-z0-9]+)*$/'", "'/^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*$/'"],
+
+  // --- Mẫu trang (bộ kiểm thử pages.php) ---
+  ['danh mục: trang loại không lọc theo loại', 'wp-content/themes/vgarco/inc/models.php',
+    "$args['tax_query'] = array(", "$args['zz_bo_loc'] = array(", 'pages'],
+  ['danh mục: bỏ số 0 đứng đầu ở số lượng', 'wp-content/themes/vgarco/template-parts/catalogue.php',
+    "vgarco_pad( $catalogue['count'] )", "$catalogue['count']", 'pages'],
+  ['danh mục: loại rỗng mất liên kết về danh mục', 'wp-content/themes/vgarco/template-parts/catalogue.php',
+    "<?php if ( $term ) : ?>\n\t\t\t\t<a class=\"text-link\"", "<?php if ( false ) : ?>\n\t\t\t\t<a class=\"text-link\"", 'pages'],
+  ['danh mục: hiện "0 dự án" khi rỗng', 'wp-content/themes/vgarco/template-parts/catalogue.php',
+    "<?php if ( $catalogue['count'] > 0 ) : ?>", "<?php if ( true ) : ?>", 'pages'],
+  ['câu chuyện: hiện nút chuyển dù thiếu ảnh công trình', 'wp-content/themes/vgarco/template-parts/catalogue.php',
+    "<?php if ( $has_built ) : //", "<?php if ( true ) : //", 'pages'],
+  ['câu chuyện: ảnh ẩn vẫn lộ cho trình đọc màn hình', 'wp-content/themes/vgarco/template-parts/catalogue.php',
+    "array( 'aria-hidden' => 'true' )", "array()", 'pages'],
+  ['câu chuyện: tiêu đề không qua bộ lọc <em>', 'wp-content/themes/vgarco/template-parts/catalogue.php',
+    "echo vgarco_heading( $story['title'] );", "echo esc_html( $story['title'] );", 'pages'],
+  ['câu chuyện: không kiểm tra dự án đã xuất bản', 'wp-content/themes/vgarco/inc/models.php',
+    " || 'publish' !== get_post_status( $project_id )", "", 'pages'],
+  ['đường dẫn: mục cuối mất aria-current', 'wp-content/themes/vgarco/inc/template-tags.php',
+    "<li aria-current=\"page\"><span>%s</span></li>", "<li><span>%s</span></li>", 'pages'],
+  ['thẻ dự án: vòng tròn mũi tên không ẩn khỏi trình đọc màn hình', 'wp-content/themes/vgarco/template-parts/cards/project.php',
+    '<span class="circle-arrow" aria-hidden="true">', '<span class="circle-arrow">', 'pages'],
 ];
 
 let caught = 0, missed = 0, skipped = 0;
-for (const [name, file, from, to] of M) {
+for (const [name, file, from, to, suite = 'smoke'] of M) {
   rmSync(work, { recursive: true, force: true });
   mkdirSync(join(work, 'tests'), { recursive: true });
   cpSync(join(src, 'wp-content'), join(work, 'wp-content'), { recursive: true });
@@ -62,7 +84,7 @@ for (const [name, file, from, to] of M) {
   if (n !== 1) { skipped++; console.log(`${name.padEnd(50)} => BỎ QUA: đoạn gốc xuất hiện ${n} lần (cần đúng 1)`); continue; }
   writeFileSync(path, text.replace(from, () => to));
 
-  const r = spawnSync(php, ['-d', `extension_dir=${ext}`, '-d', 'extension=mbstring', join(work, 'tests', 'php', 'smoke.php')], { encoding: 'utf8' });
+  const r = spawnSync(php, ['-d', `extension_dir=${ext}`, '-d', 'extension=mbstring', join(work, 'tests', 'php', `${suite}.php`)], { encoding: 'utf8' });
   const out = (r.stdout || '') + (r.stderr || '');
   const red = out.match(/THẤT BẠI (\d+)/);
   if (red) { caught++; console.log(`${name.padEnd(50)} => bắt được (${red[1]} phép kiểm đỏ)`); }

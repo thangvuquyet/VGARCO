@@ -23,8 +23,10 @@
   @include meta.load-css('components/nav');
   @include meta.load-css('components/footer');
   @include meta.load-css('components/section');
+  @include meta.load-css('components/breadcrumb');
 }
 
 @layer pages {
   @include meta.load-css('pages/home');
+  @include meta.load-css('pages/projects');
 }

@@ -87,7 +87,7 @@ function vgarco_kind_label( string $kind ): string {
  * Thẻ <img> đáp ứng (srcset từ các kích thước vg-*). Ảnh đầu tiên trên màn hình (LCP) dùng $args['priority'].
  *
  * @param int   $id   ID tệp đính kèm; <= 0 trả chuỗi rỗng.
- * @param array $args size, sizes, alt (bắt buộc ghi rõ, kể cả rỗng cho ảnh trang trí), class, priority.
+ * @param array $args size, sizes, alt (bắt buộc ghi rõ, kể cả rỗng cho ảnh trang trí), class, priority, attr (thuộc tính thêm).
  */
 function vgarco_image( int $id, array $args = array() ): string {
 	if ( $id <= 0 ) {
@@ -111,6 +111,9 @@ function vgarco_image( int $id, array $args = array() ): string {
 		'loading'  => 'lazy',
 		'decoding' => 'async',
 	);
+	if ( ! empty( $args['attr'] ) ) {
+		$attr = array_merge( $attr, $args['attr'] );
+	}
 	if ( '' !== $args['class'] ) {
 		$attr['class'] = $args['class'];
 	}
@@ -281,6 +284,119 @@ function vgarco_showcase_projects( int $count = 3 ): array {
 	}
 
 	return array_map( 'vgarco_project', $ids );
+}
+
+/**
+ * Danh mục dự án (UC-04): tất cả dự án, hoặc chỉ các dự án của một loại công trình.
+ *
+ * @param object|null $term Thuật ngữ của loai_cong_trinh; null = tất cả.
+ * @return array title, note, count, projects (xem vgarco_project), term.
+ */
+function vgarco_catalogue( $term = null ): array {
+	$args = array();
+	if ( $term ) {
+		$args['tax_query'] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+			array(
+				'taxonomy' => 'loai_cong_trinh',
+				'field'    => 'term_id',
+				'terms'    => array( (int) $term->term_id ),
+			),
+		);
+	}
+
+	$projects = array_map( 'vgarco_project', vgarco_project_ids( $args ) );
+	$name     = $term ? html_entity_decode( $term->name, ENT_QUOTES, 'UTF-8' ) : '';
+
+	return array(
+		'term'     => $term,
+		'projects' => $projects,
+		'count'    => count( $projects ),
+		'title'    => $term ? $name : __( 'Tất cả dự án', 'vgarco' ),
+		'note'     => $term
+			/* translators: %s: tên loại công trình, viết thường. */
+			? sprintf( __( 'Các dự án thuộc nhóm %s.', 'vgarco' ), mb_strtolower( $name ) )
+			: __( 'Các công trình trong hồ sơ VGARCO.', 'vgarco' ),
+	);
+}
+
+/**
+ * Khối "Câu chuyện một công trình" (UC-04 6a/6b): một dự án chọn lọc, chuyển giữa ảnh phối cảnh và ảnh công trình.
+ * Chưa cấu hình dự án hoặc thiếu ảnh phối cảnh thì không hiển thị. Thiếu ảnh công trình thì ẩn nút chuyển.
+ *
+ * @return array|null project, design (ID ảnh), built (ID ảnh hoặc 0), title, text.
+ */
+function vgarco_story(): ?array {
+	$option     = (array) vgarco_option( 'cau_chuyen', array() );
+	$project_id = (int) ( $option['du_an'] ?? 0 );
+	$design     = (int) ( $option['anh_thiet_ke'] ?? 0 );
+
+	if ( $project_id <= 0 || $design <= 0 || 'publish' !== get_post_status( $project_id ) ) {
+		return null;
+	}
+
+	$project = vgarco_project( $project_id );
+	$title   = trim( (string) ( $option['tieu_de'] ?? '' ) );
+
+	return array(
+		'project' => $project,
+		'design'  => $design,
+		'built'   => (int) ( $option['anh_thuc_te'] ?? 0 ),
+		'title'   => '' !== $title ? $title : $project['title'],
+		'text'    => trim( (string) ( $option['mo_ta'] ?? '' ) ),
+	);
+}
+
+/**
+ * Chi tiết một dự án (UC-05).
+ *
+ * @return array project, content (HTML), facts [[nhãn, giá trị]] đã bỏ dòng trống, gallery, index, total, next.
+ */
+function vgarco_project_detail( int $post_id ): array {
+	$project = vgarco_project( $post_id );
+
+	// Thông tin dự án: dòng nào trống thì ẩn, không để ô trống (UC-05 4a).
+	$facts = array_filter(
+		array(
+			array( __( 'Địa điểm', 'vgarco' ), $project['location'] ),
+			array( __( 'Thời gian', 'vgarco' ), $project['years'] ),
+			array( __( 'Chủ đầu tư', 'vgarco' ), $project['owner'] ),
+			array( __( 'Đối tác', 'vgarco' ), $project['partner'] ),
+			array( __( 'Vai trò VGARCO', 'vgarco' ), $project['role'] ),
+		),
+		static fn( array $row ): bool => '' !== $row[1]
+	);
+
+	// Thư viện: mỗi dòng có ảnh, loại ảnh và chú thích theo từng ngôn ngữ (yêu cầu 27).
+	$gallery = array();
+	foreach ( (array) get_field( 'thu_vien', $post_id ) as $row ) {
+		$image = (int) ( $row['anh'] ?? 0 );
+		if ( $image <= 0 ) {
+			continue;
+		}
+		$kind      = ( $row['loai_anh'] ?? '' ) ?: 'thiet_ke';
+		$gallery[] = array(
+			'image'      => $image,
+			'kind'       => $kind,
+			'kind_label' => vgarco_kind_label( $kind ),
+			'caption'    => trim( (string) ( $row['chu_thich'] ?? '' ) ),
+		);
+	}
+
+	// Vị trí trong danh mục ("01 / 19") và dự án tiếp theo, quay vòng về dự án đầu (UC-05 8a).
+	$ids   = vgarco_project_ids();
+	$pos   = array_search( $post_id, $ids, true );
+	$total = count( $ids );
+	$next  = ( false !== $pos && $total > 1 ) ? $ids[ ( $pos + 1 ) % $total ] : 0;
+
+	return array(
+		'project' => $project,
+		'content' => (string) apply_filters( 'the_content', (string) get_post_field( 'post_content', $post_id ) ),
+		'facts'   => array_values( $facts ),
+		'gallery' => $gallery,
+		'index'   => false === $pos ? 1 : $pos + 1,
+		'total'   => max( $total, 1 ),
+		'next'    => $next ? vgarco_project( $next ) : null,
+	);
 }
 
 /* -------------------------------------------------------------------------

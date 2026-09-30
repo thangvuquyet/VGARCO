@@ -219,6 +219,8 @@ function vgarco_fields_cau_hinh(): array {
 						'instructions' => 'Khối ở trang Danh mục dự án, chuyển giữa ảnh phối cảnh và ảnh công trình thực tế (UC-04). Chọn hai ảnh CÙNG một công trình, tốt nhất cùng góc nhìn.',
 						'sub_fields'   => array(
 							$story( 'du_an', 'Dự án', 'post_object', 'copy', array( 'post_type' => array( 'du_an' ), 'return_format' => 'id', 'allow_null' => 1, 'ui' => 1 ) ),
+							$story( 'tieu_de', 'Tiêu đề', 'textarea', 'translate', array( 'rows' => 2, 'new_lines' => '', 'instructions' => 'Hai dòng, xuống dòng giữa hai dòng. Đặt <em>...</em> quanh cụm nhấn. Ví dụ: Giữ lại ký ức.⏎<em>Viết tiếp giá trị.</em> Để trống thì dùng tên dự án.' ) ),
+							$story( 'mo_ta', 'Mô tả ngắn', 'textarea', 'translate', array( 'rows' => 3, 'instructions' => 'Một hai câu về hành trình từ phương án thiết kế đến công trình thực tế.' ) ),
 							$story( 'anh_thiet_ke', 'Ảnh phối cảnh thiết kế', 'image', 'copy', array( 'return_format' => 'id', 'preview_size' => 'medium', 'library' => 'all' ) ),
 							$story( 'anh_thuc_te', 'Ảnh công trình thực tế', 'image', 'copy', array( 'return_format' => 'id', 'preview_size' => 'medium', 'library' => 'all' ) ),
 						),

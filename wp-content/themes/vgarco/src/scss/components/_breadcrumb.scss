@@ -1,0 +1,47 @@
+@use '../mixins' as *;
+
+// Đường dẫn vị trí. Số đo lấy từ bản thiết kế: 20 px từ 701 px, 16 px ở màn nhỏ; khoảng cách 18 / 12 px hai bên dấu "/".
+.breadcrumb {
+  padding: 1rem 0 0.25rem;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--c-ink-muted);
+
+  ol {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 0.75rem;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  li + li::before {
+    content: '/';
+    content: '/' / ''; // trình đọc màn hình không đọc "gạch chéo" ở mỗi mục
+    margin-right: 0.75rem;
+    color: #aeb1aa; // chỉ là dấu phân cách trang trí, không mang thông tin
+  }
+
+  a:hover {
+    color: var(--c-ink);
+  }
+
+  [aria-current] {
+    color: var(--c-ink);
+  }
+
+  @include up($bp-md) {
+    padding-block: 1.25rem 0.5rem;
+    font-size: 1.25rem;
+    line-height: 1.7;
+
+    ol {
+      column-gap: 1.125rem;
+    }
+
+    li + li::before {
+      margin-right: 1.125rem;
+    }
+  }
+}

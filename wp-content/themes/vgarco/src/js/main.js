@@ -6,6 +6,7 @@ import { initNav } from './modules/nav.js';
 // Vite tự tách mỗi import() thành một tệp riêng có mã băm.
 const pageModules = {
 	home: () => import( './modules/home.js' ),
+	projects: () => import( './modules/projects.js' ),
 	// project: () => import( './modules/gallery.js' ),
 	// careers: () => import( './modules/careers.js' ),
 };

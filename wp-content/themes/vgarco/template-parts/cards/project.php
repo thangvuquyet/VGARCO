@@ -4,6 +4,7 @@
  * Trường thiếu tự ẩn: dự án chưa có địa điểm hoặc năm thì thẻ chỉ hiện loại công trình (UC-04 3a).
  *
  * @var array $args['project'] Dự án (xem vgarco_project()).
+ * @var bool  $args['arrow']   Có vòng tròn mũi tên ở góc ảnh (danh mục dự án).
  *
  * @package vgarco
  */
@@ -25,12 +26,17 @@ $meta_right = implode( ' / ', array_filter( array( $project['years'], $project['
 				$project['card_image'] ?: $project['hero_image'],
 				array(
 					'size'  => 'vg-1200',
-					'sizes' => '(min-width: 1001px) 30vw, (min-width: 701px) 45vw, 100vw',
+					'sizes' => ! empty( $args['arrow'] )
+						? '(min-width: 1001px) 50vw, 100vw'
+						: '(min-width: 1001px) 30vw, (min-width: 701px) 45vw, 100vw',
 					'alt'   => $project['kind_label'] . ' — ' . $project['title'],
 				)
 			);
 			?>
 			<span class="image-label"><?php echo esc_html( $project['kind_label'] ); ?></span>
+			<?php if ( ! empty( $args['arrow'] ) ) : ?>
+				<span class="circle-arrow" aria-hidden="true"><?php echo vgarco_icon( 'arrow-up-right' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
+			<?php endif; ?>
 		</div>
 		<?php if ( '' !== $project['location'] || '' !== $meta_right ) : ?>
 			<div class="project-meta">

@@ -23,7 +23,11 @@ define( 'VGARCO_CORE_DIR', ROOT . '/wp-content/plugins/vgarco-core/' );
 
 /* ---------- Hàm giả của WordPress ---------- */
 
-$GLOBALS['lang'] = $argv[1] ?? 'vi';
+$GLOBALS['lang']     = $argv[1] ?? 'vi';
+$GLOBALS['template'] = $argv[2] ?? 'index';
+// Mẫu cần một đối tượng truy vấn: VG_FX_TERM=<slug loại công trình>, VG_FX_ID=<ID dự án>.
+$GLOBALS['term'] = getenv( 'VG_FX_TERM' ) ?: '';
+$GLOBALS['post_id'] = (int) getenv( 'VG_FX_ID' );
 
 // Hệ thống hook tối giản: đủ để chạy inc/enqueue.php thật (wp_enqueue_scripts → wp_head).
 $GLOBALS['actions'] = array();
@@ -108,7 +112,7 @@ function wp_head() {
 function wp_footer() {}
 function wp_body_open() {}
 function body_class() {
-	echo 'class="home"';
+	echo 'class="' . esc_attr( vgarco_page_key() ) . '"';
 }
 function wp_date( $f ) {
 	return date( $f );
@@ -135,19 +139,39 @@ function is_wp_error( $x ) {
 	return false;
 }
 function is_front_page() {
-	return true;
+	return in_array( $GLOBALS['template'], array( 'index', 'front-page' ), true );
 }
 function is_404() {
 	return false;
 }
-function is_singular() {
-	return false;
+function is_singular( $type = '' ) {
+	return 'single-du_an' === $GLOBALS['template'] && ( '' === $type || 'du_an' === $type );
 }
-function is_post_type_archive() {
-	return false;
+function is_post_type_archive( $type = '' ) {
+	return 'archive-du_an' === $GLOBALS['template'] && ( '' === $type || 'du_an' === $type );
 }
-function is_tax() {
-	return false;
+function is_tax( $taxonomy = '', $term = '' ) {
+	if ( 'taxonomy-loai_cong_trinh' !== $GLOBALS['template'] || ( '' !== $taxonomy && 'loai_cong_trinh' !== $taxonomy ) ) {
+		return false;
+	}
+	return '' === $term || (int) $term === (int) get_queried_object()->term_id;
+}
+function _n( $single, $plural, $number ) {
+	return 1 === (int) $number ? $single : $plural;
+}
+function get_queried_object() {
+	if ( '' === $GLOBALS['term'] ) {
+		return null;
+	}
+	return (object) array(
+		'term_id'  => crc32( $GLOBALS['term'] ),
+		'slug'     => $GLOBALS['term'],
+		'name'     => $GLOBALS['fx']['term_names'][ $GLOBALS['term'] ] ?? $GLOBALS['term'],
+		'taxonomy' => 'loai_cong_trinh',
+	);
+}
+function get_queried_object_id() {
+	return $GLOBALS['post_id'];
 }
 function is_page() {
 	return false;
@@ -212,7 +236,7 @@ require_once THEME . '/inc/menus.php';
 require_once THEME . '/inc/template-tags.php';
 require_once THEME . '/inc/enqueue.php';
 
-$template = $argv[2] ?? 'index';
+$template = $GLOBALS['template'];
 ob_start();
 require THEME . '/' . $template . '.php';
 $html = ob_get_clean();
@@ -221,7 +245,7 @@ $out = ROOT . '/tests/out';
 if ( ! is_dir( $out ) ) {
 	mkdir( $out, 0777, true );
 }
-$name = array( 'index' => 'frame', 'front-page' => 'home' )[ $template ] ?? $template;
+$name = ( array( 'index' => 'frame', 'front-page' => 'home' )[ $template ] ?? $template ) . ( $GLOBALS['term'] ? '-' . $GLOBALS['term'] : '' ) . ( $GLOBALS['post_id'] ? '-' . $GLOBALS['post_id'] : '' );
 file_put_contents( $out . '/' . $name . '.html', $html );
 
 echo 'Đã kết xuất ' . strlen( $html ) . " byte → tests/out/$name.html, không có cảnh báo PHP.\n";

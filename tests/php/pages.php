@@ -27,10 +27,12 @@ function same( string $label, $expected, $actual ): void {
  * @param string $template Tên mẫu (front-page, ...).
  * @param bool   $empty    true = website chưa có nội dung.
  * @param string $lang     vi | de
+ * @param array  $env      Biến môi trường thêm cho render.php (VG_FX_TERM, VG_FX_ID, VG_FX_NO_BUILT...).
  */
-function render( string $template, bool $empty = false, string $lang = 'vi' ): DOMXPath {
-	$names = array( 'index' => 'frame', 'front-page' => 'home' );
-	$file  = ROOT . '/tests/out/' . ( $names[ $template ] ?? $template ) . '.html';
+function render( string $template, bool $empty = false, string $lang = 'vi', array $env = array() ): DOMXPath {
+	$names  = array( 'index' => 'frame', 'front-page' => 'home' );
+	$suffix = ( ! empty( $env['VG_FX_TERM'] ) ? '-' . $env['VG_FX_TERM'] : '' ) . ( ! empty( $env['VG_FX_ID'] ) ? '-' . $env['VG_FX_ID'] : '' );
+	$file   = ROOT . '/tests/out/' . ( $names[ $template ] ?? $template ) . $suffix . '.html';
 	@unlink( $file );
 
 	$cmd = sprintf(
@@ -41,12 +43,16 @@ function render( string $template, bool $empty = false, string $lang = 'vi' ): D
 		escapeshellarg( $lang ),
 		escapeshellarg( $template )
 	);
-	$env = $empty ? 'VG_FX_EMPTY=1' : 'VG_FX_EMPTY=';
-	putenv( $env );
+	$vars = array_merge( array( 'VG_FX_EMPTY' => $empty ? '1' : '' ), $env );
+	foreach ( $vars as $name => $value ) {
+		putenv( "{$name}={$value}" );
+	}
 	$output = shell_exec( $cmd . ' 2>&1' );
-	putenv( 'VG_FX_EMPTY' );
+	foreach ( array_keys( $vars ) as $name ) {
+		putenv( $name );
+	}
 
-	check( "render {$template}" . ( $empty ? ' (rỗng)' : '' ) . ': chạy không lỗi — ' . trim( (string) $output ), is_file( $file ) && ! str_contains( (string) $output, 'Fatal' ) && ! str_contains( (string) $output, 'Warning' ) );
+	check( "render {$template}" . ( $env ? ' ' . http_build_query( $env, '', ' ' ) : '' ) . ( $empty ? ' (rỗng)' : '' ) . ': chạy không lỗi — ' . trim( (string) $output ), is_file( $file ) && ! str_contains( (string) $output, 'Fatal' ) && ! str_contains( (string) $output, 'Warning' ) );
 
 	$dom = new DOMDocument();
 	libxml_use_internal_errors( true );
@@ -161,6 +167,70 @@ same( 'rỗng: ẩn khối đối tác', 0, q( $e, '//*[' . cls( 'partners-strip
 same( 'rỗng: ẩn khối tin tức (UC-01 8a)', 0, q( $e, '//*[' . cls( 'home-news' ) . ']' )->length );
 check( 'rỗng: các khối còn lại vẫn có (giới thiệu, dải chữ, CTA)', 1 === q( $e, '//*[' . cls( 'home-about' ) . ']' )->length && 1 === q( $e, '//*[' . cls( 'marquee' ) . ']' )->length && 1 === q( $e, '//*[' . cls( 'page-cta' ) . ']' )->length );
 check( 'rỗng: chỉ số dùng mặc định trong mã (13+, 03, 06)', 3 === q( $e, '//*[' . cls( 'home-facts' ) . ']/p' )->length );
+
+/* ========================= Danh mục dự án (UC-04) ========================= */
+
+$c = render( 'archive-du_an' );
+common_checks( $c, 'danh mục' );
+same( 'danh mục: 19 thẻ dự án', 19, q( $c, '//*[' . cls( 'catalogue-grid' ) . ']/article' )->length );
+same( 'danh mục: lưới không ở chế độ lọc', 0, q( $c, '//*[' . cls( 'catalogue-grid' ) . ' and ' . cls( 'is-filtered' ) . ']' )->length );
+same( 'danh mục: tiêu đề "Tất cả dự án"', 'Tất cả dự án', trim( q( $c, '//h1' )->item( 0 )->textContent ) );
+check( 'danh mục: số lượng "19 dự án"', 1 === q( $c, '//*[' . cls( 'project-head-meta' ) . ']//span[contains(., "19 dự án")]' )->length );
+same( 'danh mục: đường dẫn vị trí Trang chủ / Dự án', array( 'Trang chủ', 'Dự án' ), array_map( static fn( $n ) => trim( $n->textContent ), iterator_to_array( q( $c, '//nav[' . cls( 'breadcrumb' ) . ']//li' ) ) ) );
+same( 'danh mục: mục cuối của đường dẫn có aria-current và không có liên kết', 1, q( $c, '//nav[' . cls( 'breadcrumb' ) . ']//li[@aria-current="page"][not(.//a)]' )->length );
+same( 'danh mục: vòng tròn mũi tên ở mọi thẻ là trang trí, ẩn khỏi trình đọc màn hình', 19, q( $c, '//*[' . cls( 'circle-arrow' ) . ' and @aria-hidden="true"]' )->length );
+same( 'danh mục: nhãn loại ảnh ở mọi thẻ', 19, q( $c, '//*[' . cls( 'catalogue-grid' ) . ']//*[' . cls( 'image-label' ) . ']' )->length );
+same( 'danh mục: thẻ không có địa điểm và năm chỉ có một ô meta (không ô trống) — "Nhà Đại sứ"', 1, q( $c, '//article[.//h3[.="Nhà Đại sứ"]]//*[' . cls( 'project-meta' ) . ']/span' )->length );
+same( 'danh mục: thứ tự theo "Thứ tự" chủ đầu tư đặt — thẻ đầu là Nhà Đại sứ', 'Nhà Đại sứ', trim( q( $c, '(//*[' . cls( 'catalogue-grid' ) . ']//h3)[1]' )->item( 0 )->textContent ) );
+same( 'danh mục: mọi thẻ liên kết tới trang dự án', 19, q( $c, '//*[' . cls( 'catalogue-grid' ) . ']//a[starts-with(@href, "/du-an/")]' )->length );
+same( 'danh mục: trang thuộc module "projects" (data-vg-page)', 1, q( $c, '//body[@data-vg-page="projects"]' )->length );
+
+same( 'câu chuyện: có đúng một khối', 1, q( $c, '//section[' . cls( 'project-story' ) . ']' )->length );
+same( 'câu chuyện: nền đỏ khai báo on-dark (vòng tiêu điểm trắng)', 1, q( $c, '//section[' . cls( 'project-story' ) . ' and ' . cls( 'on-dark' ) . ']' )->length );
+same( 'câu chuyện: tiêu đề h2 có ngắt dòng và cụm nhấn <em>', 1, q( $c, '//section[' . cls( 'project-story' ) . ']//h2[count(br)=1 and count(em)=1]' )->length );
+same( 'câu chuyện: hai ảnh (phối cảnh và công trình)', 2, q( $c, '//img[' . cls( 'story-image' ) . ']' )->length );
+same( 'câu chuyện: chỉ ảnh phối cảnh đang hiển thị', 1, q( $c, '//img[' . cls( 'story-image' ) . ' and ' . cls( 'is-active' ) . ']' )->length );
+same( 'câu chuyện: ảnh còn lại ẩn khỏi trình đọc màn hình', 1, q( $c, '//img[' . cls( 'story-image' ) . ' and not(' . cls( 'is-active' ) . ') and @aria-hidden="true"]' )->length );
+same( 'câu chuyện: hai nút chuyển, nút đầu đang nhấn', array( 'true', 'false' ), array_map( static fn( $b ) => $b->getAttribute( 'aria-pressed' ), iterator_to_array( q( $c, '//*[' . cls( 'story-switch' ) . ']/button' ) ) ) );
+same( 'câu chuyện: nút chuyển mang nhãn chú thích (dịch được) trong data-caption', 2, q( $c, '//*[' . cls( 'story-switch' ) . ']/button[@data-caption != ""]' )->length );
+same( 'câu chuyện: liên kết "Khám phá" trỏ tới trang dự án được chọn (Bảo tàng)', 1, q( $c, '//section[' . cls( 'project-story' ) . ']//a[' . cls( 'story-link' ) . ' and @href="/du-an/106/"]' )->length );
+check( 'câu chuyện: dòng nhãn ghép "Câu chuyện một công trình / năm"', str_contains( q( $c, '//section[' . cls( 'project-story' ) . ']//p[' . cls( 'eyebrow' ) . ']' )->item( 0 )->textContent, 'Câu chuyện một công trình / 2019–2020' ) );
+
+// Thiếu ảnh công trình: chỉ còn ảnh phối cảnh, không có nút chuyển (UC-04 6b).
+$nb = render( 'archive-du_an', false, 'vi', array( 'VG_FX_NO_BUILT' => '1' ) );
+same( 'câu chuyện thiếu ảnh công trình: một ảnh', 1, q( $nb, '//img[' . cls( 'story-image' ) . ']' )->length );
+same( 'câu chuyện thiếu ảnh công trình: ẩn nút chuyển', 0, q( $nb, '//*[' . cls( 'story-switch' ) . ']' )->length );
+
+// Dự án được chọn cho khối câu chuyện đã gỡ về bản nháp: khối tự ẩn, không lỗi, không lộ dự án chưa xuất bản.
+$dr = render( 'archive-du_an', false, 'vi', array( 'VG_FX_STORY_DRAFT' => '1' ) );
+same( 'câu chuyện: dự án chưa xuất bản thì ẩn cả khối', 0, q( $dr, '//section[' . cls( 'project-story' ) . ']' )->length );
+
+// Một loại công trình: lưới đều, không có khối câu chuyện, đường dẫn 3 cấp.
+$f = render( 'taxonomy-loai_cong_trinh', false, 'vi', array( 'VG_FX_TERM' => 'giao-duc' ) );
+common_checks( $f, 'danh mục theo loại' );
+same( 'theo loại: 7 thẻ (chỉ các dự án của loại đó)', 7, q( $f, '//*[' . cls( 'catalogue-grid' ) . ']/article' )->length );
+same( 'theo loại: lưới ở chế độ lọc (đều, không có dòng danh sách)', 1, q( $f, '//*[' . cls( 'catalogue-grid' ) . ' and ' . cls( 'is-filtered' ) . ']' )->length );
+same( 'theo loại: tiêu đề là tên loại', 'Giáo dục & đào tạo', trim( q( $f, '//h1' )->item( 0 )->textContent ) );
+same( 'theo loại: số lượng có số 0 đứng đầu ("07 dự án")', 1, q( $f, '//*[' . cls( 'project-head-meta' ) . ']//span[contains(., "07 dự án")]' )->length );
+same( 'theo loại: không có khối câu chuyện', 0, q( $f, '//section[' . cls( 'project-story' ) . ']' )->length );
+same( 'theo loại: đường dẫn 3 cấp', array( 'Trang chủ', 'Dự án', 'Giáo dục & đào tạo' ), array_map( static fn( $n ) => trim( $n->textContent ), iterator_to_array( q( $f, '//nav[' . cls( 'breadcrumb' ) . ']//li' ) ) ) );
+same( 'theo loại: cấp giữa của đường dẫn là liên kết về /du-an/', 1, q( $f, '//nav[' . cls( 'breadcrumb' ) . ']//a[@href="/du-an/"]' )->length );
+same( 'theo loại: mọi thẻ đều thuộc loại giáo dục (dòng meta)', 7, q( $f, '//*[' . cls( 'catalogue-grid' ) . ']//*[' . cls( 'project-meta' ) . ']/span[contains(., "Giáo dục & đào tạo")]' )->length );
+
+// Loại chưa có dự án nào: thông báo và đường về danh mục (UC-04 5b), không lưới trống, không số lượng.
+$z = render( 'taxonomy-loai_cong_trinh', false, 'vi', array( 'VG_FX_TERM' => 'y-te' ) );
+common_checks( $z, 'loại rỗng' );
+same( 'loại rỗng: không có lưới', 0, q( $z, '//*[' . cls( 'catalogue-grid' ) . ']' )->length );
+same( 'loại rỗng: có thông báo', 1, q( $z, '//*[' . cls( 'catalogue-empty' ) . ']' )->length );
+same( 'loại rỗng: liên kết "Xem tất cả dự án" về /du-an/', 1, q( $z, '//*[' . cls( 'catalogue-empty' ) . ']//a[@href="/du-an/"]' )->length );
+same( 'loại rỗng: không hiện số lượng "0 dự án"', 0, q( $z, '//*[' . cls( 'project-head-meta' ) . ']//span' )->length );
+
+// Website mới cài: không có dự án — trang vẫn dùng được, không có khối câu chuyện.
+$ce = render( 'archive-du_an', true );
+common_checks( $ce, 'danh mục rỗng' );
+same( 'danh mục rỗng: có thông báo, không có lưới', array( 1, 0 ), array( q( $ce, '//*[' . cls( 'catalogue-empty' ) . ']' )->length, q( $ce, '//*[' . cls( 'catalogue-grid' ) . ']' )->length ) );
+same( 'danh mục rỗng: không có liên kết "Xem tất cả" (đang ở trang tất cả)', 0, q( $ce, '//*[' . cls( 'catalogue-empty' ) . ']//a' )->length );
+same( 'danh mục rỗng: không có khối câu chuyện', 0, q( $ce, '//section[' . cls( 'project-story' ) . ']' )->length );
 
 /* ---------- Kết quả ---------- */
 
