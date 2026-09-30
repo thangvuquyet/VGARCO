@@ -231,5 +231,36 @@ function vgarco_fields_cau_hinh(): array {
 		$common
 	);
 
-	return array( $group_lien_he, $group_trang );
+	/* --- Nhóm 3: mẫu thư ứng tuyển --- */
+
+	$mail = vgarco_field_builder( 'opt_mau_thu' );
+	$hint = 'Chỗ điền: {ten} {vi_tri} {email} {dien_thoai} {thoi_diem} {ngon_ngu} {lien_ket}. Để trống thì dùng mẫu mặc định.';
+
+	$group_thu = array_merge(
+		array(
+			'key'    => 'group_vg_opt_mau_thu',
+			'title'  => 'Mẫu thư ứng tuyển',
+			'fields' => array(
+				$o(
+					'mau_thu',
+					'Mẫu thư',
+					'group',
+					'translate',
+					array(
+						'layout'       => 'block',
+						'instructions' => 'Thư gửi khi có hồ sơ ứng tuyển mới. Thư báo cho bộ phận nhân sự luôn bằng tiếng Việt và KHÔNG đính kèm CV (xem CV trong trang quản trị). Thư xác nhận gửi ứng viên theo ngôn ngữ họ đã dùng để nộp hồ sơ.',
+						'sub_fields'   => array(
+							$mail( 'hr_tieu_de', 'Thư báo nhân sự — tiêu đề', 'text', 'copy', array( 'instructions' => $hint ) ),
+							$mail( 'hr_noi_dung', 'Thư báo nhân sự — nội dung', 'textarea', 'copy', array( 'rows' => 8, 'new_lines' => '', 'instructions' => $hint ) ),
+							$mail( 'ung_vien_tieu_de', 'Thư xác nhận ứng viên — tiêu đề', 'text', 'translate', array( 'instructions' => $hint ) ),
+							$mail( 'ung_vien_noi_dung', 'Thư xác nhận ứng viên — nội dung', 'textarea', 'translate', array( 'rows' => 8, 'new_lines' => '', 'instructions' => $hint ) ),
+						),
+					)
+				),
+			),
+		),
+		$common
+	);
+
+	return array( $group_lien_he, $group_trang, $group_thu );
 }

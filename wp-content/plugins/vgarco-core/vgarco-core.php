@@ -20,7 +20,13 @@ define( 'VGARCO_CORE_DIR', plugin_dir_path( __FILE__ ) );
 
 require_once VGARCO_CORE_DIR . 'inc/helpers.php';
 require_once VGARCO_CORE_DIR . 'inc/careers/jobs.php';
+require_once VGARCO_CORE_DIR . 'inc/careers/captcha.php';
+require_once VGARCO_CORE_DIR . 'inc/careers/apply-validate.php';
+require_once VGARCO_CORE_DIR . 'inc/careers/apply-process.php';
+require_once VGARCO_CORE_DIR . 'inc/careers/applications-lib.php';
 require_once VGARCO_CORE_DIR . 'inc/post-types.php';
+require_once VGARCO_CORE_DIR . 'inc/careers/apply-wp.php';
+require_once VGARCO_CORE_DIR . 'inc/careers/applications.php';
 require_once VGARCO_CORE_DIR . 'inc/taxonomies.php';
 require_once VGARCO_CORE_DIR . 'inc/seed.php';
 require_once VGARCO_CORE_DIR . 'inc/fields.php';

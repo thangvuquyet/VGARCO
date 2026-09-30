@@ -14,6 +14,7 @@ const php = process.env.PHP ?? 'php';
 const ext = process.env.PHP_EXT ?? '';
 const phpArgs = ext ? [ '-d', `extension_dir=${ ext }` ] : [];
 const withMb = [ ...phpArgs, '-d', 'extension=mbstring' ];
+const withApply = [ ...withMb, '-d', 'extension=gd', '-d', 'extension=fileinfo', '-d', 'extension=zip' ];
 
 const walk = ( dir, test, out = [] ) => {
 	for ( const name of readdirSync( dir ) ) {
@@ -39,8 +40,8 @@ const bad = phpFiles.filter( ( f ) => run( php, [ ...phpArgs, '-l', f ] ).status
 report( `php -l (${ phpFiles.length } tệp)`, bad.length === 0, bad.join( ', ' ) );
 
 // 2. Kiểm thử PHP
-for ( const script of [ 'smoke.php', 'pages.php' ] ) {
-	const r = run( php, [ ...withMb, join( 'tests', 'php', script ) ] );
+for ( const script of [ 'smoke.php', 'pages.php', 'apply.php' ] ) {
+	const r = run( php, [ ...( script === 'apply.php' ? withApply : withMb ), join( 'tests', 'php', script ) ] );
 	const last = ( r.stdout + r.stderr ).trim().split( '\n' ).pop();
 	report( script, r.status === 0, last );
 }
