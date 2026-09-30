@@ -15,9 +15,13 @@
   color: #fff;
   background: #1b201d;
 
-  @include up($bp-md) {
+  // Ba nấc như bản thiết kế (đo ở 610/700/900/1000/1100 px): < 601 → 360; 601–999 → 390; ≥ 1000 → 420.
+  @include up($bp-tablet) {
+    min-height: 390px;
+  }
+
+  @include up($bp-desk) {
     min-height: 420px;
-    padding-inline: 2.25rem;
   }
 
   .career-intro-bg {
@@ -51,7 +55,7 @@
     letter-spacing: 0.1em;
     color: #fff;
 
-    @include up($bp-md) {
+    @include up($bp-desk) {
       font-size: var(--fs-caption);
     }
   }
@@ -63,7 +67,11 @@
     line-height: 1.13;
     letter-spacing: -0.045em;
 
-    @include up($bp-md) {
+    @include up($bp-tablet) {
+      line-height: 1.15; // 601–999: chữ cố định 40 px, hai dòng cao 92 px
+    }
+
+    @include up($bp-desk) {
       font-size: clamp(2.5rem, 4.6vw, 4.6rem);
       line-height: 1.08;
     }
