@@ -7,11 +7,20 @@ import { extname, join, normalize, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath( new URL( '.', import.meta.url ) );
+// Thứ tự quan trọng: tiền tố dài trước, "/" cuối cùng.
+const theme = join( root, '..', 'wp-content', 'themes', 'vgarco' );
 const roots = {
-	'/js/': join( root, '..', 'wp-content', 'themes', 'vgarco', 'src', 'js' ),
+	'/js/': join( theme, 'src', 'js' ),
+	'/dist/': join( theme, 'dist' ),
 	'/': join( root, 'out' ),
 };
-const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8' };
+const types = {
+	'.html': 'text/html; charset=utf-8',
+	'.js': 'text/javascript; charset=utf-8',
+	'.css': 'text/css; charset=utf-8',
+	'.woff2': 'font/woff2',
+	'.json': 'application/json; charset=utf-8',
+};
 
 createServer( async ( req, res ) => {
 	const path = decodeURIComponent( new URL( req.url, 'http://x' ).pathname );

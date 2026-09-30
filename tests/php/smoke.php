@@ -99,6 +99,10 @@ $GLOBALS['fields'] = array( 'chi_duong_url' => 'https://maps.example/x' );
 same( 'directions: dùng liên kết đã nhập', 'https://maps.example/x', vgarco_directions_url() );
 $GLOBALS['fields'] = array();
 check( 'directions: tự tạo từ địa chỉ, có mã hóa URL', str_starts_with( vgarco_directions_url(), 'https://www.google.com/maps/search/?api=1&query=' ) && ! str_contains( vgarco_directions_url(), ' ' ) );
+check( 'directions: địa chỉ nhiều dòng được nối lại (không còn %0A / %0D)', ! str_contains( vgarco_directions_url(), '%0A' ) && ! str_contains( vgarco_directions_url(), '%0D' ) );
+$GLOBALS['fields'] = array( 'phap_nhan' => array( 'dia_chi_van_phong' => "A,\r\n  B\n\nC" ) );
+same( 'directions: nhiều dòng trống và dấu cách thừa → một dấu cách', 'https://www.google.com/maps/search/?api=1&query=A%2C%20B%20C', vgarco_directions_url() );
+$GLOBALS['fields'] = array();
 
 $home = vgarco_option( 'chi_so_trang_chu' );
 same( 'chỉ số trang chủ: mặc định có 3 mục', 3, count( $home ) );
@@ -263,6 +267,12 @@ vgarco_render_primary_nav( array( vgarco_menu_node( $evil, '/x/', false, $evil, 
 $xss_group = ob_get_clean();
 check( 'nav: không có thẻ <script> thật nào lọt vào HTML của mục có con', ! str_contains( $xss_group, '<script>' ) );
 same( 'nav: nhãn nút, nhãn bảng và liên kết con đều được thoát (3 lần)', 3, substr_count( $xss_group, '&lt;script&gt;' ) );
+
+// Chuỗi nhiều dòng: thoát HTML TRƯỚC khi đổi xuống dòng thành <br>.
+same( 'lines: xuống dòng thành <br>', 'Dòng 1<br>Dòng 2', vgarco_lines( "Dòng 1\nDòng 2" ) );
+same( 'lines: cắt khoảng trắng đầu/cuối', 'A', vgarco_lines( "\n A \n" ) );
+check( 'lines: thoát thẻ HTML nhưng vẫn giữ <br> do mình sinh', vgarco_lines( "<b>x</b>\ny" ) === '&lt;b&gt;x&lt;/b&gt;<br>y' );
+check( 'lines: không lọt thẻ <script>', ! str_contains( vgarco_lines( '<script>alert(1)</script>' ), '<script>' ) );
 
 // Biểu tượng: chỉ chấp nhận tên an toàn.
 function get_theme_file_path( $p = '' ) {

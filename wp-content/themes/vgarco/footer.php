@@ -23,13 +23,13 @@ $facebook = (string) vgarco_option( 'mang_xa_hoi.facebook' );
 				<?php get_template_part( 'template-parts/layout/logo' ); ?>
 				<span>VGARCO<small><?php esc_html_e( 'TƯ VẤN XÂY DỰNG', 'vgarco' ); ?></small></span>
 			</a>
-			<p><?php esc_html_e( 'Tư vấn thiết kế, giám sát và quản lý dự án xây dựng.', 'vgarco' ); ?></p>
+			<p><?php echo vgarco_lines( __( "Tư vấn thiết kế, giám sát\nvà quản lý dự án xây dựng.", 'vgarco' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- đã thoát trong vgarco_lines(). ?></p>
 		</div>
 
 		<div class="footer-col footer-office">
 			<span class="footer-title"><?php esc_html_e( 'VĂN PHÒNG', 'vgarco' ); ?></span>
 			<strong><?php echo esc_html( $company ); ?></strong>
-			<p><?php echo esc_html( $address ); ?></p>
+			<p><?php echo vgarco_lines( $address ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- đã thoát trong vgarco_lines(). ?></p>
 			<a class="footer-inline-link" href="<?php echo esc_url( vgarco_directions_url() ); ?>" target="_blank" rel="noopener">
 				<?php esc_html_e( 'Chỉ đường', 'vgarco' ); ?>
 				<span class="sr-only"><?php esc_html_e( '(mở ở thẻ mới)', 'vgarco' ); ?></span>

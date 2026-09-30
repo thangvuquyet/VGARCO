@@ -51,7 +51,7 @@
     --header-h: 86px;
     --header-pad: 1.5rem;
     --gutter: 2.25rem;
-    --footer-pad: 2.25rem;
+    --footer-pad: clamp(1.25rem, 4.4vw, 4.75rem); // 39,6 @900 · 63,36 @1440 · 76 @1920 (đo từ bản thiết kế)
   }
 
   @include up($bp-nav) {
@@ -65,6 +65,5 @@
   @include up($bp-xl) {
     --header-h: 112px;
     --header-pad: clamp(1.5rem, 3.5vw, 3.5rem);
-    --footer-pad: clamp(1.5rem, 4.4vw, 4.75rem);
   }
 }

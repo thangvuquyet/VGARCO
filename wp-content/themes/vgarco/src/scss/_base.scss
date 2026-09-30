@@ -135,8 +135,15 @@ h3 em {
     height: 23px;
   }
 
+  // Di động: nút nhìn thấy 36 × 42 nhưng vùng bấm đủ 44 × 44 (phương án mục 7.8).
+  @include hit-area(0.0625rem, 0.25rem);
+
   @include up($bp-tablet) {
     width: 44px;
     height: 44px;
+
+    &::after {
+      content: none;
+    }
   }
 }

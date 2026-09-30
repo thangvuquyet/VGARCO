@@ -67,9 +67,13 @@ function vgarco_fields_cau_hinh(): array {
 							$phap_nhan(
 								'dia_chi_van_phong',
 								'Địa chỉ văn phòng',
-								'text',
+								'textarea',
 								'translate',
-								array( 'instructions' => 'Hiển thị ở chân trang và dùng để tạo liên kết "Chỉ đường".' )
+								array(
+									'rows'         => 2,
+									'new_lines'    => '',
+									'instructions' => 'Hiển thị ở chân trang, mỗi dòng một dòng (thường xuống dòng sau tên phố). Cũng dùng để tạo liên kết "Chỉ đường" — khi đó các dòng được nối lại.',
+								)
 							),
 						),
 					)

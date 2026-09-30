@@ -17,6 +17,10 @@
   @include up($bp-tablet) {
     gap: 0.9375rem;
   }
+
+  @include up($bp-xl) {
+    gap: 1.5rem;
+  }
 }
 
 // --- Thương hiệu: biểu tượng + chữ VGARCO + dòng "TƯ VẤN XÂY DỰNG" ---
@@ -81,12 +85,13 @@
     letter-spacing: 0.1em;
 
     @include up($bp-tablet) {
-      margin-top: 0.375rem;
+      margin-top: 0.25rem;
       font-size: 0.625rem; // 10
       letter-spacing: 0.13em;
     }
 
     @include up($bp-nav) {
+      margin-top: 0.375rem;
       font-size: 0.6875rem; // 11
     }
   }

@@ -36,6 +36,18 @@ function vgarco_icon( string $name, string $class = '' ): string {
 }
 
 /**
+ * Thoát HTML rồi đổi xuống dòng thành <br>. Dùng cho chuỗi có ngắt dòng chủ ý (địa chỉ, khẩu hiệu).
+ * Người biên tập quyết định chỗ ngắt dòng, kể cả ở bản tiếng Đức, thay vì để trình duyệt tự ngắt.
+ *
+ * @param string $text Văn bản thuần, có thể có ký tự xuống dòng.
+ * @return string HTML đã thoát, an toàn để in trực tiếp.
+ */
+function vgarco_lines( string $text ): string {
+	// Không dùng nl2br(): nó giữ lại ký tự xuống dòng sau <br>.
+	return (string) preg_replace( '/\r\n|\r|\n/', '<br>', esc_html( trim( $text ) ) );
+}
+
+/**
  * Khóa loại trang: JS dùng để nạp đúng module (data-vg-page ở thẻ body).
  */
 function vgarco_page_key(): string {

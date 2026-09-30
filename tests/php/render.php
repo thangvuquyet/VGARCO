@@ -25,9 +25,39 @@ define( 'VGARCO_CORE_DIR', ROOT . '/wp-content/plugins/vgarco-core/' );
 
 $GLOBALS['lang'] = $argv[1] ?? 'vi';
 
-function add_action() {}
+// Hệ thống hook tối giản: đủ để chạy inc/enqueue.php thật (wp_enqueue_scripts → wp_head).
+$GLOBALS['actions'] = array();
+$GLOBALS['styles']  = array();
+$GLOBALS['modules'] = array();
+function add_action( $hook, $callback, $priority = 10 ) {
+	$GLOBALS['actions'][ $hook ][ $priority ][] = $callback;
+}
+function do_action( $hook ) {
+	$by_priority = $GLOBALS['actions'][ $hook ] ?? array();
+	ksort( $by_priority );
+	foreach ( $by_priority as $callbacks ) {
+		foreach ( $callbacks as $callback ) {
+			$callback();
+		}
+	}
+}
 function add_filter() {}
 function remove_action() {}
+function wp_enqueue_style( $handle, $src ) {
+	$GLOBALS['styles'][ $handle ] = $src;
+}
+function wp_enqueue_script_module( $id, $src ) {
+	$GLOBALS['modules'][ $id ] = $src;
+}
+function get_theme_file_uri( $p = '' ) {
+	return '/' . ltrim( $p, '/' ); // tests/serve.mjs phục vụ theme/dist dưới /dist/
+}
+function current_user_can() {
+	return false;
+}
+function determine_locale() {
+	return 'vi' === $GLOBALS['lang'] ? 'vi_VN' : 'de_DE';
+}
 function __( $t ) {
 	return $t;
 }
@@ -68,7 +98,15 @@ function bloginfo() {
 	echo 'UTF-8';
 }
 function wp_head() {
-	echo '<title>Khung thử — VGARCO</title>';
+	echo '<title>Khung thử — VGARCO</title>' . "\n";
+	do_action( 'wp_enqueue_scripts' );
+	do_action( 'wp_head' );
+	foreach ( $GLOBALS['styles'] as $src ) {
+		printf( "<link rel=\"stylesheet\" href=\"%s\">\n", esc_url( $src ) );
+	}
+	foreach ( $GLOBALS['modules'] as $src ) {
+		printf( "<script type=\"module\" src=\"%s\"></script>\n", esc_url( $src ) );
+	}
 }
 function wp_footer() {}
 function wp_body_open() {}
@@ -173,6 +211,7 @@ function the_excerpt() {
 require_once VGARCO_CORE_DIR . 'inc/helpers.php';
 require_once THEME . '/inc/menus.php';
 require_once THEME . '/inc/template-tags.php';
+require_once THEME . '/inc/enqueue.php';
 
 ob_start();
 require THEME . '/index.php';

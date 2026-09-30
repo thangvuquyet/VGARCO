@@ -38,7 +38,8 @@ function vgarco_option_defaults(): array {
 			'ten'               => 'Công ty TNHH Tư vấn Xây dựng VGARCO',
 			'ma_so_thue'        => '2901635947',
 			'dia_chi_dang_ky'   => 'Số 75, ngõ 6, đường Đặng Văn Ngữ, phường Kim Liên, Hà Nội',
-			'dia_chi_van_phong' => 'Nhà H30, ngõ 68 Trung Kính, phường Yên Hòa, Hà Nội',
+			// Có xuống dòng: bản thiết kế ngắt dòng sau tên phố. Liên kết "Chỉ đường" tự nối các dòng lại.
+			'dia_chi_van_phong' => "Nhà H30, ngõ 68 Trung Kính,\nphường Yên Hòa, Hà Nội",
 		),
 		'lien_he'         => array(
 			'dien_thoai'      => '0988 961 666',
@@ -99,6 +100,7 @@ function vgarco_directions_url(): string {
 	if ( is_string( $custom ) && '' !== $custom ) {
 		return $custom;
 	}
-	$address = (string) vgarco_option( 'phap_nhan.dia_chi_van_phong' );
+	// Địa chỉ nhiều dòng: nối thành một dòng để truy vấn bản đồ không chứa ký tự xuống dòng.
+	$address = trim( (string) preg_replace( '/\s+/u', ' ', (string) vgarco_option( 'phap_nhan.dia_chi_van_phong' ) ) );
 	return 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode( $address );
 }

@@ -1,6 +1,8 @@
 @use '../mixins' as *;
 
-// Chân trang gọn. Số đo lấy từ bản thiết kế ở 1440 px.
+// Chân trang gọn. Mọi số đo lấy từ bản thiết kế ở 1440 / 900 / 390 px (đo bằng getBoundingClientRect).
+$bp-footer-cols: 1000px; // ≥ : 4 cột, dòng cuối 3 cột
+
 .footer {
   position: relative;
   background: var(--c-surface);
@@ -10,15 +12,17 @@
 .footer-main {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 2rem;
-  padding: 2.5rem var(--footer-pad) 2.25rem;
+  gap: 1.875rem; // 30
+  padding: 2rem var(--footer-pad) 1.875rem;
+  border-bottom: 1px solid var(--c-line); // đường kẻ nằm ở đáy khối chính, đúng như bản thiết kế
 
   @include up($bp-tablet) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 2.5rem 3rem;
+    gap: 2.125rem 3rem; // hàng 34, cột 48
+    padding-block: 2.5rem 2.25rem;
   }
 
-  @include up(1000px) {
+  @include up($bp-footer-cols) {
     grid-template-columns: 1.05fr 1.35fr 0.8fr 0.7fr;
     gap: clamp(2rem, 5vw, 4.5rem);
   }
@@ -45,12 +49,18 @@
     margin-bottom: 1.25rem;
 
     .brand-mark {
-      width: 48px;
-      height: 48px;
+      width: 34px;
+      height: 34px;
+
+      @include up($bp-tablet) {
+        width: 42px;
+        height: 42px;
+      }
     }
 
     > span {
       font-size: 1.75rem; // 28
+      line-height: 1.15;
       letter-spacing: 0.015em;
     }
 
@@ -64,9 +74,12 @@
   }
 
   p {
-    max-width: 16.25rem;
     font-size: var(--fs-small);
     line-height: 1.65;
+
+    @include up($bp-tablet) {
+      max-width: 16.25rem;
+    }
   }
 }
 
@@ -74,8 +87,12 @@
 .footer-office {
   strong {
     display: block;
-    font-size: var(--fs-body);
+    font-size: 0.9375rem; // 15
     line-height: 1.5;
+
+    @include up($bp-tablet) {
+      font-size: var(--fs-body);
+    }
   }
 
   p {
@@ -96,8 +113,8 @@
   border-bottom: 1px solid var(--c-ink);
 
   svg {
-    width: 1em;
-    height: 1em;
+    width: 0.8em;
+    height: 0.8em;
   }
 
   &:hover {
@@ -106,24 +123,31 @@
   }
 }
 
-// --- Điều hướng chân trang ---
+// --- Điều hướng chân trang: 2 cột ở di động, 1 cột từ máy tính bảng ---
 .footer-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 0.625rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.625rem 1.375rem;
 
   .footer-title {
+    grid-column: 1 / -1;
     margin-bottom: 0.3125rem;
   }
 
   a {
     font-size: 0.9375rem; // 15
-    line-height: 1.7;
+    line-height: 1.625rem; // 26 px, đúng chiều cao dòng của bản thiết kế
     color: var(--c-ink-soft);
 
     &:hover {
       color: var(--c-brand);
     }
+  }
+
+  @include up($bp-tablet) {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
   }
 }
 
@@ -138,13 +162,18 @@
     position: relative;
     display: grid;
     place-items: center;
-    width: 38px;
-    height: 38px;
+    width: 36px;
+    height: 36px;
     font-size: 0.9375rem;
     font-weight: 650;
     color: var(--c-ink-soft);
     border: 1px solid #c5c9c4; // trang trí; nội dung nhận biết nằm ở biểu tượng và nhãn đọc màn hình
     border-radius: 50%;
+
+    @include up($bp-tablet) {
+      width: 38px;
+      height: 38px;
+    }
 
     svg {
       width: 17px;
@@ -173,25 +202,43 @@
   line-height: 1.45;
 }
 
-// --- Dòng cuối ---
+// --- Dòng cuối: 2 hàng bên trái + "Về đầu trang" bên phải; từ 1000 px là 3 cột ---
 .footer-bottom {
   display: grid;
-  gap: 0.25rem;
-  padding: 1.125rem var(--footer-pad);
-  font-size: 0.75rem; // 12
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  row-gap: 0.375rem;
+  padding: 1rem var(--footer-pad);
+  font-size: 0.6875rem; // 11
   line-height: 1.7;
   color: var(--c-ink-muted);
-  border-top: 1px solid var(--c-line);
 
   @include up($bp-tablet) {
+    padding-block: 1.125rem;
+    font-size: 0.75rem; // 12
+  }
+
+  > :nth-child(-n + 2) {
+    grid-column: 1;
+  }
+
+  > :last-child {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    justify-self: end;
+  }
+
+  @include up($bp-footer-cols) {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+
+    > :nth-child(-n + 2),
+    > :last-child {
+      grid-column: auto;
+      grid-row: auto;
+    }
 
     > :nth-child(2) {
       text-align: center;
-    }
-
-    > :last-child {
-      justify-self: end;
     }
   }
 

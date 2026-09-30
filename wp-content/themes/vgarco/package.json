@@ -11,5 +11,11 @@
     "build": "vite build",
     "dev": "vite build --watch",
     "fonts": "node scripts/copy-fonts.mjs"
+  },
+  "devDependencies": {
+    "@fontsource/lora": "^5.3.0",
+    "@fontsource/open-sans": "^5.3.0",
+    "sass": "^1.105.1",
+    "vite": "^8.3.1"
   }
 }
