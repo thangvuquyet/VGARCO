@@ -49,6 +49,7 @@ Máy chủ chạy ở `http://localhost:8080` (cố định) trong lúc chạy v
 |------------|-------------|
 | `env`      | WordPress 7.x, plugin/theme hoạt động, kiểu nội dung, phân loại, dữ liệu mồi, `ho_so_ut` riêng tư |
 | `import`   | `wp vgarco import` với `content/projects.csv`: chạy thử, tạo, chạy lại không đổi, cập nhật, ô trống không xóa, tệp lỗi dừng, ảnh theo SHA-1, thư viện đúng thứ tự |
+| `media`    | Ảnh tải lên: GPS/EXIF/XMP bị gỡ khỏi tệp gốc và mọi bản thu nhỏ (cả ảnh >2560 px giữ tệp gốc), ảnh dọc xoay đúng chiều (hướng 6/8/3), PNG, từ chối GIF/WebP/tệp hỏng và không để lại tệp, tải qua `async-upload.php` bằng HTTP thật |
 | `seed`     | Tạo tin, vị trí tuyển dụng (đang mở / quá hạn / đã đóng) cho các kịch bản sau; không kiểm tra |
 | `apply`    | Nộp hồ sơ qua REST: mã bảo mật, token một lần, Origin/Referer, bẫy, kiểm tra trường và tệp thật, CV ngoài web root, thư HR và ứng viên (cả tiếng Đức), SMTP hỏng + gửi lại theo giờ, giới hạn 5 lần/giờ |
 | `admin`    | Vai trò và quyền, danh sách hồ sơ, xem, tải CV (nonce, nhật ký, header), xuất `.xlsx` an toàn công thức, xóa kèm tệp, tự xóa sau 12 tháng, cảnh báo |

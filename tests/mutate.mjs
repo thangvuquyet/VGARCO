@@ -534,6 +534,26 @@ const M = [
     "add_action( 'login_form_lostpassword', 'vgarco_lostpassword_no_enumeration' );", ""],
   ["quên mật khẩu: bỏ chặn dò tài khoản (retrievepassword)", "wp-content/plugins/vgarco-core/inc/security.php",
     "add_action( 'login_form_retrievepassword', 'vgarco_lostpassword_no_enumeration' );", ""],
+  ["ảnh: bỏ bộ gỡ siêu dữ liệu khi tải lên", "wp-content/plugins/vgarco-core/inc/media.php",
+    "add_filter( 'wp_handle_upload', 'vgarco_sanitize_uploaded_image' );", ""],
+  ["ảnh: giữ mọi đoạn APPn (EXIF, XMP, IPTC)", "wp-content/plugins/vgarco-core/inc/media-lib.php",
+    "if ( $marker >= 0xE0 && $marker <= 0xEF ) { // APPn: chỉ giữ JFIF, ICC, Adobe", "if ( false ) {", 'media'],
+  ["ảnh: giữ ghi chú COM", "wp-content/plugins/vgarco-core/inc/media-lib.php",
+    "} elseif ( 0xFE === $marker ) { // ghi chú\n\t\t\t$keep = false;", "} elseif ( 0xFE === $marker ) { // ghi chú\n\t\t\t$keep = true;", 'media'],
+  ["ảnh: làm mất hồ sơ màu ICC", "wp-content/plugins/vgarco-core/inc/media-lib.php",
+    "\n\t\t\t\t|| ( 0xE2 === $marker && str_starts_with( $payload, \"ICC_PROFILE\\0\" ) )", "", 'media'],
+  ["ảnh: đọc hướng xoay sai thứ tự byte", "wp-content/plugins/vgarco-core/inc/media-lib.php",
+    "unpack( 'II' === $order ? 'v' : 'n', $s )", "unpack( 'II' === $order ? 'n' : 'v', $s )", 'media'],
+  ["ảnh: nhận hướng xoay ngoài 1–8", "wp-content/plugins/vgarco-core/inc/media-lib.php",
+    "return ( $value >= 1 && $value <= 8 ) ? $value : 1;", "return $value;", 'media'],
+  ["ảnh: JPEG kết thúc trước dữ liệu quét vẫn nhận", "wp-content/plugins/vgarco-core/inc/media-lib.php",
+    "if ( 0xD9 === $marker ) { // kết thúc ảnh trước khi có dữ liệu quét\n\t\t\treturn null;", "if ( 0xD9 === $marker ) { // kết thúc ảnh trước khi có dữ liệu quét\n\t\t\treturn array( 'segments' => $segments, 'scan' => $pos );", 'media'],
+  ["ảnh: PNG giữ khối tEXt", "wp-content/plugins/vgarco-core/inc/media-lib.php",
+    "array( 'eXIf', 'tEXt', 'zTXt', 'iTXt', 'tIME' )", "array( 'eXIf', 'zTXt', 'iTXt', 'tIME' )", 'media'],
+  ["ảnh: PNG giữ khối eXIf", "wp-content/plugins/vgarco-core/inc/media-lib.php",
+    "array( 'eXIf', 'tEXt', 'zTXt', 'iTXt', 'tIME' )", "array( 'tEXt', 'zTXt', 'iTXt', 'tIME' )", 'media'],
+  ["ảnh: PNG thiếu IEND vẫn nhận", "wp-content/plugins/vgarco-core/inc/media-lib.php",
+    "return $seen ? $out : null;", "return $out;", 'media'],
 ];
 
 let caught = 0, missed = 0, skipped = 0;
@@ -556,7 +576,7 @@ for (const [name, file, from, to, suite = 'smoke'] of M.filter(([n]) => !only ||
   if (n !== 1) { skipped++; console.log(`${name.padEnd(50)} => BỎ QUA: đoạn gốc xuất hiện ${n} lần (cần đúng 1)`); continue; }
   writeFileSync(path, text.replace(from, () => to));
 
-  const extra = suite === 'apply' ? ['-d', 'extension=gd', '-d', 'extension=fileinfo', '-d', 'extension=zip'] : [];
+  const extra = suite === 'apply' || suite === 'media' ? ['-d', 'extension=gd', '-d', 'extension=fileinfo', '-d', 'extension=zip'] : [];
   const r = suite === 'i18n'
     ? spawnSync(process.execPath, [join(work, 'tests', 'i18n.mjs')], { encoding: 'utf8' })
     : spawnSync(php, ['-d', `extension_dir=${ext}`, '-d', 'extension=mbstring', ...extra, join(work, 'tests', 'php', `${suite}.php`)], { encoding: 'utf8' });

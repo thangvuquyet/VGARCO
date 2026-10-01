@@ -52,8 +52,8 @@ const bad = phpFiles.filter( ( f ) => run( php, [ ...phpArgs, '-l', f ] ).status
 report( `php -l (${ phpFiles.length } tệp)`, bad.length === 0, bad.join( ', ' ) );
 
 // 2. Kiểm thử PHP
-for ( const script of [ 'smoke.php', 'pages.php', 'apply.php', 'search.php', 'seo.php', 'security.php', 'import.php' ] ) {
-	const r = run( php, [ ...( script === 'apply.php' ? withApply : withMb ), join( 'tests', 'php', script ) ] );
+for ( const script of [ 'smoke.php', 'pages.php', 'apply.php', 'search.php', 'seo.php', 'security.php', 'import.php', 'media.php' ] ) {
+	const r = run( php, [ ...( script === 'apply.php' || script === 'media.php' ? withApply : withMb ), join( 'tests', 'php', script ) ] );
 	const last = ( r.stdout + r.stderr ).trim().split( '\n' ).pop();
 	report( script, r.status === 0, last );
 }

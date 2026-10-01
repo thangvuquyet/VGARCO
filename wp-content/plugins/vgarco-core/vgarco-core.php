@@ -39,6 +39,7 @@ require_once VGARCO_CORE_DIR . 'inc/taxonomies.php';
 require_once VGARCO_CORE_DIR . 'inc/seed.php';
 require_once VGARCO_CORE_DIR . 'inc/fields.php';
 require_once VGARCO_CORE_DIR . 'inc/options.php';
+require_once VGARCO_CORE_DIR . 'inc/media-lib.php';
 require_once VGARCO_CORE_DIR . 'inc/media.php';
 require_once VGARCO_CORE_DIR . 'inc/editor.php';
 

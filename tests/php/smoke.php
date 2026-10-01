@@ -92,6 +92,11 @@ check( 'init: phân loại đăng ký trước kiểu nội dung (ưu tiên số
 $core_main = (string) file_get_contents( VGARCO_CORE_DIR . 'vgarco-core.php' );
 check( 'kích hoạt: đăng ký phân loại trước kiểu nội dung (cùng thứ tự với lúc chạy thường)', strpos( $core_main, 'vgarco_register_taxonomies();' ) < strpos( $core_main, 'vgarco_register_post_types();' ) );
 
+// --- Ảnh tải lên: bộ gỡ siêu dữ liệu (GPS) phải được nối vào WordPress ---
+// Hàm thuần có kiểm thử riêng (media.php); chạy thật trên WordPress ở tests/wp-lab/it_media.php. Ở đây chỉ bảo đảm KHÔNG ai tháo mất đường nối.
+check( 'ảnh: wp_handle_upload gọi bộ gỡ siêu dữ liệu (cả tải qua trang quản trị lẫn nhập bằng mã)', isset( $GLOBALS['priorities']['wp_handle_upload']['vgarco_sanitize_uploaded_image'] ) );
+check( 'ảnh: có bộ lọc upload_mimes giới hạn định dạng ảnh', ! empty( $GLOBALS['hooks']['upload_mimes'] ) );
+
 // --- Đăng nhập an toàn: thứ tự bộ lọc (lỗi chỉ lộ ra trên WordPress thật) ---
 // wp_authenticate_username_password() (ưu tiên 20) bỏ qua WP_Error của bộ lọc đến trước rồi tự kiểm tra mật khẩu. Bộ chặn khóa phải chạy SAU
 // lõi (đặt ưu tiên 1 thì mật khẩu đúng vẫn vào được dù IP/tài khoản đang khóa), và bộ gộp thông báo chung phải chạy sau bộ chặn khóa.

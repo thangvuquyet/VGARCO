@@ -68,6 +68,7 @@ PHP=... PHP_EXT=... node tests/mutate.mjs "khóa đăng nhập"               # 
 | `tests/php/smoke.php` | Hàm thuần, cấu trúc trường ACF, chặn thư ở staging, menu, bộ chuyển ngôn ngữ, đoán mục của trang 404 |
 | `tests/php/pages.php` | Chạy mẫu trang THẬT (`render.php` + hàm WordPress giả) rồi phân tích DOM: đúng một H1, ảnh LCP, alt, trường trống tự ẩn, thoát HTML, SEO, JSON-LD, hộp thoại tìm kiếm, trang lỗi… |
 | `tests/php/apply.php` | Luồng nộp hồ sơ: mã bảo mật, kiểm tra tệp CV bằng **tệp thật** (exe đổi đuôi, DOCX có macro, quá 10 MB), thứ tự 403/429/400/409/500, xuất .xlsx, hạn 12 tháng |
+| `tests/php/media.php` | Gỡ siêu dữ liệu ảnh (GPS, EXIF, XMP, IPTC) khỏi JPEG và PNG bằng ảnh GD thật có chèn EXIF giả: không đổi một byte dữ liệu ảnh, giữ hồ sơ màu, đọc hướng xoay, từ chối tệp hỏng |
 | `tests/php/search.php`, `seo.php`, `security.php`, `import.php` | Tìm kiếm bỏ dấu, SEO (thoát ký tự, JSON-LD), khóa đăng nhập và cache Cloudflare, đọc CSV và kế hoạch nhập liệu |
 | `tests/i18n.mjs`, `tests/php/gettext.php` | Công cụ dịch và trạng thái bản dịch (`.pot` mới, `.po` đủ mục, `.mo` khớp `.po`), đọc `.mo` bằng libintl độc lập |
 
@@ -77,7 +78,7 @@ Các bộ trên dùng hàm WordPress **giả** nên không thấy lỗi chỉ l�
 
 ```bash
 PHP=... PHP_EXT=... node tests/wp-lab/bootstrap.mjs wordpress.zip sqlite-database-integration.zip   # một lần
-PHP=... node tests/wp-lab/run.mjs                                                                   # 9 kịch bản, ~300 phép kiểm
+PHP=... node tests/wp-lab/run.mjs                                                                   # 10 kịch bản, ~340 phép kiểm
 ```
 
 Hướng dẫn, danh sách kịch bản và **giới hạn** (ACF PRO/WPML là bản giả, không có Nginx/Cloudflare/trình duyệt khác Chromium) ở [`tests/wp-lab/README.md`](tests/wp-lab/README.md).
