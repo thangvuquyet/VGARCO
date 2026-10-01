@@ -18,6 +18,17 @@ const ext = process.env.PHP_EXT ?? '';
 const slash = (p) => p.replace(/\\/g, '/');
 const die = (msg) => { console.error('LỖI: ' + msg); process.exit(1); };
 
+// Báo rõ khi không tìm thấy PHP (lỗi hay gặp nhất: chưa đặt biến PHP).
+if (spawnSync(php, ['-v']).error) {
+  console.error([
+    `Không chạy được PHP ("${php}"). Đặt biến PHP (và PHP_EXT = thư mục ext) trỏ tới php, ví dụ:`,
+    '  cmd:        set PHP=C:\\đường\\dẫn\\php.exe',
+    '  PowerShell: $env:PHP="C:\\đường\\dẫn\\php.exe"',
+    '  bash:       export PHP=/đường/dẫn/php',
+  ].join('\n'));
+  process.exit(1);
+}
+
 const args = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 if (process.argv.includes('--reset')) { rmSync(lab, { recursive: true, force: true }); console.log('Đã xóa .lab'); }
 mkdirSync(lab, { recursive: true });

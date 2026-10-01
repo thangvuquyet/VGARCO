@@ -12,6 +12,16 @@ const here = dirname(fileURLToPath(import.meta.url));
 const lab = join(here, '.lab');
 const php = process.env.PHP ?? 'php';
 const ini = join(lab, 'php.ini');
+// Báo rõ khi không tìm thấy PHP (lỗi hay gặp nhất: chưa đặt biến PHP).
+if (spawnSync(php, ['-v']).error) {
+  console.error([
+    `Không chạy được PHP ("${php}"). Đặt biến PHP trỏ tới php.exe, ví dụ:`,
+    '  cmd:        set PHP=C:\\đường\\dẫn\\php.exe',
+    '  PowerShell: $env:PHP="C:\\đường\\dẫn\\php.exe"',
+    '  bash:       export PHP=/đường/dẫn/php',
+  ].join('\n'));
+  process.exit(1);
+}
 if (!existsSync(join(lab, 'wordpress', 'wp-load.php'))) { console.error('Chưa dựng môi trường: chạy node tests/wp-lab/bootstrap.mjs trước'); process.exit(1); }
 
 // Thứ tự có ý nghĩa: nhập dự án → dữ liệu tin/vị trí → các kịch bản dùng dữ liệu đó.

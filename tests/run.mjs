@@ -14,6 +14,15 @@ import { fileURLToPath } from 'node:url';
 const root = join( dirname( fileURLToPath( import.meta.url ) ), '..' );
 const php = process.env.PHP ?? 'php';
 const ext = process.env.PHP_EXT ?? '';
+if ( spawnSync( php, [ '-v' ] ).error ) {
+	console.error( [
+		`Không chạy được PHP ("${ php }"). Đặt biến PHP (và PHP_EXT = thư mục ext) trỏ tới php, ví dụ:`,
+		'  cmd:        set PHP=C:\\đường\\dẫn\\php.exe  rồi  set PHP_EXT=C:\\đường\\dẫn\\ext',
+		'  PowerShell: $env:PHP="C:\\đường\\dẫn\\php.exe"; $env:PHP_EXT="C:\\đường\\dẫn\\ext"',
+		'  bash:       export PHP=/đường/dẫn/php PHP_EXT=/đường/dẫn/ext',
+	].join( '\n' ) );
+	process.exit( 1 );
+}
 const phpArgs = ext ? [ '-d', `extension_dir=${ ext }` ] : [];
 const withMb = [ ...phpArgs, '-d', 'extension=mbstring' ];
 const withApply = [ ...withMb, '-d', 'extension=gd', '-d', 'extension=fileinfo', '-d', 'extension=zip' ];
