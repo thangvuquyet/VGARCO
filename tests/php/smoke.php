@@ -27,6 +27,9 @@ function add_action( $hook, $callback, $priority = 10, $args = 1 ) {
 }
 function add_filter( $hook, $callback, $priority = 10, $args = 1 ) {
 	$GLOBALS['hooks'][ $hook ][] = $callback;
+	if ( is_string( $callback ) ) {
+		$GLOBALS['priorities'][ $hook ][ $callback ] = $priority;
+	}
 }
 function register_activation_hook() {}
 function register_deactivation_hook() {}
@@ -89,8 +92,18 @@ check( 'init: phân loại đăng ký trước kiểu nội dung (ưu tiên số
 $core_main = (string) file_get_contents( VGARCO_CORE_DIR . 'vgarco-core.php' );
 check( 'kích hoạt: đăng ký phân loại trước kiểu nội dung (cùng thứ tự với lúc chạy thường)', strpos( $core_main, 'vgarco_register_taxonomies();' ) < strpos( $core_main, 'vgarco_register_post_types();' ) );
 
+// --- Đăng nhập an toàn: thứ tự bộ lọc (lỗi chỉ lộ ra trên WordPress thật) ---
+// wp_authenticate_username_password() (ưu tiên 20) bỏ qua WP_Error của bộ lọc đến trước rồi tự kiểm tra mật khẩu. Bộ chặn khóa phải chạy SAU
+// lõi (đặt ưu tiên 1 thì mật khẩu đúng vẫn vào được dù IP/tài khoản đang khóa), và bộ gộp thông báo chung phải chạy sau bộ chặn khóa.
+require_once VGARCO_CORE_DIR . 'inc/security-lib.php';
+require_once VGARCO_CORE_DIR . 'inc/security.php';
+$auth = $GLOBALS['priorities']['authenticate'] ?? array();
+check( 'authenticate: bộ chặn khóa chạy sau kiểm tra mật khẩu của lõi (ưu tiên > 30)', ( $auth['vgarco_auth_guard'] ?? 0 ) > 30 );
+check( 'authenticate: thông báo chung chạy sau bộ chặn khóa', ( $auth['vgarco_auth_generic_error'] ?? 0 ) > ( $auth['vgarco_auth_guard'] ?? PHP_INT_MAX ) );
+check( 'quên mật khẩu: có chặn dò tài khoản ở cả hai tên hành động', isset( $GLOBALS['priorities']['login_form_lostpassword']['vgarco_lostpassword_no_enumeration'], $GLOBALS['priorities']['login_form_retrievepassword']['vgarco_lostpassword_no_enumeration'] ) );
+
 // --- vgarco_dot_get ---
-$tree = array( 'a' => array( 'b' => array( 'c' => 5 ) ), 'z' => null );
+$tree =array( 'a' => array( 'b' => array( 'c' => 5 ) ), 'z' => null );
 same( 'dot_get: lồng 3 cấp', 5, vgarco_dot_get( $tree, 'a.b.c' ) );
 same( 'dot_get: khóa không có', null, vgarco_dot_get( $tree, 'a.x.c' ) );
 same( 'dot_get: qua giá trị không phải mảng', null, vgarco_dot_get( $tree, 'a.b.c.d' ) );

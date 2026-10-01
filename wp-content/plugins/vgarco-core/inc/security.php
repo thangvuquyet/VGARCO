@@ -26,8 +26,22 @@ function vgarco_lockout_save( string $kind, string $value, array $state ): void 
 }
 
 /**
- * Chặn trước khi WordPress kiểm tra mật khẩu (ưu tiên 1; kiểm tra mật khẩu của lõi ở ưu tiên 20): đang khóa thì không cho thử,
- * và không tiết lộ khóa theo IP hay theo tài khoản — luôn cùng một thông báo.
+ * Tên tài khoản dùng làm khóa bộ đếm: đăng nhập bằng tên hay bằng email của cùng một người dùng chung một bộ đếm
+ * (nếu không, kẻ tấn công có gấp đôi số lần thử). Tên không tồn tại thì giữ nguyên chuỗi đã gõ.
+ */
+function vgarco_lockout_account( string $typed ): string {
+	$user = get_user_by( 'login', $typed );
+	if ( ! $user && is_email( $typed ) ) {
+		$user = get_user_by( 'email', $typed );
+	}
+	return $user ? (string) $user->user_login : $typed;
+}
+
+/**
+ * Chặn đăng nhập khi đang khóa, kể cả khi mật khẩu đúng; không tiết lộ khóa theo IP hay theo tài khoản — luôn cùng một thông báo.
+ *
+ * Ưu tiên 98: SAU kiểm tra mật khẩu của lõi (ưu tiên 20). Đặt trước thì vô hiệu: wp_authenticate_username_password() nhận WP_Error
+ * của bộ lọc trước đó, bỏ qua, tự kiểm tra mật khẩu rồi trả WP_User hợp lệ — mật khẩu đúng vẫn vào được (phát hiện khi chạy trên WordPress 7.1 thật).
  *
  * @param WP_User|WP_Error|null $user
  * @return WP_User|WP_Error|null
@@ -38,16 +52,16 @@ function vgarco_auth_guard( $user, $username = '', $password = '' ) {
 	}
 	$now = time();
 	if ( vgarco_lockout_remaining( vgarco_lockout_load( 'ip', vgarco_client_ip() ), $now ) > 0
-		|| vgarco_lockout_remaining( vgarco_lockout_load( 'user', (string) $username ), $now ) > 0 ) {
+		|| vgarco_lockout_remaining( vgarco_lockout_load( 'user', vgarco_lockout_account( (string) $username ) ), $now ) > 0 ) {
 		return new WP_Error( 'vgarco_locked', vgarco_login_error_message() );
 	}
 	return $user;
 }
-add_filter( 'authenticate', 'vgarco_auth_guard', 1, 3 );
+add_filter( 'authenticate', 'vgarco_auth_guard', 98, 3 );
 
 /**
  * Mọi lỗi đăng nhập thành một thông báo: lõi WordPress phân biệt "tên không tồn tại" với "sai mật khẩu" nên lộ danh sách tài khoản.
- * Ưu tiên 99: chạy sau cùng, sau mọi bộ kiểm tra khác.
+ * Ưu tiên 99: chạy sau cùng, sau bộ chặn khóa (98) và mọi bộ kiểm tra khác.
  *
  * @param WP_User|WP_Error|null $user
  * @return WP_User|WP_Error|null
@@ -75,8 +89,9 @@ add_action(
 		$ip = vgarco_lockout_record_ip( vgarco_lockout_load( 'ip', vgarco_client_ip() ), $now );
 		vgarco_lockout_save( 'ip', vgarco_client_ip(), $ip['state'] );
 
-		$user = vgarco_lockout_record_user( vgarco_lockout_load( 'user', $username ), $now );
-		vgarco_lockout_save( 'user', $username, $user['state'] );
+		$account = vgarco_lockout_account( $username );
+		$user    = vgarco_lockout_record_user( vgarco_lockout_load( 'user', $account ), $now );
+		vgarco_lockout_save( 'user', $account, $user['state'] );
 
 		if ( $user['triggered'] ) {
 			wp_mail(
@@ -84,7 +99,7 @@ add_action(
 				'[VGARCO] Tài khoản bị tạm khóa do đăng nhập sai nhiều lần',
 				sprintf(
 					"Tài khoản \"%s\" bị tạm khóa %d phút do đăng nhập sai %d lần trong %d phút.\nThời điểm: %s\n\nNếu đây không phải bạn hay đồng nghiệp, có thể đang có người dò mật khẩu: kiểm tra quy tắc rate limit ở Cloudflare và bảo đảm tài khoản đã bật 2FA.",
-					sanitize_user( $username, true ),
+					sanitize_user( $account, true ),
 					(int) ( VGARCO_LOCK_USER_DURATION / 60 ),
 					VGARCO_LOCK_USER_MAX,
 					(int) ( VGARCO_LOCK_USER_WINDOW / 60 ),
@@ -99,10 +114,37 @@ add_action(
 add_action(
 	'wp_login',
 	static function ( $user_login ): void {
-		delete_transient( vgarco_lockout_key( 'user', (string) $user_login, vgarco_lockout_salt() ) );
+		delete_transient( vgarco_lockout_key( 'user', vgarco_lockout_account( (string) $user_login ), vgarco_lockout_salt() ) );
 		delete_transient( vgarco_lockout_key( 'ip', vgarco_client_ip(), vgarco_lockout_salt() ) );
 	}
 );
+
+/**
+ * Quên mật khẩu: lõi WordPress báo "không có tài khoản với tên hoặc email này" khi tài khoản không tồn tại, nên dò được danh sách
+ * tài khoản và email quản trị (phát hiện khi chạy trên WordPress 7.1 thật; thông báo đăng nhập chung ở trên không che được lối này).
+ * Tài khoản không tồn tại: trả đúng trang "kiểm tra email" như khi có, không gửi thư. Tài khoản có thật: để lõi xử lý.
+ */
+function vgarco_lostpassword_no_enumeration(): void {
+	if ( 'POST' !== ( $_SERVER['REQUEST_METHOD'] ?? '' ) ) {
+		return;
+	}
+	$login = trim( (string) wp_unslash( $_POST['user_login'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- lõi cũng không dùng nonce ở biểu mẫu này
+	if ( '' === $login ) {
+		return; // lõi tự báo "hãy nhập tên hoặc email": không tiết lộ gì
+	}
+	$user = get_user_by( 'login', $login );
+	if ( ! $user && is_email( $login ) ) {
+		$user = get_user_by( 'email', $login );
+	}
+	if ( $user ) {
+		return;
+	}
+	$redirect_to = ! empty( $_REQUEST['redirect_to'] ) ? (string) wp_unslash( $_REQUEST['redirect_to'] ) : 'wp-login.php?checkemail=confirm'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	wp_safe_redirect( $redirect_to );
+	exit;
+}
+add_action( 'login_form_lostpassword', 'vgarco_lostpassword_no_enumeration' );
+add_action( 'login_form_retrievepassword', 'vgarco_lostpassword_no_enumeration' );
 
 /**
  * Báo email quản trị khi có tài khoản quản trị mới (tạo mới hoặc được nâng quyền) — đề phòng kẻ đã vào được tự cấp quyền cho mình.

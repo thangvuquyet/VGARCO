@@ -526,6 +526,14 @@ const M = [
   ["đường dẫn: kích hoạt đăng ký kiểu nội dung trước phân loại", "wp-content/plugins/vgarco-core/vgarco-core.php",
     "\tvgarco_register_taxonomies(); // trước kiểu nội dung, cùng thứ tự với lúc chạy thường (xem taxonomies.php)\n\tvgarco_register_post_types();",
     "\tvgarco_register_post_types();\n\tvgarco_register_taxonomies();"],
+  ["đăng nhập: bộ chặn khóa chạy trước kiểm tra mật khẩu của lõi", "wp-content/plugins/vgarco-core/inc/security.php",
+    "add_filter( 'authenticate', 'vgarco_auth_guard', 98, 3 );", "add_filter( 'authenticate', 'vgarco_auth_guard', 1, 3 );"],
+  ["đăng nhập: thông báo chung chạy trước bộ chặn khóa", "wp-content/plugins/vgarco-core/inc/security.php",
+    "add_filter( 'authenticate', 'vgarco_auth_generic_error', 99 );", "add_filter( 'authenticate', 'vgarco_auth_generic_error', 50 );"],
+  ["quên mật khẩu: bỏ chặn dò tài khoản (lostpassword)", "wp-content/plugins/vgarco-core/inc/security.php",
+    "add_action( 'login_form_lostpassword', 'vgarco_lostpassword_no_enumeration' );", ""],
+  ["quên mật khẩu: bỏ chặn dò tài khoản (retrievepassword)", "wp-content/plugins/vgarco-core/inc/security.php",
+    "add_action( 'login_form_retrievepassword', 'vgarco_lostpassword_no_enumeration' );", ""],
 ];
 
 let caught = 0, missed = 0, skipped = 0;
