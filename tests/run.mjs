@@ -20,7 +20,8 @@ const withApply = [ ...withMb, '-d', 'extension=gd', '-d', 'extension=fileinfo',
 
 const walk = ( dir, test, out = [] ) => {
 	for ( const name of readdirSync( dir ) ) {
-		if ( name === 'node_modules' || name === 'dist' || name === 'out' ) {
+		// .lab: WordPress thật của tests/wp-lab (hàng nghìn tệp bên thứ ba, không phải mã của dự án)
+		if ( name === 'node_modules' || name === 'dist' || name === 'out' || name === '.lab' ) {
 			continue;
 		}
 		const path = join( dir, name );

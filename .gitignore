@@ -38,3 +38,6 @@ Thumbs.db
 
 # Kết quả kết xuất của tests/php/render.php
 tests/out/
+
+# Môi trường thử WordPress thật (tests/wp-lab): lõi WordPress, CSDL SQLite, nhật ký, mật khẩu thử
+tests/wp-lab/.lab/

@@ -17,6 +17,7 @@ wp-content/
 content/                           Bảng tính nhập liệu (xem content/README.md)
 scripts/i18n/                      Công cụ dịch: trích .pot, gộp bản dịch .po, biên dịch .mo (Node, không cần gettext)
 tests/                             Kiểm thử tự động không cần WordPress (xem bên dưới)
+tests/wp-lab/                      Kiểm thử tích hợp trên WordPress thật (SQLite) — dựng bằng bootstrap.mjs
 ```
 
 Nguyên tắc tách lớp: **kiểu nội dung không bao giờ nằm trong theme.** Đổi hoặc tắt theme thì dự án, tin tức, tuyển dụng vẫn còn nguyên trong trang quản trị.
@@ -72,7 +73,15 @@ PHP=... PHP_EXT=... node tests/mutate.mjs "khóa đăng nhập"               # 
 
 Kiểm tra trên trình duyệt (không nằm trong `run.mjs`): `node tests/render-all.mjs` rồi `node tests/serve.mjs 4174`; quy trình axe-core ở [`tests/a11y.md`](tests/a11y.md).
 
-Các bộ này **không thay** cho chạy thử trên WordPress + WPML + ACF PRO thật: hook, REST, transient, `wp_mail`, cron, phân quyền, giao diện quản trị và WP-CLI chưa từng chạy trên WordPress thật.
+Các bộ trên dùng hàm WordPress **giả** nên không thấy lỗi chỉ lộ khi WordPress thật xử lý. Vì vậy có thêm bộ kiểm thử tích hợp chạy trên **WordPress 7.1 thật** (SQLite, không cần MySQL):
+
+```bash
+PHP=... PHP_EXT=... node tests/wp-lab/bootstrap.mjs wordpress.zip sqlite-database-integration.zip   # một lần
+PHP=... node tests/wp-lab/run.mjs                                                                   # 8 kịch bản, ~280 phép kiểm
+```
+
+Hướng dẫn, danh sách kịch bản và **giới hạn** (ACF PRO/WPML là bản giả, không có Nginx/Cloudflare/trình duyệt khác Chromium) ở [`tests/wp-lab/README.md`](tests/wp-lab/README.md).
+Bộ này đã tìm ra 10 lỗi mà các bộ giả không thấy (đường dẫn phân loại 404, khóa đăng nhập vô hiệu, XML-RPC còn mở, dò tài khoản qua "quên mật khẩu"...).
 
 ## Dịch
 
@@ -103,5 +112,8 @@ tìm kiếm dự án, SEO cơ bản, bản dịch tiếng Đức (nháp), bộ c
 
 Chưa làm: script dựng máy chủ (`provision.sh`, `deploy.sh`), kho Git từ xa, tên miền/hosting, cấu hình Nginx/Cloudflare/Brevo/sao lưu.
 
-Điểm phải kiểm chứng trên WordPress thật (spike đầu tiên): ACF PRO + WPML/ACFML (chế độ nhóm trường, ưu tiên dịch của trường lặp, dịch đường dẫn kiểu nội dung `wpml-config.xml`),
-REST `vgarco/v1` (token, nộp hồ sơ, tìm kiếm), vai trò `vg_tuyen_dung` và quyền riêng của `ho_so_ut`, `wp vgarco import`, tải bản dịch `.mo`, cron (thử lại thư, xóa hồ sơ, xóa cache).
+Đã chạy thử trên WordPress 7.1 thật (SQLite; `tests/wp-lab`): kích hoạt, kiểu nội dung và phân loại, nhập liệu bằng bảng tính (lõi `VGARCO_CLI_Command`, WP-CLI giả), REST nộp hồ sơ và tìm kiếm,
+vai trò `vg_tuyen_dung` và quyền riêng của `ho_so_ut`, tải/xuất/xóa hồ sơ, thư, cron, đăng nhập qua `wp-login.php`, xóa cache Cloudflare (API giả), bề mặt tấn công, bản dịch `.mo`, duyệt toàn site.
+
+**Còn phải kiểm chứng khi có giấy phép (spike đầu tiên trên staging):** ACF PRO + WPML/ACFML thật (chế độ nhóm trường, ưu tiên dịch của trường lặp, dịch đường dẫn kiểu nội dung
+`wpml-config.xml`, giao diện nhập liệu của biên tập viên), lệnh `wp vgarco import` bằng WP-CLI thật, Nginx/header bảo mật/Cloudflare/Brevo thật, Safari, Firefox, Cốc Cốc và trình đọc màn hình thật.
