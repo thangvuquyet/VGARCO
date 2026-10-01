@@ -53,7 +53,10 @@ Máy chủ chạy ở `http://localhost:8080` (cố định) trong lúc chạy v
 | `admin`    | Vai trò và quyền, danh sách hồ sơ, xem, tải CV (nonce, nhật ký, header), xuất `.xlsx` an toàn công thức, xóa kèm tệp, tự xóa sau 12 tháng, cảnh báo |
 | `site`     | Trang công khai: SEO, JSON-LD, 404 theo mục, tìm kiếm REST, bộ lọc phân loại, sơ đồ trang, bề mặt tấn công (author, REST users, XML-RPC), bản dịch `.mo` |
 | `security` | Đăng nhập qua `wp-login.php`: khóa IP và tài khoản, thông báo chung, quên mật khẩu không lộ tài khoản, báo quản trị mới, xóa cache Cloudflare |
+| `acffree`  | Tùy chọn: ACF bản MIỄN PHÍ thật thay shim — website không sập khi thiếu ACF PRO, quản trị viên được báo, ACF thật đọc được nhóm trường của VGARCO |
 | `crawl`    | Duyệt mọi liên kết nội bộ: 200, tài nguyên tải được, một H1, không trùng id, ảnh có alt, không tài nguyên ngoài miền |
+
+`acffree` chỉ chạy khi đã giải nén plugin *Advanced Custom Fields* bản miễn phí (<https://downloads.wordpress.org/plugin/advanced-custom-fields.latest-stable.zip>) vào `.lab/wordpress/wp-content/plugins/advanced-custom-fields/`; không thì in "BỎ QUA".
 
 Thứ tự trong `run.mjs` có ý nghĩa (`import` → `seed` → các kịch bản dùng dữ liệu đó). Mỗi kịch bản chạy lại được.
 

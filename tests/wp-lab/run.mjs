@@ -15,7 +15,7 @@ const ini = join(lab, 'php.ini');
 if (!existsSync(join(lab, 'wordpress', 'wp-load.php'))) { console.error('Chưa dựng môi trường: chạy node tests/wp-lab/bootstrap.mjs trước'); process.exit(1); }
 
 // Thứ tự có ý nghĩa: nhập dự án → dữ liệu tin/vị trí → các kịch bản dùng dữ liệu đó.
-const order = ['env', 'import', 'seed', 'apply', 'admin', 'site', 'security', 'crawl'];
+const order = ['env', 'import', 'seed', 'apply', 'admin', 'site', 'security', 'crawl', 'acffree'];
 const only = process.argv.slice(2);
 const todo = only.length ? order.filter((n) => only.includes(n)) : order;
 
@@ -35,7 +35,7 @@ try {
     const r = spawnSync(php, ['-c', ini, join(here, `it_${name}.php`)], { encoding: 'utf8', timeout: 600000 });
     const out = ((r.stdout || '') + (r.stderr || '')).trim();
     const tail = out.split('\n').filter((l) => /^(ĐẠT|THẤT BẠI|  ✗)|PHP (Fatal|Warning|Notice)|Fatal error/.test(l)).join('\n');
-    const ok = r.status === 0 && /ĐẠT/.test(out) || name === 'seed' && r.status === 0;
+    const ok = r.status === 0 && (name === 'seed' || /ĐẠT|BỎ QUA/.test(out));
     console.log(`${ok ? 'ĐẠT ' : 'LỖI '} ${name.padEnd(9)} ${ok ? (tail || out.split('\n').pop()) : '\n' + (tail || out).slice(0, 3000)}`);
     if (!ok) failed++;
   }
