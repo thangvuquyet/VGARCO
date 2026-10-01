@@ -4,8 +4,9 @@ Bộ kiểm thử PHP trong `tests/php/` chạy với hàm WordPress **giả**, 
 (thứ tự quy tắc đường dẫn, thứ tự bộ lọc đăng nhập, `xmlrpc.php`, quyền của vai trò, nạp bản dịch...). Thư mục này dựng một WordPress thật
 chạy bằng PHP tích hợp và SQLite — không cần MySQL, Docker hay Nginx — rồi chạy các luồng của website qua HTTP thật.
 
-Ở lần chạy đầu tiên, bộ này tìm ra 10 lỗi mà bộ giả không thấy (xem lịch sử Git: "Sửa 7 lỗi chỉ lộ ra khi chạy trên WordPress 7.1 thật" và
-"Đăng nhập an toàn: sửa khóa không có tác dụng..."). Mỗi lỗi đã có phép kiểm hoặc đột biến tương ứng ở `tests/php/smoke.php` để không quay lại.
+Ở lần chạy đầu tiên, bộ này tìm ra 8 lỗi mà bộ giả không thấy (xem lịch sử Git: "Sửa 7 lỗi chỉ lộ ra khi chạy trên WordPress 7.1 thật" và
+"Đăng nhập an toàn: sửa khóa không có tác dụng..."). Các lỗi về đường dẫn phân loại, thứ tự bộ lọc đăng nhập, quên mật khẩu và XML-RPC có thêm phép kiểm và đột biến
+ở `tests/php/smoke.php`, `tests/mutate.mjs` để không quay lại.
 
 ## Không kiểm chứng điều gì
 

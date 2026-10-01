@@ -77,11 +77,11 @@ Các bộ trên dùng hàm WordPress **giả** nên không thấy lỗi chỉ l�
 
 ```bash
 PHP=... PHP_EXT=... node tests/wp-lab/bootstrap.mjs wordpress.zip sqlite-database-integration.zip   # một lần
-PHP=... node tests/wp-lab/run.mjs                                                                   # 8 kịch bản, ~280 phép kiểm
+PHP=... node tests/wp-lab/run.mjs                                                                   # 9 kịch bản, ~300 phép kiểm
 ```
 
 Hướng dẫn, danh sách kịch bản và **giới hạn** (ACF PRO/WPML là bản giả, không có Nginx/Cloudflare/trình duyệt khác Chromium) ở [`tests/wp-lab/README.md`](tests/wp-lab/README.md).
-Bộ này đã tìm ra 10 lỗi mà các bộ giả không thấy (đường dẫn phân loại 404, khóa đăng nhập vô hiệu, XML-RPC còn mở, dò tài khoản qua "quên mật khẩu"...).
+Bộ này đã tìm ra 8 lỗi mà các bộ giả không thấy (đường dẫn phân loại 404, khóa đăng nhập vô hiệu, XML-RPC còn mở, dò tài khoản qua "quên mật khẩu"...).
 
 ## Dịch
 
