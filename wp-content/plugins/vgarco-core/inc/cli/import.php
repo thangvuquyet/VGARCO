@@ -89,18 +89,16 @@ class VGARCO_CLI_Command {
 		foreach ( $result['plans'] as $plan ) {
 			$vi_id = $this->find( $plan['ma'], 'vi' );
 
-			if ( '' !== $lang ? 'vi' === $lang : true ) {
+			if ( '' === $lang || 'vi' === $lang ) {
 				$vi_id = $this->upsert( $plan, 'vi', $vi_id, 0, $status, $dry, $counts );
 			}
-			if ( '' !== $lang ? 'de' === $lang : true ) {
-				if ( ! $plan['de'] ) {
-					continue;
-				}
+			// Bản tiếng Đức chỉ khi có tên tiếng Đức. KHÔNG dùng continue ở đây: phần ảnh bên dưới phải chạy cho cả dự án chưa có bản Đức.
+			if ( ( '' === $lang || 'de' === $lang ) && $plan['de'] ) {
 				if ( ! $vi_id && ! $dry ) {
 					WP_CLI::warning( "{$plan['ma']}: chưa có bản tiếng Việt nên bỏ qua bản tiếng Đức." );
-					continue;
+				} else {
+					$this->upsert( $plan, 'de', $this->find( $plan['ma'], 'de' ), (int) $vi_id, $status, $dry, $counts );
 				}
-				$this->upsert( $plan, 'de', $this->find( $plan['ma'], 'de' ), (int) $vi_id, $status, $dry, $counts );
 			}
 
 			if ( $vi_id && ! $dry && isset( $images[ $plan['ma'] ] ) ) {
@@ -224,7 +222,9 @@ class VGARCO_CLI_Command {
 		);
 		foreach ( array( 'dia_diem', 'vai_tro', 'pham_vi', 'chu_dau_tu', 'doi_tac', 'mo_ta_seo', 'thoi_gian', 'quoc_gia', 'cong_bo_chu_dau_tu', 'loai_anh_dai_dien', 'noi_bat', 'tieu_bieu' ) as $key ) {
 			$value = get_field( $key, $post_id );
-			$flat[ 'meta.' . $key ] = is_bool( $value ) ? ( $value ? '1' : '0' ) : (string) $value;
+			// Cờ đúng/sai: ACF trả bool, 0/1, "0"/"1" hoặc rỗng (chưa từng lưu) — mọi dạng "sai" đều là '0', nếu không mỗi lần chạy lại sẽ báo thay đổi giả.
+			$is_flag                = in_array( $key, array( 'cong_bo_chu_dau_tu', 'noi_bat', 'tieu_bieu' ), true );
+			$flat[ 'meta.' . $key ] = $is_flag ? ( $value && '0' !== $value ? '1' : '0' ) : (string) $value;
 		}
 		$flat['terms.loai_cong_trinh'] = implode( ',', wp_get_object_terms( $post_id, 'loai_cong_trinh', array( 'fields' => 'slugs' ) ) );
 		return $flat;

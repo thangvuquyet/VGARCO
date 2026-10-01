@@ -47,8 +47,8 @@ require_once VGARCO_CORE_DIR . 'inc/editor.php';
  * Chỉ làm mới đường dẫn ở đây — làm mỗi lần tải trang sẽ làm chậm toàn site.
  */
 function vgarco_core_activate(): void {
+	vgarco_register_taxonomies(); // trước kiểu nội dung, cùng thứ tự với lúc chạy thường (xem taxonomies.php)
 	vgarco_register_post_types();
-	vgarco_register_taxonomies();
 	vgarco_seed_terms();
 	flush_rewrite_rules();
 }

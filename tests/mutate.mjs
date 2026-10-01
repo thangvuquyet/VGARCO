@@ -515,6 +515,17 @@ const M = [
     "if ( 'tv' === $role && '' === trim( $row['chu_thich_vi'] ?? '' ) ) {", "if ( false ) {", 'import'],
   ["nhập liệu: images.csv nhận ma không có trong dự án", "wp-content/plugins/vgarco-core/inc/cli/import-lib.php",
     "if ( ! in_array( $ma, $known_codes, true ) ) {", "if ( false ) {", 'import'],
+  ["xml-rpc: bỏ chặn yêu cầu xmlrpc.php", "wp-content/mu-plugins/vgarco-loader.php",
+    "if ( defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST ) {", "if ( false ) {"],
+  ["xml-rpc: chặn nhưng không dừng yêu cầu", "wp-content/mu-plugins/vgarco-loader.php",
+    "exit( 'XML-RPC đã bị tắt.' );", "echo 'XML-RPC đã bị tắt.';"],
+  ["xml-rpc: chặn mọi yêu cầu (kể cả trang thường)", "wp-content/mu-plugins/vgarco-loader.php",
+    "if ( defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST ) {", "if ( true ) {"],
+  ["đường dẫn: phân loại đăng ký sau kiểu nội dung", "wp-content/plugins/vgarco-core/inc/taxonomies.php",
+    "add_action( 'init', 'vgarco_register_taxonomies', 5 );", "add_action( 'init', 'vgarco_register_taxonomies', 10 );"],
+  ["đường dẫn: kích hoạt đăng ký kiểu nội dung trước phân loại", "wp-content/plugins/vgarco-core/vgarco-core.php",
+    "\tvgarco_register_taxonomies(); // trước kiểu nội dung, cùng thứ tự với lúc chạy thường (xem taxonomies.php)\n\tvgarco_register_post_types();",
+    "\tvgarco_register_post_types();\n\tvgarco_register_taxonomies();"],
 ];
 
 let caught = 0, missed = 0, skipped = 0;

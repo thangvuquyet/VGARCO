@@ -17,8 +17,14 @@ defined( 'ABSPATH' ) || exit;
  * 1. Bề mặt tấn công (yêu cầu 5.4.7)
  * ---------------------------------------------------------------------- */
 
-// XML-RPC và pingback.
+// XML-RPC và pingback. Bộ lọc xmlrpc_enabled chỉ chặn các lệnh cần đăng nhập: system.listMethods, system.multicall, pingback.ping
+// vẫn trả lời (kiểm trên WordPress 7.1 thật). Vì vậy chặn luôn cả yêu cầu tới xmlrpc.php ngay khi mu-plugin nạp.
 add_filter( 'xmlrpc_enabled', '__return_false' );
+if ( defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST ) {
+	status_header( 403 );
+	header( 'Content-Type: text/plain; charset=utf-8' );
+	exit( 'XML-RPC đã bị tắt.' );
+}
 add_filter(
 	'wp_headers',
 	static function ( array $headers ): array {

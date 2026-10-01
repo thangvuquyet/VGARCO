@@ -44,6 +44,7 @@ add_action(
 				'capability_type'     => array( 'ho_so_ut', 'ho_so_uts' ),
 				'map_meta_cap'        => true,
 				'capabilities'        => array(
+					'read'                   => 'vg_view_applications', // mặc định là "read": ai đăng nhập cũng "đọc" được hồ sơ đã xuất bản
 					'edit_posts'             => 'vg_view_applications',
 					'edit_others_posts'      => 'vg_view_applications',
 					'edit_private_posts'     => 'vg_view_applications',
@@ -383,6 +384,45 @@ add_action(
 	}
 );
 
+/**
+ * Trang "Xuất danh sách" (mục con của menu Hồ sơ ứng tuyển): chọn vị trí, khoảng ngày, chỉ hồ sơ lỗi thư.
+ *
+ * Trang này còn có lý do kỹ thuật: kiểu nội dung không cho tạo tay (create_posts = do_not_allow) nên menu chỉ còn MỘT mục con ("Tất cả"),
+ * và WordPress thu gọn menu một mục rồi từ chối vai trò không có quyền edit_posts của lõi (như Nhân sự tuyển dụng) vào danh sách (403).
+ * Có mục con thứ hai thì menu không bị thu gọn.
+ */
+add_action(
+	'admin_menu',
+	static function (): void {
+		add_submenu_page( 'edit.php?post_type=ho_so_ut', 'Xuất danh sách hồ sơ', 'Xuất danh sách', 'vg_export_applications', 'vgarco-export', 'vgarco_apply_render_export_page' );
+	}
+);
+
+function vgarco_apply_render_export_page(): void {
+	if ( ! current_user_can( 'vg_export_applications' ) ) {
+		wp_die( 'Bạn không có quyền xuất hồ sơ.', 'Không có quyền', array( 'response' => 403 ) );
+	}
+	$jobs = get_posts( array( 'post_type' => 'vi_tri', 'post_status' => 'any', 'posts_per_page' => 100, 'orderby' => 'title', 'order' => 'ASC', 'suppress_filters' => true ) );
+
+	echo '<div class="wrap"><h1>Xuất danh sách hồ sơ</h1>';
+	echo '<p>Tệp .xlsx chứa họ tên, email, điện thoại và vị trí — <strong>dữ liệu cá nhân</strong>: không gửi qua kênh công khai. Tệp không chứa CV.</p>';
+	echo '<form method="get" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
+	echo '<input type="hidden" name="action" value="vgarco_export_applications">';
+	wp_nonce_field( 'vgarco_export_applications' );
+	echo '<table class="form-table" role="presentation"><tbody>';
+	echo '<tr><th scope="row"><label for="vg-export-job">Vị trí</label></th><td><select id="vg-export-job" name="vi_tri_id"><option value="">Tất cả vị trí</option>';
+	foreach ( $jobs as $job ) {
+		printf( '<option value="%d">%s</option>', (int) $job->ID, esc_html( get_the_title( $job ) ) );
+	}
+	echo '</select></td></tr>';
+	echo '<tr><th scope="row"><label for="vg-export-from">Nộp từ ngày</label></th><td><input type="date" id="vg-export-from" name="tu"></td></tr>';
+	echo '<tr><th scope="row"><label for="vg-export-to">Đến ngày</label></th><td><input type="date" id="vg-export-to" name="den"></td></tr>';
+	echo '<tr><th scope="row">Lọc thêm</th><td><label><input type="checkbox" name="thu_loi" value="1"> Chỉ hồ sơ lỗi thư</label></td></tr>';
+	echo '</tbody></table>';
+	submit_button( 'Tải .xlsx', 'primary', 'submit', false );
+	echo '</form></div>';
+}
+
 add_action(
 	'admin_post_vgarco_export_applications',
 	static function (): void {
@@ -411,6 +451,17 @@ add_action(
 		}
 		if ( ! empty( $_GET['s'] ) ) {
 			$args['s'] = sanitize_text_field( wp_unslash( $_GET['s'] ) );
+		}
+		// Khoảng ngày nộp (Y-m-d, theo múi giờ website), tính cả ngày đầu và ngày cuối.
+		$date_query = array( 'inclusive' => true );
+		foreach ( array( 'tu' => 'after', 'den' => 'before' ) as $param => $bound ) {
+			$value = isset( $_GET[ $param ] ) ? sanitize_text_field( wp_unslash( $_GET[ $param ] ) ) : '';
+			if ( preg_match( '/^\d{4}-\d{2}-\d{2}$/', $value ) ) {
+				$date_query[ $bound ] = $value . ( 'before' === $bound ? ' 23:59:59' : ' 00:00:00' );
+			}
+		}
+		if ( count( $date_query ) > 1 ) {
+			$args['date_query'] = array( $date_query );
 		}
 
 		$rows = array();

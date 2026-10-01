@@ -21,6 +21,9 @@ $GLOBALS['queried'] = array();
 
 function add_action( $hook, $callback, $priority = 10, $args = 1 ) {
 	$GLOBALS['hooks'][ $hook ][] = $callback;
+	if ( is_string( $callback ) ) {
+		$GLOBALS['priorities'][ $hook ][ $callback ] = $priority;
+	}
 }
 function add_filter( $hook, $callback, $priority = 10, $args = 1 ) {
 	$GLOBALS['hooks'][ $hook ][] = $callback;
@@ -77,6 +80,14 @@ define( 'VGARCO_CORE_DIR', ROOT . '/wp-content/plugins/vgarco-core/' );
 foreach ( array( 'helpers', 'post-types', 'taxonomies', 'seed', 'fields', 'media' ) as $file ) {
 	require_once VGARCO_CORE_DIR . "inc/{$file}.php";
 }
+
+// --- Thứ tự đăng ký: phân loại TRƯỚC kiểu nội dung ---
+// Quy tắc đường dẫn xếp theo thứ tự đăng ký. Đăng ký sau thì quy tắc ảnh đính kèm của dự án (du-an/[^/]+/([^/]+)/)
+// khớp trước và /du-an/loai/<nhóm>/ thành 404. Lỗi này chỉ lộ ra khi chạy trên WordPress thật.
+$prio = $GLOBALS['priorities']['init'] ?? array();
+check( 'init: phân loại đăng ký trước kiểu nội dung (ưu tiên số nhỏ hơn)', isset( $prio['vgarco_register_taxonomies'], $prio['vgarco_register_post_types'] ) && $prio['vgarco_register_taxonomies'] < $prio['vgarco_register_post_types'] );
+$core_main = (string) file_get_contents( VGARCO_CORE_DIR . 'vgarco-core.php' );
+check( 'kích hoạt: đăng ký phân loại trước kiểu nội dung (cùng thứ tự với lúc chạy thường)', strpos( $core_main, 'vgarco_register_taxonomies();' ) < strpos( $core_main, 'vgarco_register_post_types();' ) );
 
 // --- vgarco_dot_get ---
 $tree = array( 'a' => array( 'b' => array( 'c' => 5 ) ), 'z' => null );
@@ -183,6 +194,27 @@ same( 'kích thước ảnh sinh ra', array( 480, 800, 1200, 1600, 2560 ), vgarc
 
 $GLOBALS['hooks'] = array();
 require ROOT . '/wp-content/mu-plugins/vgarco-loader.php';
+
+// XML-RPC: bộ lọc xmlrpc_enabled chỉ chặn lệnh cần đăng nhập; system.listMethods/multicall/pingback vẫn trả lời (thấy trên WordPress 7.1 thật).
+// Mu-plugin phải kết thúc yêu cầu xmlrpc.php bằng 403 trước khi WordPress xử lý. Chạy tiến trình riêng vì mã dùng exit.
+$probe = sys_get_temp_dir() . '/vgarco-xmlrpc-probe.php';
+file_put_contents(
+	$probe,
+	'<?php define( "ABSPATH", "/" ); if ( "1" === getenv( "PROBE_XMLRPC" ) ) { define( "XMLRPC_REQUEST", true ); }'
+	. ' function add_filter() {} function add_action() {} function status_header( $c ) { echo "STATUS:$c;"; } function wp_get_environment_type() { return "production"; }'
+	. ' require ' . var_export( ROOT . '/wp-content/mu-plugins/vgarco-loader.php', true ) . '; echo "REACHED";'
+);
+$probe_run = static function ( string $flag ) use ( $probe ): string {
+	putenv( 'PROBE_XMLRPC=' . $flag );
+	$out = (string) shell_exec( escapeshellarg( PHP_BINARY ) . ' ' . escapeshellarg( $probe ) );
+	putenv( 'PROBE_XMLRPC' );
+	return $out;
+};
+$blocked = $probe_run( '1' );
+check( 'XML-RPC: yêu cầu xmlrpc.php trả 403 và dừng ngay (không chạy tiếp WordPress)', str_contains( $blocked, 'STATUS:403;' ) && ! str_contains( $blocked, 'REACHED' ) );
+$normal = $probe_run( '0' );
+check( 'XML-RPC: yêu cầu thường không bị chặn', str_contains( $normal, 'REACHED' ) && ! str_contains( $normal, 'STATUS:' ) );
+@unlink( $probe );
 
 $mail_filter = null;
 foreach ( $GLOBALS['hooks']['pre_wp_mail'] ?? array() as $cb ) {

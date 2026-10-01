@@ -129,19 +129,43 @@ function vgarco_client_ip(): string {
 }
 
 /**
- * Chạy $fn trong một ngôn ngữ (WPML và locale của WordPress), rồi trả về như cũ. Mẫu thư mặc định và giá trị đã dịch
- * phải theo ngôn ngữ của người nhận, không theo ngôn ngữ của yêu cầu hiện tại (cron chạy ở ngôn ngữ mặc định).
+ * Chạy $fn với bản dịch của VGARCO ở một ngôn ngữ, rồi trả về như cũ. Mẫu thư mặc định và chuỗi giao diện phải theo ngôn ngữ của người nhận,
+ * không theo ngôn ngữ của yêu cầu hiện tại (cron chạy ở ngôn ngữ mặc định; thư báo nhân sự luôn tiếng Việt dù ứng viên nộp bằng tiếng Đức).
+ *
+ * Nạp THẲNG tệp .mo của theme và plugin thay vì dùng switch_to_locale(): hàm đó từ chối đổi sang ngôn ngữ chưa cài gói ngôn ngữ lõi
+ * (thử trên WordPress 7.1: switch_to_locale('de_DE') trả false) và không nạp lại bản dịch ở đường dẫn riêng. Tiếng Việt là ngôn ngữ gốc
+ * của chuỗi nên không có tệp .mo: bỏ bản dịch đang nạp là ra đúng chuỗi gốc.
  */
 function vgarco_with_language( string $lang, callable $fn ) {
+	global $l10n;
+
+	$locale = 'de' === $lang ? 'de_DE' : 'vi';
+	$files  = array(
+		'vgarco'      => get_theme_file_path( "languages/{$locale}.mo" ),
+		'vgarco-core' => VGARCO_CORE_DIR . "languages/vgarco-core-{$locale}.mo",
+	);
+
+	$saved = array();
+	foreach ( $files as $domain => $file ) {
+		$saved[ $domain ] = $l10n[ $domain ] ?? null;
+		unset( $l10n[ $domain ] );
+		if ( is_readable( $file ) ) {
+			load_textdomain( $domain, $file, $locale );
+		}
+	}
 	do_action( 'wpml_switch_language', $lang );
-	$switched = function_exists( 'switch_to_locale' ) && switch_to_locale( 'de' === $lang ? 'de_DE' : 'vi' );
+
 	try {
 		return $fn();
 	} finally {
-		if ( $switched ) {
-			restore_previous_locale();
-		}
 		do_action( 'wpml_switch_language', null );
+		foreach ( $saved as $domain => $translations ) {
+			if ( null === $translations ) {
+				unset( $l10n[ $domain ] );
+			} else {
+				$l10n[ $domain ] = $translations;
+			}
+		}
 	}
 }
 

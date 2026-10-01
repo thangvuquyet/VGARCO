@@ -101,4 +101,6 @@ function vgarco_register_taxonomies(): void {
 		)
 	);
 }
-add_action( 'init', 'vgarco_register_taxonomies' );
+// Ưu tiên 5, trước kiểu nội dung (ưu tiên 10): WordPress xếp quy tắc đường dẫn theo thứ tự đăng ký. Đăng ký sau thì quy tắc ảnh đính kèm
+// của dự án (du-an/[^/]+/([^/]+)/) khớp trước và /du-an/loai/<nhóm>/ thành 404 (phát hiện khi chạy trên WordPress 7.1 thật).
+add_action( 'init', 'vgarco_register_taxonomies', 5 );
