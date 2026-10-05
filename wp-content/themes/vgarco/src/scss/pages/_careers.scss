@@ -617,15 +617,26 @@
     color: var(--c-brand);
   }
 
+  // Cột nhãn rộng theo nhãn dài nhất (chung cho mọi dòng để giá trị thẳng hàng), tối thiểu 90 px, tối đa 45% hộp.
+  // Cột cố định 90 px làm nhãn tiếng Đức ("Beschäftigungsart", "Bewerbungsfrist") đè lên giá trị (đặc tả 5.3 #3).
+  // subgrid: Chrome 117, Safari 16, Firefox 71; trình duyệt cũ hơn xếp nhãn trên giá trị, vẫn đọc được.
+  dl {
+    display: grid;
+    grid-template-columns: fit-content(45%) minmax(0, 1fr);
+    column-gap: 0.75rem;
+  }
+
   dl div {
     display: grid;
-    grid-template-columns: 90px minmax(0, 1fr);
-    gap: 0.75rem;
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
     padding-block: 0.75rem;
     border-top: 1px solid var(--c-line);
   }
 
   dt {
+    min-inline-size: 90px;
+    overflow-wrap: anywhere;
     color: var(--c-ink-muted);
   }
 

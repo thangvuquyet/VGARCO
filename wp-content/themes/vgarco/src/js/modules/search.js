@@ -188,6 +188,13 @@ function init() {
 
 	// Mũi tên xuống/lên đi qua danh sách kết quả; Enter theo liên kết như thường.
 	dialog.addEventListener( 'keydown', ( event ) => {
+		// Ô nhập kiểu "search" của Chrome/Edge dùng phím Esc để XÓA chữ trước (lần Esc đầu không đóng hộp thoại): đang có chữ
+		// thì phải bấm Esc hai lần. UC-09 2a: Esc đóng hộp thoại và trả tiêu điểm — nên tự đóng, chặn thao tác xóa mặc định.
+		if ( event.key === 'Escape' ) {
+			event.preventDefault();
+			closeSearch();
+			return;
+		}
 		if ( event.key !== 'ArrowDown' && event.key !== 'ArrowUp' ) {
 			return;
 		}

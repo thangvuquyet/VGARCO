@@ -10,6 +10,12 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+// Tiếng Đức nhiều từ ghép rất dài ("Unternehmensentwicklung", "Beschäftigungsart"): ngắt từ có gạch nối khi hết chỗ
+// (yêu cầu 5.3 #3: bố cục không vỡ khi chữ tiếng Đức dài hơn tiếng Việt). Tiếng Việt không có từ điển ngắt từ nên không bị ảnh hưởng.
+:lang(de) {
+  hyphens: auto;
+}
+
 a {
   color: inherit;
   text-decoration: none;
@@ -98,6 +104,7 @@ h3 em {
   font-weight: 650;
   line-height: 1.6;
   letter-spacing: 0.09em;
+  overflow-wrap: break-word; // "Projektinformationen" giãn chữ rộng hơn cột 251 px ở 1024 px
   color: var(--c-ink-muted);
 }
 

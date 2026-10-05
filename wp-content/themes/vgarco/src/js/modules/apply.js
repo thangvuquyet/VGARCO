@@ -46,8 +46,9 @@ export default function initApply() {
 				throw new Error( String( response.status ) );
 			}
 			setCaptcha( await response.json() );
-		} catch {
-			feedback.textContent = msg( 'msgNetwork' );
+		} catch ( error ) {
+			// 429 (xin mã quá nhiều lần) không phải lỗi mạng: nói đúng nguyên nhân thay vì bảo người dùng kiểm tra mạng.
+			feedback.textContent = msg( '429' === error?.message ? 'msgTokenRate' : 'msgNetwork' );
 		}
 	}
 

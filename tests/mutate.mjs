@@ -600,6 +600,10 @@ const M = [
     "$dry     = isset( $opts['dry-run'] );", "$dry     = false;", "export-images"],
   ["ảnh: PNG thiếu IEND vẫn nhận", "wp-content/plugins/vgarco-core/inc/media-lib.php",
     "return $seen ? $out : null;", "return $out;", 'media'],
+  ["danh mục: bỏ dòng trạng thái \"Đang hiển thị n dự án.\"", "wp-content/themes/vgarco/template-parts/catalogue.php",
+    "<p class=\"sr-only\" role=\"status\">", "<p class=\"sr-only\">", 'pages'],
+  ["danh mục: dòng trạng thái đếm sai (luôn 1)", "wp-content/themes/vgarco/template-parts/catalogue.php",
+    "1 === $catalogue['count']", "true", 'pages'],
 ];
 
 let caught = 0, missed = 0, skipped = 0;

@@ -61,6 +61,7 @@ vgarco_breadcrumb( $trail );
 			data-msg-captcha="<?php esc_attr_e( 'Mã bảo mật chưa đúng. Chúng tôi đã tạo mã mới, dữ liệu của bạn được giữ nguyên.', 'vgarco' ); ?>"
 			data-msg-consent="<?php esc_attr_e( 'Vui lòng đồng ý để chúng tôi xử lý hồ sơ.', 'vgarco' ); ?>"
 			data-msg-rate="<?php esc_attr_e( 'Bạn đã gửi quá nhiều hồ sơ trong thời gian ngắn. Vui lòng thử lại sau.', 'vgarco' ); ?>"
+			data-msg-token-rate="<?php esc_attr_e( 'Bạn đã yêu cầu mã bảo mật quá nhiều lần. Vui lòng đợi ít phút rồi tải lại trang.', 'vgarco' ); ?>"
 			data-msg-closed="<?php esc_attr_e( 'Vị trí này đã ngừng nhận hồ sơ.', 'vgarco' ); ?>"
 			data-msg-rejected="<?php esc_attr_e( 'Không gửi được hồ sơ. Hãy tải lại trang rồi thử lại.', 'vgarco' ); ?>"
 			data-msg-server="<?php esc_attr_e( 'Có lỗi xảy ra phía máy chủ. Hồ sơ chưa được gửi, dữ liệu của bạn vẫn còn — vui lòng thử lại sau ít phút.', 'vgarco' ); ?>"

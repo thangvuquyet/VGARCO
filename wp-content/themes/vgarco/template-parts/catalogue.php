@@ -51,6 +51,17 @@ vgarco_breadcrumb( $trail );
 				<?php get_template_part( 'template-parts/cards/project', null, array( 'project' => $project, 'arrow' => true ) ); ?>
 			<?php endforeach; ?>
 		</div>
+		<?php /* UC-04 bước 3: dòng "Đang hiển thị n dự án." (bản thiết kế: vùng trạng thái chỉ dành cho trình đọc màn hình). */ ?>
+		<p class="sr-only" role="status">
+			<?php
+			echo esc_html(
+				1 === $catalogue['count']
+					? __( 'Đang hiển thị 1 dự án.', 'vgarco' )
+					/* translators: %d: số dự án đang hiển thị. */
+					: sprintf( __( 'Đang hiển thị %d dự án.', 'vgarco' ), $catalogue['count'] )
+			);
+			?>
+		</p>
 	<?php else : ?>
 		<div class="catalogue-empty">
 			<p>

@@ -63,6 +63,11 @@ Máy chủ chạy ở `http://localhost:8080` (cố định) trong lúc chạy v
 
 Thứ tự trong `run.mjs` có ý nghĩa (`import` → `seed` → các kịch bản dùng dữ liệu đó). Mỗi kịch bản chạy lại được.
 
+## Kiểm tra trên trình duyệt (không tự động)
+
+Bố cục ở nhiều độ rộng (kể cả giao diện **tiếng Đức** qua plugin `lab-lang`, tham số `?lab_lang=de`) và thao tác JS cần trình duyệt: xem [`browser/README.md`](browser/README.md).
+Lần kiểm đầu tiên tìm ra 4 chỗ vỡ bố cục tiếng Đức và 2 lỗi thao tác (Esc ở hộp thoại tìm kiếm, thông báo khi xin mã bảo mật quá nhiều lần).
+
 ## Viết thêm
 
 Mỗi kịch bản là một tệp `it_<tên>.php` nạp `lib.php` (WordPress nạp trong tiến trình, WP-CLI giả, `http()`, `check()`, `same()`, `finish()`),

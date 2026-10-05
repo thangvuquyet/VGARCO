@@ -328,6 +328,7 @@
     margin-top: 0.9375rem;
     font-size: var(--fs-small);
     line-height: 1.6;
+    overflow-wrap: anywhere; // nhãn tiếng Đức ("Unternehmensentwicklung") dài hơn cột hẹp
     color: var(--c-ink-muted);
   }
 

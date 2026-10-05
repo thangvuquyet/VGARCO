@@ -15,7 +15,7 @@ function out( $m ) {
 }
 
 // Plugin: shim ACF trước, rồi vgarco-core (kích hoạt chạy vgarco_core_activate: kiểu nội dung, phân loại, dữ liệu mồi), rồi bộ bắt thư.
-foreach ( array( 'lab-acf-shim/lab-acf-shim.php', 'vgarco-core/vgarco-core.php', 'lab-mail-capture/lab-mail-capture.php' ) as $plugin ) {
+foreach ( array( 'lab-acf-shim/lab-acf-shim.php', 'vgarco-core/vgarco-core.php', 'lab-mail-capture/lab-mail-capture.php', 'lab-lang/lab-lang.php' ) as $plugin ) {
 	if ( ! is_plugin_active( $plugin ) ) {
 		$r = activate_plugin( $plugin );
 		out( ( is_wp_error( $r ) ? 'LỖI ' . $r->get_error_message() : 'đã kích hoạt' ) . ": {$plugin}" );

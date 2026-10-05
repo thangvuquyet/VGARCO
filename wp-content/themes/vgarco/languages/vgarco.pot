@@ -63,6 +63,10 @@ msgstr ""
 msgid "Bạn đã gửi quá nhiều hồ sơ trong thời gian ngắn. Vui lòng thử lại sau."
 msgstr ""
 
+#: wp-content/themes/vgarco/templates/apply.php
+msgid "Bạn đã yêu cầu mã bảo mật quá nhiều lần. Vui lòng đợi ít phút rồi tải lại trang."
+msgstr ""
+
 #: wp-content/themes/vgarco/inc/menus.php wp-content/themes/vgarco/templates/leadership.php
 msgid "Ban lãnh đạo"
 msgstr ""
@@ -337,6 +341,15 @@ msgstr ""
 
 #: wp-content/themes/vgarco/templates/apply.php
 msgid "Đang gửi…"
+msgstr ""
+
+#: wp-content/themes/vgarco/template-parts/catalogue.php
+#, php-format
+msgid "Đang hiển thị %d dự án."
+msgstr ""
+
+#: wp-content/themes/vgarco/template-parts/catalogue.php
+msgid "Đang hiển thị 1 dự án."
 msgstr ""
 
 #: wp-content/themes/vgarco/template-parts/layout/search-dialog.php

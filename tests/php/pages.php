@@ -225,6 +225,7 @@ same( 'danh mục: 19 thẻ dự án', 19, q( $c, '//*[' . cls( 'catalogue-grid'
 same( 'danh mục: lưới không ở chế độ lọc', 0, q( $c, '//*[' . cls( 'catalogue-grid' ) . ' and ' . cls( 'is-filtered' ) . ']' )->length );
 same( 'danh mục: tiêu đề "Tất cả dự án"', 'Tất cả dự án', trim( q( $c, '//h1' )->item( 0 )->textContent ) );
 check( 'danh mục: số lượng "19 dự án"', 1 === q( $c, '//*[' . cls( 'project-head-meta' ) . ']//span[contains(., "19 dự án")]' )->length );
+same( 'danh mục: dòng trạng thái "Đang hiển thị 19 dự án." (UC-04 bước 3), chỉ dành cho trình đọc màn hình', array( 'Đang hiển thị 19 dự án.', 1 ), array( trim( q( $c, '//p[' . cls( 'sr-only' ) . ' and @role="status"]' )->item( 0 )->textContent ), q( $c, '//p[' . cls( 'sr-only' ) . ' and @role="status"]' )->length ) );
 same( 'danh mục: đường dẫn vị trí Trang chủ / Dự án', array( 'Trang chủ', 'Dự án' ), array_map( static fn( $n ) => trim( $n->textContent ), iterator_to_array( q( $c, '//nav[' . cls( 'breadcrumb' ) . ']//li' ) ) ) );
 same( 'danh mục: mục cuối của đường dẫn có aria-current và không có liên kết', 1, q( $c, '//nav[' . cls( 'breadcrumb' ) . ']//li[@aria-current="page"][not(.//a)]' )->length );
 same( 'danh mục: vòng tròn mũi tên ở mọi thẻ là trang trí, ẩn khỏi trình đọc màn hình', 19, q( $c, '//*[' . cls( 'circle-arrow' ) . ' and @aria-hidden="true"]' )->length );
@@ -258,6 +259,7 @@ same( 'câu chuyện: dự án chưa xuất bản thì ẩn cả khối', 0, q( 
 $f = render( 'taxonomy-loai_cong_trinh', false, 'vi', array( 'VG_FX_TERM' => 'giao-duc' ) );
 common_checks( $f, 'danh mục theo loại' );
 same( 'theo loại: 7 thẻ (chỉ các dự án của loại đó)', 7, q( $f, '//*[' . cls( 'catalogue-grid' ) . ']/article' )->length );
+same( 'theo loại: dòng trạng thái đếm đúng 7 dự án của loại đó', 'Đang hiển thị 7 dự án.', trim( q( $f, '//p[' . cls( 'sr-only' ) . ' and @role="status"]' )->item( 0 )->textContent ) );
 same( 'theo loại: lưới ở chế độ lọc (đều, không có dòng danh sách)', 1, q( $f, '//*[' . cls( 'catalogue-grid' ) . ' and ' . cls( 'is-filtered' ) . ']' )->length );
 same( 'theo loại: tiêu đề là tên loại', 'Giáo dục & đào tạo', trim( q( $f, '//h1' )->item( 0 )->textContent ) );
 same( 'theo loại: số lượng có số 0 đứng đầu ("07 dự án")', 1, q( $f, '//*[' . cls( 'project-head-meta' ) . ']//span[contains(., "07 dự án")]' )->length );
@@ -269,6 +271,7 @@ same( 'theo loại: mọi thẻ đều thuộc loại giáo dục (dòng meta)',
 // Loại chưa có dự án nào: thông báo và đường về danh mục (UC-04 5b), không lưới trống, không số lượng.
 $z = render( 'taxonomy-loai_cong_trinh', false, 'vi', array( 'VG_FX_TERM' => 'y-te' ) );
 common_checks( $z, 'loại rỗng' );
+same( 'loại rỗng: không có dòng "Đang hiển thị" (đã có thông báo rỗng)', 0, q( $z, '//p[' . cls( 'sr-only' ) . ' and @role="status"]' )->length );
 same( 'loại rỗng: không có lưới', 0, q( $z, '//*[' . cls( 'catalogue-grid' ) . ']' )->length );
 same( 'loại rỗng: có thông báo', 1, q( $z, '//*[' . cls( 'catalogue-empty' ) . ']' )->length );
 same( 'loại rỗng: liên kết "Xem tất cả dự án" về /du-an/', 1, q( $z, '//*[' . cls( 'catalogue-empty' ) . ']//a[@href="/du-an/"]' )->length );
@@ -627,7 +630,7 @@ $hp = q( $a, '//div[' . cls( 'field-trap' ) . ']' );
 check( 'ứng tuyển: trường bẫy ẩn khỏi người dùng (aria-hidden, tabindex=-1, không autocomplete) nhưng vẫn là ô nhập thật', 1 === $hp->length && 'true' === $hp->item( 0 )->getAttribute( 'aria-hidden' ) && 1 === q( $a, '//div[' . cls( 'field-trap' ) . ']/input[@name="website" and @tabindex="-1" and @autocomplete="off"]' )->length );
 check( 'ứng tuyển: mọi ô có nhãn, ô bắt buộc trỏ tới vùng báo lỗi có thật', 0 === count( array_filter( iterator_to_array( q( $a, '//form[@id="job-apply-form"]//*[(self::input or self::textarea) and @id and not(@type="hidden") and not(ancestor::div[' . cls( 'field-trap' ) . '])]' ) ), static fn( $n ) => 0 === q( $a, '//label[@for="' . $n->getAttribute( 'id' ) . '"]' )->length && 0 === q( $a, '//label//*[@id="' . $n->getAttribute( 'id' ) . '"]' )->length ) ) && 0 === count( array_filter( iterator_to_array( q( $a, '//form[@id="job-apply-form"]//*[@required]' ) ), static fn( $n ) => 1 !== q( $a, '//*[@id="' . ( explode( ' ', $n->getAttribute( 'aria-describedby' ) )[ count( explode( ' ', $n->getAttribute( 'aria-describedby' ) ) ) - 1 ] ) . '"]' )->length ) ) );
 check( 'ứng tuyển: ảnh mã bảo mật có mô tả, nút tạo mã mới có tên', 1 === q( $a, '//img[@data-captcha-image and @alt != ""]' )->length && 1 === q( $a, '//button[@data-captcha-refresh and @aria-label != ""]' )->length );
-check( 'ứng tuyển: vùng báo lỗi chung có role=alert; mọi thông báo lỗi/thành công dịch được qua data-*', 1 === q( $a, '//p[@data-feedback and @role="alert"]' )->length && $af->item( 0 )->hasAttribute( 'data-msg-captcha' ) && $af->item( 0 )->hasAttribute( 'data-msg-success' ) && $af->item( 0 )->hasAttribute( 'data-msg-rate' ) && $af->item( 0 )->hasAttribute( 'data-msg-closed' ) );
+check( 'ứng tuyển: vùng báo lỗi chung có role=alert; mọi thông báo lỗi/thành công dịch được qua data-*', 1 === q( $a, '//p[@data-feedback and @role="alert"]' )->length && $af->item( 0 )->hasAttribute( 'data-msg-captcha' ) && $af->item( 0 )->hasAttribute( 'data-msg-success' ) && $af->item( 0 )->hasAttribute( 'data-msg-rate' ) && $af->item( 0 )->hasAttribute( 'data-msg-token-rate' ) &&$af->item( 0 )->hasAttribute( 'data-msg-closed' ) );
 check( 'ứng tuyển: có <noscript> chỉ đường thay thế (email tuyển dụng) vì thiếu JS thì không nộp được', str_contains( (string) file_get_contents( ROOT . '/tests/out/templates-apply-507.html' ), '<noscript>' ) && str_contains( (string) file_get_contents( ROOT . '/tests/out/templates-apply-507.html' ), 'mailto:vgarco.cc@gmail.com' ) );
 check( 'ứng tuyển: ô đồng ý có liên kết tới chính sách dữ liệu, mở thẻ mới có noopener', 1 === q( $a, '//label[' . cls( 'consent-label' ) . ']//a[@href="/chinh-sach-bao-ve-du-lieu/" and @target="_blank" and contains(@rel, "noopener")]' )->length );
 same( 'ứng tuyển: cột tóm tắt có tên vị trí, địa điểm, phòng ban và liên kết xem lại mô tả', array( 'Kiến trúc sư thiết kế', array( 'Địa điểm', 'Phòng ban' ), '/tuyen-dung/401/' ), array( trim( q( $a, '//aside[' . cls( 'job-apply-summary' ) . ']/h2' )->item( 0 )->textContent ), array_map( static fn( $n ) => trim( $n->textContent ), iterator_to_array( q( $a, '//aside//dt' ) ) ), q( $a, '//aside[' . cls( 'job-apply-summary' ) . ']/a' )->item( 0 )->getAttribute( 'href' ) ) );
