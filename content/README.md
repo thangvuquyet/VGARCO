@@ -49,4 +49,28 @@ và `cong_bo_chu_dau_tu` đang `0` cho mọi dự án. Cần rà cùng chủ đ�
 | `loai_anh` | | `thiet_ke` (mặc định) hoặc `cong_trinh` |
 | `chu_thich_vi/_de` | `tv` cần `chu_thich_vi` | Mô tả thật của ảnh, dùng làm văn bản thay thế cho người khiếm thị |
 
-Ảnh chụp bằng điện thoại phải gỡ siêu dữ liệu (EXIF/GPS) trước khi nhập — bắt buộc với công trình quân sự, ngoại giao (phương án mục 9.1).
+Siêu dữ liệu (EXIF/GPS) của ảnh tải lên được **gỡ tự động ở máy chủ** (kể cả ảnh nhập bằng `wp vgarco import`): đo trên ảnh thật, 22 trong 113 ảnh JPEG của dự án có tọa độ GPS.
+Vẫn nên xuất ảnh bằng công cụ dưới đây trước khi nhập — nó còn xoay đúng chiều, giới hạn kích thước và dung lượng.
+
+### Xuất ảnh master
+
+```bash
+php scripts/content/export-images.php <thư-mục-đã-cắt> <thư-mục-xuất> --csv=<thư-mục-xuất>/images.csv
+php scripts/content/export-images.php <thư-mục-đã-cắt> <thư-mục-xuất> --dry-run    # chỉ kiểm tra, không ghi tệp
+```
+
+Cần PHP 8.3 với `gd` (JPEG, PNG; AVIF để có số ước lượng), không cần WordPress hay gói npm. **Ảnh phải được cắt tay đúng tỉ lệ trước** (hero 21:9, trình chiếu 16:9, thẻ 4:3):
+công cụ không bao giờ tự cắt vì cắt tự động xén mất mái hoặc nền công trình. Đặt tên theo mã dự án:
+
+| Tên tệp | Vai trò | Khung tối đa (không phóng to) |
+|---|---|---|
+| `<ma>-hero.jpg` | đầu trang 21:9 | 2560 × 1097 |
+| `<ma>-slide.jpg` | trình chiếu 16:9 | 1600 × 900 |
+| `<ma>-the.jpg` | thẻ 4:3 | 1200 × 900 |
+| `<ma>-tv-01.jpg`, `-tv-02.jpg`... | thư viện (tối đa 15) | 1800 × 1800 |
+
+Đuôi `jpg`, `jpeg` hoặc `png` (PNG render 20–30 MB được đổi sang JPEG); tệp xuất luôn là `.jpg`. Mỗi ảnh được xoay theo EXIF, thu nhỏ vừa khung, nén JPEG chất lượng 86 (tự hạ từng bước nếu quá **1,5 MB**,
+chạm q70 mà vẫn quá thì báo lỗi), gỡ mọi siêu dữ liệu. Công cụ **báo** (không sửa): ảnh lệch tỉ lệ quy cách (`--strict` coi là lỗi), ảnh có hồ sơ màu không phải sRGB (GD không đổi được hồ sơ màu:
+xuất sRGB từ Lightroom/Photoshop trước), ảnh có AVIF ước lượng vượt trần dung lượng của mục 9.2 (chỉ cảnh báo vì trần còn chờ chủ đầu tư quyết). Tên sai, trùng hay tệp hỏng thì **không ghi gì cả**,
+mọi lỗi báo một lượt. Kết quả: các tệp `.jpg` trong thư mục xuất và (nếu có `--csv`) bộ khung `images.csv` — **chú thích để trống**, phải điền `chu_thich_vi` thật cho ảnh thư viện trước khi nhập;
+công cụ không ghi đè `images.csv` đã có. Rồi nhập: `wp vgarco import projects content/projects.csv --images=<thư-mục-xuất>`.

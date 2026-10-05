@@ -16,6 +16,7 @@ wp-content/
 └── themes/vgarco/                 TRÌNH BÀY: mẫu trang, SCSS, JS, chuỗi giao diện, SEO cơ bản
 content/                           Bảng tính nhập liệu (xem content/README.md)
 scripts/i18n/                      Công cụ dịch: trích .pot, gộp bản dịch .po, biên dịch .mo (Node, không cần gettext)
+scripts/content/                   Công cụ nội dung: sinh projects.csv (Node), xuất ảnh master theo quy cách 9.2 (PHP + gd; xem content/README.md)
 tests/                             Kiểm thử tự động không cần WordPress (xem bên dưới)
 tests/wp-lab/                      Kiểm thử tích hợp trên WordPress thật (SQLite) — dựng bằng bootstrap.mjs
 ```
@@ -69,6 +70,7 @@ PHP=... PHP_EXT=... node tests/mutate.mjs "khóa đăng nhập"               # 
 | `tests/php/pages.php` | Chạy mẫu trang THẬT (`render.php` + hàm WordPress giả) rồi phân tích DOM: đúng một H1, ảnh LCP, alt, trường trống tự ẩn, thoát HTML, SEO, JSON-LD, hộp thoại tìm kiếm, trang lỗi… |
 | `tests/php/apply.php` | Luồng nộp hồ sơ: mã bảo mật, kiểm tra tệp CV bằng **tệp thật** (exe đổi đuôi, DOCX có macro, quá 10 MB), thứ tự 403/429/400/409/500, xuất .xlsx, hạn 12 tháng |
 | `tests/php/media.php` | Gỡ siêu dữ liệu ảnh (GPS, EXIF, XMP, IPTC) khỏi JPEG và PNG bằng ảnh GD thật có chèn EXIF giả: không đổi một byte dữ liệu ảnh, giữ hồ sơ màu, đọc hướng xoay, từ chối tệp hỏng |
+| `tests/php/export-images.php` | Công cụ xuất ảnh master: tên tệp, kích thước, xoay 8 hướng EXIF, hạ chất lượng khi quá 1,5 MB, hồ sơ màu, `images.csv`; rồi chạy lệnh thật trên thư mục ảnh thật (tên sai, tệp hỏng, `--strict`, `--dry-run`, không ghi đè) |
 | `tests/php/search.php`, `seo.php`, `security.php`, `import.php` | Tìm kiếm bỏ dấu, SEO (thoát ký tự, JSON-LD), khóa đăng nhập và cache Cloudflare, đọc CSV và kế hoạch nhập liệu |
 | `tests/i18n.mjs`, `tests/php/gettext.php` | Công cụ dịch và trạng thái bản dịch (`.pot` mới, `.po` đủ mục, `.mo` khớp `.po`), đọc `.mo` bằng libintl độc lập |
 
@@ -78,7 +80,7 @@ Các bộ trên dùng hàm WordPress **giả** nên không thấy lỗi chỉ l�
 
 ```bash
 PHP=... PHP_EXT=... node tests/wp-lab/bootstrap.mjs wordpress.zip sqlite-database-integration.zip   # một lần
-PHP=... node tests/wp-lab/run.mjs                                                                   # 10 kịch bản, ~340 phép kiểm
+PHP=... node tests/wp-lab/run.mjs                                                                   # 11 kịch bản, ~360 phép kiểm
 ```
 
 Hướng dẫn, danh sách kịch bản và **giới hạn** (ACF PRO/WPML là bản giả, không có Nginx/Cloudflare/trình duyệt khác Chromium) ở [`tests/wp-lab/README.md`](tests/wp-lab/README.md).

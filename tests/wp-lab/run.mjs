@@ -25,7 +25,7 @@ if (spawnSync(php, ['-v']).error) {
 if (!existsSync(join(lab, 'wordpress', 'wp-load.php'))) { console.error('Chưa dựng môi trường: chạy node tests/wp-lab/bootstrap.mjs trước'); process.exit(1); }
 
 // Thứ tự có ý nghĩa: nhập dự án → dữ liệu tin/vị trí → các kịch bản dùng dữ liệu đó.
-const order = ['env', 'import', 'media', 'seed', 'apply', 'admin', 'site', 'security', 'crawl', 'acffree'];
+const order = ['env', 'import', 'media', 'export', 'seed', 'apply', 'admin', 'site', 'security', 'crawl', 'acffree'];
 const only = process.argv.slice(2);
 const todo = only.length ? order.filter((n) => only.includes(n)) : order;
 

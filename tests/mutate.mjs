@@ -560,6 +560,44 @@ const M = [
     "default      => (int) $default,", "default      => VGARCO_WEBP_QUALITY,", 'media'],
   ["ảnh: bỏ nối bộ lọc chất lượng", "wp-content/plugins/vgarco-core/inc/media.php",
     "add_filter( 'wp_editor_set_quality', 'vgarco_image_quality', 10, 2 );", ""],
+  ["xuất ảnh: khung hero rộng 2000 thay vì 2560", "scripts/content/export-images-lib.php",
+    "'max' => array( 2560, 1097 )", "'max' => array( 2000, 1097 )", "export-images"],
+  ["xuất ảnh: cho phóng to ảnh nhỏ", "scripts/content/export-images-lib.php",
+    "$scale             = min( 1.0, $max_w / $w, $max_h / $h );", "$scale             = min( $max_w / $w, $max_h / $h );", "export-images"],
+  ["xuất ảnh: dung sai tỉ lệ 50%", "scripts/content/export-images-lib.php",
+    "const VGARCO_EXPORT_RATIO_TOL     = 0.03;", "const VGARCO_EXPORT_RATIO_TOL     = 0.5;", "export-images"],
+  ["xuất ảnh: nhận ảnh thư viện số 0", "scripts/content/export-images-lib.php",
+    "if ( 'tv' === $role && $n < 1 ) {", "if ( false ) {", "export-images"],
+  ["xuất ảnh: quá 15 ảnh thư viện vẫn nhận", "scripts/content/export-images-lib.php",
+    "( $count[ $p['ma'] ] = ( $count[ $p['ma'] ] ?? 0 ) + 1 ) > VGARCO_EXPORT_MAX_GALLERY", "false", "export-images"],
+  ["xuất ảnh: không phát hiện trùng tệp xuất", "scripts/content/export-images-lib.php",
+    "if ( isset( $seen[ $p['out'] ] ) ) {", "if ( false ) {", "export-images"],
+  ["xuất ảnh: xoay hướng 6 ngược chiều", "scripts/content/export-images-lib.php",
+    "case 6:\n\t\t\treturn imagerotate( $im, -90, 0 );", "case 6:\n\t\t\treturn imagerotate( $im, 90, 0 );", "export-images"],
+  ["xuất ảnh: hướng 5 quên lật ngang", "scripts/content/export-images-lib.php",
+    "case 5:\n\t\t\timageflip( $im, IMG_FLIP_HORIZONTAL );\n\t\t\treturn imagerotate( $im, 90, 0 );", "case 5:\n\t\t\treturn imagerotate( $im, 90, 0 );", "export-images"],
+  ["xuất ảnh: hướng 7 sai chiều xoay", "scripts/content/export-images-lib.php",
+    "case 7:\n\t\t\timageflip( $im, IMG_FLIP_HORIZONTAL );\n\t\t\treturn imagerotate( $im, -90, 0 );", "case 7:\n\t\t\timageflip( $im, IMG_FLIP_HORIZONTAL );\n\t\t\treturn imagerotate( $im, 90, 0 );", "export-images"],
+  ["xuất ảnh: không hạ chất lượng khi quá trần", "scripts/content/export-images-lib.php",
+    "if ( strlen( $bytes ) <= $max_bytes || $quality <= VGARCO_EXPORT_MIN_QUALITY ) {", "if ( true ) {", "export-images"],
+  ["xuất ảnh: trần dung lượng 15 MB thay vì 1,5 MB", "scripts/content/export-images-lib.php",
+    "const VGARCO_EXPORT_MAX_BYTES     = 1572864;", "const VGARCO_EXPORT_MAX_BYTES     = 15728640;", "export-images"],
+  ["xuất ảnh: không báo hồ sơ màu ngoài sRGB", "scripts/content/export-images-lib.php",
+    "if ( '' === $profile || stripos( $profile, 'sRGB' ) !== false ) {", "if ( true ) {", "export-images"],
+  ["xuất ảnh: bộ khung csv sắp sai (thư viện trước hero)", "scripts/content/export-images-lib.php",
+    "$order = array( 'hero' => 0, 'the' => 1, 'slide' => 2, 'tv' => 3 );", "$order = array( 'hero' => 3, 'the' => 1, 'slide' => 2, 'tv' => 0 );", "export-images"],
+  ["xuất ảnh: ước lượng AVIF làm tròn xuống", "scripts/content/export-images-lib.php",
+    "(int) ceil( strlen( $bytes ) / 1024 )", "(int) floor( strlen( $bytes ) / 1024 )", "export-images"],
+  ["xuất ảnh: không gỡ siêu dữ liệu khi nén", "scripts/content/export-images-lib.php",
+    "$bytes = vgarco_jpeg_strip_metadata( $bytes ) ?? $bytes;", "", "export-images"],
+  ["xuất ảnh (lệnh): ghi đè images.csv đã có", "scripts/content/export-images.php",
+    "if ( $csv && is_file( $csv ) ) {", "if ( false ) {", "export-images"],
+  ["xuất ảnh (lệnh): vẫn ghi khi có lỗi", "scripts/content/export-images.php",
+    "if ( $errors ) {\n\tfwrite( STDERR, \"Có \"", "if ( false ) {\n\tfwrite( STDERR, \"Có \"", "export-images"],
+  ["xuất ảnh (lệnh): --strict không có tác dụng", "scripts/content/export-images.php",
+    "$strict  = isset( $opts['strict'] );", "$strict  = false;", "export-images"],
+  ["xuất ảnh (lệnh): --dry-run vẫn ghi tệp", "scripts/content/export-images.php",
+    "$dry     = isset( $opts['dry-run'] );", "$dry     = false;", "export-images"],
   ["ảnh: PNG thiếu IEND vẫn nhận", "wp-content/plugins/vgarco-core/inc/media-lib.php",
     "return $seen ? $out : null;", "return $out;", 'media'],
 ];
@@ -573,6 +611,7 @@ for (const [name, file, from, to, suite = 'smoke'] of M.filter(([n]) => !only ||
   // Bỏ node_modules và dist (rất nặng, kiểm thử PHP không cần): mỗi lần sao chép nhanh hơn hàng chục lần.
   cpSync(join(src, 'wp-content'), join(work, 'wp-content'), { recursive: true, filter: (from) => !/[\\/](node_modules|dist)([\\/]|$)/.test(from) });
   cpSync(join(src, 'tests', 'php'), join(work, 'tests', 'php'), { recursive: true });
+  if (suite === 'export-images') cpSync(join(src, 'scripts'), join(work, 'scripts'), { recursive: true });
   if (suite === 'i18n') {
     cpSync(join(src, 'scripts'), join(work, 'scripts'), { recursive: true });
     cpSync(join(src, 'tests', 'i18n.mjs'), join(work, 'tests', 'i18n.mjs'));
@@ -584,7 +623,7 @@ for (const [name, file, from, to, suite = 'smoke'] of M.filter(([n]) => !only ||
   if (n !== 1) { skipped++; console.log(`${name.padEnd(50)} => BỎ QUA: đoạn gốc xuất hiện ${n} lần (cần đúng 1)`); continue; }
   writeFileSync(path, text.replace(from, () => to));
 
-  const extra = suite === 'apply' || suite === 'media' ? ['-d', 'extension=gd', '-d', 'extension=fileinfo', '-d', 'extension=zip'] : [];
+  const extra = [ 'apply', 'media', 'export-images' ].includes(suite) ? ['-d', 'extension=gd', '-d', 'extension=fileinfo', '-d', 'extension=zip'] : [];
   const r = suite === 'i18n'
     ? spawnSync(process.execPath, [join(work, 'tests', 'i18n.mjs')], { encoding: 'utf8' })
     : spawnSync(php, ['-d', `extension_dir=${ext}`, '-d', 'extension=mbstring', ...extra, join(work, 'tests', 'php', `${suite}.php`)], { encoding: 'utf8' });
