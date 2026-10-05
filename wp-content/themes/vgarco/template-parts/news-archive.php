@@ -56,7 +56,7 @@ vgarco_breadcrumb( $trail );
 									$item['image_id'],
 									array(
 										'size'  => 'vg-480',
-										'sizes' => '(min-width: 701px) 150px, 100vw',
+										'sizes' => '(min-width: 801px) 150px, (min-width: 601px) 96px, 100vw',
 										'alt'   => '',
 									)
 								);

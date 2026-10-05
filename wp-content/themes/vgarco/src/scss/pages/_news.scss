@@ -85,15 +85,35 @@
     align-items: center;
     padding-block: 1.625rem;
 
-    @include up($bp-md) {
-      grid-template-columns: 150px minmax(0, 1fr) 210px;
-      gap: 1.75rem;
+    // 601–800 px: ảnh nhỏ 96 px bên trái, ngày và chuyên mục xuống dưới đoạn chữ (như bản thiết kế); cột ngày riêng bên phải chỉ từ 801 px.
+    @include up($bp-tablet) {
+      grid-template-columns: 96px minmax(0, 1fr);
+      gap: 1rem;
       padding-block: 1.5rem;
     }
 
+    @include up($bp-news) {
+      grid-template-columns: 150px minmax(0, 1fr) 210px;
+      gap: 1.75rem;
+    }
+
     &.no-thumb {
-      @include up($bp-md) {
+      @include up($bp-tablet) {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      @include up($bp-news) {
         grid-template-columns: minmax(0, 1fr) 210px;
+      }
+    }
+
+    &:not(.no-thumb) > .news-row-meta {
+      @include up($bp-tablet) {
+        grid-column: 2;
+      }
+
+      @include up($bp-news) {
+        grid-column: auto;
       }
     }
   }
@@ -104,7 +124,11 @@
     background: var(--c-surface-warm);
     aspect-ratio: 1.76 / 1;
 
-    @include up($bp-md) {
+    @include up($bp-tablet) {
+      aspect-ratio: 96 / 74;
+    }
+
+    @include up($bp-news) {
       aspect-ratio: 1.5625 / 1; // 150 × 96
     }
 
@@ -175,7 +199,7 @@
     }
   }
 
-  @include up($bp-md) {
+  @include up($bp-news) {
     display: grid;
     gap: 0.25rem;
     text-align: right;
@@ -261,7 +285,7 @@
     letter-spacing: -0.045em;
   }
 
-  @include up($bp-md) {
+  @include up($bp-news) {
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 3.125rem;
   }
@@ -274,7 +298,7 @@
   line-height: 1.7;
   color: var(--c-ink-muted);
 
-  @include up($bp-md) {
+  @include up($bp-news) {
     display: grid;
     gap: 0.5rem;
     text-align: right;

@@ -4,6 +4,8 @@ $bp-tablet: 601px; // ≥ : máy tính bảng
 $bp-md: 701px; // ≥ : lưới 2–3 cột, tiêu đề khối nằm ngang
 $bp-lg: 1001px; // ≥ : bố cục máy tính (hero 3 cột, lưới dự án 3 cột)
 $bp-desk: 1000px; // ≥ : trang Dự án (danh mục và chi tiết): bản thiết kế chuyển bố cục rộng đúng ở 1000 px
+$bp-news: 801px; // ≥ : trang Tin tức: hàng tin 3 cột (ảnh | chữ | ngày) và đầu bài 2 cột; bản thiết kế đổi ở 800 px. Thấp hơn thì cột chữ chỉ còn ~200 px (15 ký tự/dòng ở 701 px)
+$bp-job: 901px; // ≥ : chi tiết vị trí tuyển dụng: nút "Ứng tuyển" nằm bên phải tiêu đề; bản thiết kế đổi ở 900 px (tiêu đề tiếng Đức dài còn 4 dòng ở 701–800 px)
 $bp-nav: 1181px; // ≥ : menu ngang thay cho menu thả dọc
 $bp-wide: 1280px;
 $bp-xl: 1400px;

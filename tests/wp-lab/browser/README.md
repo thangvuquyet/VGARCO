@@ -19,6 +19,23 @@ Mỗi lần dán một độ rộng rồi chạy trong vòng ~45 giây (cửa s�
 
 Hai kết quả "lỗi" được chấp nhận: mục cuối đường dẫn vị trí của trang chi tiết dự án (cắt bằng dấu "…" theo thiết kế, cả hai ngôn ngữ) và mũi tên menu xoay 45° (hình học, vượt 3 px ở 1440+).
 
+## Cấu trúc bố cục so với bản thiết kế: `structure-check.js`
+
+`layout-check.js` chỉ bắt chữ tràn; nó **không** bắt được cột chữ bị bóp hẹp hay trang đổi số cột sớm/muộn hơn bản thiết kế. `structure-check.js` làm việc đó: `vgSweep` in số cột thật của mọi khối lưới/flex
+ở nhiều độ rộng (chạy ở cả theme và bản thiết kế HTML `node server.cjs` → http://localhost:4173, rồi so hai bên), `vgCramped` liệt kê đoạn chữ dưới 24 ký tự/dòng. Cách dùng ở đầu tệp.
+
+Bản thiết kế **không** đổi bố cục cùng một độ rộng ở mọi trang (Tin tức 800 px, chi tiết vị trí 900 px, Tuyển dụng 600 px, Dự án 1000 px); theme dùng các biến `$bp-*` trong `src/scss/_mixins.scss` cho từng trang.
+Kiểm ngày 05/10/2026 ở 600–1181 px (cả VI và DE):
+
+| Trang | Phát hiện | Xử lý |
+|---|---|---|
+| Tin tức, danh sách | Từ 701 px theme chia 3 cột (ảnh 150, chữ, ngày 210) trong khi bản thiết kế chỉ chia ở 801 px: ở 701 px cột chữ chỉ còn **198 px (15 ký tự/dòng)**, ở 768 px 265 px | Sửa: 601–800 px dùng hàng gọn như bản thiết kế (ảnh 96 × 74 bên trái, ngày dưới đoạn chữ), 3 cột từ 801 px (`$bp-news`) |
+| Tin tức, chi tiết | Đầu bài chia 2 cột từ 701 px → tiêu đề còn 419 px (3 dòng, 15 ký tự/dòng) | Sửa: 1 cột tới 800 px (`$bp-news`) |
+| Chi tiết vị trí | Nút "Ứng tuyển" nằm cạnh tiêu đề từ 701 px; tiêu đề tiếng Đức dài (60 ký tự) thành 4 dòng ở 701–800 px | Sửa: xếp dưới tiêu đề tới 900 px (`$bp-job`), như bản thiết kế |
+| Tuyển dụng, danh sách | Ở 601–700 px theme xếp 1 cột, bản thiết kế đã chia (số thứ tự + nội dung; ô tìm kiếm 2 cột) | Giữ nguyên: không có chữ bị bóp, chỉ là dạng điện thoại thêm 100 px |
+| Tin tức, chi tiết (khung thân bài) | Bản thiết kế chia 2 cột (cột chia sẻ 120 px) từ 801 px nhưng **tự nó cuộn ngang 29 px** ở 801–1050 px | Giữ nguyên của theme (1 cột tới 1000 px, không cuộn ngang) |
+| Tin tức, danh sách ở 801–900 px | Tiêu đề tiếng Đức rất dài (90+ ký tự) ra 5 dòng ở cột chữ 298 px | Giữ nguyên (đúng bản thiết kế; tiêu đề thực tế ngắn hơn, tách từ tự động đang bật) |
+
 ## Thao tác JS
 
 Đã kiểm ngày 05/10/2026 bằng cách gọi trực tiếp trong trang (chọn phần tử theo thuộc tính `data-*` trong `src/js/modules/`):

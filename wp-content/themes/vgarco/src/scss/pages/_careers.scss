@@ -500,7 +500,7 @@
     }
   }
 
-  @include up($bp-md) {
+  @include up($bp-job) {
     grid-template-columns: minmax(0, 1fr) auto;
   }
 }
