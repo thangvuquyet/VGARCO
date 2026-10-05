@@ -95,6 +95,7 @@ check( 'kích hoạt: đăng ký phân loại trước kiểu nội dung (cùng 
 // --- Ảnh tải lên: bộ gỡ siêu dữ liệu (GPS) phải được nối vào WordPress ---
 // Hàm thuần có kiểm thử riêng (media.php); chạy thật trên WordPress ở tests/wp-lab/it_media.php. Ở đây chỉ bảo đảm KHÔNG ai tháo mất đường nối.
 check( 'ảnh: wp_handle_upload gọi bộ gỡ siêu dữ liệu (cả tải qua trang quản trị lẫn nhập bằng mã)', isset( $GLOBALS['priorities']['wp_handle_upload']['vgarco_sanitize_uploaded_image'] ) );
+check( 'ảnh: chất lượng AVIF/WebP có chủ đích (wp_editor_set_quality)', isset( $GLOBALS['priorities']['wp_editor_set_quality']['vgarco_image_quality'] ) );
 check( 'ảnh: có bộ lọc upload_mimes giới hạn định dạng ảnh', ! empty( $GLOBALS['hooks']['upload_mimes'] ) );
 
 // --- Đăng nhập an toàn: thứ tự bộ lọc (lỗi chỉ lộ ra trên WordPress thật) ---

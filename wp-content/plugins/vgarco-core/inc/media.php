@@ -47,6 +47,9 @@ add_filter(
 	}
 );
 
+// Chất lượng AVIF/WebP có chủ đích (xem media-lib.php): mặc định của WordPress làm ảnh AVIF lớn gấp đôi trần dung lượng của kế hoạch.
+add_filter( 'wp_editor_set_quality', 'vgarco_image_quality', 10, 2 );
+
 /*
  * Siêu dữ liệu ảnh (tọa độ GPS, giờ chụp, thiết bị).
  *

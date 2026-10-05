@@ -15,6 +15,29 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
+ * Chất lượng mã hóa AVIF và WebP (thang 0–100 của WordPress). Đo trên 16 bộ ảnh thật của dự án (plan Phụ lục E): mặc định của WordPress là 82
+ * cho AVIF (86 cho WebP); ở mức 82 chỉ 8/16 ảnh đầu trang đạt trần 350 KB của mục 9.2. Mức 55 trông ngang JPEG 82 ở ảnh chi tiết nhất (hạt đá granite,
+ * tán cây) mà nhẹ hơn khoảng 35% (13/16 ảnh đạt trần; vài ảnh render chi tiết vượt nhẹ). JPEG giữ mặc định của WordPress (82).
+ * Số đo bằng GD/libavif và chỉ cho AVIF; WebP (72) chưa đo riêng. Phải đo lại bằng bộ mã hóa thật của máy chủ ở ngày N16 (mục 9.3 bước 5).
+ */
+const VGARCO_AVIF_QUALITY = 55;
+const VGARCO_WEBP_QUALITY = 72;
+
+/**
+ * Bộ lọc wp_editor_set_quality: chất lượng theo định dạng đầu ra.
+ *
+ * @param int    $default Chất lượng mặc định của WordPress cho định dạng đó.
+ * @param string $mime    Định dạng đầu ra (image/jpeg, image/avif, image/webp...).
+ */
+function vgarco_image_quality( $default, $mime = '' ): int {
+	return match ( $mime ) {
+		'image/avif' => VGARCO_AVIF_QUALITY,
+		'image/webp' => VGARCO_WEBP_QUALITY,
+		default      => (int) $default,
+	};
+}
+
+/**
  * Tách các đoạn của JPEG cho tới đoạn quét ảnh (SOS).
  *
  * @return array{segments: array<int, array{0:int,1:int}>, scan: int}|null segments = [mã đánh dấu, vị trí]; scan = vị trí của SOS. null nếu không phải JPEG hợp lệ.

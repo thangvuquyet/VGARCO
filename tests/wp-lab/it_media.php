@@ -58,6 +58,37 @@ check( 'cho phép JPEG và PNG', in_array( 'image/jpeg', $mimes, true ) && in_ar
 check( 'không cho WebP, AVIF, HEIC, GIF, TIFF, BMP, ICO (siêu dữ liệu chưa gỡ được)', ! array_filter( $mimes, fn( $m ) => str_starts_with( $m, 'image/' ) && ! in_array( $m, array( 'image/jpeg', 'image/png' ), true ) ) );
 check( 'tệp không phải ảnh (PDF) vẫn được phép', in_array( 'application/pdf', $mimes, true ) );
 
+/* ---- Chất lượng AVIF qua bộ xử lý ảnh THẬT của WordPress ---- */
+if ( wp_image_editor_supports( array( 'mime_type' => 'image/avif' ) ) ) {
+	$noise = imagecreatetruecolor( 900, 600 ); // ảnh nhiều chi tiết để mức nén có ảnh hưởng
+	mt_srand( 7 );
+	for ( $y = 0; $y < 600; $y += 2 ) {
+		for ( $x = 0; $x < 900; $x += 2 ) {
+			$c = imagecolorallocate( $noise, mt_rand( 0, 255 ), mt_rand( 0, 255 ), mt_rand( 0, 255 ) );
+			imagefilledrectangle( $noise, $x, $y, $x + 1, $y + 1, $c );
+		}
+	}
+	$src = $tmp . '/nhieu-chi-tiet.jpg';
+	imagejpeg( $noise, $src, 90 );
+	$encode = static function () use ( $src, $tmp ): int {
+		$editor = wp_get_image_editor( $src );
+		$dest   = $tmp . '/q.avif';
+		$editor->save( $dest, 'image/avif' );
+		$size = (int) filesize( $dest );
+		@unlink( $dest );
+		return $size;
+	};
+	$with    = $encode();
+	remove_filter( 'wp_editor_set_quality', 'vgarco_image_quality', 10 );
+	$without = $encode();
+	add_filter( 'wp_editor_set_quality', 'vgarco_image_quality', 10, 2 );
+	check( "AVIF qua bộ xử lý ảnh của WordPress: có bộ lọc nhẹ hơn rõ rệt (< 75% của mặc định): {$with} so với {$without} byte", $with > 0 && $with < 0.75 * $without );
+	same( 'bộ lọc không đổi chất lượng JPEG', 82, apply_filters( 'wp_editor_set_quality', 82, 'image/jpeg', array() ) );
+} else {
+	echo "  (bỏ qua phép kiểm AVIF: bộ xử lý ảnh trên máy này không hỗ trợ AVIF)
+";
+}
+
 /* ---- JPEG có GPS, không xoay ---- */
 [ $id, $err ] = $sideload( with_segments( base_jpeg( 800, 400, true ), seg( 0xE1, exif_payload( 1 ) ) . $metadata ), 'khong-xoay.jpg' );
 check( 'JPEG có GPS: tải lên được' . ( $err ? " ({$err})" : '' ), is_int( $id ) );

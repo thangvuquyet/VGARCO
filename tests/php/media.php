@@ -48,6 +48,16 @@ $full = with_segments(
 );
 $needles = array( GPS_NEEDLE, 'XMP-GPS-NEEDLE', '8BIM-IPTC-NEEDLE', 'MPF-NEEDLE', 'COM-NEEDLE' );
 
+/* ========== Chất lượng mã hóa theo định dạng ========== */
+
+same( 'chất lượng AVIF', 55, vgarco_image_quality( 82, 'image/avif' ) );
+same( 'chất lượng WebP', 72, vgarco_image_quality( 86, 'image/webp' ) );
+same( 'JPEG giữ mặc định của WordPress', 82, vgarco_image_quality( 82, 'image/jpeg' ) );
+same( 'PNG giữ mặc định', 90, vgarco_image_quality( 90, 'image/png' ) );
+same( 'định dạng khác/không rõ giữ mặc định', 77, vgarco_image_quality( 77, '' ) );
+same( 'mặc định đưa vào dạng chuỗi vẫn ra số nguyên', 82, vgarco_image_quality( '82', 'image/jpeg' ) );
+check( 'AVIF nén mạnh hơn WebP, WebP nén mạnh hơn mặc định (thứ tự có chủ đích)', VGARCO_AVIF_QUALITY < VGARCO_WEBP_QUALITY && VGARCO_WEBP_QUALITY < 82 );
+
 /* ========== JPEG: gỡ siêu dữ liệu ========== */
 
 foreach ( $needles as $n ) {
