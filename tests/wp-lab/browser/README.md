@@ -36,6 +36,11 @@ Kiểm ngày 05/10/2026 ở 600–1181 px (cả VI và DE):
 | Tin tức, chi tiết (khung thân bài) | Bản thiết kế chia 2 cột (cột chia sẻ 120 px) từ 801 px nhưng **tự nó cuộn ngang 29 px** ở 801–1050 px | Giữ nguyên của theme (1 cột tới 1000 px, không cuộn ngang) |
 | Tin tức, danh sách ở 801–900 px | Tiêu đề tiếng Đức rất dài (90+ ký tự) ra 5 dòng ở cột chữ 298 px | Giữ nguyên (đúng bản thiết kế; tiêu đề thực tế ngắn hơn, tách từ tự động đang bật) |
 
+## Trợ năng trên trang thật: `axe-check.js`
+
+axe-core chạy trên trang thật của website thử ở nhiều độ rộng, cả tiếng Đức và các trạng thái động (hộp thoại tìm kiếm, menu di động, biểu mẫu báo lỗi, hộp xem ảnh).
+Cần thêm `node tests/serve.mjs 4174` (phục vụ `/axe/axe.min.js`). Cách dùng và **phép đối chứng bắt buộc** ở đầu tệp; kết quả ngày 05/10/2026 ở `tests/a11y.md`.
+
 ## Thao tác JS
 
 Đã kiểm ngày 05/10/2026 bằng cách gọi trực tiếp trong trang (chọn phần tử theo thuộc tính `data-*` trong `src/js/modules/`):
