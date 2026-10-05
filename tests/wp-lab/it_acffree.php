@@ -21,7 +21,7 @@ try {
 	$admin = lab_cookie_for( (int) get_user_by( 'login', 'labadmin' )->ID );
 	$cj    = array( 'headers' => array( 'Cookie: ' . $admin ) );
 
-	foreach ( array( '/', '/du-an/', '/tin-tuc/', '/tuyen-dung-trang/', '/lien-he/', '/gioi-thieu/', '/linh-vuc-hoat-dong/', '/tuyen-dung/vt-kts/' ) as $path ) {
+	foreach ( array( '/', '/du-an/', '/tin-tuc/', '/tuyen-dung/', '/lien-he/', '/gioi-thieu/', '/linh-vuc-hoat-dong/', '/tuyen-dung/vt-kts/' ) as $path ) {
 		$r = http( 'GET', $path );
 		check( "ACF miễn phí: {$path} trả 200 và không có lỗi PHP trong trang", 200 === $r['status'] && ! preg_match( '/Fatal error|Parse error|Uncaught|Warning:|Notice:|Deprecated:/', $r['body'] ) );
 	}

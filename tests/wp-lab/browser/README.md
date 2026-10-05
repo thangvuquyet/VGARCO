@@ -29,7 +29,7 @@ Hai kết quả "lỗi" được chấp nhận: mục cuối đường dẫn v�
 | chi tiết dự án | `[data-gallery-next]`, chấm, phím Home/End/←/→ trên `[data-gallery-stage]`, vuốt (`pointerType: 'touch'` kéo ≥ 50 px) | số ảnh "Ảnh n / m: chú thích" đổi; vuốt ngắn (< 50 px) không đổi |
 | chi tiết dự án | bấm `[data-gallery-open]`, rồi phím **Esc thật** | hộp xem ảnh mở có chú thích; Esc đóng; tiêu điểm trở về nút mở |
 | chi tiết tin | bấm `[data-copy-link]` (thay `navigator.clipboard`) | chép đúng địa chỉ chuẩn của bài (không kèm `?v=`); thông báo "Đã sao chép liên kết" rồi tự xóa |
-| `/tuyen-dung-trang/` | gõ từ khóa vào ô tìm; từ khóa không khớp; "Xóa bộ lọc" | số vị trí đổi tại chỗ không tải lại trang; hiện "Chưa tìm thấy vị trí phù hợp" + "Xóa bộ lọc" + "Xem tất cả vị trí" |
+| `/tuyen-dung/` | gõ từ khóa vào ô tìm; từ khóa không khớp; "Xóa bộ lọc" | số vị trí đổi tại chỗ không tải lại trang; hiện "Chưa tìm thấy vị trí phù hợp" + "Xóa bộ lọc" + "Xem tất cả vị trí" |
 | mọi trang | mở hộp thoại tìm kiếm (`[data-vg-search-open]`), gõ **chữ rồi bấm Esc thật một lần** | tiêu điểm vào ô nhập; < 3 ký tự giữ hướng dẫn; không khớp báo "Chưa có dự án phù hợp"; Esc, nút đóng, bấm nền đều đóng và trả tiêu điểm về nút mở |
 | `/ung-tuyen/?id=…` | bấm `[data-captcha-refresh]`; gửi trống | token và ảnh mã mới, ô mã được xóa; mọi trường bắt buộc đánh dấu lỗi, tiêu điểm vào trường đầu, ô đồng ý không tích sẵn |
 | `/lien-he/` | gửi trống; email sai; thiếu đồng ý | lỗi đúng trường; ô đồng ý không tích sẵn |

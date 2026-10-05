@@ -604,6 +604,8 @@ const M = [
     "<p class=\"sr-only\" role=\"status\">", "<p class=\"sr-only\">", 'pages'],
   ["danh mục: dòng trạng thái đếm sai (luôn 1)", "wp-content/themes/vgarco/template-parts/catalogue.php",
     "1 === $catalogue['count']", "true", 'pages'],
+  ["kích hoạt: không tạo vai trò Nhân sự (chờ admin_init)", "wp-content/plugins/vgarco-core/vgarco-core.php",
+    "\tvgarco_apply_ensure_roles();\n", ""],
 ];
 
 let caught = 0, missed = 0, skipped = 0;

@@ -88,11 +88,22 @@ foreach ( array( 'cu' => 'quá hạn', 'dong' => 'đã đóng' ) as $k => $why )
 	$cx = $dom( $c['body'] );
 	check( "vị trí {$why}: không có JobPosting, không có nút ứng tuyển, có thông báo ngừng nhận", ! isset( $ld( $cx )['JobPosting'] ) && ! str_contains( $c['body'], '/ung-tuyen/?id=' ) && str_contains( $c['body'], 'ngừng nhận hồ sơ' ) );
 }
-$careers = http( 'GET', '/tuyen-dung-trang/' );
+// Bản đồ đường dẫn tiếng Việt của phương án 6.6: trang Tuyển dụng và chi tiết vị trí CÙNG tiền tố /tuyen-dung/, Ban lãnh đạo và Phòng ban là trang con của Về công ty.
+foreach ( array( '/' => 'Từ ý tưởng', '/gioi-thieu/' => 'Đến giá trị dài lâu', '/gioi-thieu/ban-lanh-dao/' => 'Ban lãnh đạo', '/gioi-thieu/phong-ban/' => 'Nhiều chuyên môn', '/linh-vuc-hoat-dong/' => 'Tư duy tổng thể', '/du-an/' => 'Tất cả dự án', '/tin-tuc/' => 'Tin tức', '/tuyen-dung/' => 'Chọn công việc', '/tuyen-dung/vt-kts/' => 'Kiến trúc sư thiết kế', '/lien-he/' => 'Một cuộc trò chuyện', '/chinh-sach-bao-ve-du-lieu/' => 'Chính sách bảo vệ dữ liệu' ) as $path => $needle ) {
+	$r = http( 'GET', $path );
+	check( "bản đồ đường dẫn: {$path} trả 200 và đúng trang", 200 === $r['status'] && ( str_contains( strip_tags( $r['body'] ), $needle ) || '/' === $path || '/lien-he/' === $path ) );
+}
+// WordPress đoán đường dẫn thiếu cấp cha và chuyển hướng 301 về đúng trang; đường dẫn không tồn tại thì 404.
+foreach ( array( '/ban-lanh-dao/' => '/gioi-thieu/ban-lanh-dao/', '/phong-ban/' => '/gioi-thieu/phong-ban/' ) as $short => $full ) {
+	$r = http( 'GET', $short );
+	check( "đường dẫn thiếu cấp cha {$short}: 301 về {$full}", 301 === $r['status'] && str_contains( $r['headers'], 'Location: ' . $base . $full ) );
+}
+same( 'đường dẫn tự đặt trong phòng thử trước đây (/tuyen-dung-trang/) không còn', 404, http( 'GET', '/tuyen-dung-trang/' )['status'] );
+$careers = http( 'GET', '/tuyen-dung/' );
 $cx      = $dom( $careers['body'] );
 $cards   = $cx->query( '//article[contains(@class,"job-card")]' )->length;
 same( 'trang Tuyển dụng: chỉ 2 vị trí đang mở (không có quá hạn/đã đóng)', array( 200, 2 ), array( $careers['status'], $cards ) );
-$filtered = http( 'GET', '/tuyen-dung-trang/?q=ket+cau' );
+$filtered = http( 'GET', '/tuyen-dung/?q=ket+cau' );
 same( 'trang Tuyển dụng: lọc bằng GET không JS ("ket cau" tìm ra "Kỹ sư kết cấu")', 1, $dom( $filtered['body'] )->query( '//article[contains(@class,"job-card") and not(@hidden)]' )->length );
 $apply = http( 'GET', '/ung-tuyen/?id=' . $jobs['kts'] );
 $px    = $dom( $apply['body'] );

@@ -51,6 +51,9 @@ function vgarco_core_activate(): void {
 	vgarco_register_taxonomies(); // trước kiểu nội dung, cùng thứ tự với lúc chạy thường (xem taxonomies.php)
 	vgarco_register_post_types();
 	vgarco_seed_terms();
+	// Vai trò "Nhân sự tuyển dụng" cũng phải có ngay sau khi kích hoạt: nếu chỉ tạo ở admin_init thì cài mới bằng WP-CLI chưa có vai trò
+	// cho tới khi có người mở trang quản trị (tạo tài khoản nhân sự bằng `wp user create --role=vg_tuyen_dung` sẽ lỗi).
+	vgarco_apply_ensure_roles();
 	flush_rewrite_rules();
 }
 register_activation_hook( VGARCO_CORE_FILE, 'vgarco_core_activate' );

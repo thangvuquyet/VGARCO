@@ -25,7 +25,7 @@ if (spawnSync(php, ['-v']).error) {
 if (!existsSync(join(lab, 'wordpress', 'wp-load.php'))) { console.error('Chưa dựng môi trường: chạy node tests/wp-lab/bootstrap.mjs trước'); process.exit(1); }
 
 // Thứ tự có ý nghĩa: nhập dự án → dữ liệu tin/vị trí → các kịch bản dùng dữ liệu đó.
-const order = ['env', 'import', 'media', 'export', 'seed', 'apply', 'admin', 'site', 'security', 'crawl', 'acffree'];
+const order = ['env', 'import', 'media', 'export', 'seed', 'apply', 'admin', 'site', 'security', 'crawl', 'acffree', 'smoke'];
 const only = process.argv.slice(2);
 const todo = only.length ? order.filter((n) => only.includes(n)) : order;
 
@@ -42,10 +42,14 @@ let failed = 0;
 try {
   if (!(await ready())) throw new Error('máy chủ PHP không lên được ở localhost:8080 (cổng đang bận?)');
   for (const name of todo) {
-    const r = spawnSync(php, ['-c', ini, join(here, `it_${name}.php`)], { encoding: 'utf8', timeout: 600000 });
+    // 'smoke' là script Node kiểm website đang chạy (scripts/ops/smoke.mjs), không phải kịch bản PHP.
+    const r = name === 'smoke'
+      ? spawnSync(process.execPath, [join(here, '..', '..', 'scripts', 'ops', 'smoke.mjs'), 'http://localhost:8080', '--env=local'], { encoding: 'utf8', timeout: 120000 })
+      : spawnSync(php, ['-c', ini, join(here, `it_${name}.php`)], { encoding: 'utf8', timeout: 600000 });
     const out = ((r.stdout || '') + (r.stderr || '')).trim();
-    const tail = out.split('\n').filter((l) => /^(ĐẠT|THẤT BẠI|  ✗)|PHP (Fatal|Warning|Notice)|Fatal error/.test(l)).join('\n');
-    const ok = r.status === 0 && (name === 'seed' || /ĐẠT|BỎ QUA/.test(out));
+    const pattern = name === 'smoke' ? /^HỎNG|phép kiểm|Tất cả đạt/ : /^(ĐẠT|THẤT BẠI|  ✗)|PHP (Fatal|Warning|Notice)|Fatal error/;
+    const tail = out.split('\n').filter((l) => pattern.test(l)).join('\n');
+    const ok = r.status === 0 && (name === 'seed' || /ĐẠT|BỎ QUA|Tất cả đạt/.test(out));
     console.log(`${ok ? 'ĐẠT ' : 'LỖI '} ${name.padEnd(9)} ${ok ? (tail || out.split('\n').pop()) : '\n' + (tail || out).slice(0, 3000)}`);
     if (!ok) failed++;
   }

@@ -28,22 +28,26 @@ update_option( 'permalink_structure', '/%postname%/' );
 update_option( 'timezone_string', 'Asia/Ho_Chi_Minh' );
 update_option( 'blogdescription', 'Tư vấn thiết kế, giám sát và quản lý dự án xây dựng' );
 
-// Trang theo mẫu (khóa → [tiêu đề, slug, mẫu]).
+// Trang theo mẫu (khóa → [tiêu đề, đường dẫn đầy đủ, mẫu]) — đúng bản đồ đường dẫn của phương án 6.6: Ban lãnh đạo và Phòng ban là
+// trang CON của Về công ty (/gioi-thieu/ban-lanh-dao/), trang Tuyển dụng ở /tuyen-dung/ cùng tiền tố với chi tiết vị trí (/tuyen-dung/<slug>/).
 $pages = array(
 	'home'        => array( 'Trang chủ', 'trang-chu', '' ),
 	'about'       => array( 'Về công ty', 'gioi-thieu', 'templates/about.php' ),
-	'leadership'  => array( 'Ban lãnh đạo', 'ban-lanh-dao', 'templates/leadership.php' ),
-	'departments' => array( 'Phòng ban', 'phong-ban', 'templates/departments.php' ),
+	'leadership'  => array( 'Ban lãnh đạo', 'gioi-thieu/ban-lanh-dao', 'templates/leadership.php' ),
+	'departments' => array( 'Phòng ban', 'gioi-thieu/phong-ban', 'templates/departments.php' ),
 	'services'    => array( 'Lĩnh vực hoạt động', 'linh-vuc-hoat-dong', 'templates/services.php' ),
-	'careers'     => array( 'Tuyển dụng', 'tuyen-dung-trang', 'templates/careers.php' ),
+	'careers'     => array( 'Tuyển dụng', 'tuyen-dung', 'templates/careers.php' ),
 	'apply'       => array( 'Ứng tuyển', 'ung-tuyen', 'templates/apply.php' ),
 	'contact'     => array( 'Liên hệ', 'lien-he', 'templates/contact.php' ),
 	'privacy'     => array( 'Chính sách bảo vệ dữ liệu', 'chinh-sach-bao-ve-du-lieu', '' ),
 );
 $ids = array();
-foreach ( $pages as $key => [ $title, $slug, $template ] ) {
-	$existing = get_page_by_path( $slug );
-	$id       = $existing ? $existing->ID : wp_insert_post( array( 'post_type' => 'page', 'post_status' => 'publish', 'post_title' => $title, 'post_name' => $slug, 'post_content' => 'privacy' === $key ? '<p>Nội dung chính sách bảo vệ dữ liệu cá nhân (bản thử).</p>' : '' ) );
+foreach ( $pages as $key => [ $title, $path, $template ] ) {
+	$parts    = explode( '/', $path );
+	$slug     = end( $parts );
+	$parent   = count( $parts ) > 1 ? (int) ( get_page_by_path( $parts[0] )->ID ?? 0 ) : 0;
+	$existing = get_page_by_path( $path );
+	$id       = $existing ? $existing->ID : wp_insert_post( array( 'post_type' => 'page', 'post_status' => 'publish', 'post_title' => $title, 'post_name' => $slug, 'post_parent' => $parent, 'post_content' => 'privacy' === $key ? '<p>Nội dung chính sách bảo vệ dữ liệu cá nhân (bản thử).</p>' : '' ) );
 	if ( $template ) {
 		update_post_meta( $id, '_wp_page_template', $template );
 	}

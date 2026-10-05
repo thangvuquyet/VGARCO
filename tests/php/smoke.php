@@ -91,6 +91,9 @@ $prio = $GLOBALS['priorities']['init'] ?? array();
 check( 'init: phân loại đăng ký trước kiểu nội dung (ưu tiên số nhỏ hơn)', isset( $prio['vgarco_register_taxonomies'], $prio['vgarco_register_post_types'] ) && $prio['vgarco_register_taxonomies'] < $prio['vgarco_register_post_types'] );
 $core_main = (string) file_get_contents( VGARCO_CORE_DIR . 'vgarco-core.php' );
 check( 'kích hoạt: đăng ký phân loại trước kiểu nội dung (cùng thứ tự với lúc chạy thường)', strpos( $core_main, 'vgarco_register_taxonomies();' ) < strpos( $core_main, 'vgarco_register_post_types();' ) );
+// Cài mới bằng WP-CLI không chạy admin_init: vai trò Nhân sự phải được tạo ngay lúc kích hoạt (kiểm chứng thật ở tests/wp-lab/it_env.php).
+$activate = (string) substr( $core_main, (int) strpos( $core_main, 'function vgarco_core_activate' ), 900 );
+check( 'kích hoạt: tạo vai trò Nhân sự tuyển dụng (không chờ admin_init)', str_contains( $activate, 'vgarco_apply_ensure_roles();' ) );
 
 // --- Ảnh tải lên: bộ gỡ siêu dữ liệu (GPS) phải được nối vào WordPress ---
 // Hàm thuần có kiểm thử riêng (media.php); chạy thật trên WordPress ở tests/wp-lab/it_media.php. Ở đây chỉ bảo đảm KHÔNG ai tháo mất đường nối.

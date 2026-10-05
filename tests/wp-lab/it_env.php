@@ -10,6 +10,10 @@ foreach ( array( 'du_an', 'linh_vuc', 'tin_tuc', 'vi_tri', 'ho_so_ut' ) as $t ) 
 foreach ( array( 'loai_cong_trinh', 'chuyen_muc', 'noi_lam_viec', 'phong_ban' ) as $t ) {
 	check( "phân loại {$t} đã đăng ký", taxonomy_exists( $t ) );
 }
+// Cài mới bằng WP-CLI: chưa ai mở trang quản trị (admin_init) mà vai trò Nhân sự đã phải có để `wp user create --role=vg_tuyen_dung` chạy được.
+$hr = get_role( 'vg_tuyen_dung' );
+check( 'vai trò Nhân sự tuyển dụng có ngay sau khi kích hoạt (không chờ admin_init), đủ quyền hồ sơ', $hr && $hr->has_cap( 'vg_view_applications' ) && $hr->has_cap( 'vg_download_cv' ) && $hr->has_cap( 'vg_export_applications' ) && $hr->has_cap( 'vg_delete_applications' ) );
+check( 'Quản trị viên có đủ quyền hồ sơ ngay sau khi kích hoạt', get_role( 'administrator' )->has_cap( 'vg_view_applications' ) );
 same( '7 loại công trình được tạo sẵn', 7, (int) wp_count_terms( array( 'taxonomy' => 'loai_cong_trinh', 'hide_empty' => false ) ) );
 same( '3 chuyên mục tin được tạo sẵn', 3, (int) wp_count_terms( array( 'taxonomy' => 'chuyen_muc', 'hide_empty' => false ) ) );
 $o = get_post_type_object( 'ho_so_ut' );

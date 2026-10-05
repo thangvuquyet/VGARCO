@@ -17,9 +17,13 @@ wp-content/
 content/                           Bảng tính nhập liệu (xem content/README.md)
 scripts/i18n/                      Công cụ dịch: trích .pot, gộp bản dịch .po, biên dịch .mo (Node, không cần gettext)
 scripts/content/                   Công cụ nội dung: sinh projects.csv (Node), xuất ảnh master theo quy cách 9.2 (PHP + gd; xem content/README.md)
+scripts/ops/smoke.mjs              Kiểm nhanh một website đang chạy (trang chính, 404, REST, bề mặt tấn công, header, noindex)
+docs/                              Hồ sơ kỹ thuật bàn giao: kiến trúc, cấu hình, vận hành, triển khai, sao lưu, sự cố, sổ tài khoản
 tests/                             Kiểm thử tự động không cần WordPress (xem bên dưới)
 tests/wp-lab/                      Kiểm thử tích hợp trên WordPress thật (SQLite) — dựng bằng bootstrap.mjs
 ```
+
+**Người vận hành bắt đầu từ [`docs/README.md`](docs/README.md).** Kiểm nhanh một website đang chạy: `node scripts/ops/smoke.mjs https://<tên-miền> --env=production`.
 
 Nguyên tắc tách lớp: **kiểu nội dung không bao giờ nằm trong theme.** Đổi hoặc tắt theme thì dự án, tin tức, tuyển dụng vẫn còn nguyên trong trang quản trị.
 Mỗi chức năng có nghiệp vụ viết thành **hàm thuần** (`*-lib.php`) — kiểm thử được bằng dữ liệu giả — và một tệp mỏng nối vào WordPress.
@@ -80,7 +84,7 @@ Các bộ trên dùng hàm WordPress **giả** nên không thấy lỗi chỉ l�
 
 ```bash
 PHP=... PHP_EXT=... node tests/wp-lab/bootstrap.mjs wordpress.zip sqlite-database-integration.zip   # một lần
-PHP=... node tests/wp-lab/run.mjs                                                                   # 11 kịch bản, ~360 phép kiểm
+PHP=... node tests/wp-lab/run.mjs                                                                   # 12 kịch bản, ~400 phép kiểm
 ```
 
 Hướng dẫn, danh sách kịch bản và **giới hạn** (ACF PRO/WPML là bản giả, không có Nginx/Cloudflare/trình duyệt khác Chromium) ở [`tests/wp-lab/README.md`](tests/wp-lab/README.md).
