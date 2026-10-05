@@ -3,7 +3,8 @@
 namespace {
 	define( 'WP_CLI', true );
 	class WP_CLI {
-		public static array $lines = array();
+		public static array $lines  = array();
+		public static array $tables = array(); // các bảng đã in qua format_items (để kiểm nội dung)
 		public static function add_command( $name, $class ) {}
 		public static function log( $m ) { self::$lines[] = (string) $m; }
 		public static function success( $m ) { self::$lines[] = 'OK: ' . $m; }
@@ -13,5 +14,8 @@ namespace {
 	}
 }
 namespace WP_CLI\Utils {
-	function format_items( $format, $items, $fields ) { \WP_CLI::log( 'table: ' . count( $items ) . ' dòng' ); }
+	function format_items( $format, $items, $fields ) {
+		\WP_CLI::$tables[] = $items;
+		\WP_CLI::log( 'table: ' . count( $items ) . ' dòng' );
+	}
 }

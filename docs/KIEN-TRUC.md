@@ -32,7 +32,7 @@ Header bảo mật (HSTS, CSP...) **do Nginx gửi**, không gửi ở PHP.
 | `security*.php` | Khóa đăng nhập sai, "quên mật khẩu" không lộ tài khoản, báo quản trị viên mới |
 | `cache*.php` | Xóa cache Cloudflare |
 | `alerts.php` | Cảnh báo hệ thống cho người vận hành |
-| `media*.php` | Gỡ GPS/EXIF khỏi ảnh tải lên, giới hạn JPEG/PNG, kích thước ảnh, chất lượng AVIF/WebP |
+| `media*.php` | Gỡ GPS/EXIF khỏi ảnh tải lên, giới hạn JPEG/PNG, kích thước ảnh, chất lượng AVIF/WebP (AVIF hạ theo từng ảnh để giữ trần dung lượng) |
 | `cli/import*.php` | Lệnh `wp vgarco import` và `wp vgarco report` |
 | `editor.php` | Giới hạn khối soạn thảo, ẩn menu "Bài viết" mặc định |
 
@@ -101,6 +101,7 @@ Có Redis (object cache) thì transient nằm ở Redis, không ở bảng `opti
   Đăng nhập bằng tên hay bằng email của cùng người dùng chung một bộ đếm. Mọi lỗi đăng nhập dùng **một thông báo chung**; "Quên mật khẩu" không cho biết tài khoản có tồn tại hay không.
 - **Báo quản trị viên mới:** tạo mới hoặc nâng quyền lên Quản trị viên đều gửi email tới `admin_email`.
 - **Ảnh tải lên:** GPS, EXIF, XMP, IPTC bị gỡ khỏi tệp gốc (WordPress phục vụ công khai tệp gốc) trước khi tạo các bản thu nhỏ; ảnh dọc chụp bằng điện thoại được xoay thẳng trước khi gỡ hướng xoay; chỉ nhận JPEG và PNG; không xử lý được thì **xóa tệp và từ chối**.
+- **Trần dung lượng ảnh (mục 9.2 của kế hoạch, giữ nguyên, không nới):** bản AVIF mặc định ở chất lượng 55. Khi sinh bản thu nhỏ, hệ thống mã hóa thử bản AVIF lớn nhất bằng chính bộ mã hóa của máy chủ; nếu vượt trần (ảnh đầu trang 350 KB, trình chiếu 250 KB, thư viện/câu chuyện 300 KB, thẻ/lĩnh vực/tin tức 150 KB) thì hạ 55 → 50 → 45 cho tới khi vừa; ở 45 vẫn vượt thì giữ 45 và ghi nhận. Kết quả lưu ở meta `_vgarco_avif_quality` của ảnh (tạo lại bản thu nhỏ không đo lại), xem bằng `wp vgarco report images`. Bản nhỏ (dưới 60% cỡ gốc) giữ mức chung.
 - **IP người gửi:** `vgarco_client_ip()` tin header `CF-Connecting-IP`. An toàn **chỉ khi** máy chủ gốc chỉ nhận kết nối từ Cloudflare (ufw + Authenticated Origin Pulls); nếu không, kẻ tấn công giả header để né khóa đăng nhập và giới hạn tần suất.
 - **Không có thư mục tải lên thực thi được, không có cấu hình nằm trong web root:** phần này do Nginx quyết định (xem `TRIEN-KHAI.md`).
 

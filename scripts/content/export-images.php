@@ -149,7 +149,7 @@ foreach ( $plan['items'] as $item ) {
 			++$over;
 		}
 		if ( null !== $avif && $avif > $spec['ceiling_kb'] ) {
-			echo "    ⚠ AVIF ước lượng {$avif} KB vượt trần {$spec['ceiling_kb']} KB của mục 9.2 (quyết định trần còn mở): cân nhắc ảnh ít chi tiết hơn hoặc hạ chất lượng riêng ảnh này\n";
+			echo "    ⚠ AVIF ước lượng {$avif} KB vượt trần {$spec['ceiling_kb']} KB của mục 9.2 (trần được giữ): máy chủ sẽ tự hạ chất lượng AVIF riêng ảnh này khi nạp (tối thiểu 45); nếu ở 45 vẫn vượt thì cân nhắc ảnh ít chi tiết hơn — xem `wp vgarco report images`\n";
 			++$ceiling;
 		}
 		if ( $enc['quality'] < VGARCO_EXPORT_QUALITY ) {

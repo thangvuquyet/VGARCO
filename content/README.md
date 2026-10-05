@@ -71,6 +71,6 @@ công cụ không bao giờ tự cắt vì cắt tự động xén mất mái ho
 
 Đuôi `jpg`, `jpeg` hoặc `png` (PNG render 20–30 MB được đổi sang JPEG); tệp xuất luôn là `.jpg`. Mỗi ảnh được xoay theo EXIF, thu nhỏ vừa khung, nén JPEG chất lượng 86 (tự hạ từng bước nếu quá **1,5 MB**,
 chạm q70 mà vẫn quá thì báo lỗi), gỡ mọi siêu dữ liệu. Công cụ **báo** (không sửa): ảnh lệch tỉ lệ quy cách (`--strict` coi là lỗi), ảnh có hồ sơ màu không phải sRGB (GD không đổi được hồ sơ màu:
-xuất sRGB từ Lightroom/Photoshop trước), ảnh có AVIF ước lượng vượt trần dung lượng của mục 9.2 (chỉ cảnh báo vì trần còn chờ chủ đầu tư quyết). Tên sai, trùng hay tệp hỏng thì **không ghi gì cả**,
+xuất sRGB từ Lightroom/Photoshop trước), ảnh có AVIF ước lượng vượt trần dung lượng của mục 9.2 (chỉ cảnh báo: trần được giữ, máy chủ tự hạ chất lượng AVIF riêng ảnh đó khi nạp; xem `wp vgarco report images`). Tên sai, trùng hay tệp hỏng thì **không ghi gì cả**,
 mọi lỗi báo một lượt. Kết quả: các tệp `.jpg` trong thư mục xuất và (nếu có `--csv`) bộ khung `images.csv` — **chú thích để trống**, phải điền `chu_thich_vi` thật cho ảnh thư viện trước khi nhập;
 công cụ không ghi đè `images.csv` đã có. Rồi nhập: `wp vgarco import projects content/projects.csv --images=<thư-mục-xuất>`.

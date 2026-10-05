@@ -81,7 +81,7 @@ if ( wp_image_editor_supports( array( 'mime_type' => 'image/avif' ) ) ) {
 	$with    = $encode();
 	remove_filter( 'wp_editor_set_quality', 'vgarco_image_quality', 10 );
 	$without = $encode();
-	add_filter( 'wp_editor_set_quality', 'vgarco_image_quality', 10, 2 );
+	add_filter( 'wp_editor_set_quality', 'vgarco_image_quality', 10, 3 );
 	check( "AVIF qua bộ xử lý ảnh của WordPress: có bộ lọc nhẹ hơn rõ rệt (< 75% của mặc định): {$with} so với {$without} byte", $with > 0 && $with < 0.75 * $without );
 	same( 'bộ lọc không đổi chất lượng JPEG', 82, apply_filters( 'wp_editor_set_quality', 82, 'image/jpeg', array() ) );
 } else {
@@ -198,6 +198,133 @@ if ( ! empty( $m[1] ) ) {
 	file_put_contents( $bad, $gif );
 	$resp = http( 'POST', '/wp-admin/async-upload.php', array( 'headers' => array( 'Cookie: ' . $cookie ), 'body' => array( 'action' => 'upload-attachment', '_wpnonce' => $m[1], 'name' => 'gif.gif', 'async-upload' => new CURLFile( $bad, 'image/gif', 'gif.gif' ) ) ) );
 	check( 'tải GIF qua trang quản trị: bị từ chối', empty( $resp['json']['success'] ) );
+}
+
+/* ---- AVIF theo từng ảnh: giữ trần mục 9.2 (quyết định 05/10/2026) — chạy qua đường sinh bản thu nhỏ THẬT của WordPress ---- */
+if ( wp_image_editor_supports( array( 'mime_type' => 'image/avif' ) ) ) {
+	// Dọn ảnh thử còn sót của lần chạy hỏng trước, để báo cáo `report images` chỉ thấy ảnh của lần chạy này.
+	foreach ( get_posts( array( 'post_type' => 'attachment', 'post_status' => 'inherit', 'posts_per_page' => -1, 'fields' => 'ids', 'meta_key' => '_vgarco_avif_quality' ) ) as $old ) {
+		wp_delete_attachment( $old, true );
+	}
+	$noise = imagecreatetruecolor( 960, 540 ); // 16:9, nhiều chi tiết để mức nén có ảnh hưởng
+	mt_srand( 11 );
+	for ( $y = 0; $y < 540; $y += 3 ) {
+		for ( $x = 0; $x < 960; $x += 3 ) {
+			imagefilledrectangle( $noise, $x, $y, $x + 2, $y + 2, imagecolorallocate( $noise, mt_rand( 0, 255 ), mt_rand( 0, 255 ), mt_rand( 0, 255 ) ) );
+		}
+	}
+	ob_start();
+	imagejpeg( $noise, null, 90 );
+	$jpeg = (string) ob_get_clean();
+
+	// Mô phỏng Modern Image Formats: sau khi lõi sinh các bản thu nhỏ, mã hóa AVIF bản gốc và một bản 400 px bằng bộ xử lý ảnh của WordPress,
+	// KHÔNG ép chất lượng — mức dùng là mức do bộ lọc của VGARCO quyết.
+	$sim = array();
+	$mif = static function ( $meta, $id ) use ( &$sim, $tmp ) {
+		foreach ( array( 'full' => 0, 'small' => 400 ) as $label => $w ) {
+			$editor = wp_get_image_editor( get_attached_file( $id ) );
+			if ( $w ) {
+				$editor->resize( $w, null, false );
+			}
+			$saved = $editor->save( $tmp . '/sim-' . $label . '.avif', 'image/avif' );
+			$sim[ $label ] = is_wp_error( $saved ) ? -1 : (int) filesize( $saved['path'] );
+			@unlink( $tmp . '/sim-' . $label . '.avif' );
+		}
+		return $meta;
+	};
+	add_filter( 'wp_generate_attachment_metadata', $mif, 10, 2 );
+
+	// Số đo tham chiếu: cùng bộ mã hóa, ép đúng chất lượng.
+	$ref = static function ( string $file, int $width, int $q ) use ( $tmp ): int {
+		$state          = &vgarco_image_quality_state();
+		$state['force'] = $q;
+		$editor         = wp_get_image_editor( $file );
+		if ( $width ) {
+			$editor->resize( $width, null, false );
+		}
+		$saved          = $editor->save( $tmp . '/ref.avif', 'image/avif' );
+		$state['force'] = null;
+		$bytes          = (int) filesize( $saved['path'] );
+		@unlink( $saved['path'] );
+		return $bytes;
+	};
+
+	$ceiling = 1024; // trần giả 1 KB: không bậc nào vừa
+	$force_ceiling = static function () use ( &$ceiling ): int {
+		return $ceiling;
+	};
+	add_filter( 'vgarco_image_ceiling_bytes', $force_ceiling );
+	$avif_meta = static function ( int $id ): array {
+		$saved = get_post_meta( $id, '_vgarco_avif_quality', true );
+		return is_array( $saved ) ? $saved : array();
+	};
+
+	[ $aid, $err ] = $sideload( $jpeg, 'avif-theo-anh.jpg' );
+	check( 'ảnh thử AVIF: tải lên được' . ( $err ? " ({$err})" : '' ), is_int( $aid ) );
+	$created[] = $aid;
+	$file      = get_attached_file( $aid );
+	$b55       = $ref( $file, 0, 55 );
+	$b50       = $ref( $file, 0, 50 );
+	$b45       = $ref( $file, 0, 45 );
+	check( "bộ mã hóa thật cho dung lượng giảm dần theo chất lượng (55: {$b55}, 50: {$b50}, 45: {$b45} byte)", $b55 > $b50 && $b50 > $b45 );
+
+	$m = $avif_meta( $aid );
+	same( 'không bậc nào vừa trần: giữ 45 (bậc thấp nhất) và ghi nhận', array( 45, false, 1024 ), array( $m['quality'] ?? null, $m['fits'] ?? null, $m['ceiling'] ?? null ) );
+	same( '… dung lượng ghi nhận là số đo thật ở 45', $b45, $m['bytes'] ?? null );
+	same( 'bản AVIF lớn nhất do "plugin" sinh trong luồng thật dùng 45', $b45, $sim['full'] ?? null );
+	same( 'bản AVIF nhỏ (42% cỡ gốc) giữ mức chung 55', $ref( $file, 400, 55 ), $sim['small'] ?? null );
+	$state = &vgarco_image_quality_state();
+	same( 'xong ảnh: trạng thái được dọn (không rò sang ảnh sau)', array( null, null ), array( $state['force'], $state['ctx'] ) );
+
+	WP_CLI::$lines  = array();
+	WP_CLI::$tables = array();
+	( new VGARCO_CLI_Command() )->report( array( 'images' ), array() );
+	$row = WP_CLI::$tables[0][0] ?? array();
+	check( 'wp vgarco report images: liệt kê ảnh còn vượt trần ở mức thấp nhất', 1 === count( WP_CLI::$tables[0] ?? array() ) && $aid === ( $row['ID'] ?? 0 ) && 45 === ( $row['Chất lượng'] ?? 0 ) && str_contains( (string) ( $row['Kết quả'] ?? '' ), 'VẪN VƯỢT' ) );
+	check( 'wp vgarco report images: có cảnh báo tổng', (bool) array_filter( WP_CLI::$lines, fn( $l ) => str_starts_with( $l, 'WARN: 1 ảnh vẫn vượt trần' ) ) );
+
+	$regen = static function () use ( $aid, $file, $avif_meta ) {
+		wp_update_attachment_metadata( $aid, wp_generate_attachment_metadata( $aid, $file ) ); // như `wp media regenerate`
+		return $avif_meta( $aid );
+	};
+
+	$ceiling = (int) ( ( $b50 + $b55 ) / 2 ); // vượt ở 55, vừa ở 50
+	$m       = $regen();
+	same( 'đổi trần cho vừa ở 50: đo lại, hạ đúng một bậc', array( 50, true ), array( $m['quality'] ?? null, $m['fits'] ?? null ) );
+	same( '… bản AVIF lớn nhất dùng 50', $b50, $sim['full'] ?? null );
+
+	$ceiling = (int) ( ( $b45 + $b50 ) / 2 );
+	$m       = $regen();
+	same( 'trần chỉ vừa ở 45: hạ hai bậc', array( 45, true ), array( $m['quality'] ?? null, $m['fits'] ?? null ) );
+	same( '… bản AVIF lớn nhất dùng 45', $b45, $sim['full'] ?? null );
+
+	$ceiling = $b55 + 1;
+	$m       = $regen();
+	same( 'trần rộng: ảnh giữ nguyên mức chung 55 (không đổi gì)', array( 55, true ), array( $m['quality'] ?? null, $m['fits'] ?? null ) );
+	same( '… bản AVIF lớn nhất dùng 55', $b55, $sim['full'] ?? null );
+
+	WP_CLI::$tables = array();
+	( new VGARCO_CLI_Command() )->report( array( 'images' ), array() );
+	check( 'wp vgarco report images: ảnh đã vừa ở mức chung không còn trong báo cáo', array() === WP_CLI::$tables );
+
+	// Kết quả đã đo được nhớ: tạo lại bản thu nhỏ (wp media regenerate) không đo lại, dùng đúng mức đã lưu.
+	$m            = $avif_meta( $aid );
+	$m['quality'] = 47;
+	update_post_meta( $aid, '_vgarco_avif_quality', $m );
+	$regen();
+	same( 'tạo lại bản thu nhỏ: dùng mức đã lưu (47) thay vì đo lại', $ref( $file, 0, 47 ), $sim['full'] ?? null );
+
+	// Công tắc tắt: không hạ gì cả, về mức chung.
+	define( 'VGARCO_AVIF_ADAPTIVE', false );
+	$ceiling = 1024;
+	$regen();
+	same( 'VGARCO_AVIF_ADAPTIVE = false: bản AVIF lớn nhất về mức chung 55 dù vượt trần', $b55, $sim['full'] ?? null );
+
+	remove_filter( 'wp_generate_attachment_metadata', $mif, 10 );
+	remove_filter( 'vgarco_image_ceiling_bytes', $force_ceiling );
+} else {
+	echo "  (bỏ qua phép kiểm AVIF theo từng ảnh: bộ xử lý ảnh trên máy này không hỗ trợ AVIF)
+";
 }
 
 foreach ( $created as $cid ) {

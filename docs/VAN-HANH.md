@@ -30,6 +30,7 @@ Quy tắc chính (chi tiết ở `content/README.md`):
 - Ô trống trong bảng **không xóa** dữ liệu đã nhập tay trong trang quản trị; ô có giá trị thì bảng thắng.
 - Dự án mới vào ở trạng thái **nháp**: kiểm tra rồi mới xuất bản. Quyền **công bố chủ đầu tư/đối tác** mặc định tắt (cột `cong_bo_chu_dau_tu`).
 - Ảnh: xuất bằng `php scripts/content/export-images.php` (xoay, gỡ GPS, giới hạn kích thước và dung lượng, ra bộ khung `images.csv`), điền chú thích thật rồi nhập; ảnh nạp **một lần** theo nội dung (SHA-1), chạy lại không nạp trùng.
+- Sau khi nạp ảnh: `wp vgarco report images` liệt kê ảnh bị hạ chất lượng AVIF để vừa trần dung lượng (chất lượng 50 hoặc 45) và ảnh **vẫn vượt trần ở 45** — ảnh sau nên được thay bằng ảnh ít chi tiết hơn hoặc cắt lại. Ảnh không có trong báo cáo vẫn giữ chất lượng chung 55. Mã hóa thử làm việc nạp ảnh lớn chậm hơn (1–3 lần mã hóa thêm cho mỗi ảnh); nạp hàng loạt nên chạy bằng WP-CLI (không bị giới hạn thời gian của web).
 - Chỉ mục tìm kiếm tự làm mới khi dự án đổi. Khi bạn **xuất bản** dự án (hoặc sửa dự án đã xuất bản), cache Cloudflare được lên lịch xóa sau 30 giây (tùy chu kỳ cron hệ thống); dự án nháp không làm đổi trang công khai nên không kích hoạt xóa cache.
 
 Tin tức, vị trí tuyển dụng, lĩnh vực: nhập trong trang quản trị (khối soạn thảo bị giới hạn để không phá bố cục).

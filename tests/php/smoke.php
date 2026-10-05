@@ -100,6 +100,8 @@ check( 'kích hoạt: tạo vai trò Nhân sự tuyển dụng (không chờ adm
 check( 'ảnh: wp_handle_upload gọi bộ gỡ siêu dữ liệu (cả tải qua trang quản trị lẫn nhập bằng mã)', isset( $GLOBALS['priorities']['wp_handle_upload']['vgarco_sanitize_uploaded_image'] ) );
 check( 'ảnh: chất lượng AVIF/WebP có chủ đích (wp_editor_set_quality)', isset( $GLOBALS['priorities']['wp_editor_set_quality']['vgarco_image_quality'] ) );
 check( 'ảnh: có bộ lọc upload_mimes giới hạn định dạng ảnh', ! empty( $GLOBALS['hooks']['upload_mimes'] ) );
+check( 'ảnh: AVIF theo từng ảnh — báo ảnh nào đang sinh bản thu nhỏ (intermediate_image_sizes_advanced, ngoài bộ lọc bỏ kích thước thừa)', count( $GLOBALS['hooks']['intermediate_image_sizes_advanced'] ?? array() ) >= 2 );
+check( 'ảnh: AVIF theo từng ảnh — dọn trạng thái sau khi sinh xong (wp_generate_attachment_metadata)', ! empty( $GLOBALS['hooks']['wp_generate_attachment_metadata'] ) );
 
 // --- Đăng nhập an toàn: thứ tự bộ lọc (lỗi chỉ lộ ra trên WordPress thật) ---
 // wp_authenticate_username_password() (ưu tiên 20) bỏ qua WP_Error của bộ lọc đến trước rồi tự kiểm tra mật khẩu. Bộ chặn khóa phải chạy SAU

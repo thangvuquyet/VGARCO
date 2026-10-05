@@ -24,12 +24,97 @@ const VGARCO_AVIF_QUALITY = 55;
 const VGARCO_WEBP_QUALITY = 72;
 
 /**
- * Bộ lọc wp_editor_set_quality: chất lượng theo định dạng đầu ra.
+ * Chất lượng AVIF theo TỪNG ẢNH (quyết định 05/10/2026: giữ trần dung lượng của mục 9.2, không nới).
+ *
+ * Mức 55 vẫn để vài ảnh render nhiều chi tiết vượt trần. Khi nạp ảnh, máy chủ mã hóa thử bản AVIF LỚN NHẤT bằng chính bộ mã hóa đang chạy
+ * (nên không phụ thuộc số đo của GD ở phòng thử) và hạ lần lượt theo các bậc dưới đây cho tới khi vừa trần. Ảnh vừa ở 55 thì giữ 55 (không đổi gì).
+ * Bậc thấp nhất 45: ở đó hạt đá granite bắt đầu mất nhưng ảnh vẫn dùng được (so mắt 1:1, Phụ lục E). Ảnh nào 45 vẫn vượt thì giữ 45 và ghi nhận
+ * (`wp vgarco report images`) để người làm nội dung chọn lại ảnh, chứ không hạ thêm làm hỏng ảnh.
+ */
+const VGARCO_AVIF_QUALITY_STEPS = array( 55, 50, 45 );
+
+/**
+ * Trần dung lượng (byte) của bản AVIF lớn nhất, theo mục 9.2, suy từ kích thước ảnh nạp lên (vai trò của ảnh không được lưu ở đâu cả).
+ * 21:9 = ảnh đầu trang 350 KB; 16:9 = trình chiếu 250 KB; còn lại cạnh dài từ 1500 px (thư viện, câu chuyện công trình) 300 KB; nhỏ hơn
+ * (thẻ dự án, lĩnh vực, tin tức) 150 KB. Sai số tỉ lệ 3% như công cụ xuất ảnh.
+ */
+function vgarco_image_ceiling_bytes( int $width, int $height ): int {
+	$long  = max( $width, $height );
+	$short = min( $width, $height );
+	if ( $short <= 0 ) {
+		return 150 * 1024;
+	}
+	$ratio = $long / $short;
+	if ( abs( $ratio / ( 21 / 9 ) - 1 ) <= 0.03 ) {
+		return 350 * 1024;
+	}
+	if ( abs( $ratio / ( 16 / 9 ) - 1 ) <= 0.03 ) {
+		return 250 * 1024;
+	}
+	return ( $long >= 1500 ? 300 : 150 ) * 1024;
+}
+
+/**
+ * Chọn chất lượng AVIF cao nhất (theo các bậc) mà bản mã hóa vẫn vừa trần.
+ *
+ * @param callable $measure Nhận chất lượng, trả dung lượng byte sau khi mã hóa (null nếu không đo được).
+ * @param int      $ceiling Trần (byte).
+ * @param int[]    $steps   Các bậc, từ cao xuống thấp.
+ * @return array{quality:int, bytes:?int, fits:?bool} fits = null khi không đo được (giữ bậc đầu, không đoán).
+ */
+function vgarco_pick_avif_quality( callable $measure, int $ceiling, array $steps = VGARCO_AVIF_QUALITY_STEPS ): array {
+	$result = array( 'quality' => $steps[0] ?? VGARCO_AVIF_QUALITY, 'bytes' => null, 'fits' => null );
+	foreach ( $steps as $quality ) {
+		$bytes = $measure( $quality );
+		if ( null === $bytes ) {
+			return array( 'quality' => $steps[0], 'bytes' => null, 'fits' => null );
+		}
+		$result = array( 'quality' => $quality, 'bytes' => $bytes, 'fits' => $bytes <= $ceiling );
+		if ( $result['fits'] ) {
+			break;
+		}
+	}
+	return $result;
+}
+
+/**
+ * Trạng thái chất lượng của yêu cầu hiện tại (tham chiếu tới biến tĩnh).
+ *   force: chất lượng ép khi đang mã hóa thử (bộ lọc không đi qua ctx, tránh gọi lồng).
+ *   ctx:   ảnh đang được sinh các bản thu nhỏ: width (px của ảnh gốc), quality (null = chưa quyết), resolve (hàm quyết, chỉ gọi khi thật sự cần AVIF).
+ *
+ * @return array{force:?int, ctx:?array}
+ */
+function &vgarco_image_quality_state(): array {
+	static $state = array( 'force' => null, 'ctx' => null );
+	return $state;
+}
+
+/**
+ * Bộ lọc wp_editor_set_quality: chất lượng theo định dạng đầu ra (và theo ảnh, với AVIF).
  *
  * @param int    $default Chất lượng mặc định của WordPress cho định dạng đó.
  * @param string $mime    Định dạng đầu ra (image/jpeg, image/avif, image/webp...).
+ * @param array  $size    Kích thước bản đang sinh (width, height); WordPress ≥ 6.8 truyền vào.
  */
-function vgarco_image_quality( $default, $mime = '' ): int {
+function vgarco_image_quality( $default, $mime = '', $size = array() ): int {
+	if ( 'image/avif' === $mime ) {
+		$state = &vgarco_image_quality_state();
+		if ( null !== $state['force'] ) {
+			return (int) $state['force'];
+		}
+		$ctx = $state['ctx'];
+		if ( is_array( $ctx ) ) {
+			if ( null === $ctx['quality'] && is_callable( $ctx['resolve'] ?? null ) ) {
+				$state['ctx']['quality'] = (int) ( $ctx['resolve'] )(); // chỉ tới lúc này mới tốn công đo
+				$ctx                     = $state['ctx'];
+			}
+			// Chỉ các bản gần cỡ ảnh gốc mới chạm trần; bản nhỏ giữ chất lượng chung cho đồng đều và vì đã nhẹ sẵn.
+			$width = (int) ( $size['width'] ?? 0 );
+			if ( null !== $ctx['quality'] && ( $width <= 0 || $ctx['width'] <= 0 || $width >= 0.6 * $ctx['width'] ) ) {
+				return (int) $ctx['quality'];
+			}
+		}
+	}
 	return match ( $mime ) {
 		'image/avif' => VGARCO_AVIF_QUALITY,
 		'image/webp' => VGARCO_WEBP_QUALITY,

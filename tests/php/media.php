@@ -57,6 +57,107 @@ same( 'PNG giữ mặc định', 90, vgarco_image_quality( 90, 'image/png' ) );
 same( 'định dạng khác/không rõ giữ mặc định', 77, vgarco_image_quality( 77, '' ) );
 same( 'mặc định đưa vào dạng chuỗi vẫn ra số nguyên', 82, vgarco_image_quality( '82', 'image/jpeg' ) );
 check( 'AVIF nén mạnh hơn WebP, WebP nén mạnh hơn mặc định (thứ tự có chủ đích)', VGARCO_AVIF_QUALITY < VGARCO_WEBP_QUALITY && VGARCO_WEBP_QUALITY < 82 );
+check( 'các bậc chất lượng AVIF: bắt đầu từ mức chung, giảm dần, tối thiểu 45', VGARCO_AVIF_QUALITY_STEPS[0] === VGARCO_AVIF_QUALITY && VGARCO_AVIF_QUALITY_STEPS === array( 55, 50, 45 ) );
+
+/* ========== Chất lượng AVIF theo từng ảnh (giữ trần mục 9.2) ========== */
+
+$KB = 1024;
+foreach (
+	array(
+		'ảnh đầu trang 21:9 (2560×1097)'                 => array( 2560, 1097, 350 ),
+		'ảnh đầu trang lệch tỉ lệ trong sai số 3% (2560×1100)' => array( 2560, 1100, 350 ),
+		'trình chiếu 16:9 (1600×900)'                    => array( 1600, 900, 250 ),
+		'thẻ dự án 4:3 (1200×900)'                       => array( 1200, 900, 150 ),
+		'thư viện ngang 3:2 (1800×1200)'                 => array( 1800, 1200, 300 ),
+		'thư viện dọc 2:3 (1200×1800)'                   => array( 1200, 1800, 300 ),
+		'thư viện 4:3 (1800×1350)'                       => array( 1800, 1350, 300 ),
+		'lĩnh vực, tin tức 3:2 (1200×800)'               => array( 1200, 800, 150 ),
+		'ảnh nhỏ (800×600)'                              => array( 800, 600, 150 ),
+		'lệch 21:9 quá sai số (2560×1200) tính theo cỡ'  => array( 2560, 1200, 300 ),
+		'kích thước 0 không chia cho 0'                  => array( 0, 0, 150 ),
+	) as $label => [ $w, $h, $kb ]
+) {
+	same( "trần AVIF: {$label}", $kb * $KB, vgarco_image_ceiling_bytes( $w, $h ) );
+}
+
+$calls = array();
+$curve = static function ( array $bytes_by_q ) use ( &$calls ): callable {
+	return static function ( int $q ) use ( $bytes_by_q, &$calls ): ?int {
+		$calls[] = $q;
+		return $bytes_by_q[ $q ] ?? null;
+	};
+};
+
+$calls = array();
+same( 'vừa trần ở 55: giữ 55, chỉ đo một lần', array( 'quality' => 55, 'bytes' => 300, 'fits' => true ), vgarco_pick_avif_quality( $curve( array( 55 => 300, 50 => 250, 45 => 200 ) ), 350 ) );
+same( '… số lần đo', array( 55 ), $calls );
+
+$calls = array();
+same( 'vượt ở 55, vừa ở 50: hạ một bậc', array( 'quality' => 50, 'bytes' => 340, 'fits' => true ), vgarco_pick_avif_quality( $curve( array( 55 => 400, 50 => 340, 45 => 250 ) ), 350 ) );
+same( '… dừng ngay khi vừa (không đo 45)', array( 55, 50 ), $calls );
+
+$calls = array();
+same( 'chỉ vừa ở 45', array( 'quality' => 45, 'bytes' => 349, 'fits' => true ), vgarco_pick_avif_quality( $curve( array( 55 => 600, 50 => 450, 45 => 349 ) ), 350 ) );
+
+same( 'đúng bằng trần là vừa', true, vgarco_pick_avif_quality( $curve( array( 55 => 350 ) ), 350 )['fits'] );
+same( 'hơn trần 1 byte là vượt', false, vgarco_pick_avif_quality( $curve( array( 55 => 351, 50 => 351, 45 => 351 ) ), 350 )['fits'] );
+
+$calls = array();
+same( '45 vẫn vượt: giữ 45 (không hạ thêm) và báo vượt', array( 'quality' => 45, 'bytes' => 500, 'fits' => false ), vgarco_pick_avif_quality( $curve( array( 55 => 900, 50 => 700, 45 => 500 ) ), 350 ) );
+same( '… đã thử đủ ba bậc theo thứ tự', array( 55, 50, 45 ), $calls );
+
+$calls = array();
+same( 'không đo được: giữ mức chung, không đoán, không đo tiếp', array( 'quality' => 55, 'bytes' => null, 'fits' => null ), vgarco_pick_avif_quality( $curve( array() ), 350 ) );
+same( '… dừng ở lần đo hỏng đầu tiên', array( 55 ), $calls );
+
+$calls = array();
+same( 'đo hỏng giữa chừng: về mức chung, không giữ bậc nửa vời', array( 'quality' => 55, 'bytes' => null, 'fits' => null ), vgarco_pick_avif_quality( $curve( array( 55 => 600 ) ), 350 ) );
+
+// Bộ lọc chất lượng theo ảnh: trạng thái nằm trong biến tĩnh, mỗi phép thử dọn lại.
+$state = &vgarco_image_quality_state();
+$reset = static function () use ( &$state ): void {
+	$state = array( 'force' => null, 'ctx' => null );
+};
+
+$reset();
+$state['ctx'] = array( 'width' => 2560, 'quality' => 45, 'resolve' => null );
+same( 'ảnh đã quyết 45: bản AVIF lớn nhất dùng 45', 45, vgarco_image_quality( 82, 'image/avif', array( 'width' => 2560, 'height' => 1097 ) ) );
+same( '… bản 1600 (62% cỡ gốc) cũng dùng 45', 45, vgarco_image_quality( 82, 'image/avif', array( 'width' => 1600, 'height' => 686 ) ) );
+same( '… bản 1200 (47% cỡ gốc) giữ mức chung 55: đã nhẹ sẵn', 55, vgarco_image_quality( 82, 'image/avif', array( 'width' => 1200, 'height' => 514 ) ) );
+same( '… không biết kích thước bản đang sinh thì dùng mức của ảnh', 45, vgarco_image_quality( 82, 'image/avif' ) );
+same( '… WebP không bị đổi', 72, vgarco_image_quality( 86, 'image/webp', array( 'width' => 2560 ) ) );
+same( '… JPEG không bị đổi', 82, vgarco_image_quality( 82, 'image/jpeg', array( 'width' => 2560 ) ) );
+
+$reset();
+$state['ctx'] = array( 'width' => 2560, 'quality' => 45, 'resolve' => null );
+$state['force'] = 50;
+same( 'đang mã hóa thử: chất lượng ép thắng mức của ảnh', 50, vgarco_image_quality( 82, 'image/avif', array( 'width' => 2560 ) ) );
+same( '… cả khi chưa có ảnh nào đang xử lý', 50, ( static function () use ( &$state ) {
+	$state['ctx'] = null;
+	return vgarco_image_quality( 82, 'image/avif' );
+} )() );
+
+$reset();
+same( 'không có ảnh nào đang xử lý: mức chung', 55, vgarco_image_quality( 82, 'image/avif', array( 'width' => 2560 ) ) );
+
+// Quyết định chậm: chỉ đo khi thật sự có bản AVIF được sinh, và chỉ đo một lần cho mỗi ảnh.
+$reset();
+$resolved       = 0;
+$state['ctx']   = array(
+	'width'   => 1600,
+	'quality' => null,
+	'resolve' => static function () use ( &$resolved ): int {
+		++$resolved;
+		return 50;
+	},
+);
+same( 'chưa cần AVIF (JPEG): không đo', 82, vgarco_image_quality( 82, 'image/jpeg', array( 'width' => 1600 ) ) );
+same( '… vẫn chưa đo', 0, $resolved );
+same( 'bản AVIF đầu tiên: đo rồi dùng kết quả', 50, vgarco_image_quality( 82, 'image/avif', array( 'width' => 1600 ) ) );
+same( 'bản AVIF thứ hai (75% cỡ gốc): dùng lại, không đo nữa', 50, vgarco_image_quality( 82, 'image/avif', array( 'width' => 1200 ) ) );
+same( 'bản AVIF nhỏ (50% cỡ gốc): mức chung', 55, vgarco_image_quality( 82, 'image/avif', array( 'width' => 800 ) ) );
+same( '… tổng cộng chỉ đo một lần', 1, $resolved );
+$reset();
 
 /* ========== JPEG: gỡ siêu dữ liệu ========== */
 

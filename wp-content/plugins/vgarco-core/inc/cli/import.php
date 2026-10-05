@@ -116,6 +116,7 @@ class VGARCO_CLI_Command {
 	 *
 	 * <report>
 	 * : translations — liệt kê nội dung đã xuất bản bằng tiếng Việt mà chưa có bản dịch.
+	 *   images — liệt kê ảnh bị hạ chất lượng AVIF để vừa trần dung lượng (mục 9.2), và ảnh vẫn vượt trần ở mức thấp nhất.
 	 *
 	 * [--lang=<lang>]
 	 * : Ngôn ngữ đích (mặc định de).
@@ -124,8 +125,12 @@ class VGARCO_CLI_Command {
 	 * @param array<string,string> $assoc
 	 */
 	public function report( array $args, array $assoc ): void {
+		if ( 'images' === ( $args[0] ?? '' ) ) {
+			$this->report_images();
+			return;
+		}
 		if ( 'translations' !== ( $args[0] ?? '' ) ) {
-			WP_CLI::error( 'Chỉ hỗ trợ: translations.' );
+			WP_CLI::error( 'Chỉ hỗ trợ: translations, images.' );
 		}
 		$lang = (string) ( $assoc['lang'] ?? 'de' );
 		$rows = array();
@@ -145,6 +150,38 @@ class VGARCO_CLI_Command {
 		}
 		\WP_CLI\Utils\format_items( 'table', $rows, array( 'ID', 'Loại', 'Tiêu đề' ) );
 		WP_CLI::warning( count( $rows ) . " mục chưa có bản {$lang}." );
+	}
+
+	/**
+	 * Ảnh đã bị hạ chất lượng AVIF (quality < 55) và ảnh còn vượt trần ở mức thấp nhất. Chỉ đọc meta đã lưu lúc sinh các bản thu nhỏ.
+	 */
+	private function report_images(): void {
+		$rows = array();
+		$over = 0;
+		foreach ( get_posts( array( 'post_type' => 'attachment', 'post_status' => 'inherit', 'posts_per_page' => -1, 'fields' => 'ids', 'meta_key' => '_vgarco_avif_quality' ) ) as $id ) { // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			$m = get_post_meta( $id, '_vgarco_avif_quality', true );
+			if ( ! is_array( $m ) || ( (int) ( $m['quality'] ?? VGARCO_AVIF_QUALITY ) >= VGARCO_AVIF_QUALITY && false !== ( $m['fits'] ?? null ) ) ) {
+				continue;
+			}
+			$still = false === ( $m['fits'] ?? null );
+			$over += $still ? 1 : 0;
+			$rows[] = array(
+				'ID' => $id,
+				'Tệp' => wp_basename( (string) get_attached_file( $id ) ),
+				'Chất lượng' => (int) $m['quality'],
+				'KB' => isset( $m['bytes'] ) ? round( $m['bytes'] / 1024 ) : '?',
+				'Trần KB' => round( ( (int) ( $m['ceiling'] ?? 0 ) ) / 1024 ),
+				'Kết quả' => $still ? 'VẪN VƯỢT TRẦN — chọn lại ảnh' : 'đã hạ để vừa trần',
+			);
+		}
+		if ( ! $rows ) {
+			WP_CLI::success( 'Không có ảnh nào bị hạ chất lượng AVIF hoặc vượt trần.' );
+			return;
+		}
+		\WP_CLI\Utils\format_items( 'table', $rows, array( 'ID', 'Tệp', 'Chất lượng', 'KB', 'Trần KB', 'Kết quả' ) );
+		if ( $over ) {
+			WP_CLI::warning( "{$over} ảnh vẫn vượt trần ở chất lượng thấp nhất: nên chọn lại ảnh hoặc xin chủ đầu tư nới trần cho ảnh đó." );
+		}
 	}
 
 	/* ---------------------------------------------------------------- nội bộ */

@@ -16,6 +16,7 @@
 | `VGARCO_CF_TOKEN` | Production | Như trên | API token chỉ có quyền **Zone → Cache Purge** trên đúng zone này. Không dùng khóa toàn quyền (Global API Key) |
 | `VGARCO_TELEGRAM_TOKEN`, `VGARCO_TELEGRAM_CHAT` | Nên có | Cảnh báo chỉ hiện ở trang quản trị (và email với cảnh báo khẩn) | Cần **cả hai** mới gửi Telegram |
 | `VG_MAIL_ALLOW` | Staging | Staging chặn **mọi** thư | Mảng địa chỉ hoặc `@tên-miền` được phép nhận thư khi `WP_ENVIRONMENT_TYPE = staging`. Ví dụ `array( 'ten@example.com', '@vgarco.vn' )` |
+| `VGARCO_AVIF_ADAPTIVE` | Không | Bật (`true`) | `false` tắt việc hạ chất lượng AVIF theo từng ảnh (mọi ảnh về mức chung 55, có thể vượt trần dung lượng). Chỉ tắt khi bộ mã hóa AVIF của máy chủ quá chậm khiến nạp/tải ảnh lên bị quá thời gian (mỗi ảnh lớn phải mã hóa thử 1–3 lần) |
 | `WP_ENVIRONMENT_TYPE` | Có | WordPress coi là `production` | `local`, `staging` hoặc `production` — xem mục 3 |
 
 Hằng số WordPress nên đặt ở production (thiết kế): `DISALLOW_FILE_EDIT`, `DISALLOW_FILE_MODS` (cập nhật chỉ qua WP-CLI dưới tài khoản `deploy`, xem `VAN-HANH.md`), `AUTOMATIC_UPDATER_DISABLED`, `FORCE_SSL_ADMIN`,

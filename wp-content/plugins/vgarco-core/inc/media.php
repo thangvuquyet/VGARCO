@@ -48,7 +48,100 @@ add_filter(
 );
 
 // Chất lượng AVIF/WebP có chủ đích (xem media-lib.php): mặc định của WordPress làm ảnh AVIF lớn gấp đôi trần dung lượng của kế hoạch.
-add_filter( 'wp_editor_set_quality', 'vgarco_image_quality', 10, 2 );
+add_filter( 'wp_editor_set_quality', 'vgarco_image_quality', 10, 3 );
+
+/*
+ * Chất lượng AVIF theo từng ảnh (xem media-lib.php): ảnh nào bản AVIF lớn nhất vượt trần mục 9.2 ở mức 55 thì hạ xuống 50 rồi 45.
+ * Bộ lọc intermediate_image_sizes_advanced chạy ngay trước khi sinh các bản thu nhỏ (cả khi nạp, tải lên và `wp media regenerate`) và biết ảnh nào;
+ * wp_generate_attachment_metadata (ưu tiên 99) chạy sau cùng, sau cả plugin sinh AVIF, nên dọn trạng thái ở đó.
+ * Tắt hẳn bằng define( 'VGARCO_AVIF_ADAPTIVE', false ) trong wp-config.php nếu bộ mã hóa AVIF của máy chủ quá chậm cho việc mã hóa thử.
+ */
+add_filter(
+	'intermediate_image_sizes_advanced',
+	static function ( array $sizes, $image_meta = array(), $attachment_id = 0 ): array {
+		$state        = &vgarco_image_quality_state();
+		$state['ctx'] = null;
+		if ( ( defined( 'VGARCO_AVIF_ADAPTIVE' ) && ! VGARCO_AVIF_ADAPTIVE ) || ! $attachment_id || ! is_array( $image_meta ) ) {
+			return $sizes;
+		}
+		$id    = (int) $attachment_id;
+		$width = (int) ( $image_meta['width'] ?? 0 );
+		$high  = (int) ( $image_meta['height'] ?? 0 );
+		// Ghi nhớ kết quả đã đo (wp media regenerate không đo lại), nhưng đo lại khi đổi bộ mã hóa, đổi trần hoặc thay tệp ảnh.
+		$state['ctx'] = array(
+			'width'   => $width,
+			'quality' => null,
+			'resolve' => static fn(): int => vgarco_resolve_avif_quality( $id, $width, $high ),
+		);
+		return $sizes;
+	},
+	20,
+	3
+);
+add_filter(
+	'wp_generate_attachment_metadata',
+	static function ( $metadata ) {
+		$state        = &vgarco_image_quality_state();
+		$state['ctx'] = null;
+		return $metadata;
+	},
+	99
+);
+
+/**
+ * Mã hóa thử ảnh (cỡ lớn nhất sẽ có, tối đa 2560 px) thành AVIF ở một chất lượng và trả dung lượng.
+ *
+ * @return int|null null nếu không mã hóa được (bộ xử lý ảnh không hỗ trợ AVIF, tệp hỏng...).
+ */
+function vgarco_measure_avif_bytes( string $file, int $quality ): ?int {
+	$state          = &vgarco_image_quality_state();
+	$state['force'] = $quality;
+	$dest           = trailingslashit( get_temp_dir() ) . wp_unique_filename( get_temp_dir(), 'vgarco-do-avif.avif' );
+	try {
+		$editor = wp_get_image_editor( $file );
+		if ( is_wp_error( $editor ) ) {
+			return null;
+		}
+		$size = $editor->get_size();
+		if ( (int) ( $size['width'] ?? 0 ) > 2560 ) {
+			$editor->resize( 2560, null, false );
+		}
+		$saved = $editor->save( $dest, 'image/avif' );
+		if ( is_wp_error( $saved ) || empty( $saved['path'] ) || 'image/avif' !== ( $saved['mime-type'] ?? '' ) ) {
+			return null;
+		}
+		$bytes = (int) filesize( $saved['path'] );
+		wp_delete_file( $saved['path'] );
+		return $bytes > 0 ? $bytes : null;
+	} finally {
+		$state['force'] = null;
+		wp_delete_file( $dest );
+	}
+}
+
+/**
+ * Quyết chất lượng AVIF của một ảnh đã đính kèm: dùng kết quả đã lưu nếu còn đúng, không thì đo và lưu (meta _vgarco_avif_quality).
+ */
+function vgarco_resolve_avif_quality( int $attachment_id, int $width, int $height ): int {
+	$file = get_attached_file( $attachment_id );
+	if ( ! $file || ! is_readable( $file ) || ! wp_image_editor_supports( array( 'mime_type' => 'image/avif' ) ) ) {
+		return VGARCO_AVIF_QUALITY;
+	}
+	$ceiling = (int) apply_filters( 'vgarco_image_ceiling_bytes', vgarco_image_ceiling_bytes( $width, $height ), $width, $height );
+	$probe   = wp_get_image_editor( $file );
+	$editor  = is_wp_error( $probe ) ? '' : get_class( $probe );
+	unset( $probe );
+	$sig = md5( implode( '|', array( $editor, $ceiling, $width, $height, (int) filesize( $file ), VGARCO_AVIF_QUALITY_STEPS[0] ) ) );
+
+	$saved = get_post_meta( $attachment_id, '_vgarco_avif_quality', true );
+	if ( is_array( $saved ) && ( $saved['sig'] ?? '' ) === $sig && isset( $saved['quality'] ) ) {
+		return (int) $saved['quality'];
+	}
+
+	$pick = vgarco_pick_avif_quality( static fn( int $q ): ?int => vgarco_measure_avif_bytes( $file, $q ), $ceiling );
+	update_post_meta( $attachment_id, '_vgarco_avif_quality', $pick + array( 'ceiling' => $ceiling, 'sig' => $sig, 'editor' => $editor ) );
+	return $pick['quality'];
+}
 
 /*
  * Siêu dữ liệu ảnh (tọa độ GPS, giờ chụp, thiết bị).
