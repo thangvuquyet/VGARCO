@@ -3,10 +3,27 @@
 
 const DESKTOP = window.matchMedia( '(min-width: 1181px)' );
 
+// Đổ bóng thanh đầu trang khi đã cuộn khỏi đầu trang (lớp is-stuck, kiểu dáng ở components/_header.scss).
+function initHeaderShadow( header ) {
+	let stuck = null;
+	const update = () => {
+		const next = window.scrollY > 12;
+		if ( next !== stuck ) {
+			stuck = next;
+			header.classList.toggle( 'is-stuck', next );
+		}
+	};
+	update();
+	window.addEventListener( 'scroll', update, { passive: true } );
+}
+
 export function initNav() {
 	const header = document.querySelector( '.header' );
 	const nav = header?.querySelector( '#main-nav' );
 	const toggle = header?.querySelector( '.menu-toggle' );
+	if ( header ) {
+		initHeaderShadow( header );
+	}
 	if ( ! header || ! nav || ! toggle ) {
 		return;
 	}

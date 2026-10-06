@@ -87,6 +87,10 @@ foreach ( $fx_empty ? array() : json_decode( (string) file_get_contents( __DIR__
 	$image    = fx_image( $pin ? $pin[1] : $row['image'] );
 	$kind     = $pin ? $pin[2] : $row['kind'];
 	$featured = $pin ? $pin[3] : false;
+	// VG_FX_ONE_FEATURED=1: chỉ một dự án nổi bật (trình chiếu một ảnh: không có chấm chọn ảnh).
+	if ( getenv( 'VG_FX_ONE_FEATURED' ) && 101 !== $id ) {
+		$featured = false;
+	}
 	$showcase = $pin ? $pin[4] : false;
 
 	// Thư viện = các ảnh ngoài ảnh đầu trang. Bản thiết kế bỏ ảnh đầu của mảng gallery vì nó là ảnh bìa.

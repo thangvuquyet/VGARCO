@@ -91,6 +91,16 @@ $methods = array_slice(
 				<div class="showcase-grid" aria-hidden="true"></div>
 				<div class="showcase-watermark" aria-hidden="true">VG</div>
 
+				<?php if ( count( $slides ) > 1 ) : ?>
+					<?php // Chấm chọn ảnh: chỉ khi có từ 2 ảnh; ẩn tới khi home.js chạy (không JS thì bấm không làm gì). ?>
+					<div class="showcase-dots on-dark" data-hero-dots role="group" aria-label="<?php esc_attr_e( 'Chọn ảnh trình chiếu', 'vgarco' ); ?>" hidden>
+						<?php foreach ( $slides as $i => $slide ) : ?>
+							<button type="button" class="showcase-dot" data-hero-dot<?php echo 0 === $i ? ' aria-current="true"' : ''; ?>
+								aria-label="<?php /* translators: 1: số thứ tự ảnh, 2: tổng số ảnh, 3: tên dự án. */ echo esc_attr( sprintf( __( 'Ảnh %1$d / %2$d: %3$s', 'vgarco' ), $i + 1, count( $slides ), $slide['title'] ) ); ?>"></button>
+						<?php endforeach; ?>
+					</div>
+				<?php endif; ?>
+
 				<?php foreach ( $slides as $i => $slide ) : ?>
 					<?php if ( '' !== $slide['title'] ) : ?>
 						<div class="showcase-caption<?php echo 0 === $i ? ' is-active' : ''; ?>">

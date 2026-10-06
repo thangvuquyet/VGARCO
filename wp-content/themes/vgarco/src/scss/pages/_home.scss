@@ -228,7 +228,7 @@
   object-position: 50% 52%;
   filter: saturate(0.94) contrast(1.02);
   opacity: 0;
-  transition: opacity 0.7s ease;
+  transition: opacity 0.9s ease; // 0,9 s như bản đầu của theme; caption bên dưới cùng nhịp
 
   &.is-active {
     opacity: 1;
@@ -282,6 +282,45 @@
   }
 }
 
+// Chấm chọn ảnh (như bản đầu của theme), ở góc trên bên trái khung ảnh — góc dưới đã có chú thích, góc trên bên phải có chữ VG mờ.
+// Mỗi nút cao 44 px, rộng 40 px (vùng bấm), vạch nhìn thấy chỉ dày 3 px. Server sinh nút có thuộc tính hidden; home.js bỏ hidden khi có JS (không JS thì nút không làm gì nên không hiện).
+.showcase-dots {
+  position: absolute;
+  top: 0.375rem;
+  left: 0.5rem;
+  z-index: 5;
+  display: flex;
+}
+
+.showcase-dot {
+  position: relative;
+  width: 2.5rem;
+  height: 2.75rem;
+  padding: 0;
+  cursor: pointer;
+  background: none;
+  border: 0;
+
+  // Viền mảnh sẫm quanh vạch để vẫn thấy rõ trên ảnh sáng (nền trời).
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 0.25rem;
+    left: 0.25rem;
+    height: 3px;
+    margin-top: -1.5px;
+    background: rgb(255 255 255 / 48%);
+    box-shadow: 0 0 0 1px rgb(8 10 9 / 28%);
+    transition: background-color 0.2s ease;
+  }
+
+  &:hover::before,
+  &[aria-current='true']::before {
+    background: #fff;
+  }
+}
+
 // Chú thích của từng ảnh, chuyển mờ dần cùng ảnh. Chú thích không hoạt động bị ẩn khỏi trình đọc màn hình và bàn phím.
 .showcase-caption {
   position: absolute;
@@ -293,13 +332,13 @@
   visibility: hidden;
   opacity: 0;
   transition:
-    opacity 0.7s ease,
-    visibility 0s 0.7s;
+    opacity 0.9s ease,
+    visibility 0s 0.9s;
 
   &.is-active {
     visibility: visible;
     opacity: 1;
-    transition: opacity 0.7s ease;
+    transition: opacity 0.9s ease;
   }
 
   .eyebrow {

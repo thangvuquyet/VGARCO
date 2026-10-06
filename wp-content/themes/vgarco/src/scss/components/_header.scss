@@ -13,6 +13,17 @@
   background: var(--c-surface);
   border-bottom: 1px solid var(--c-line);
   isolation: isolate;
+  transition: box-shadow 0.2s ease;
+
+  // Đã cuộn khỏi đầu trang (nav.js đặt lớp này): đổ bóng nhẹ như bản đầu của theme. Không thu nhỏ thanh: chiều cao đã đo theo bản thiết kế và co giãn sẽ làm nội dung bên dưới giật.
+  &.is-stuck {
+    box-shadow: var(--shadow-header);
+  }
+
+  // Dưới điểm gãy menu ngang, menu trượt vào từ bên phải (components/_nav.scss): phần đang nằm ngoài màn hình không được làm trang cuộn ngang được.
+  @media (max-width: #{$bp-nav - 1px}) {
+    overflow-x: clip;
+  }
 
   @include up($bp-md) {
     gap: 0.9375rem;
@@ -190,6 +201,18 @@
     width: 22px;
     height: 1px;
     background: var(--c-ink);
+    transition: transform 0.2s ease;
+  }
+
+  // Đang mở: hai vạch thành dấu X. Tâm hai vạch cách nhau 7 px (khe 6 + dày 1) nên mỗi vạch dịch 3,5 px vào giữa rồi xoay ±45°.
+  &[aria-expanded='true'] {
+    span:first-child {
+      transform: translateY(3.5px) rotate(45deg);
+    }
+
+    span:last-child {
+      transform: translateY(-3.5px) rotate(-45deg);
+    }
   }
 
   @include up($bp-nav) {

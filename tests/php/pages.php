@@ -171,6 +171,20 @@ same( 'hero: đúng một chú thích hiển thị', 1, q( $x, '//*[' . cls( 'sh
 check( 'hero: liên kết chú thích trỏ tới dự án', q( $x, '//a[' . cls( 'hero-project-link' ) . ']' )->item( 0 )->getAttribute( 'href' ) === '/du-an/101/' );
 check( 'hero: nhãn đường dẫn "Từ bản vẽ" trỏ tới #du-an', 1 === q( $x, '//a[' . cls( 'hero-process-rail' ) . ' and @href="#du-an"]' )->length );
 
+// Chấm chọn ảnh của hero (như bản đầu của theme): một nút cho mỗi ảnh, ẩn tới khi home.js chạy, đúng một nút đang chọn.
+$dots = q( $x, '//*[@data-hero-dots]//button[@data-hero-dot]' );
+same( 'hero: mỗi ảnh một chấm chọn', 3, $dots->length );
+same( 'hero: nhóm chấm có nhãn đọc được và vai trò group', array( 'group', 'Chọn ảnh trình chiếu' ), array( q( $x, '//*[@data-hero-dots]' )->item( 0 )->getAttribute( 'role' ), q( $x, '//*[@data-hero-dots]' )->item( 0 )->getAttribute( 'aria-label' ) ) );
+check( 'hero: nhóm chấm ẩn sẵn (không JS thì bấm không làm gì nên không hiện) và nằm trong khung ảnh', 1 === q( $x, '//*[' . cls( 'showcase-media' ) . ']/*[@data-hero-dots and @hidden]' )->length );
+same( 'hero: đúng một chấm đang chọn, là chấm đầu (khớp ảnh đang hiện)', array( 'true', '', '' ), 3 === $dots->length ? array( $dots->item( 0 )->getAttribute( 'aria-current' ), $dots->item( 1 )->getAttribute( 'aria-current' ), $dots->item( 2 )->getAttribute( 'aria-current' ) ) : array() );
+check( 'hero: nhãn chấm nêu số thứ tự, tổng số và tên dự án (không chỉ "chấm 1")', 3 === $dots->length && str_starts_with( $dots->item( 0 )->getAttribute( 'aria-label' ), 'Ảnh 1 / 3: ' ) && str_starts_with( $dots->item( 2 )->getAttribute( 'aria-label' ), 'Ảnh 3 / 3: ' ) && strlen( $dots->item( 0 )->getAttribute( 'aria-label' ) ) > strlen( 'Ảnh 1 / 3: ' ) );
+check( 'hero: chấm là nút type=button (không gửi biểu mẫu)', 3 === $dots->length && 'button' === $dots->item( 0 )->getAttribute( 'type' ) );
+check( 'hero: nhóm chấm khai báo on-dark để vòng tiêu điểm đổi sang trắng trên ảnh', 1 === q( $x, '//*[@data-hero-dots and ' . cls( 'on-dark' ) . ']' )->length );
+$one = render( 'front-page', false, 'vi', array( 'VG_FX_ONE_FEATURED' => '1' ) );
+same( 'hero một ảnh: có 1 ảnh', 1, q( $one, '//*[' . cls( 'showcase-images' ) . ']/img' )->length );
+same( 'hero một ảnh: không có chấm chọn ảnh (không có gì để chọn)', 0, q( $one, '//*[@data-hero-dots]' )->length );
+// Bản dịch tiếng Đức của nhãn chấm kiểm ở tests/i18n.mjs (mọi chuỗi phải có bản dịch) và tests/php/gettext.php (.mo khớp .po); trình kết xuất giả ở đây không nạp .mo.
+
 $toggle = q( $x, '//button[' . cls( 'motion-toggle' ) . ']' )->item( 0 );
 check( 'nút dừng: có aria-pressed=false ban đầu', null !== $toggle && 'false' === $toggle->getAttribute( 'aria-pressed' ) );
 check( 'nút dừng: nhãn dừng/tiếp tục lấy từ data-* (dịch được)', null !== $toggle && '' !== $toggle->getAttribute( 'data-label-pause' ) && '' !== $toggle->getAttribute( 'data-label-play' ) && $toggle->getAttribute( 'aria-label' ) === $toggle->getAttribute( 'data-label-pause' ) );
@@ -701,6 +715,47 @@ $contact_scss = (string) file_get_contents( ROOT . '/wp-content/themes/vgarco/sr
 $careers_scss = (string) file_get_contents( ROOT . '/wp-content/themes/vgarco/src/scss/pages/_careers.scss' );
 check( 'SCSS: chữ trắng của ô đồng ý chỉ áp dụng trong biểu mẫu liên hệ (nền tối), không toàn cục — nếu không ô đồng ý ở biểu mẫu ứng tuyển (nền sáng) thành chữ trắng trên nền trắng', 1 === preg_match( '/^\.contact-form \.consent-label \{/m', $contact_scss ) && 0 === preg_match( '/^\.consent-label \{/m', $contact_scss ) );
 check( 'SCSS: ô đồng ý ở biểu mẫu ứng tuyển có màu chữ tối tường minh', 1 === preg_match( '/\.job-apply-form \.consent-label \{[^}]*color: var\(--c-ink\);/s', $careers_scss ) );
+
+/* ========================= Chuyển động theo bản đầu của theme (05/10/2026) ========================= */
+// Hành vi thật (trượt, mờ dần, đổ bóng khi cuộn, rê chuột) chỉ kiểm được trên trình duyệt: xem tests/wp-lab/browser/README.md.
+// Ở đây giữ các quy tắc dễ bị phá nhất: tắt khi giảm chuyển động, menu đóng không còn nằm trong thứ tự Tab, trang không cuộn ngang vì menu nằm ngoài màn hình.
+
+$scss_dir = ROOT . '/wp-content/themes/vgarco/src/scss/';
+$reset    = (string) file_get_contents( $scss_dir . '_reset.scss' );
+$header   = (string) file_get_contents( $scss_dir . 'components/_header.scss' );
+$navscss  = (string) file_get_contents( $scss_dir . 'components/_nav.scss' );
+$section  = (string) file_get_contents( $scss_dir . 'components/_section.scss' );
+$homescss = (string) file_get_contents( $scss_dir . 'pages/_home.scss' );
+$navjs    = (string) file_get_contents( ROOT . '/wp-content/themes/vgarco/src/js/modules/nav.js' );
+$homejs   = (string) file_get_contents( ROOT . '/wp-content/themes/vgarco/src/js/modules/home.js' );
+
+check( 'chuyển động: cuộn mượt khi bấm liên kết neo, chỉ khi KHÔNG bật giảm chuyển động', 1 === preg_match( '/@media \(prefers-reduced-motion: no-preference\) \{\s*html \{\s*scroll-behavior: smooth;/', $reset ) );
+check( 'chuyển động: giảm chuyển động vẫn tắt cuộn mượt, chuyển cảnh và độ trễ chuyển cảnh', 1 === preg_match( '/@media \(prefers-reduced-motion: reduce\) \{.*scroll-behavior: auto;.*transition-duration: 0\.01ms !important;\s*transition-delay: 0s !important;/s', $reset ) );
+
+check( 'đầu trang: có bóng đổ khi đã cuộn (is-stuck) và chuyển mềm 0,2 s', 1 === preg_match( '/\.header \{[^}]*transition: box-shadow 0\.2s ease;.*&\.is-stuck \{\s*box-shadow: var\(--shadow-header\);/s', $header ) );
+check( 'đầu trang: KHÔNG thu nhỏ khi cuộn (chiều cao đã đo theo bản thiết kế, thu nhỏ làm nội dung bên dưới giật)', 0 === preg_match( '/is-stuck[^}]*\b(height|padding)\s*:/', $header ) );
+check( 'đầu trang: cắt phần tràn ngang dưới điểm gãy menu ngang (menu đóng nằm ngoài màn hình không làm trang cuộn ngang)', 1 === preg_match( '/@media \(max-width: #\{\$bp-nav - 1px\}\) \{\s*overflow-x: clip;/', $header ) );
+check( 'nút menu: mở thì hai vạch thành dấu X (xoay ±45°, dịch 3,5 px vào giữa), chuyển mềm', 1 === preg_match( '/transition: transform 0\.2s ease;.*&\[aria-expanded=\'true\'\] \{\s*span:first-child \{\s*transform: translateY\(3\.5px\) rotate\(45deg\);.*span:last-child \{\s*transform: translateY\(-3\.5px\) rotate\(-45deg\);/s', $header ) );
+check( 'token: có --shadow-header', str_contains( (string) file_get_contents( $scss_dir . '_tokens.scss' ), '--shadow-header:' ) );
+
+check( 'menu di động: đóng bằng visibility:hidden + nằm ngoài màn hình (không dùng display:none nên có chuyển động; vẫn ra khỏi thứ tự Tab)', 1 === preg_match( '/^\.nav \{(?:(?!\n\}).)*?visibility: hidden;\s*transform: translateX\(100%\);/ms', $navscss ) && 0 === preg_match( '/^\.nav \{(?:(?!\n\}).)*?display: none/ms', $navscss ) );
+check( 'menu di động: visibility chỉ đổi sau khi trượt xong (trễ 0,25 s) để lúc đóng vẫn thấy menu trượt đi', 1 === preg_match( '/transform 0\.25s ease,\s*visibility 0s 0\.25s;/', $navscss ) );
+check( 'menu di động: mở thì hiện, về vị trí cũ, trượt 0,25 s', 1 === preg_match( '/&\.open \{\s*visibility: visible;\s*transform: none;\s*transition: transform 0\.25s ease;/', $navscss ) );
+check( 'menu ngang (từ 1181 px): luôn hiện, không dịch chuyển, không chuyển cảnh', 1 === preg_match( '/box-shadow: none;\s*visibility: visible;\s*transform: none;\s*transition: none;/', $navscss ) );
+check( 'menu con: mở thì mờ dần và nhích lên 6 px trong 0,16 s (chỉ khi mở, hidden vẫn là cách ẩn)', 1 === preg_match( '/@keyframes nav-panel-in \{\s*from \{\s*opacity: 0;\s*transform: translateY\(6px\);/', $navscss ) && 1 === preg_match( '/&:not\(\[hidden\]\) \{\s*animation: nav-panel-in 0\.16s ease;/', $navscss ) );
+
+check( 'thẻ dự án: rê chuột phóng ảnh 5,5%, vào nhanh dừng êm (0,5 s)', 1 === preg_match( '/transition: transform 0\.5s cubic-bezier\(0\.2, 0\.7, 0\.3, 1\);.*a:hover \.project-photo img \{\s*transform: scale\(1\.055\);/s', $section ) );
+check( 'thẻ dự án: KHÔNG phủ màu đỏ lên ảnh khi rê chuột (ảnh phối cảnh kiến trúc không được đổi màu)', 0 === preg_match( '/\.project-photo[^{]*::after/', $section ) );
+
+check( 'hero: ảnh và chú thích chuyển mờ 0,9 s (cùng nhịp, visibility trễ bằng thời gian mờ)', 1 === preg_match( '/\.showcase-image \{[^}]*?transition: opacity 0\.9s ease;/', $homescss ) && 1 === preg_match( '/opacity 0\.9s ease,\s*visibility 0s 0\.9s;\s*\n\s*&\.is-active \{\s*visibility: visible;\s*opacity: 1;\s*transition: opacity 0\.9s ease;/', $homescss ) );
+check( 'hero: nút chấm có vùng bấm cao ≥ 44 px (2,75 rem), vạch nhìn thấy dày 3 px', 1 === preg_match( '/\.showcase-dot \{[^}]*width: 2\.5rem;\s*height: 2\.75rem;.*?height: 3px;/s', $homescss ) );
+
+check( 'nav.js: đổ bóng khi cuộn quá 12 px, nghe cuộn ở chế độ passive, chỉ đổi lớp khi trạng thái thật sự đổi', 1 === preg_match( '/scrollY > 12;/', $navjs ) && str_contains( $navjs, "'scroll', update, { passive: true }" ) && str_contains( $navjs, 'if ( next !== stuck )' ) );
+check( 'home.js: rê chuột chỉ tính với con trỏ CHUỘT (chạm trên cảm ứng không được làm trình chiếu đứng mãi)', 1 === preg_match( "/'pointerenter'.*?event\.pointerType === 'mouse'/s", $homejs ) );
+check( 'home.js: tiêu điểm chỉ tính khi là tiêu điểm bàn phím (:focus-visible); rời khung thì chạy lại', str_contains( $homejs, "matches( ':focus-visible' )" ) && 1 === preg_match( "/'focusout'.*?focusing = false;\s*start\(\);/s", $homejs ) );
+check( 'home.js: chỉ chạy khi không bị dừng bởi nút, rê chuột, tiêu điểm hoặc thẻ ẩn', 1 === preg_match( '/function start\(\) \{\s*if \( images\.length > 1 && ! timer && ! userPaused\(\) && ! hovering && ! focusing && ! document\.hidden \)/', $homejs ) );
+check( 'home.js: bấm chấm đổi ảnh rồi đếm lại thời gian; chấm chỉ hiện khi có JS và từ 2 ảnh', 1 === preg_match( '/dot\.addEventListener\( \'click\', \(\) => \{\s*show\( i \);.*?stop\(\);\s*start\(\);/s', $homejs ) && str_contains( $homejs, 'dotsBox.hidden = false;' ) && str_contains( $homejs, 'dotsBox && images.length > 1' ) );
+check( 'home.js: chấm đang chọn đánh dấu bằng aria-current khớp ảnh đang hiện', str_contains( $homejs, "dot.setAttribute( 'aria-current', 'true' )" ) && str_contains( $homejs, "dot.removeAttribute( 'aria-current' )" ) );
 
 /* ========================= Bộ chuyển ngôn ngữ (UC-10) ========================= */
 

@@ -26,7 +26,7 @@ msgid_plural "%s dự án"
 msgstr[0] "%s Projekt"
 msgstr[1] "%s Projekte"
 
-#: wp-content/themes/vgarco/template-parts/project-gallery.php
+#: wp-content/themes/vgarco/front-page.php wp-content/themes/vgarco/template-parts/project-gallery.php
 #, php-format
 msgid "Ảnh %1$d / %2$d: %3$s"
 msgstr "Bild %1$d / %2$d: %3$s"
@@ -151,6 +151,10 @@ msgstr "Datenschutzerklärung"
 #: wp-content/themes/vgarco/templates/about.php
 msgid "CHLB Đức"
 msgstr "Deutschland"
+
+#: wp-content/themes/vgarco/front-page.php
+msgid "Chọn ảnh trình chiếu"
+msgstr "Bild der Diashow auswählen"
 
 #: wp-content/themes/vgarco/template-parts/news-archive.php
 msgid "Chọn chuyên mục tin tức"

@@ -10,6 +10,13 @@ html {
   scroll-padding-top: var(--header-h); // liên kết neo không bị thanh đầu trang che
 }
 
+// Cuộn mượt khi bấm liên kết neo (như bản đầu của theme). Chỉ khi người dùng KHÔNG bật "giảm chuyển động"; khối reduce ở cuối tệp vẫn tắt hẳn.
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
 body,
 h1,
 h2,
@@ -73,6 +80,7 @@ button {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    transition-delay: 0s !important; // các chuyển cảnh "visibility 0s 0.25s" (menu, chú thích ảnh) không còn trễ
     scroll-behavior: auto !important;
   }
 }

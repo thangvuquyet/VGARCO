@@ -128,12 +128,13 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.6s ease;
+    transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.3, 1); // như bản đầu của theme: vào nhanh, dừng êm
   }
 }
 
+// Phóng 5,5% khi rê chuột (bản đầu của theme). Không phủ màu đỏ như bản đầu: ảnh phối cảnh kiến trúc không được đổi màu.
 .project-card a:hover .project-photo img {
-  transform: scale(1.03);
+  transform: scale(1.055);
 }
 
 // Nhãn loại ảnh ("Phối cảnh thiết kế" / "Ảnh công trình") ở góc dưới bên trái ảnh.

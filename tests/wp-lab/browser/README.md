@@ -59,4 +59,25 @@ Cần thêm `node tests/serve.mjs 4174` (phục vụ `/axe/axe.min.js`). Cách d
 Phím **Esc phải là phím thật** (không dùng `dispatchEvent`): chính vì thế mới tìm ra lỗi hộp thoại tìm kiếm — ô nhập kiểu `search` của Chrome/Edge dùng Esc để *xóa chữ* trước,
 nên khi đang có chữ thì Esc đầu tiên không đóng hộp thoại (UC-09 2a). Đã sửa trong `search.js`.
 
-Chưa kiểm được: thiết lập "giảm chuyển động" thật của hệ điều hành, màn hình cảm ứng thật, Safari/Firefox/Cốc Cốc, trình đọc màn hình.
+## Chuyển động (theo bản đầu của theme), kiểm ngày 06/10/2026
+
+Trình duyệt nhúng **không vẽ khi cửa sổ ẩn** nên không có sự kiện `scroll` thật, chuyển cảnh CSS không chạy tiếp và `document.hidden` là `true` (trình chiếu hero tự dừng). Cách làm: đọc trạng thái cuối
+sau `document.getAnimations().forEach( ( a ) => a.finish() )`; đặt `Object.defineProperty( document, 'hidden', { get: () => false } )` rồi bắn `visibilitychange`; bắn `scroll`/`PointerEvent` bằng tay;
+riêng phím Tab dùng phím thật (`:focus-visible` chỉ đúng với tiêu điểm do bàn phím).
+
+| Trang | Thao tác | Kỳ vọng (đã thấy) |
+|---|---|---|
+| mọi trang | cuộn qua 12 px / về 0 | lớp `is-stuck` bật ở 13 px, tắt khi về đầu; bóng `0 2px 14px` ; chiều cao thanh không đổi |
+| mọi trang, ≥ 1181 px | mở một mục menu có con | bảng con có hoạt ảnh `nav-panel-in` 0,16 s (mờ dần, nhích lên 6 px) rồi `opacity: 1`, `transform: none`; đóng lại thì `hidden` |
+| mọi trang, ≤ 1180 px | bấm nút menu rồi bấm lần nữa | mở: menu `transform: none`, `visibility: visible`, hai vạch thành X (±45°, ±3,5 px); đóng: còn thấy menu trượt đi, sau 0,25 s `visibility: hidden`, `translateX(100%)`; **không có liên kết nào còn trong thứ tự Tab**; trang không cuộn ngang ở 390, 768, 1180 px |
+| mọi trang, ≥ 1181 px | đọc kiểu của `.nav` | `position: static`, `visible`, không dịch chuyển |
+| `/` có từ 2 dự án nổi bật | đọc chấm chọn ảnh | mỗi ảnh một chấm (nút 40 × 44 px, góc trên trái khung ảnh, không đè chú thích hay chữ VG), chấm đầu `aria-current` |
+| `/` | bấm chấm 3 rồi chấm 1 | ảnh, chú thích và chấm đổi cùng nhau |
+| `/` | tự chạy → rê **chuột** vào khung → rời đi | 5,6 s đổi ảnh; rê chuột thì đứng (6,3 s không đổi); rời đi chạy lại |
+| `/` | `pointerenter` kiểu **cảm ứng** | KHÔNG dừng (chạm vào ảnh không được làm trình chiếu đứng mãi) |
+| `/` | nút dừng chuyển động; bấm chấm khi đang dừng; bấm lại nút | dừng thật; bấm chấm đổi ảnh nhưng không tự chạy lại; tiếp tục thì chạy lại |
+| `/` | Tab thật từ liên kết "Từ bản vẽ" tới chấm đầu | tiêu điểm vào chấm (`:focus-visible`), trình chiếu đứng; rời khung thì chạy lại |
+| trang có thẻ dự án | đọc kiểu `.project-photo img` | `transform 0.5s cubic-bezier(.2,.7,.3,1)`; quy tắc rê chuột `scale(1.055)`, không phủ màu |
+| mọi trang | đọc `scroll-behavior` của `html` | `smooth` (và `auto` khi bật giảm chuyển động) |
+
+Chưa kiểm được: thiết lập "giảm chuyển động" thật của hệ điều hành, màn hình cảm ứng thật, Safari/Firefox/Cốc Cốc, trình đọc màn hình. Chưa nhìn tận mắt chuyển động đang chạy (cửa sổ ẩn); chỉ đo trạng thái đầu/cuối và quy tắc đã biên dịch.

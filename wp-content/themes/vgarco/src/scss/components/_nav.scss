@@ -4,7 +4,9 @@
 // mục có con mở thành một bảng rộng hết chiều ngang dưới thanh đầu trang.
 
 .nav {
-  display: none;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
   position: absolute;
   top: 100%;
   left: 0;
@@ -16,10 +18,18 @@
   border-bottom: 1px solid var(--c-line);
   box-shadow: var(--shadow-panel);
 
+  // Đóng: nằm ngoài màn hình bên phải và visibility:hidden (không vào thứ tự Tab, không được đọc) — thay cho display:none để có chuyển động.
+  // visibility chỉ đổi sau khi trượt xong (0,25 s) nên lúc đóng menu vẫn nhìn thấy nó trượt đi.
+  visibility: hidden;
+  transform: translateX(100%);
+  transition:
+    transform 0.25s ease,
+    visibility 0s 0.25s;
+
   &.open {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
+    visibility: visible;
+    transform: none;
+    transition: transform 0.25s ease;
   }
 }
 
@@ -59,8 +69,21 @@
 }
 
 // --- Bảng menu con ---
+// Hiện ra bằng cách bỏ thuộc tính hidden (nav.js) nên chuyển động chỉ có khi MỞ: mờ dần và nhích lên 6 px trong 0,16 s như bản đầu của theme.
+// Cố ý không làm chuyển động khi đóng để không giữ lại thứ đã bị ẩn khỏi trình đọc màn hình và bàn phím.
+@keyframes nav-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
 .nav-panel {
   padding: 1.0625rem 0 1.375rem;
+
+  &:not([hidden]) {
+    animation: nav-panel-in 0.16s ease;
+  }
 }
 
 .nav-panel-label {
@@ -124,6 +147,9 @@
     background: transparent;
     border: 0;
     box-shadow: none;
+    visibility: visible;
+    transform: none;
+    transition: none;
   }
 
   .nav-group {
