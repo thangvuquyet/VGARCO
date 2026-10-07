@@ -183,6 +183,13 @@
     }
   }
 
+  // Liên kết thường (không có menu con): gạch chân đỏ chạy ra khi rê chuột hoặc lấy tiêu điểm — như bản thiết kế (".nav > a:hover::after { width: 100% }").
+  // Mục có menu con (nút) chỉ gạch khi đang mở.
+  .nav > a:hover::after,
+  .nav > a:focus-visible::after {
+    transform: scaleX(1);
+  }
+
   .nav-panel {
     position: absolute;
     top: 100%;

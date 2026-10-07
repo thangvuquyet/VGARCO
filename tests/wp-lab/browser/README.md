@@ -101,4 +101,36 @@ và với giảm chuyển động thì `matchMedia` giả. Trang thử: `single-
 | `/` | đọc `.service-preview-list a::after` | `scaleX(0)` lúc thường, `transition 0.3s`, kẻ đỏ 1 px đè lên đường kẻ dưới; không đổi bố cục |
 | chi tiết dự án, trang chủ | axe-core 1440/768/390 | 0 vi phạm |
 
+### Đợt ba (07/10/2026): hiệu ứng nút và liên kết — **đối chiếu từng phần tử với bản thiết kế HTML**
+
+Cách làm (không cần chuột thật, chính xác theo thứ tự ưu tiên của CSS): chép mọi luật CSS của trang vào một thẻ `<style>` phụ với `:hover` đổi thành `.__h` (và `:focus-visible` thành `.__fv`),
+rồi gắn lớp `__h` cho phần tử **và mọi tổ tiên** (rê chuột vào con là rê vào cả cha), ép tính kiểu, kết thúc mọi chuyển cảnh bằng `document.getAnimations()` (chỉ loại có `transitionProperty`), rồi so
+màu chữ, nền, viền, `transform`, `filter` (cả `::before`/`::after`) trước và sau. Chạy y hệt trên trang mẫu (`node server.cjs` ở thư mục `vgarco-preview`, http://localhost:4173) và trên theme
+(trang tĩnh http://127.0.0.1:4174), rồi so hai bản. Hai bản liệt kê luật `:hover`/`transition`/`animation` còn khớp ít nhất một phần tử của trang bằng `document.styleSheets`.
+
+Lỗi lớn nhất tìm ra: **theme thiếu chuyển cảnh chung** — bản thiết kế có `button, a, input, textarea, summary { transition: color .22s, background .22s, border-color .22s }`, theme gần như không có,
+nên mọi liên kết và nút đổi màu **giật** thay vì mềm. Sau khi thêm, các phần tử dưới đây khớp bản thiết kế (thời lượng và giá trị cuối):
+
+| Phần tử | Bản thiết kế | Theme sau sửa |
+|---|---|---|
+| liên kết, nút, ô nhập nói chung | `color/background/border-color 0.22s` | như vậy |
+| vòng "Khám phá công trình" | đen → đỏ, xoay 45°, 0,25 s | như vậy |
+| mũi tên "Từ bản vẽ" | `rotate(90deg) translateX(6px)`, 0,32 s | như vậy |
+| vòng CTA | nền trắng, chữ `#963a34`, `rotate(45deg) scale(1.06)`, 0,28 s | như vậy |
+| ảnh hero | `scale(1.018)`, `saturate(1) contrast(1.035)`, 1,1 s / 0,4 s | như vậy (chỉ thiết bị có chuột) |
+| ảnh thẻ dự án | `scale(1.035)` 0,6 s | `scale(1.055)` 0,5 s (theo bản theme đầu, đã duyệt) |
+| ô đối tác | nền `#f2f3ef`, chữ `#a23b35`, 0,2 s; rê vào dải thì dừng | như vậy |
+| nút dừng chuyển động | nền đen, chữ trắng | như vậy |
+| hàng lĩnh vực | chữ `#a23b35` | chữ `#a23b35` + đường kẻ đỏ quét (thêm) |
+| biểu tượng chân trang | đỏ, nhấc 2 px | như vậy |
+| nút tìm kiếm, nút menu, ngôn ngữ, text-link | đỏ / nền đỏ | như vậy |
+| vòng mũi tên ở thẻ dự án | nền đỏ, mũi tên trắng, 0,2 s | như vậy |
+| nút cuộn xuống (Về công ty), breadcrumb | đỏ | như vậy |
+| nút "Xem chi tiết" ở vị trí tuyển dụng | vòng 45 px, rê chuột đổ đỏ | **theme chưa có vòng** — đã thêm (`.job-detail-arrow`), 0,22 s (bản thiết kế đổi tức thì) |
+| nút gửi ở Liên hệ | nền `#202321`, chữ trắng | như vậy (trước là hồng nhạt) |
+| gạch chân menu | liên kết thường gạch đỏ chạy ra khi rê chuột | như vậy |
+
+Khác bản thiết kế (có chủ ý): liên kết thường ở menu ngang vẫn đổi đỏ khi rê chuột (bản thiết kế chỉ gạch chân); chữ chú thích hero vẫn gạch chân (bản thiết kế đổi đỏ — chữ đỏ trên ảnh tối khó đọc);
+nút "Xem chi tiết" có chuyển cảnh 0,22 s; màu đỏ khi rê chuột của một số nút là `#a30000` thay vì `#960000/#9b0000` (chênh vài đơn vị, không nhìn thấy).
+
 Chưa kiểm được: thiết lập "giảm chuyển động" thật của hệ điều hành, màn hình cảm ứng thật, Safari/Firefox/Cốc Cốc, trình đọc màn hình. Chưa nhìn tận mắt chuyển động đang chạy (cửa sổ ẩn); chỉ đo trạng thái đầu/cuối và quy tắc đã biên dịch.

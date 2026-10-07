@@ -200,8 +200,10 @@
   span {
     width: 22px;
     height: 1px;
-    background: var(--c-ink);
-    transition: transform 0.2s ease;
+    background: currentcolor; // theo màu chữ của nút: rê chuột đổi đỏ (.icon-button:hover)
+    transition:
+      transform 0.2s ease,
+      background-color 0.22s;
   }
 
   // Đang mở: hai vạch thành dấu X. Tâm hai vạch cách nhau 7 px (khe 6 + dày 1) nên mỗi vạch dịch 3,5 px vào giữa rồi xoay ±45°.

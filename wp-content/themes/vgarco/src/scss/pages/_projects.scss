@@ -157,6 +157,9 @@
   color: var(--c-ink);
   background: var(--c-surface);
   border-radius: 50%;
+  transition:
+    background-color 0.2s,
+    color 0.2s;
 
   svg {
     width: 19px;
@@ -174,6 +177,13 @@
       height: 21px;
     }
   }
+}
+
+// Rê chuột vào thẻ: vòng mũi tên đổi nền đỏ, mũi tên trắng (bản thiết kế).
+.project-card a:hover .circle-arrow,
+.project-card a:focus-visible .circle-arrow {
+  color: #fff;
+  background: var(--c-brand);
 }
 
 // --- Bố cục biên tập (tất cả dự án): hai thẻ đầu lệch nhau, thẻ thứ ba tràn hàng, còn lại là danh sách ---

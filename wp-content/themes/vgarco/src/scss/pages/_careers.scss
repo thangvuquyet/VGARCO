@@ -392,6 +392,28 @@
   }
 }
 
+// Vòng tròn quanh mũi tên (bản thiết kế: 45 × 45 px, viền mảnh); rê chuột vào nút thì vòng đổ đỏ, mũi tên trắng.
+.job-detail-arrow {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 45px;
+  height: 45px;
+  border: 1px solid var(--c-line-strong);
+  border-radius: 50%;
+  transition:
+    color 0.22s,
+    background-color 0.22s,
+    border-color 0.22s;
+
+  .job-detail-button:hover &,
+  .job-detail-button:focus-visible & {
+    color: #fff;
+    background: var(--c-brand);
+    border-color: var(--c-brand);
+  }
+}
+
 .jobs-empty {
   padding-block: 2.5rem 1.5rem;
   border-top: 1px solid var(--c-line);

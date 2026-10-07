@@ -66,6 +66,19 @@ h3 em {
   outline-color: var(--c-focus-invert);
 }
 
+// Chuyển cảnh chung (bản thiết kế HTML: "button, a, input, textarea, summary { transition: color .22s, background .22s, border-color .22s }"):
+// mọi liên kết, nút, ô nhập đổi màu chữ, nền, viền mềm 0,22 s thay vì giật. Phần tử nào cần thêm (transform...) tự khai báo transition riêng, ghi đè dòng này.
+a,
+button,
+input,
+textarea,
+summary {
+  transition:
+    color 0.22s,
+    background-color 0.22s,
+    border-color 0.22s;
+}
+
 // --- Tiện ích nền tảng ---
 .skip {
   position: fixed;
@@ -137,6 +150,10 @@ h3 em {
   width: 34px;
   height: 42px;
   color: var(--c-ink);
+
+  &:hover {
+    color: var(--c-brand);
+  }
 
   @include up($bp-phone) {
     width: 36px;

@@ -137,7 +137,7 @@ vgarco_breadcrumb(
 					</div>
 					<a class="job-detail-button" href="<?php echo esc_url( $job['url'] ); ?>" aria-label="<?php echo esc_attr( sprintf( /* translators: %s: tên vị trí */ __( 'Xem chi tiết: %s', 'vgarco' ), $job['title'] ) ); ?>">
 						<span><?php esc_html_e( 'Xem chi tiết', 'vgarco' ); ?></span>
-						<?php echo vgarco_icon( 'arrow-up-right' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+						<span class="job-detail-arrow" aria-hidden="true"><?php echo vgarco_icon( 'arrow-up-right' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
 					</a>
 				</article>
 			<?php endforeach; ?>

@@ -181,9 +181,18 @@ $bp-footer-cols: 1000px; // ≥ : 4 cột, dòng cuối 3 cột
     }
   }
 
+  > a {
+    transition:
+      color 0.22s,
+      border-color 0.22s,
+      transform 0.22s;
+  }
+
+  // Rê chuột: đổi đỏ và nhấc lên 2 px (bản thiết kế).
   > a:hover {
     color: var(--c-brand);
     border-color: var(--c-brand);
+    transform: translateY(-2px);
   }
 }
 

@@ -310,15 +310,19 @@
   line-height: 1.7;
   color: var(--c-panel);
   background: #fff;
-  transition: background-color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 
   svg {
     width: 20px;
     height: 20px;
   }
 
+  // Rê chuột: nền thành đen, chữ trắng (bản thiết kế: ".contact .button-red:hover { background: #202321; color: #fff }").
   &:hover {
-    background: #f7ebe9;
+    color: #fff;
+    background: #202321;
   }
 
   @include up($bp-tablet) {

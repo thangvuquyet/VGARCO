@@ -95,8 +95,8 @@
 
   &:hover {
     color: #fff;
-    background: var(--c-ink);
-    border-color: var(--c-ink);
+    background: var(--c-brand);
+    border-color: var(--c-brand);
   }
 
   @include up($bp-tablet) {
