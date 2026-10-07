@@ -80,4 +80,25 @@ riêng phím Tab dùng phím thật (`:focus-visible` chỉ đúng với tiêu �
 | trang có thẻ dự án | đọc kiểu `.project-photo img` | `transform 0.5s cubic-bezier(.2,.7,.3,1)`; quy tắc rê chuột `scale(1.055)`, không phủ màu |
 | mọi trang | đọc `scroll-behavior` của `html` | `smooth` (và `auto` khi bật giảm chuyển động) |
 
+### Đợt hai (07/10/2026): thư viện ảnh tự chạy, hero vào, vòng CTA, hàng lĩnh vực
+
+Vì cửa sổ ẩn, **thư viện** được nạp vào một iframe bằng `document.write` sau khi gắn sẵn: `IntersectionObserver` giả (gọi `callback([{ isIntersecting: true }])` bằng tay), `document.hidden` giả (đọc `window.__hidden`),
+và với giảm chuyển động thì `matchMedia` giả. Trang thử: `single-du_an-106.html` (2 ảnh) từ `node tests/render-all.mjs` + `node tests/serve.mjs 4174`. Lưu ý: sự kiện `close` của `<dialog>` **không bắn** khi cửa sổ ẩn
+(kể cả `<dialog>` mới tạo) — kiểm bằng `dialog.dispatchEvent( new Event( 'close' ) )`; trình duyệt thật vẫn bắn bình thường (kể cả khi nhấn Esc).
+
+| Trang | Thao tác | Kỳ vọng (đã thấy) |
+|---|---|---|
+| chi tiết dự án có ≥ 2 ảnh | tải; chưa vào khung nhìn → vào khung nhìn | nút tạm dừng hiện (44 px, góc trên trái, không đè nút phóng to, ở 1440/768/390 px); chưa thấy thì không đếm; thấy thì `is-counting` |
+| như trên | chờ 6,7 s | tự sang ảnh sau; `data-gallery-status` vẫn rỗng (**không đọc to**); thanh tiến độ `gallery-progress 6.5s`, phần đã trôi trắng đặc trên nền mờ |
+| như trên | rê chuột thật vào / ra; chạm kiểu cảm ứng | chuột: đứng 6,7 s không đổi, ra thì chạy lại; chạm: KHÔNG dừng |
+| như trên | nút tạm dừng bấm hai lần | `aria-pressed` và nhãn đổi ("Tiếp tục chuyển động" ↔ "Tạm dừng chuyển động"); dừng thì 6,7 s không đổi ảnh |
+| như trên | bấm "ảnh tiếp theo" / phím → | đổi ngay, **có** đọc to ("Ảnh 2 / 2: …"), thời gian đếm lại |
+| như trên | mở ảnh lớn → đóng (+ rời tiêu điểm) | mở thì dừng; đóng và hết tiêu điểm thì chạy lại. Tiêu điểm bàn phím còn trong thư viện (ví dụ nút phóng to vừa nhận lại tiêu điểm) thì **vẫn dừng** — đúng thiết kế |
+| như trên | ra khỏi khung nhìn; thẻ trình duyệt ẩn | dừng; vào lại / hiện lại thì chạy |
+| như trên, giả lập giảm chuyển động | tải | nút ở trạng thái "Tiếp tục chuyển động" (`aria-pressed=true`), 6,7 s không đổi; người dùng bấm thì chạy |
+| `/` | đọc kiểu `.hero-content h1` và `.hero-frame` | H1 `hero-arrive 0.8s both` (mờ + trượt); khung `hero-arrive-frame 1s 0.1s both` (**chỉ trượt**, không đổi độ trong suốt) |
+| `/` | đọc `.cta-circle::after`; thêm lớp `is-paused` vào `<body>` | `cta-ring 2.7s infinite`, viền trắng 50%; có lớp `is-paused` thì `display: none` |
+| `/` | đọc `.service-preview-list a::after` | `scaleX(0)` lúc thường, `transition 0.3s`, kẻ đỏ 1 px đè lên đường kẻ dưới; không đổi bố cục |
+| chi tiết dự án, trang chủ | axe-core 1440/768/390 | 0 vi phạm |
+
 Chưa kiểm được: thiết lập "giảm chuyển động" thật của hệ điều hành, màn hình cảm ứng thật, Safari/Firefox/Cốc Cốc, trình đọc màn hình. Chưa nhìn tận mắt chuyển động đang chạy (cửa sổ ẩn); chỉ đo trạng thái đầu/cuối và quy tắc đã biên dịch.

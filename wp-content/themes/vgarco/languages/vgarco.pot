@@ -940,7 +940,7 @@ msgstr ""
 msgid "Sự ghi nhận"
 msgstr ""
 
-#: wp-content/themes/vgarco/front-page.php
+#: wp-content/themes/vgarco/front-page.php wp-content/themes/vgarco/template-parts/project-gallery.php
 msgid "Tạm dừng chuyển động"
 msgstr ""
 
@@ -1026,7 +1026,7 @@ msgstr ""
 msgid "Tiếp nối hành trình"
 msgstr ""
 
-#: wp-content/themes/vgarco/front-page.php
+#: wp-content/themes/vgarco/front-page.php wp-content/themes/vgarco/template-parts/project-gallery.php
 msgid "Tiếp tục chuyển động"
 msgstr ""
 

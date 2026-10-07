@@ -1,8 +1,9 @@
 <?php
 /**
  * Thư viện ảnh của dự án (UC-05): một khung trình chiếu, nút trước/sau, chấm tiến độ, dải ảnh nhỏ, phóng to.
- * Không tự chạy (WCAG 2.2.2). Chỉ một ảnh: ẩn nút chuyển, số đếm và dải ảnh nhỏ (UC-05 gallery 1 ảnh).
- * Không có JS: thấy ảnh đầu; ảnh nhỏ là liên kết tới tệp ảnh. JS thêm việc chuyển ảnh, bàn phím, vuốt, phóng to.
+ * Chỉ một ảnh: ẩn nút chuyển, số đếm, nút dừng và dải ảnh nhỏ (UC-05 gallery 1 ảnh).
+ * Không có JS: thấy ảnh đầu, đứng yên; ảnh nhỏ là liên kết tới tệp ảnh. JS thêm việc chuyển ảnh, bàn phím, vuốt, phóng to
+ * và TỰ CHẠY (6,5 s/ảnh, như bản thiết kế) — nên có nút tạm dừng ngay trong khung (WCAG 2.2.2); máy bật "giảm chuyển động" thì khởi đầu ở trạng thái dừng.
  *
  * @var array[] $args['gallery'] Mỗi phần tử: image, kind, kind_label, caption.
  * @var string  $args['title']   Tên dự án (dùng cho alt).
@@ -64,6 +65,15 @@ $label = static fn( array $item ): string => '' !== $item['caption'] ? $item['ca
 		</button>
 
 		<?php if ( $many ) : ?>
+			<?php // Nút tạm dừng/tiếp tục tự chạy (WCAG 2.2.2). Ẩn tới khi JS sẵn sàng; nhãn dùng lại hai chuỗi của nút dừng chuyển động ở trang chủ. ?>
+			<button type="button" class="gallery-toggle" data-gallery-toggle aria-pressed="false" hidden
+				aria-label="<?php esc_attr_e( 'Tạm dừng chuyển động', 'vgarco' ); ?>"
+				data-label-pause="<?php esc_attr_e( 'Tạm dừng chuyển động', 'vgarco' ); ?>"
+				data-label-play="<?php esc_attr_e( 'Tiếp tục chuyển động', 'vgarco' ); ?>">
+				<?php echo vgarco_icon( 'pause', 'icon-pause' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<?php echo vgarco_icon( 'play', 'icon-play' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+			</button>
+
 			<div class="project-gallery-controls" hidden data-gallery-controls>
 				<button type="button" class="gallery-nav" data-gallery-prev aria-label="<?php esc_attr_e( 'Ảnh trước', 'vgarco' ); ?>">
 					<?php echo vgarco_icon( 'arrow-left' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>

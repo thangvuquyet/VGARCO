@@ -976,7 +976,7 @@ msgstr "Ihre Telefonnummer"
 msgid "Sự ghi nhận"
 msgstr "Anerkennung"
 
-#: wp-content/themes/vgarco/front-page.php
+#: wp-content/themes/vgarco/front-page.php wp-content/themes/vgarco/template-parts/project-gallery.php
 msgid "Tạm dừng chuyển động"
 msgstr "Animation pausieren"
 
@@ -1064,7 +1064,7 @@ msgstr "Wasserversorgung, Entwässerung und Betriebsanforderungen bereits im Ent
 msgid "Tiếp nối hành trình"
 msgstr "Unser Weg geht weiter"
 
-#: wp-content/themes/vgarco/front-page.php
+#: wp-content/themes/vgarco/front-page.php wp-content/themes/vgarco/template-parts/project-gallery.php
 msgid "Tiếp tục chuyển động"
 msgstr "Animation fortsetzen"
 
