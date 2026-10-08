@@ -27,7 +27,9 @@ if (!existsSync(join(lab, 'wordpress', 'wp-load.php'))) { console.error('Chưa d
 // Thứ tự có ý nghĩa: nhập dự án → dữ liệu tin/vị trí → các kịch bản dùng dữ liệu đó.
 const order = ['env', 'import', 'media', 'export', 'seed', 'apply', 'admin', 'site', 'security', 'crawl', 'acffree', 'smoke'];
 const only = process.argv.slice(2);
-const todo = only.length ? order.filter((n) => only.includes(n)) : order;
+// 'demo' không nằm trong thứ tự mặc định: nó dựng dữ liệu minh họa (ảnh thật) và các kịch bản khác dọn dữ liệu đó.
+const optional = ['demo'];
+const todo = only.length ? [...order, ...optional].filter((n) => only.includes(n)) : order;
 
 const server = spawn(php, ['-c', ini, '-S', 'localhost:8080', '-t', join(lab, 'wordpress'), join(here, 'router.php')], { stdio: 'ignore' });
 async function ready() {

@@ -63,10 +63,31 @@ Máy chủ chạy ở `http://localhost:8080` (cố định) trong lúc chạy v
 
 Thứ tự trong `run.mjs` có ý nghĩa (`import` → `seed` → các kịch bản dùng dữ liệu đó). Mỗi kịch bản chạy lại được.
 
+## Dữ liệu minh họa: `demo` (không nằm trong lượt chạy mặc định)
+
+Website thử sau các kịch bản trên chỉ có dữ liệu tối thiểu (không ảnh, không lĩnh vực, không đối tác), nên **trông khác hẳn trang tĩnh**. Muốn xem website thử đầy đủ như trang tĩnh:
+
+```bash
+PHP=/đường/dẫn/php node tests/wp-lab/run.mjs demo     # chạy SAU CÙNG; chạy lại được
+```
+
+`it_demo.php` dọn dự án/ảnh/tin/vị trí/lĩnh vực rồi nhập 19 dự án **đã công bố** kèm ảnh thật, dựng 6 lĩnh vực, 5 đối tác, khối "câu chuyện công trình", tin tức có ảnh, 3 vị trí đang mở, ảnh mặc định của trang chủ; kiểm lại 20 điều trên trang thật.
+Mọi kịch bản khác dọn dữ liệu này lúc bắt đầu, nên `demo` không đưa vào thứ tự mặc định; chạy lại `demo` sau khi chạy các kịch bản khác để website thử trở về dạng minh họa.
+
+- **Ảnh** lấy từ thư mục ngoài kho mã (đặt biến `VG_DEMO_PHOTOS`, mặc định là thư mục `vgarco-demo-photos` nằm cạnh thư mục kho mã); thiếu thư mục thì kịch bản in "BỎ QUA" (không phải lỗi). Thư mục này do `demo/prepare-photos.php` dựng từ ảnh gốc của dự án
+  (cắt theo vùng nổi bật, **phóng to và làm nét** ảnh gốc thấp độ phân giải bằng ffmpeg, xuất qua `scripts/content/export-images.php`; có `contact-sheet.jpg` và `report.json` để xem lại).
+- **Dự án chưa có ảnh riêng để trống có chủ ý** (3 trong 19: Đài kiểm soát không lưu Đồng Hới, Học viện Kỹ thuật & Công nghệ An ninh, Biệt thự tại Niedernhausen): thẻ vẫn có chữ và liên kết nhưng không có ảnh và không mang nhãn loại ảnh.
+
+## So website thử với trang tĩnh: [`compare/`](compare/README.md)
+
+`structure.php` so cấu trúc 14 cặp trang (cần `node tests/serve.mjs 4174`); `collector.mjs` + `fn.js` + `cmpstyles.mjs` so kiểu hiển thị của từng phần tử. Kết quả ngày 08/10/2026 và cách đọc: xem README của thư mục đó.
+
 ## Kiểm tra trên trình duyệt (không tự động)
 
-Bố cục ở nhiều độ rộng (kể cả giao diện **tiếng Đức** qua plugin `lab-lang`, tham số `?lab_lang=de`) và thao tác JS cần trình duyệt: xem [`browser/README.md`](browser/README.md).
+Bố cục ở nhiều độ rộng (kể cả giao diện **tiếng Đức** qua plugin `lab-lang`, tham số `?lab_lang=de`), thao tác JS, giảm chuyển động (mô phỏng) và duyệt bằng phím Tab cần trình duyệt: xem [`browser/README.md`](browser/README.md).
 Lần kiểm đầu tiên tìm ra 4 chỗ vỡ bố cục tiếng Đức và 2 lỗi thao tác (Esc ở hộp thoại tìm kiếm, thông báo khi xin mã bảo mật quá nhiều lần).
+
+`lab-lang` giả lập phần WPML mà theme dùng: locale `vi` (hoặc `de_DE` khi có `?lab_lang=de`) và bộ lọc `wpml_active_languages` (bộ chuyển VI/DE, hreflang). Không có URL `/de/`, không có nội dung dịch, không dịch đường dẫn: những thứ đó chỉ kiểm được với WPML thật.
 
 ## Viết thêm
 

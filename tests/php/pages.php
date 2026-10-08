@@ -260,8 +260,16 @@ same( 'câu chuyện: nút chuyển mang nhãn chú thích (dịch được) tro
 same( 'câu chuyện: liên kết "Khám phá" trỏ tới trang dự án được chọn (Bảo tàng)', 1, q( $c, '//section[' . cls( 'project-story' ) . ']//a[' . cls( 'story-link' ) . ' and @href="/du-an/106/"]' )->length );
 check( 'câu chuyện: dòng nhãn ghép "Câu chuyện một công trình / năm"', str_contains( q( $c, '//section[' . cls( 'project-story' ) . ']//p[' . cls( 'eyebrow' ) . ']' )->item( 0 )->textContent, 'Câu chuyện một công trình / 2019–2020' ) );
 
+// Dự án chưa có ảnh riêng (để trống có chủ ý): thẻ vẫn còn đủ chữ và liên kết, nhưng không có thẻ ảnh và không treo nhãn loại ảnh trên ô trống.
+$bl     = render( 'archive-du_an', false, 'vi', array( 'VG_FX_BLANK' => '108' ) );
+$bl_art = '//*[' . cls( 'catalogue-grid' ) . ']/article[.//a[@href="/du-an/108/"]]';
+same( 'danh mục có dự án chưa có ảnh: vẫn đủ 19 thẻ', 19, q( $bl, '//*[' . cls( 'catalogue-grid' ) . ']/article' )->length );
+same( 'danh mục có dự án chưa có ảnh: thẻ trống không có ảnh và không có nhãn loại ảnh', array( 0, 0 ), array( q( $bl, $bl_art . '//img' )->length, q( $bl, $bl_art . '//*[' . cls( 'image-label' ) . ']' )->length ) );
+same( 'danh mục có dự án chưa có ảnh: thẻ trống vẫn có tiêu đề và vùng ảnh (giữ nhịp lưới)', array( 1, 1 ), array( q( $bl, $bl_art . '//h3' )->length, q( $bl, $bl_art . '//*[' . cls( 'project-photo' ) . ']' )->length ) );
+same( 'danh mục có dự án chưa có ảnh: 18 thẻ còn lại giữ nhãn loại ảnh', 18, q( $bl, '//*[' . cls( 'catalogue-grid' ) . ']//*[' . cls( 'image-label' ) . ']' )->length );
+
 // Thiếu ảnh công trình: chỉ còn ảnh phối cảnh, không có nút chuyển (UC-04 6b).
-$nb = render( 'archive-du_an', false, 'vi', array( 'VG_FX_NO_BUILT' => '1' ) );
+$nb =render( 'archive-du_an', false, 'vi', array( 'VG_FX_NO_BUILT' => '1' ) );
 same( 'câu chuyện thiếu ảnh công trình: một ảnh', 1, q( $nb, '//img[' . cls( 'story-image' ) . ']' )->length );
 same( 'câu chuyện thiếu ảnh công trình: ẩn nút chuyển', 0, q( $nb, '//*[' . cls( 'story-switch' ) . ']' )->length );
 
@@ -912,6 +920,14 @@ common_checks( $p, 'trang chung' );
 same( 'trang chung: h1 là tiêu đề trang', 'Bài thử', trim( q( $p, '//h1' )->item( 0 )->textContent ) );
 check( 'trang chung: nội dung nằm trong .entry-content của bài viết .page-basic', 1 === q( $p, '//article[' . cls( 'page-basic' ) . ']/div[' . cls( 'entry-content' ) . ']/p[contains(., "Nội dung thử")]' )->length );
 check( 'trang chung: đường dẫn vị trí kết thúc bằng tiêu đề, mục cuối là aria-current', 1 === q( $p, '//nav[' . cls( 'breadcrumb' ) . ']//li[@aria-current="page" and contains(., "Bài thử")]' )->length );
+
+/* ========================= Preload phông (đọc mã nguồn: lỗi chỉ lộ trên WordPress thật) ========================= */
+
+// wp_enqueue_scripts chạy ở wp_head mức 1; callback thêm vào CÙNG mức khi đang lặp bị WordPress bỏ qua, nên thẻ preload phải ở mức 2 trở lên.
+// Bản dựng thử không thấy lỗi này (không có wp_head thật), nên giữ một phép kiểm trên mã nguồn.
+$enqueue_php = (string) file_get_contents( ROOT . '/wp-content/themes/vgarco/inc/enqueue.php' );
+check( 'preload phông: in ở wp_head với mức ưu tiên 2 (mức 1 bị WordPress bỏ qua khi đang lặp)', 1 === preg_match( "/add_action\(\s*'wp_head',.*?printf\( '<link rel=\"preload\".*?\},\s*2 \/\//s", $enqueue_php ) );
+check( 'preload phông: thẻ có crossorigin (thiếu thì trình duyệt tải phông hai lần)', str_contains( $enqueue_php, 'as="font" type="font/woff2" crossorigin' ) );
 
 /* ---------- Kết quả ---------- */
 

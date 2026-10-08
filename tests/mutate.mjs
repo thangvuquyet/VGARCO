@@ -824,6 +824,12 @@ const M = [
     "1 === $catalogue['count']", "true", 'pages'],
   ["kích hoạt: không tạo vai trò Nhân sự (chờ admin_init)", "wp-content/plugins/vgarco-core/vgarco-core.php",
     "\tvgarco_apply_ensure_roles();\n", ""],
+  ["preload phông: in ở wp_head mức 1 (WordPress bỏ qua)", "wp-content/themes/vgarco/inc/enqueue.php",
+    "\t\t\t\t2 // KHÔNG dùng 1:", "\t\t\t\t1 // KHÔNG dùng 1:", 'pages'],
+  ["preload phông: thiếu crossorigin", "wp-content/themes/vgarco/inc/enqueue.php",
+    "as=\"font\" type=\"font/woff2\" crossorigin>", "as=\"font\" type=\"font/woff2\">", 'pages'],
+  ["thẻ dự án: nhãn loại ảnh hiện cả khi chưa có ảnh", "wp-content/themes/vgarco/template-parts/cards/project.php",
+    "<?php if ( $image_id > 0 ) :", "<?php if ( true ) :", 'pages'],
 ];
 
 let caught = 0, missed = 0, skipped = 0;

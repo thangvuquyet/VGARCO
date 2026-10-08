@@ -93,6 +93,12 @@ foreach ( $fx_empty ? array() : json_decode( (string) file_get_contents( __DIR__
 	}
 	$showcase = $pin ? $pin[4] : false;
 
+	// VG_FX_BLANK=<ID>: dự án chưa có ảnh riêng (để trống có chủ ý): trang phải hiển thị tử tế, không treo nhãn loại ảnh trên ô trống.
+	if ( (string) $id === (string) getenv( 'VG_FX_BLANK' ) ) {
+		$image          = 0;
+		$row['gallery'] = array();
+	}
+
 	// Thư viện = các ảnh ngoài ảnh đầu trang. Bản thiết kế bỏ ảnh đầu của mảng gallery vì nó là ảnh bìa.
 	$library = array();
 	foreach ( array_slice( $row['gallery'], 1 ) as $i => $file ) {

@@ -17,13 +17,14 @@ if ( ! $project ) {
 }
 
 $meta_right = implode( ' / ', array_filter( array( $project['years'], $project['types'][0]['name'] ?? '' ) ) );
+$image_id   = (int) ( $project['card_image'] ?: $project['hero_image'] );
 ?>
 <article class="project-card">
 	<a href="<?php echo esc_url( $project['url'] ); ?>">
 		<div class="project-photo">
 			<?php
 			echo vgarco_image( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- markup ảnh của WordPress.
-				$project['card_image'] ?: $project['hero_image'],
+				$image_id,
 				array(
 					'size'  => 'vg-1200',
 					'sizes' => ! empty( $args['arrow'] )
@@ -33,7 +34,9 @@ $meta_right = implode( ' / ', array_filter( array( $project['years'], $project['
 				)
 			);
 			?>
-			<span class="image-label"><?php echo esc_html( $project['kind_label'] ); ?></span>
+			<?php if ( $image_id > 0 ) : // Dự án chưa có ảnh: ô trống không mang nhãn "Phối cảnh thiết kế" / "Ảnh công trình". ?>
+				<span class="image-label"><?php echo esc_html( $project['kind_label'] ); ?></span>
+			<?php endif; ?>
 			<?php if ( ! empty( $args['arrow'] ) ) : ?>
 				<span class="circle-arrow" aria-hidden="true"><?php echo vgarco_icon( 'arrow-up-right' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
 			<?php endif; ?>

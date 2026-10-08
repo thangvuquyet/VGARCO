@@ -79,7 +79,7 @@ add_action(
 						printf( '<link rel="preload" href="%s" as="font" type="font/woff2" crossorigin>' . "\n", esc_url( $url ) );
 					}
 				},
-				1
+				2 // KHÔNG dùng 1: wp_enqueue_scripts chạy ở wp_head mức 1, WordPress bỏ qua callback thêm vào CÙNG mức khi đang lặp nên thẻ preload không bao giờ được in (chỉ lộ ra trên WordPress thật)
 			);
 		}
 	}
