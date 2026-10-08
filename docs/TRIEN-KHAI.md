@@ -1,6 +1,7 @@
 # Triển khai
 
-> **Trạng thái: thiết kế, chưa chạy trên máy chủ thật.** Kho này **chưa có** `provision.sh` (dựng máy chủ) và `deploy.sh` (đưa mã lên); tên miền và máy chủ được hoãn theo yêu cầu.
+> **Trạng thái: thiết kế, chưa chạy trên máy chủ thật.** `scripts/ops/provision.sh` (dựng máy chủ) và `scripts/ops/deploy.sh` (đưa mã lên, tự hoàn tác khi kiểm khói hỏng) đã có **dưới dạng bản thiết kế**: mới kiểm được cú pháp (`bash -n`),
+> chế độ `--dry-run` (in kế hoạch) và các chốt chặn tham số; **chưa chạy trên Ubuntu hay máy chủ nào**, nên còn những chỗ phải kiểm lần đầu (đã ghi trong tiêu đề mỗi tệp). Tên miền và máy chủ được hoãn theo yêu cầu.
 > Những gì **đã chạy được và kiểm chứng**: dựng website trên WordPress 7.1 thật bằng phòng thử (`tests/wp-lab`), build theme, bộ kiểm thử, và script kiểm nhanh `scripts/ops/smoke.mjs` (chạy với bất kỳ địa chỉ nào).
 > Tài liệu này ghi quy trình để khi có máy chủ chỉ còn việc *chạy*, không phải *nghĩ lại*.
 
@@ -105,7 +106,24 @@ node scripts/ops/smoke.mjs https://<tên-miền> --env=production   # từ máy 
 Trước khi đưa lên production: **sao lưu** (xem `SAO-LUU-PHUC-HOI.md`) và ghi lại mã commit đang chạy (`git rev-parse HEAD`) để hoàn tác.
 
 **Hoàn tác:** chạy lại các bước trên với commit trước đó (`git checkout <commit-trước>`, build, rsync, reload). Thay đổi **dữ liệu** (nhập liệu) không hoàn tác bằng mã: khôi phục từ sao lưu.
-Thiết kế tốt hơn khi viết `deploy.sh`: mỗi lần đưa lên một thư mục `releases/<mã-commit>` rồi đổi liên kết `current`, hoàn tác chỉ là đổi lại liên kết và reload.
+
+**Bản tự động: `scripts/ops/deploy.sh`** (bản thiết kế, chưa chạy thật) làm đúng chuỗi trên và thêm các chốt chặn:
+
+```bash
+scripts/ops/deploy.sh --env=staging --host=deploy@<máy> --domain=<tên-miền-staging> --dry-run   # xem kế hoạch
+scripts/ops/deploy.sh --env=staging --host=deploy@<máy> --domain=<tên-miền-staging>
+scripts/ops/deploy.sh --env=production --host=deploy@<máy> --domain=<tên-miền> --yes-production
+scripts/ops/deploy.sh --env=production --host=deploy@<máy> --domain=<tên-miền> --rollback-to=<tên-gói>   # hoàn tác tay
+```
+
+Kho Git phải sạch (triển khai từ commit đã có); chạy toàn bộ kiểm thử; build theme; **nén bản đang chạy thành gói hoàn tác** (`/var/www/<site>/rollback/<thời-gian>-<commit>.tar.zst`, giữ 5 gói); rsync với `--delay-updates`; reload PHP-FPM;
+xóa cache đối tượng và Cloudflare; chạy `smoke.mjs`; **nếu kiểm khói hỏng thì tự giải gói hoàn tác**, reload, xóa cache và thoát mã 1. Người dùng ssh phải là `deploy` (quyền sudo của `deploy` chỉ gồm `systemctl reload php8.3-fpm`, do `provision.sh` cấp).
+Chọn rsync + gói hoàn tác thay cho `releases/<commit>` + liên kết `current` vì WordPress xử lý plugin/theme/mu-plugin qua liên kết tượng trưng nhiều chỗ chưa kiểm chứng (đường dẫn thật của plugin, `plugins_url`); đổi sang liên kết chỉ sau khi thử trên staging.
+
+**Dựng máy chủ: `scripts/ops/provision.sh`** (bản thiết kế, chưa chạy thật): Ubuntu 24.04 sạch → người dùng (`deploy`, người dùng PHP không shell, `backup`), SSH chỉ khóa, `ufw` (443 chỉ cho Cloudflare, không mở 80), pool PHP-FPM riêng từng môi trường, MariaDB và Redis chỉ localhost
+(mật khẩu sinh ngẫu nhiên, chỉ nằm trong `/etc/vgarco/*.php` quyền 0640), Nginx (khối `default_server` từ chối, khối của tên miền, chặn tệp nhạy cảm, Authenticated Origin Pulls khi đã có CA), cron. Chạy lại được (chỉ ghi tệp khi nội dung đổi, giữ bản `.bak`).
+**Rủi ro lớn nhất là tự khóa mình ngoài máy chủ** (SSH, tường lửa): bước `ssh` từ chối chạy nếu `deploy` chưa có khóa công khai, giữ cổng 22 tới khi chạy lại với `--finalize-ssh`, và mở cổng SSH trước khi bật `ufw`.
+Chưa có trong script: sao lưu restic, Telegram, cấp chứng chỉ Let's Encrypt lần đầu, tiêu đề bảo mật (HSTS/CSP) của Nginx — vẫn là tài liệu.
 
 ## 5. Kiểm tra sau triển khai
 

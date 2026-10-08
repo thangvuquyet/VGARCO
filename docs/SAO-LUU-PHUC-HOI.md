@@ -28,7 +28,7 @@ Hệ quả cho dữ liệu cá nhân: CV bị xóa khỏi hệ thống (tự xó
 ## 3. Khôi phục toàn bộ vào máy chủ mới hoặc staging
 
 ```bash
-# 0. Máy chủ dựng bằng provision.sh (chưa có): người dùng, Nginx, PHP-FPM, MariaDB, quyền tệp — xem TRIEN-KHAI.md mục 2
+# 0. Máy chủ dựng bằng scripts/ops/provision.sh (bản thiết kế, chưa chạy thật): người dùng, Nginx, PHP-FPM, MariaDB, quyền tệp — xem TRIEN-KHAI.md mục 2
 # 1. Lấy khóa và mật khẩu từ kho mật khẩu của chủ đầu tư, đặt /etc/vgarco/restic.env
 source /etc/vgarco/restic.env
 restic snapshots                                   # chọn mã snapshot (thường là bản mới nhất)
