@@ -134,3 +134,19 @@ Khác bản thiết kế (có chủ ý): liên kết thường ở menu ngang v�
 nút "Xem chi tiết" có chuyển cảnh 0,22 s; màu đỏ khi rê chuột của một số nút là `#a30000` thay vì `#960000/#9b0000` (chênh vài đơn vị, không nhìn thấy).
 
 Chưa kiểm được: thiết lập "giảm chuyển động" thật của hệ điều hành, màn hình cảm ứng thật, Safari/Firefox/Cốc Cốc, trình đọc màn hình. Chưa nhìn tận mắt chuyển động đang chạy (cửa sổ ẩn); chỉ đo trạng thái đầu/cuối và quy tắc đã biên dịch.
+
+### Đợt bốn (08/10/2026): website thử đã có ảnh thật (`run.mjs demo`), giảm chuyển động (mô phỏng), duyệt phím Tab
+
+Chuẩn bị: `node tests/wp-lab/run.mjs demo` (xem `tests/wp-lab/README.md`), `node tests/wp-lab/compare/collector.mjs` (cổng 9100). Tất cả mã trình duyệt nạp một dòng:
+`await fetch('http://127.0.0.1:9100/b/<tên>.js').then(r => r.text()).then(t => (0, eval)(t));` (collector phục vụ mọi tệp `.js` trong thư mục này ở đường dẫn `/b/`).
+
+| Việc | Công cụ | Kết quả |
+|---|---|---|
+| axe-core trên trang có ảnh thật | `axe-check.js` | 0 vi phạm ở `/`, `/du-an/`, chi tiết dự án có ảnh, chi tiết dự án **không ảnh**, `/linh-vuc-hoat-dong/`, `/tin-tuc/`, `/tuyen-dung/`, `/gioi-thieu/` (390/768/1440 px), cả `/?lab_lang=de` và `/du-an/?lab_lang=de` ở 390 px. **Đối chứng** (chèn `<img>` thiếu alt) phải ra `image-alt(critical)`: đã thấy |
+| Bố cục, không ảnh → có ảnh | `layout-check.js` | Không có trang nào cuộn ngang ở 390/768/1440 px. Ba kết quả "lỗi" được chấp nhận: (1) mục cuối đường dẫn vị trí của chi tiết dự án, cắt bằng "…" theo thiết kế; (2) mũi tên menu xoay 45° vượt 3 px ở 1440; (3) **mới:** dấu "+" của hàng lĩnh vực đang mở (`summary` ở `/linh-vuc-hoat-dong/`) vượt 7–9 px — là khung bao của phần tử xoay 45°, chữ không tràn |
+| Giảm chuyển động (mô phỏng) | `reduced-motion-check.js` | Trang chủ và chi tiết dự án: `scroll-behavior: auto`, 0 chuyển cảnh, 0 hoạt ảnh, vòng CTA ẩn, dải đối tác đứng, H1 không có hoạt ảnh vào, nút dừng ở trạng thái "đã dừng" (`aria-pressed=true`, `body.is-paused` ở trang chủ). **Đối chứng** (không giảm chuyển động): 88 chuyển cảnh + 4 hoạt ảnh ở trang chủ, 67 + 1 ở chi tiết dự án, cuộn mượt, vòng CTA hiện, nút dừng `aria-pressed=false` |
+| Duyệt phím Tab (phím thật) | `tab-walk.js` | Trang chủ 40 điểm dừng, chi tiết dự án 45: thứ tự hợp lý (liên kết bỏ qua → logo → menu → tìm kiếm → ngôn ngữ → nội dung → chân trang → "Về đầu trang" → quay lại liên kết bỏ qua), **mọi điểm dừng có tên truy cập và vòng tiêu điểm nhìn thấy**, không bẫy bàn phím, không phần tử ẩn nhận tiêu điểm; trang tự cuộn theo tiêu điểm. Thư viện ảnh: vùng trình chiếu (có nhãn) → phóng to → tạm dừng → trước → các chấm → sau → danh sách ảnh nhỏ → dự án kế tiếp |
+| So kiểu hiển thị website thử ↔ trang tĩnh (1440 px) | `compare/cmpstyles.mjs` | Trang chủ 0/107 phần tử khác, danh mục dự án 0/63, tin tức 0/54: xem `compare/README.md` |
+
+**Mô phỏng giảm chuyển động không thay cho thiết lập thật** của hệ điều hành (Windows: Cài đặt → Trợ năng → Hiệu ứng hình ảnh → tắt "Hiệu ứng hoạt hình"): phần CSS (viết lại truy vấn media) và phần JS (`matchMedia` giả) được đo, nhưng việc trình duyệt thật báo `prefers-reduced-motion: reduce` thì chỉ người dùng thử được.
+Khi chạy `tab-walk.js` trong cửa sổ ẩn, đặt `scroll-behavior: auto` trước (xem đầu tệp), nếu không các điểm dừng sau lượt cuộn mượt bị báo "ngoài khung nhìn" giả.
