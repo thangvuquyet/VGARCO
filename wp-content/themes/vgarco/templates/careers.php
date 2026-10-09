@@ -1,12 +1,6 @@
 <?php
 /**
  * Template Name: Tuyển dụng
- *
- * Trang Tuyển dụng (UC-07). Render sẵn MỌI vị trí đang nhận hồ sơ; JS lọc tại chỗ theo từ khóa, nơi làm việc, phòng ban
- * (không tải lại trang, ghi bộ lọc vào URL). Không có JS: biểu mẫu gửi GET và PHP lọc bằng cùng quy tắc — đường dẫn
- * ?q=&noi-lam-viec=&phong-ban= chia sẻ được ở cả hai cách. Không có vị trí nào: thông báo + khối "Chưa thấy vị trí phù hợp?" (3a).
- *
- * @package vgarco
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -18,7 +12,6 @@ $page_url = (string) get_permalink( $id );
 $all      = vgarco_open_jobs();
 $filters  = vgarco_job_filters( $all );
 
-// Giá trị bộ lọc từ URL: chỉ nhận đúng các lựa chọn đang có (không tin dữ liệu người dùng gửi lên).
 $q_raw = isset( $_GET['q'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['q'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- bộ lọc công khai, chỉ đọc.
 $query = mb_substr( $q_raw, 0, 100 );
 $loc   = isset( $_GET['noi-lam-viec'] ) ? sanitize_key( wp_unslash( (string) $_GET['noi-lam-viec'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
