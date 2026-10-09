@@ -1,20 +1,4 @@
 <?php
-/**
- * Lệnh WP-CLI nhập liệu bằng bảng tính (mục 8.7 của phương án):
- *
- *   wp vgarco import projects content/projects.csv --images=content/images --dry-run   # xem trước thay đổi
- *   wp vgarco import projects content/projects.csv --images=content/images
- *   wp vgarco import projects content/projects.csv --lang=de                            # chỉ cột tiếng Đức (bản VI đã có)
- *   wp vgarco report translations --lang=de                                             # liệt kê nội dung chưa dịch
- *
- * Toàn bộ kiểm tra dữ liệu nằm ở import-lib.php (có kiểm thử bằng tệp CSV thật). Tệp này chỉ ghi vào WordPress/WPML/ACF.
- * CHƯA CHẠY TRÊN WORDPRESS THẬT: kiểm ở spike WPML (phương án mục 6.7) trước khi dùng cho nội dung thật.
- *
- * Quy tắc: cập nhật theo khóa `ma` (chạy lại không tạo bản trùng); bài mới ở trạng thái nháp trừ khi có --status=publish;
- * ô trống trong bảng không xóa dữ liệu đã nhập tay; ảnh nạp một lần (so khớp SHA-1), bản DE dùng lại ảnh của bản VI.
- *
- * @package vgarco-core
- */
 
 defined( 'ABSPATH' ) || exit;
 
@@ -24,45 +8,9 @@ if ( ! defined( 'WP_CLI' ) || ! WP_CLI ) {
 
 require_once VGARCO_CORE_DIR . 'inc/cli/import-lib.php';
 
-/** Ảnh tối đa (byte): PNG render 20–30 MB phải đổi sang JPEG trước khi nhập (mục 9.1). */
 const VGARCO_IMPORT_MAX_IMAGE_BYTES = 15 * 1024 * 1024;
 
-/**
- * Quản lý nội dung VGARCO từ dòng lệnh.
- */
 class VGARCO_CLI_Command {
-
-	/**
-	 * Nhập dữ liệu từ tệp CSV.
-	 *
-	 * ## OPTIONS
-	 *
-	 * <entity>
-	 * : Loại dữ liệu. Hiện hỗ trợ: projects.
-	 *
-	 * <file>
-	 * : Đường dẫn tệp CSV (UTF-8, phân cách ; , hoặc tab).
-	 *
-	 * [--images=<dir>]
-	 * : Thư mục chứa ảnh; đọc images.csv cạnh tệp CSV (hoặc --images-csv) để biết ảnh nào của dự án nào.
-	 *
-	 * [--images-csv=<file>]
-	 * : Đường dẫn images.csv nếu không nằm cạnh tệp CSV dự án.
-	 *
-	 * [--lang=<lang>]
-	 * : vi = chỉ bản tiếng Việt; de = chỉ bản tiếng Đức (bản VI phải có sẵn). Bỏ trống = cả hai.
-	 *
-	 * [--status=<status>]
-	 * : Trạng thái của bài MỚI: draft (mặc định) hoặc publish.
-	 *
-	 * [--dry-run]
-	 * : Chỉ in thay đổi, không ghi gì.
-	 *
-	 * @when after_wp_load
-	 *
-	 * @param string[]             $args  entity, file.
-	 * @param array<string,string> $assoc Tùy chọn.
-	 */
 	public function import( array $args, array $assoc ): void {
 		[ $entity, $file ] = array_pad( $args, 2, '' );
 		if ( 'projects' !== $entity ) {
@@ -78,7 +26,7 @@ class VGARCO_CLI_Command {
 			WP_CLI::error( '--lang chỉ nhận vi hoặc de.' );
 		}
 
-		$result = vgarco_import_projects( (string) file_get_contents( $file ), array( 'terms' => vgarco_seed_term_map()['loai_cong_trinh'] ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$result = vgarco_import_projects( (string) file_get_contents( $file ), array( 'terms' => vgarco_seed_term_map()['loai_cong_trinh'] ) );
 		$images = $this->read_images( $file, $assoc, array_column( $result['plans'], 'ma' ), $result['errors'] );
 		if ( $result['errors'] ) {
 			WP_CLI::error_multi_line( $result['errors'] );
@@ -92,7 +40,6 @@ class VGARCO_CLI_Command {
 			if ( '' === $lang || 'vi' === $lang ) {
 				$vi_id = $this->upsert( $plan, 'vi', $vi_id, 0, $status, $dry, $counts );
 			}
-			// Bản tiếng Đức chỉ khi có tên tiếng Đức. KHÔNG dùng continue ở đây: phần ảnh bên dưới phải chạy cho cả dự án chưa có bản Đức.
 			if ( ( '' === $lang || 'de' === $lang ) && $plan['de'] ) {
 				if ( ! $vi_id && ! $dry ) {
 					WP_CLI::warning( "{$plan['ma']}: chưa có bản tiếng Việt nên bỏ qua bản tiếng Đức." );
@@ -109,21 +56,6 @@ class VGARCO_CLI_Command {
 		WP_CLI::success( sprintf( '%s: %d tạo mới, %d cập nhật, %d không đổi.', $dry ? 'Xem trước' : 'Xong', $counts['created'], $counts['updated'], $counts['unchanged'] ) );
 	}
 
-	/**
-	 * Báo cáo nội dung.
-	 *
-	 * ## OPTIONS
-	 *
-	 * <report>
-	 * : translations — liệt kê nội dung đã xuất bản bằng tiếng Việt mà chưa có bản dịch.
-	 *   images — liệt kê ảnh bị hạ chất lượng AVIF để vừa trần dung lượng (mục 9.2), và ảnh vẫn vượt trần ở mức thấp nhất.
-	 *
-	 * [--lang=<lang>]
-	 * : Ngôn ngữ đích (mặc định de).
-	 *
-	 * @param string[]             $args
-	 * @param array<string,string> $assoc
-	 */
 	public function report( array $args, array $assoc ): void {
 		if ( 'images' === ( $args[0] ?? '' ) ) {
 			$this->report_images();
@@ -152,13 +84,10 @@ class VGARCO_CLI_Command {
 		WP_CLI::warning( count( $rows ) . " mục chưa có bản {$lang}." );
 	}
 
-	/**
-	 * Ảnh đã bị hạ chất lượng AVIF (quality < 55) và ảnh còn vượt trần ở mức thấp nhất. Chỉ đọc meta đã lưu lúc sinh các bản thu nhỏ.
-	 */
 	private function report_images(): void {
 		$rows = array();
 		$over = 0;
-		foreach ( get_posts( array( 'post_type' => 'attachment', 'post_status' => 'inherit', 'posts_per_page' => -1, 'fields' => 'ids', 'meta_key' => '_vgarco_avif_quality' ) ) as $id ) { // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+		foreach ( get_posts( array( 'post_type' => 'attachment', 'post_status' => 'inherit', 'posts_per_page' => -1, 'fields' => 'ids', 'meta_key' => '_vgarco_avif_quality' ) ) as $id ) {
 			$m = get_post_meta( $id, '_vgarco_avif_quality', true );
 			if ( ! is_array( $m ) || ( (int) ( $m['quality'] ?? VGARCO_AVIF_QUALITY ) >= VGARCO_AVIF_QUALITY && false !== ( $m['fits'] ?? null ) ) ) {
 				continue;
@@ -184,15 +113,6 @@ class VGARCO_CLI_Command {
 		}
 	}
 
-	/* ---------------------------------------------------------------- nội bộ */
-
-	/**
-	 * Đọc images.csv (nếu có) và kiểm tra tệp ảnh tồn tại, không quá nặng. Lỗi nối vào $errors.
-	 *
-	 * @param string[] $codes
-	 * @param string[] $errors
-	 * @return array<string,array>
-	 */
 	private function read_images( string $file, array $assoc, array $codes, array &$errors ): array {
 		$dir = (string) ( $assoc['images'] ?? '' );
 		$csv = (string) ( $assoc['images-csv'] ?? dirname( $file ) . '/images.csv' );
@@ -203,7 +123,7 @@ class VGARCO_CLI_Command {
 			$errors[] = "Không có thư mục ảnh: {$dir}";
 			return array();
 		}
-		$parsed = vgarco_import_images( (string) file_get_contents( $csv ), $codes ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$parsed = vgarco_import_images( (string) file_get_contents( $csv ), $codes );
 		$errors = array_merge( $errors, $parsed['errors'] );
 
 		foreach ( $parsed['images'] as $ma => $set ) {
@@ -223,7 +143,6 @@ class VGARCO_CLI_Command {
 		return $parsed['images'];
 	}
 
-	/** Tìm bài dự án theo `ma` trong một ngôn ngữ. */
 	private function find( string $ma, string $lang ): int {
 		$ids = get_posts(
 			array(
@@ -232,20 +151,19 @@ class VGARCO_CLI_Command {
 				'posts_per_page'   => -1,
 				'fields'           => 'ids',
 				'suppress_filters' => true,
-				'meta_key'         => 'ma', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-				'meta_value'       => $ma, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+				'meta_key'         => 'ma',
+				'meta_value'       => $ma,
 			)
 		);
 		foreach ( $ids as $id ) {
 			$code = apply_filters( 'wpml_element_language_code', null, array( 'element_id' => $id, 'element_type' => 'post_du_an' ) );
-			if ( null === $code || $lang === $code ) { // không có WPML: mọi bài là tiếng Việt
+			if ( null === $code || $lang === $code ) {
 				return (int) $id;
 			}
 		}
 		return 0;
 	}
 
-	/** Giá trị hiện có của bài, cùng khóa với vgarco_import_flatten(). */
 	private function current( int $post_id ): array {
 		if ( ! $post_id ) {
 			return array();
@@ -259,7 +177,6 @@ class VGARCO_CLI_Command {
 		);
 		foreach ( array( 'dia_diem', 'vai_tro', 'pham_vi', 'chu_dau_tu', 'doi_tac', 'mo_ta_seo', 'thoi_gian', 'quoc_gia', 'cong_bo_chu_dau_tu', 'loai_anh_dai_dien', 'noi_bat', 'tieu_bieu' ) as $key ) {
 			$value = get_field( $key, $post_id );
-			// Cờ đúng/sai: ACF trả bool, 0/1, "0"/"1" hoặc rỗng (chưa từng lưu) — mọi dạng "sai" đều là '0', nếu không mỗi lần chạy lại sẽ báo thay đổi giả.
 			$is_flag                = in_array( $key, array( 'cong_bo_chu_dau_tu', 'noi_bat', 'tieu_bieu' ), true );
 			$flat[ 'meta.' . $key ] = $is_flag ? ( $value && '0' !== $value ? '1' : '0' ) : (string) $value;
 		}
@@ -267,13 +184,6 @@ class VGARCO_CLI_Command {
 		return $flat;
 	}
 
-	/**
-	 * Tạo hoặc cập nhật một bài ở một ngôn ngữ.
-	 *
-	 * @param int   $source_id ID bài tiếng Việt khi tạo bản dịch (để nối nhóm dịch WPML).
-	 * @param array $counts    Bộ đếm kết quả (tham chiếu).
-	 * @return int ID bài (0 nếu --dry-run và bài chưa có).
-	 */
 	private function upsert( array $plan, string $lang, int $post_id, int $source_id, string $status, bool $dry, array &$counts ): int {
 		$planned = vgarco_import_flatten( $plan, $lang );
 		$diff    = vgarco_import_diff( $this->current( $post_id ), $planned );
@@ -318,7 +228,6 @@ class VGARCO_CLI_Command {
 		$post_id = (int) $result;
 
 		if ( 'de' === $lang && $source_id && ! apply_filters( 'wpml_element_has_translations', null, $post_id, 'post_du_an' ) ) {
-			// Gắn vào nhóm dịch của bản tiếng Việt (lần chạy đầu của bản DE).
 			do_action(
 				'wpml_set_element_language_details',
 				array(
@@ -345,9 +254,6 @@ class VGARCO_CLI_Command {
 		return $post_id;
 	}
 
-	/**
-	 * Gắn ảnh vào dự án tiếng Việt và cả bản tiếng Đức (nếu có): ảnh dùng chung, chú thích theo ngôn ngữ.
-	 */
 	private function apply_images( string $ma, array $set, int $vi_id, string $dir ): void {
 		$ids = array();
 		foreach ( array( 'hero' => 'anh_dau_trang', 'the' => 'anh_the', 'slide' => 'anh_trinh_chieu' ) as $role => $field ) {
@@ -382,9 +288,6 @@ class VGARCO_CLI_Command {
 		WP_CLI::log( "  ảnh {$ma}: " . count( $ids ) . ' ảnh chính, ' . count( $rows_vi ) . ' ảnh thư viện' );
 	}
 
-	/**
-	 * Nạp một tệp ảnh vào thư viện phương tiện, một lần duy nhất (so khớp SHA-1 của nội dung).
-	 */
 	private function sideload( string $path, int $post_id, string $alt ): int {
 		$sha   = (string) sha1_file( $path );
 		$found = get_posts(
@@ -394,8 +297,8 @@ class VGARCO_CLI_Command {
 				'posts_per_page'   => 1,
 				'fields'           => 'ids',
 				'suppress_filters' => true,
-				'meta_key'         => '_vg_import_sha1', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-				'meta_value'       => $sha, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+				'meta_key'         => '_vg_import_sha1',
+				'meta_value'       => $sha,
 			)
 		);
 		if ( $found ) {
@@ -407,10 +310,10 @@ class VGARCO_CLI_Command {
 		require_once ABSPATH . 'wp-admin/includes/image.php';
 
 		$tmp = wp_tempnam( basename( $path ) );
-		copy( $path, $tmp ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_copy
+		copy( $path, $tmp );
 		$id = media_handle_sideload( array( 'name' => basename( $path ), 'tmp_name' => $tmp ), $post_id );
 		if ( is_wp_error( $id ) ) {
-			@unlink( $tmp ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.unlink_unlink
+			@unlink( $tmp );
 			WP_CLI::error( 'Không nạp được ảnh ' . basename( $path ) . ': ' . $id->get_error_message() );
 		}
 		update_post_meta( $id, '_vg_import_sha1', $sha );

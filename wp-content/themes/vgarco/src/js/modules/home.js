@@ -1,15 +1,3 @@
-// Trang chủ: trình chiếu ảnh ở hero và nút dừng chung cho mọi chuyển động tự chạy.
-//
-// Yêu cầu: tối đa 5 dự án nổi bật, chuyển cảnh mềm, có nút tạm dừng, tự dừng khi thiết bị bật "giảm chuyển động"
-// (yêu cầu 1, UC-01 3a/3b, WCAG 2.2.2). Ảnh đầu tiên do máy chủ đã hiển thị sẵn (LCP), JS chỉ thêm chuyển động.
-//
-// Ba lý do khiến trình chiếu đứng lại, độc lập nhau — chỉ chạy khi cả ba đều không xảy ra:
-//   1. người dùng bấm nút dừng (hoặc hệ điều hành bật giảm chuyển động): class is-paused trên <body>, cũng dừng các dải chạy ngang;
-//   2. rê CHUỘT vào khung ảnh, hoặc tiêu điểm BÀN PHÍM nằm trong khung (đang đọc chú thích, đang chọn chấm) — như bản đầu của theme;
-//   3. thẻ trình duyệt bị ẩn.
-// Rê chuột chỉ tính với con trỏ chuột thật: trên màn hình cảm ứng, chạm vào ảnh không được làm trình chiếu đứng mãi tới khi chạm chỗ khác.
-// Nút dừng vẫn là cách duy nhất đáp ứng WCAG 2.2.2; hai lý do còn lại chỉ là tiện lợi.
-
 const INTERVAL = 5600;
 
 export default function initHome() {
@@ -31,7 +19,6 @@ export default function initHome() {
 	function show( next ) {
 		index = ( next + images.length ) % images.length;
 		images.forEach( ( image, i ) => image.classList.toggle( 'is-active', i === index ) );
-		// Chú thích chỉ có ở ảnh thuộc dự án; ảnh mặc định không có chú thích.
 		captions.forEach( ( caption, i ) => caption.classList.toggle( 'is-active', i === index ) );
 		dots.forEach( ( dot, i ) => {
 			if ( i === index ) {
@@ -57,7 +44,6 @@ export default function initHome() {
 		document.body.classList.toggle( 'is-paused', paused );
 		if ( toggle ) {
 			toggle.setAttribute( 'aria-pressed', String( paused ) );
-			// Nhãn nút lấy từ thuộc tính data do PHP sinh (đã dịch), không viết cứng trong JS.
 			toggle.setAttribute( 'aria-label', paused ? toggle.dataset.labelPlay : toggle.dataset.labelPause );
 		}
 		if ( paused ) {
@@ -70,7 +56,6 @@ export default function initHome() {
 	toggle?.addEventListener( 'click', () => setPaused( ! userPaused() ) );
 	reduced.addEventListener( 'change', ( event ) => setPaused( event.matches ) );
 
-	// Không chạy ngầm khi thẻ trình duyệt bị ẩn.
 	document.addEventListener( 'visibilitychange', () => {
 		if ( document.hidden ) {
 			stop();
@@ -90,7 +75,6 @@ export default function initHome() {
 			hovering = false;
 			start();
 		} );
-		// Chỉ tiêu điểm do bàn phím (:focus-visible); bấm chuột vào chấm cũng làm nút nhận tiêu điểm nhưng khi đó con trỏ đã giữ trình chiếu đứng.
 		hero.addEventListener( 'focusin', ( event ) => {
 			if ( event.target instanceof Element && event.target.matches( ':focus-visible' ) ) {
 				focusing = true;
@@ -109,7 +93,6 @@ export default function initHome() {
 		dots.forEach( ( dot, i ) =>
 			dot.addEventListener( 'click', () => {
 				show( i );
-				// Đếm lại từ đầu: ảnh vừa chọn được xem đủ thời gian, không bị chuyển ngay.
 				stop();
 				start();
 			} )

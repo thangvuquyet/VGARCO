@@ -1,11 +1,5 @@
 @use '../mixins' as *;
 
-// Trang chủ. Số đo lấy từ bản thiết kế HTML ở 1440 và 390 px; giữa hai mốc theo điểm gãy của theme.
-// Khác bản thiết kế có chủ ý:
-//  - dưới 1001 px hero xếp dọc (bản thiết kế xẹp khung ảnh về 0 px ở 700–899 px);
-//  - chữ phụ của dòng chú thích hero dùng --c-ink-muted (bản gốc #92968F chỉ đạt 2,9 : 1);
-//  - dấu ✳ của dải chữ vẽ bằng SVG (bản gốc là ký tự emoji, hiện ô vuông xanh trên Windows).
-
 @keyframes marquee-ltr {
   from {
     transform: translateX(-50%);
@@ -16,7 +10,6 @@
   }
 }
 
-// ===================================================================== HERO
 .hero {
   --hero-pad: clamp(1.25rem, 3.33vw, 3rem);
 
@@ -88,7 +81,6 @@
     color: var(--c-ink-muted);
   }
 
-  // Rê chuột: vòng đen thành đỏ và xoay 45° (mũi tên chéo thành mũi tên ngang), 0,25 s — bản thiết kế.
   &:hover .round-arrow,
   &:focus-visible .round-arrow {
     background: var(--c-brand);
@@ -122,7 +114,6 @@
   }
 }
 
-// "TỪ BẢN VẼ → ĐẾN CÔNG TRÌNH": ngang trên di động, dọc ở cột giữa trên máy tính.
 .hero-process-rail {
   display: grid;
   grid-template-columns: auto auto auto 1fr;
@@ -162,7 +153,6 @@
     color: var(--c-panel);
   }
 
-  // Rê chuột: mũi tên xoay 90° rồi dịch 6 px — bản thiết kế.
   &:hover .process-arrow,
   &:focus-visible .process-arrow {
     transform: rotate(90deg) translateX(6px);
@@ -201,7 +191,6 @@
   }
 }
 
-// --- Khung ảnh trình chiếu ---
 .hero-frame {
   position: relative;
   aspect-ratio: 7 / 5;
@@ -223,7 +212,6 @@
   inset: 0;
   overflow: hidden;
 
-  // Lớp tối dần ở đáy để chữ trắng đọc được trên mọi ảnh.
   &::after {
     content: '';
     position: absolute;
@@ -243,7 +231,6 @@
   object-position: 50% 52%;
   filter: saturate(0.94) contrast(1.02);
   opacity: 0;
-  // Chuyển ảnh mờ 0,9 s (như bản đầu của theme; caption cùng nhịp) + phóng/đậm màu khi rê chuột vào khung (bản thiết kế: 1,1 s và 0,4 s).
   transition:
     opacity 0.9s ease,
     transform 1.1s cubic-bezier(0.2, 0.72, 0.2, 1),
@@ -258,7 +245,6 @@
   }
 }
 
-// Lưới ba cột chia ảnh, chữ VG chìm: điểm nhấn trang trí của bản thiết kế.
 .showcase-grid {
   position: absolute;
   inset: 0;
@@ -301,7 +287,6 @@
   }
 }
 
-// Rê chuột vào khung: ảnh phóng 1,8% và đậm màu hơn một chút (bản thiết kế).
 @media (hover: hover) {
   .hero-frame:hover .showcase-image {
     filter: saturate(1) contrast(1.035);
@@ -309,8 +294,6 @@
   }
 }
 
-// Chấm chọn ảnh (như bản đầu của theme), ở góc trên bên trái khung ảnh — góc dưới đã có chú thích, góc trên bên phải có chữ VG mờ.
-// Mỗi nút cao 44 px, rộng 40 px (vùng bấm), vạch nhìn thấy chỉ dày 3 px. Server sinh nút có thuộc tính hidden; home.js bỏ hidden khi có JS (không JS thì nút không làm gì nên không hiện).
 .showcase-dots {
   position: absolute;
   top: 0.375rem;
@@ -328,7 +311,6 @@
   background: none;
   border: 0;
 
-  // Viền mảnh sẫm quanh vạch để vẫn thấy rõ trên ảnh sáng (nền trời).
   &::before {
     content: '';
     position: absolute;
@@ -348,7 +330,6 @@
   }
 }
 
-// Chú thích của từng ảnh, chuyển mờ dần cùng ảnh. Chú thích không hoạt động bị ẩn khỏi trình đọc màn hình và bàn phím.
 .showcase-caption {
   position: absolute;
   right: 1.125rem;
@@ -371,7 +352,7 @@
   .eyebrow {
     display: block;
     margin-bottom: 0.625rem;
-    font-size: 0.5625rem; // 9
+    font-size: 0.5625rem;
     letter-spacing: 0.09em;
     color: #fff;
   }
@@ -392,7 +373,7 @@
     left: 34px;
 
     .eyebrow {
-      font-size: 0.75rem; // 12
+      font-size: 0.75rem;
     }
   }
 }
@@ -420,11 +401,10 @@
   }
 }
 
-// ===================================================================== DẢI CHỮ
 .marquee {
   position: relative;
   overflow: hidden;
-  font-size: 1.0625rem; // 17
+  font-size: 1.0625rem;
   font-weight: 450;
   line-height: 1.7;
   letter-spacing: -0.02em;
@@ -441,7 +421,7 @@
 .partner-track {
   display: flex;
   width: max-content;
-  animation: marquee-ltr 40s linear infinite; // trái sang phải, theo đặc tả HUONG_DAN
+  animation: marquee-ltr 40s linear infinite;
 }
 
 .partner-track {
@@ -470,7 +450,6 @@
   }
 }
 
-// Một nút dừng chung cho hero và cả hai dải chạy (UC-01 3a).
 .motion-toggle {
   position: absolute;
   top: 50%;
@@ -527,7 +506,6 @@
   }
 }
 
-// Trạng thái dừng: JS đặt lên <body>; giảm chuyển động của hệ điều hành cũng dừng cả hai dải.
 .is-paused {
   .marquee-track,
   .partner-track {
@@ -550,9 +528,6 @@
   }
 }
 
-// Chữ và khung ảnh của hero "tới" từ dưới lên khi tải trang (bản thiết kế), chỉ khi KHÔNG bật giảm chuyển động.
-// Khung ảnh chỉ trượt, KHÔNG mờ dần: ảnh hero là phần tử LCP, và phần tử đang có độ trong suốt 0 thì chưa được tính là đã vẽ — mờ dần sẽ làm chậm chỉ số LCP.
-// Chữ H1 thì mờ dần được (không phải LCP khi ảnh lớn hơn). Chuyển động chỉ dùng opacity/transform nên không gây xô lệch bố cục (CLS).
 @keyframes hero-arrive {
   from {
     opacity: 0;
@@ -576,7 +551,6 @@
   }
 }
 
-// ===================================================================== VỀ VGARCO
 .section {
   padding-block: 2.75rem;
 }
@@ -731,7 +705,6 @@
   }
 }
 
-// ===================================================================== DỰ ÁN TIÊU BIỂU
 .projects-section {
   @include up($bp-md) {
     padding-block: 3.25rem 3.5rem;
@@ -769,7 +742,6 @@
   }
 }
 
-// ===================================================================== CHUYÊN MÔN
 .home-services {
   padding-block: 2.875rem;
   background: var(--c-surface-warm);
@@ -791,7 +763,6 @@
   }
 }
 
-// Khối này nền xanh xám: chữ nhấn dùng đỏ nhạt của nhãn thay vì đỏ thương hiệu (bản thiết kế).
 .home-services h2 em {
   color: var(--c-label);
 }
@@ -830,12 +801,10 @@
       font-size: 1.3125rem;
     }
 
-    // Chữ đổi sang đỏ nhạt của nhãn (khối nền xanh xám, như bản thiết kế: --label-red), không phải đỏ thương hiệu.
     &:hover {
       color: var(--c-label);
     }
 
-    // Đường kẻ đỏ quét từ trái sang phải đè lên đường kẻ dưới khi rê chuột hoặc lấy tiêu điểm (thay cho "thẻ nhấc lên" của bản đầu: đây là hàng, không phải thẻ).
     &::after {
       content: '';
       position: absolute;
@@ -872,7 +841,6 @@
   }
 }
 
-// ===================================================================== ĐỐI TÁC
 .partners-strip {
   padding-block: 3rem 3.25rem;
   border-bottom: 1px solid var(--c-line);
@@ -907,15 +875,12 @@
   }
 }
 
-// Dải đối tác tràn hết chiều ngang màn hình.
 .partner-marquee {
   overflow: hidden;
   background: var(--c-surface);
   border-block: 1px solid var(--c-line);
 }
 
-// Bề rộng nhóm cố định theo số đối tác (không theo nội dung): mỗi nhóm ít nhất bằng màn hình, mỗi cột ít nhất --partner-min.
-// Nhờ vậy tên dài xuống dòng trong cột thay vì kéo giãn cả dải.
 .partner-group {
   --partner-min: 220px;
 
@@ -929,7 +894,6 @@
   }
 }
 
-// Rê chuột vào dải: dừng chạy (bản thiết kế). Cách dừng cho người không dùng chuột là nút "Tạm dừng chuyển động".
 .partner-marquee:hover .partner-track {
   animation-play-state: paused;
 }
@@ -990,7 +954,6 @@
   border-radius: 50%;
 }
 
-// ===================================================================== TIN TỨC
 .home-news {
   border-bottom: 1px solid var(--c-line);
 
@@ -1067,7 +1030,6 @@
   }
 }
 
-// ===================================================================== KÊU GỌI LIÊN HỆ
 .page-cta {
   overflow: hidden;
   color: #fff;
@@ -1098,7 +1060,6 @@
     letter-spacing: -0.045em;
   }
 
-  // Chữ nhấn trên nền đỏ: trắng, không đỏ (đỏ trên đỏ không đọc được).
   h2 em {
     color: inherit;
   }
@@ -1156,7 +1117,6 @@
     color 0.28s,
     border-color 0.28s;
 
-  // Rê chuột / lấy tiêu điểm: nền trắng, mũi tên đỏ, xoay 45° và phóng 6% (bản thiết kế).
   &:hover,
   &:focus-visible {
     color: var(--c-panel);
@@ -1164,7 +1124,6 @@
     transform: rotate(45deg) scale(1.06);
   }
 
-  // Vòng ngoài mỏng, chỉ có nét trên và dưới.
   &::before {
     content: '';
     position: absolute;
@@ -1184,7 +1143,6 @@
     transform: scale(1.45);
   }
 
-  // Vòng toả ra rồi mờ dần, lặp mãi (bản thiết kế). Dừng bằng nút "Tạm dừng chuyển động" chung của trang (.is-paused: ẩn hẳn vòng, không để nó đứng yên giữa chừng) và khi bật giảm chuyển động.
   &::after {
     content: '';
     position: absolute;

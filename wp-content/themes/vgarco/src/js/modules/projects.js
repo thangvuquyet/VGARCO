@@ -1,6 +1,3 @@
-// Danh mục dự án: khối "Câu chuyện một công trình" chuyển giữa phối cảnh thiết kế và công trình thực tế (UC-04 6a).
-// Máy chủ đã hiển thị sẵn ảnh phối cảnh; JS chỉ thêm việc chuyển. Thiếu ảnh công trình thì không có nút (UC-04 6b).
-
 export default function initProjects() {
 	const story = document.querySelector( '[data-story]' );
 	if ( ! story ) {
@@ -24,7 +21,6 @@ export default function initProjects() {
 			} );
 			images.forEach( ( image, i ) => {
 				image.classList.toggle( 'is-active', i === index );
-				// Ảnh đang ẩn không được trình đọc màn hình đọc: hai ảnh cùng một công trình, chỉ một ảnh đang hiển thị.
 				image.setAttribute( 'aria-hidden', String( i !== index ) );
 			} );
 			if ( caption ) {

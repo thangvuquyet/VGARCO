@@ -1,18 +1,11 @@
 <?php
-/**
- * Trang lỗi 404 theo ngữ cảnh (yêu cầu 35, UC-05 2a): địa chỉ nằm dưới mục nào thì lời nhắn và liên kết đầu tiên dẫn về mục đó
- * (dự án → danh mục dự án; tin → trang tin; vị trí tuyển dụng → trang tuyển dụng). Đúng ngôn ngữ đang xem vì mọi địa chỉ
- * mục đều lấy qua WPML. Trang này không được lập chỉ mục (inc/seo.php).
- *
- * @package vgarco
- */
 
 defined( 'ABSPATH' ) || exit;
 
 get_header();
 
 $sections = vgarco_error_sections();
-$request  = (string) wp_parse_url( isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : '/', PHP_URL_PATH ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- chỉ so khớp tiền tố, không in ra.
+$request  = (string) wp_parse_url( isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : '/', PHP_URL_PATH );
 $context  = vgarco_url_section( $request, $sections );
 $current  = $context ? $sections[ $context ] : null;
 

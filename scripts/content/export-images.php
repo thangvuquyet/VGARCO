@@ -1,22 +1,6 @@
 <?php
-/**
- * Xuất ảnh master cho website (phương án mục 9.3 bước 3–4). Không cần WordPress; cần PHP 8.3 với gd (JPEG, PNG; AVIF nếu có).
- *
- *   php scripts/content/export-images.php <thư-mục-đã-cắt> <thư-mục-xuất> [--csv=images.csv] [--strict] [--dry-run]
- *
- * Thư mục đã cắt chứa ảnh đã CẮT TAY đúng tỉ lệ (hero 21:9, trình chiếu 16:9, thẻ 4:3), đặt tên theo mã dự án:
- *   <ma>-hero.jpg  <ma>-the.jpg  <ma>-slide.jpg  <ma>-tv-01.jpg  <ma>-tv-02.jpg ...   (đuôi jpg, jpeg hoặc png)
- * Mỗi ảnh được xoay theo EXIF, thu nhỏ vừa khung (không phóng to), nén JPEG chất lượng 86 (tự hạ nếu quá 1,5 MB), gỡ mọi siêu dữ liệu.
- * Công cụ KHÔNG tự cắt: chỉ báo ảnh lệch tỉ lệ. Tên sai hoặc lỗi thì không ghi gì cả; mọi lỗi báo một lượt.
- *
- *   --csv=<tệp>   ghi bộ khung images.csv (chú thích để trống: ảnh thư viện phải có chú thích thật). Không ghi đè tệp đã có.
- *   --strict      ảnh lệch tỉ lệ quy cách bị coi là lỗi (mặc định chỉ cảnh báo)
- *   --dry-run     chỉ kiểm tra và báo kế hoạch, không ghi tệp
- *
- * Mã thoát: 0 = xong; 1 = có lỗi (chưa ghi gì, hoặc có ảnh không đạt trần 1,5 MB); 2 = dùng sai lệnh hoặc thiếu gd.
- */
 
-ini_set( 'memory_limit', '2048M' ); // ảnh toàn cảnh hàng chục nghìn điểm ảnh
+ini_set( 'memory_limit', '2048M' );
 define( 'ABSPATH', __DIR__ . '/' );
 require_once dirname( __DIR__, 2 ) . '/wp-content/plugins/vgarco-core/inc/media-lib.php';
 require_once __DIR__ . '/export-images-lib.php';
@@ -49,8 +33,6 @@ if ( ! is_dir( $in ) ) {
 	exit( 2 );
 }
 
-/* ---------- 1. Kiểm tra trước, chưa ghi gì ---------- */
-
 $files   = array();
 $ignored = array();
 foreach ( scandir( $in ) as $f ) {
@@ -65,7 +47,7 @@ foreach ( scandir( $in ) as $f ) {
 }
 $plan   = vgarco_export_plan( $files );
 $errors = $plan['errors'];
-$notes  = array(); // tệp => ghi chú cảnh báo
+$notes  = array();
 foreach ( $plan['items'] as $i => $item ) {
 	$path  = "{$in}/{$item['src']}";
 	$size  = @getimagesize( $path );
@@ -107,8 +89,6 @@ if ( ! $plan['items'] ) {
 	fwrite( STDERR, "Không có ảnh nào trong {$in}\n" );
 	exit( 1 );
 }
-
-/* ---------- 2. Xuất ---------- */
 
 if ( ! $dry && ! is_dir( $out ) && ! mkdir( $out, 0777, true ) ) {
 	fwrite( STDERR, "Không tạo được thư mục xuất: {$out}\n" );
@@ -162,11 +142,9 @@ foreach ( $plan['items'] as $item ) {
 	}
 }
 
-/* ---------- 3. images.csv ---------- */
-
 if ( $csv && ! $dry ) {
 	$fh = fopen( $csv, 'w' );
-	fwrite( $fh, "\xEF\xBB\xBF" ); // BOM để Excel nhận UTF-8
+	fwrite( $fh, "\xEF\xBB\xBF" );
 	foreach ( vgarco_export_csv_rows( $plan['items'] ) as $row ) {
 		fputcsv( $fh, $row, ';' );
 	}

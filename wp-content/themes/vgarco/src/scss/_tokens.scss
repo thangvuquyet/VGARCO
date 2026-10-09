@@ -1,53 +1,47 @@
 @use 'mixins' as *;
 
-// Token thiết kế. Nguồn: đặc tả bảng 6.2 (màu), bảng 6.3 (chữ), tokens.json của bản thiết kế,
-// và giá trị đo được từ bản thiết kế HTML ở 1440 / 1280 / 900 / 390 px.
 :root {
   color-scheme: light;
 
-  // --- Màu ---
-  --c-ink: #191b1a; // chữ chính, nền nút ngôn ngữ đang chọn
-  --c-ink-soft: #505550; // liên kết chân trang
-  --c-ink-muted: #656967; // chữ phụ
-  --c-brand: #c30000; // logo, cụm từ nhấn, mũi tên
-  --c-label: #a23b35; // nhãn chuyên mục
-  --c-panel: #963a34; // khối kêu gọi liên hệ, nút chính
+  --c-ink: #191b1a;
+  --c-ink-soft: #505550;
+  --c-ink-muted: #656967;
+  --c-brand: #c30000;
+  --c-label: #a23b35;
+  --c-panel: #963a34;
   --c-panel-hover: #7d2f2a;
-  --c-surface: #fcfcfa; // nền trang
+  --c-surface: #fcfcfa;
   --c-surface-pale: #f3f4f1;
-  --c-surface-warm: #eef0eb; // nền khối xen kẽ
+  --c-surface-warm: #eef0eb;
   --c-surface-dark: #171b19;
-  --c-line: #dcded9; // đường kẻ trang trí, phân cách. KHÔNG dùng làm viền ô nhập (độ tương phản 1,32 : 1)
-  --c-line-strong: #8a8f8c; // viền ô nhập liệu, đạt 3 : 1 với nền trang (3,20 : 1)
-  --c-focus: #de4c24; // vòng tiêu điểm trên nền sáng
-  --c-focus-invert: #fff; // vòng tiêu điểm trên nền đỏ hoặc tối (cam trên đỏ chỉ đạt 1,75 : 1)
+  --c-line: #dcded9;
+  --c-line-strong: #8a8f8c;
+  --c-focus: #de4c24;
+  --c-focus-invert: #fff;
 
-  // --- Chữ ---
   --ff-sans: 'Segoe UI Variable Text', 'Segoe UI', 'VG Sans', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
-  --ff-accent: 'Lora', Georgia, 'Times New Roman', serif; // chỉ dùng chữ nghiêng, cho cụm từ nhấn trong tiêu đề
+  --ff-accent: 'Lora', Georgia, 'Times New Roman', serif;
 
-  --fs-caption: 0.8125rem; // 13
-  --fs-small: 0.875rem; // 14
-  --fs-body: 1rem; // 16
-  --fs-lead: 1.125rem; // 18
-  --fs-card: clamp(1.25rem, 1.45vw, 1.5rem); // 20–24
-  --fs-headline-a: 2.5rem; // tiêu đề lớn: 40 (mobile) → 44–62 từ 701 px, xem bên dưới
-  --fs-headline-b: 1.875rem; // tiêu đề khối: 30 (mobile) → 32–44
+  --fs-caption: 0.8125rem;
+  --fs-small: 0.875rem;
+  --fs-body: 1rem;
+  --fs-lead: 1.125rem;
+  --fs-card: clamp(1.25rem, 1.45vw, 1.5rem);
+  --fs-headline-a: 2.5rem;
+  --fs-headline-b: 1.875rem;
 
-  // --- Bố cục ---
-  --w-content: 86.25rem; // 1380 px — theo bản thiết kế (đặc tả 6.2 ghi 1320: lệch, xem phương án mục 3.1 #12)
+  --w-content: 86.25rem;
   --header-h: 72px;
-  --header-pad: 0.8125rem; // 13 @390 · 16 @480 · 24 @701
+  --header-pad: 0.8125rem;
   --gutter: 1.25rem;
   --footer-pad: 1.25rem;
   --shadow-panel: 0 16px 25px rgb(25 27 26 / 7%);
-  --shadow-header: 0 2px 14px rgb(25 27 26 / 9%); // đổ bóng thanh đầu trang khi đã cuộn xuống
+  --shadow-header: 0 2px 14px rgb(25 27 26 / 9%);
 
   @include up($bp-phone) {
     --header-pad: 1rem;
   }
 
-  // Đầu trang và cỡ tiêu đề đổi ở 701 px; lề trang (--gutter) đổi sớm hơn, ở 601 px (đo từ bản thiết kế ở 610 / 700 / 701 px).
   @include up($bp-md) {
     --header-h: 86px;
     --header-pad: 1.5rem;
@@ -57,7 +51,7 @@
 
   @include up($bp-tablet) {
     --gutter: 2.25rem;
-    --footer-pad: clamp(1.25rem, 4.4vw, 4.75rem); // 39,6 @900 · 63,36 @1440 · 76 @1920 (đo từ bản thiết kế)
+    --footer-pad: clamp(1.25rem, 4.4vw, 4.75rem);
   }
 
   @include up($bp-nav) {

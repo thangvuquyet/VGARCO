@@ -1,9 +1,3 @@
-// Trang Tuyển dụng (UC-07): lọc vị trí tại chỗ theo từ khóa, nơi làm việc, phòng ban; cập nhật số lượng; ghi bộ lọc vào URL.
-//
-// Máy chủ đã render sẵn mọi vị trí đang nhận và đã lọc theo URL (không JS vẫn dùng được). JS chỉ thêm lọc tức thì:
-// cùng quy tắc với PHP (mọi từ khóa đều phải có; không phân biệt dấu, hoa thường) nên kết quả hai cách luôn khớp.
-
-// Bỏ dấu giống vgarco_fold() ở PHP: NFD rồi bỏ dấu kết hợp; đ → d, ß → ss.
 const fold = ( text ) =>
 	String( text )
 		.toLocaleLowerCase()
@@ -77,7 +71,6 @@ export default function initCareers() {
 			try {
 				window.history.replaceState( null, '', url );
 			} catch {
-				// URL chỉ để chia sẻ; không ghi được cũng không ảnh hưởng việc lọc.
 			}
 		}
 	}

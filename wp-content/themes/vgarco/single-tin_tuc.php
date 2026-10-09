@@ -1,11 +1,4 @@
 <?php
-/**
- * Chi tiết tin tức (UC-06): ảnh đầu bài kèm chú thích, đoạn dẫn, nội dung biên tập, chia sẻ, bài trước/sau.
- * Chia sẻ Facebook là liên kết thật mở thẻ mới (6b); nút sao chép liên kết chỉ hiện khi có JS (6a).
- * Bài đầu danh sách không có "Bài trước", bài cuối không có "Bài tiếp theo" (7a).
- *
- * @package vgarco
- */
 
 defined( 'ABSPATH' ) || exit;
 
@@ -44,13 +37,13 @@ vgarco_breadcrumb(
 	<?php if ( $item['image_id'] > 0 ) : ?>
 		<figure class="news-article-cover">
 			<?php
-			echo vgarco_image( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- markup ảnh của WordPress.
+			echo vgarco_image(
 				$item['image_id'],
 				array(
 					'size'     => 'vg-1600',
 					'sizes'    => '100vw',
 					'alt'      => '' !== $article['caption'] ? $article['caption'] : $item['title'],
-					'priority' => true, // ảnh lớn nhất trên màn hình đầu (LCP)
+					'priority' => true,
 				)
 			);
 			?>
@@ -68,7 +61,7 @@ vgarco_breadcrumb(
 					data-label="<?php esc_attr_e( 'Sao chép liên kết', 'vgarco' ); ?>"
 					data-done="<?php esc_attr_e( 'Đã sao chép liên kết', 'vgarco' ); ?>"
 					aria-label="<?php esc_attr_e( 'Sao chép liên kết', 'vgarco' ); ?>">
-					<?php echo vgarco_icon( 'arrow-up-right' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					<?php echo vgarco_icon( 'arrow-up-right' ); ?>
 				</button>
 				<a class="share-facebook" href="<?php echo esc_url( 'https://www.facebook.com/sharer/sharer.php?u=' . rawurlencode( $url ) ); ?>" target="_blank" rel="noopener noreferrer"
 					aria-label="<?php esc_attr_e( 'Chia sẻ lên Facebook (mở thẻ mới)', 'vgarco' ); ?>">f</a>
@@ -80,7 +73,7 @@ vgarco_breadcrumb(
 			<?php if ( '' !== $article['lead'] ) : ?>
 				<p class="article-lead"><?php echo esc_html( $article['lead'] ); ?></p>
 			<?php endif; ?>
-			<?php echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- nội dung biên tập, đã qua the_content. ?>
+			<?php echo $content; ?>
 		</div>
 	</div>
 
@@ -90,14 +83,14 @@ vgarco_breadcrumb(
 				<a class="nav-prev" href="<?php echo esc_url( $article['prev']['url'] ); ?>" rel="prev">
 					<small><?php esc_html_e( 'Bài trước', 'vgarco' ); ?></small>
 					<strong><?php echo esc_html( $article['prev']['title'] ); ?></strong>
-					<span aria-hidden="true"><?php echo vgarco_icon( 'arrow-left' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
+					<span aria-hidden="true"><?php echo vgarco_icon( 'arrow-left' ); ?></span>
 				</a>
 			<?php endif; ?>
 			<?php if ( $article['next'] ) : ?>
 				<a class="nav-next" href="<?php echo esc_url( $article['next']['url'] ); ?>" rel="next">
 					<small><?php esc_html_e( 'Bài tiếp theo', 'vgarco' ); ?></small>
 					<strong><?php echo esc_html( $article['next']['title'] ); ?></strong>
-					<span aria-hidden="true"><?php echo vgarco_icon( 'arrow-right' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
+					<span aria-hidden="true"><?php echo vgarco_icon( 'arrow-right' ); ?></span>
 				</a>
 			<?php endif; ?>
 		</nav>

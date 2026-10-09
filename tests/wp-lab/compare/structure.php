@@ -1,23 +1,9 @@
 <?php
-/**
- * So CẤU TRÚC trang của website thử WordPress (localhost:8080) với trang tĩnh dựng từ cùng theme và dữ liệu mẫu (127.0.0.1:4174).
- *
- *   php tests/wp-lab/compare/structure.php            # cần: node tests/serve.mjs 4174 và máy chủ thử (php -S localhost:8080 ...)
- *   php tests/wp-lab/compare/structure.php --verbose  # in cả những khác biệt đã được chấp nhận
- *
- * Hai bên dùng chung một theme nên cùng một khối phải có cùng thẻ + lớp. Với mỗi cặp trang, công cụ lấy tập "thẻ.lớp-đầu" của mọi phần tử
- * trong <main>, rồi báo lớp chỉ có ở một bên. Số lượng KHÔNG so (phụ thuộc dữ liệu: 2 hay 6 ảnh thư viện cùng một khối), và thẻ <img> bị bỏ
- * qua vì WordPress tự thêm lớp attachment-* cho ảnh. Khác biệt phụ thuộc dữ liệu nằm trong ALLOWED (kèm lý do): nếu thêm vào đó, phải có lý do.
- *
- * Thoát 1 khi còn khác biệt chưa được chấp nhận. Chạy công cụ này SAU `node tests/wp-lab/run.mjs demo` (dữ liệu minh họa), vì trên dữ liệu thử
- * của các kịch bản khác (không ảnh, không lĩnh vực) hầu hết khối "đương nhiên" khác.
- */
 error_reporting( E_ALL & ~E_WARNING & ~E_DEPRECATED );
 
 $static = 'http://127.0.0.1:4174/';
 $lab    = 'http://localhost:8080';
 
-/** Khác biệt được chấp nhận: [ 'trang' => [ 'thẻ.lớp' => 'lý do' ] ]; khóa '*' áp dụng cho mọi trang. */
 const ALLOWED = array(
 	'*'         => array(),
 	'chi tiết dự án' => array(
@@ -60,7 +46,6 @@ function fetch( string $url ): ?DOMXPath {
 	return new DOMXPath( $dom );
 }
 
-/** @return array{keys: string[], headings: string[]} */
 function summarise( DOMXPath $x ): array {
 	$main = $x->query( '//main' )->item( 0 );
 	$keys = array();
@@ -86,7 +71,6 @@ $unexpected = 0;
 $missing    = 0;
 foreach ( $pairs as $name => [ $file, $path ] ) {
 	if ( 'apply' === $path ) {
-		// Địa chỉ ứng tuyển có mã vị trí (đổi theo từng lần dựng dữ liệu): lấy từ nút "Ứng tuyển" của trang chi tiết vị trí.
 		$job = fetch( $lab . '/tuyen-dung/vt-kts/' );
 		$a   = $job ? $job->query( '//a[contains(@href, "/ung-tuyen/")]' )->item( 0 ) : null;
 		$path = $a ? (string) wp_parse_url_path( $a->getAttribute( 'href' ) ) : '/ung-tuyen/';

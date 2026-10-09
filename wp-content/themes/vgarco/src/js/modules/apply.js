@@ -1,8 +1,3 @@
-// Trang Ứng tuyển (UC-08): kiểm tra nhanh ở trình duyệt, lấy mã bảo mật từ API, gửi hồ sơ bằng fetch.
-//
-// Kiểm tra ở đây chỉ để người dùng sửa sớm (7a, 4a); máy chủ kiểm tra lại toàn bộ và là nơi quyết định (mục 8.3).
-// Lỗi nào cũng giữ nguyên dữ liệu đã nhập (7a). Mã sai hoặc hết hạn: máy chủ trả mã mới, giữ dữ liệu (8a).
-
 const MAX_SIZE_DEFAULT = 10 * 1024 * 1024;
 const EXTENSIONS = [ 'pdf', 'doc', 'docx' ];
 
@@ -47,7 +42,6 @@ export default function initApply() {
 			}
 			setCaptcha( await response.json() );
 		} catch ( error ) {
-			// 429 (xin mã quá nhiều lần) không phải lỗi mạng: nói đúng nguyên nhân thay vì bảo người dùng kiểm tra mạng.
 			feedback.textContent = msg( '429' === error?.message ? 'msgTokenRate' : 'msgNetwork' );
 		}
 	}
@@ -121,7 +115,6 @@ export default function initApply() {
 		return first;
 	}
 
-	// Ánh xạ mã lỗi từ máy chủ sang câu chữ (dịch được, nằm trong data-* do PHP sinh).
 	const serverMessage = {
 		required: 'msgRequired',
 		email: 'msgEmail',
@@ -205,7 +198,6 @@ export default function initApply() {
 				return;
 			}
 
-			// Mã bảo mật sai hoặc hết hạn (8a) và mọi lỗi cần mã mới: nhận mã mới, giữ nguyên dữ liệu.
 			if ( data.captcha ) {
 				setCaptcha( data.captcha );
 			}
@@ -227,7 +219,6 @@ export default function initApply() {
 		}
 	} );
 
-	// Có JS: hiện biểu mẫu và lấy mã bảo mật. Không có JS: biểu mẫu vẫn ẩn, <noscript> chỉ đường thay thế.
 	form.hidden = false;
 	loadCaptcha();
 }

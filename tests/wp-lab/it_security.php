@@ -1,8 +1,6 @@
 <?php
-/** Đăng nhập an toàn, báo quản trị mới, xóa cache Cloudflare — chạy thật trên WordPress 7.1 (qua HTTP tới wp-login.php khi cần). */
 require __DIR__ . '/lib.php';
 
-/** Thử đăng nhập qua wp-login.php từ một IP (CF-Connecting-IP). */
 function attempt( string $user, string $pass, string $ip ): array {
 	$r = http(
 		'POST',
@@ -26,7 +24,6 @@ $clean = static function (): void {
 	wp_cache_flush();
 };
 
-/* ---- Khóa theo IP ---- */
 $clean();
 lab_clear_mail();
 $ip = '198.51.100.201';
@@ -48,7 +45,6 @@ same( 'khóa IP không gây thư báo quản trị (chuyện thường ngày)', 
 $spoof = attempt( 'labadmin', $pass, '198.51.100.204' );
 check( 'đổi CF-Connecting-IP sang địa chỉ mới thì thoát khóa IP (hiển nhiên; chặn ở Cloudflare bảo đảm header này không giả được)', $spoof['ok'] );
 
-/* ---- Khóa theo tài khoản (nhiều IP, mỗi IP chỉ sai vài lần) ---- */
 $clean();
 lab_clear_mail();
 for ( $i = 1; $i <= 9; $i++ ) {
@@ -70,7 +66,6 @@ same( 'tiếp tục thử khi đã khóa: không gửi thêm thư (không bị b
 $clean();
 check( 'sau khi hết khóa (xóa bộ đếm) đăng nhập lại được', attempt( 'labadmin', $pass, '198.51.100.97' )['ok'] );
 
-/* ---- Quên mật khẩu không được cho biết tài khoản có tồn tại ---- */
 $clean();
 $lp = static fn( string $login ): array => http( 'POST', '/wp-login.php?action=lostpassword', array( 'body' => http_build_query( array( 'user_login' => $login, 'redirect_to' => '', 'wp-submit' => 'Get New Password' ) ), 'headers' => array( 'CF-Connecting-IP: 198.51.100.150' ) ) );
 $exists  = $lp( 'labadmin' );
@@ -83,7 +78,6 @@ $msg     = static function ( array $r ): string {
 same( 'quên mật khẩu: tài khoản có thật và không có cho cùng kết quả (không liệt kê được tài khoản)', array( $loc( $exists ), $msg( $exists ) ), array( $loc( $missing ), $msg( $missing ) ) );
 check( 'quên mật khẩu với tên không tồn tại không hiện "không có tài khoản"', ! preg_match( '/no account|không có tài khoản|không tồn tại/iu', $msg( $missing ) ) );
 
-/* ---- Tài khoản quản trị mới ---- */
 lab_clear_mail();
 $uid = wp_insert_user( array( 'user_login' => 'lab_new_admin', 'user_pass' => wp_generate_password( 20 ), 'user_email' => 'lab-new-admin@example.test', 'role' => 'administrator' ) );
 $m   = array_values( array_filter( lab_mails(), fn( $x ) => str_contains( (string) $x['subject'], 'tài khoản quản trị mới' ) ) );
@@ -97,7 +91,6 @@ same( 'nâng biên tập viên lên quản trị: báo đúng một lần', 1, c
 wp_delete_user( $uid );
 wp_delete_user( $eid );
 
-/* ---- Xóa cache Cloudflare ---- */
 @unlink( LAB . '/http.log' );
 delete_option( 'vgarco_alerts' );
 update_option( 'lab_cf_fail', 0 );
@@ -141,7 +134,6 @@ check( 'quản trị viên thấy cảnh báo ở trang quản trị', str_conta
 update_option( 'lab_cf_fail', 0 );
 delete_option( 'vgarco_alerts' );
 
-// Dữ liệu riêng tư không được kéo theo xóa cache; thay đổi trạng thái khác thì có.
 wp_clear_scheduled_hook( 'vgarco_cf_purge' );
 $app = wp_insert_post( array( 'post_type' => 'ho_so_ut', 'post_status' => 'private', 'post_title' => 'Hồ sơ thử cache' ) );
 same( 'tạo hồ sơ ứng viên (riêng tư): không xóa cache', array(), $cf_events() );

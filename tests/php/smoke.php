@@ -1,18 +1,7 @@
 <?php
-/**
- * Kiểm thử khói cho vgarco-core, mu-plugin và các hàm thuần của theme.
- * Chạy không cần WordPress: nạp mã thật với một số hàm giả tối thiểu.
- *
- *   php -d extension_dir=<ext> -d extension=mbstring tests/php/smoke.php
- *
- * Kiểm thử này KHÔNG thay cho chạy thử trên WordPress + WPML + ACF PRO thật.
- * Nó chỉ bắt lỗi logic ở phần không phụ thuộc WordPress.
- */
 
 define( 'ABSPATH', __DIR__ . '/' );
 define( 'ROOT', dirname( __DIR__, 2 ) );
-
-/* ---------- Hàm giả của WordPress ---------- */
 
 $GLOBALS['hooks']   = array();
 $GLOBALS['env']     = 'production';
@@ -59,8 +48,6 @@ function get_field( $name, $post_id = false ) {
 }
 function error_log_stub() {}
 
-/* ---------- Tiện ích kiểm thử ---------- */
-
 $pass = 0;
 $fail = array();
 
@@ -77,35 +64,24 @@ function same( string $label, $expected, $actual ): void {
 	check( $label . ' — mong đợi ' . var_export( $expected, true ) . ', nhận ' . var_export( $actual, true ), $expected === $actual );
 }
 
-/* ========== 1. vgarco-core ========== */
-
 define( 'VGARCO_CORE_DIR', ROOT . '/wp-content/plugins/vgarco-core/' );
 foreach ( array( 'helpers', 'post-types', 'taxonomies', 'seed', 'fields', 'media' ) as $file ) {
 	require_once VGARCO_CORE_DIR . "inc/{$file}.php";
 }
 
-// --- Thứ tự đăng ký: phân loại TRƯỚC kiểu nội dung ---
-// Quy tắc đường dẫn xếp theo thứ tự đăng ký. Đăng ký sau thì quy tắc ảnh đính kèm của dự án (du-an/[^/]+/([^/]+)/)
-// khớp trước và /du-an/loai/<nhóm>/ thành 404. Lỗi này chỉ lộ ra khi chạy trên WordPress thật.
 $prio = $GLOBALS['priorities']['init'] ?? array();
 check( 'init: phân loại đăng ký trước kiểu nội dung (ưu tiên số nhỏ hơn)', isset( $prio['vgarco_register_taxonomies'], $prio['vgarco_register_post_types'] ) && $prio['vgarco_register_taxonomies'] < $prio['vgarco_register_post_types'] );
 $core_main = (string) file_get_contents( VGARCO_CORE_DIR . 'vgarco-core.php' );
 check( 'kích hoạt: đăng ký phân loại trước kiểu nội dung (cùng thứ tự với lúc chạy thường)', strpos( $core_main, 'vgarco_register_taxonomies();' ) < strpos( $core_main, 'vgarco_register_post_types();' ) );
-// Cài mới bằng WP-CLI không chạy admin_init: vai trò Nhân sự phải được tạo ngay lúc kích hoạt (kiểm chứng thật ở tests/wp-lab/it_env.php).
 $activate = (string) substr( $core_main, (int) strpos( $core_main, 'function vgarco_core_activate' ), 900 );
 check( 'kích hoạt: tạo vai trò Nhân sự tuyển dụng (không chờ admin_init)', str_contains( $activate, 'vgarco_apply_ensure_roles();' ) );
 
-// --- Ảnh tải lên: bộ gỡ siêu dữ liệu (GPS) phải được nối vào WordPress ---
-// Hàm thuần có kiểm thử riêng (media.php); chạy thật trên WordPress ở tests/wp-lab/it_media.php. Ở đây chỉ bảo đảm KHÔNG ai tháo mất đường nối.
 check( 'ảnh: wp_handle_upload gọi bộ gỡ siêu dữ liệu (cả tải qua trang quản trị lẫn nhập bằng mã)', isset( $GLOBALS['priorities']['wp_handle_upload']['vgarco_sanitize_uploaded_image'] ) );
 check( 'ảnh: chất lượng AVIF/WebP có chủ đích (wp_editor_set_quality)', isset( $GLOBALS['priorities']['wp_editor_set_quality']['vgarco_image_quality'] ) );
 check( 'ảnh: có bộ lọc upload_mimes giới hạn định dạng ảnh', ! empty( $GLOBALS['hooks']['upload_mimes'] ) );
 check( 'ảnh: AVIF theo từng ảnh — báo ảnh nào đang sinh bản thu nhỏ (intermediate_image_sizes_advanced, ngoài bộ lọc bỏ kích thước thừa)', count( $GLOBALS['hooks']['intermediate_image_sizes_advanced'] ?? array() ) >= 2 );
 check( 'ảnh: AVIF theo từng ảnh — dọn trạng thái sau khi sinh xong (wp_generate_attachment_metadata)', ! empty( $GLOBALS['hooks']['wp_generate_attachment_metadata'] ) );
 
-// --- Đăng nhập an toàn: thứ tự bộ lọc (lỗi chỉ lộ ra trên WordPress thật) ---
-// wp_authenticate_username_password() (ưu tiên 20) bỏ qua WP_Error của bộ lọc đến trước rồi tự kiểm tra mật khẩu. Bộ chặn khóa phải chạy SAU
-// lõi (đặt ưu tiên 1 thì mật khẩu đúng vẫn vào được dù IP/tài khoản đang khóa), và bộ gộp thông báo chung phải chạy sau bộ chặn khóa.
 require_once VGARCO_CORE_DIR . 'inc/security-lib.php';
 require_once VGARCO_CORE_DIR . 'inc/security.php';
 $auth = $GLOBALS['priorities']['authenticate'] ?? array();
@@ -113,14 +89,12 @@ check( 'authenticate: bộ chặn khóa chạy sau kiểm tra mật khẩu của
 check( 'authenticate: thông báo chung chạy sau bộ chặn khóa', ( $auth['vgarco_auth_generic_error'] ?? 0 ) > ( $auth['vgarco_auth_guard'] ?? PHP_INT_MAX ) );
 check( 'quên mật khẩu: có chặn dò tài khoản ở cả hai tên hành động', isset( $GLOBALS['priorities']['login_form_lostpassword']['vgarco_lostpassword_no_enumeration'], $GLOBALS['priorities']['login_form_retrievepassword']['vgarco_lostpassword_no_enumeration'] ) );
 
-// --- vgarco_dot_get ---
 $tree =array( 'a' => array( 'b' => array( 'c' => 5 ) ), 'z' => null );
 same( 'dot_get: lồng 3 cấp', 5, vgarco_dot_get( $tree, 'a.b.c' ) );
 same( 'dot_get: khóa không có', null, vgarco_dot_get( $tree, 'a.x.c' ) );
 same( 'dot_get: qua giá trị không phải mảng', null, vgarco_dot_get( $tree, 'a.b.c.d' ) );
 same( 'dot_get: giá trị null có thật', null, vgarco_dot_get( $tree, 'z' ) );
 
-// --- vgarco_option: đã lưu thắng mặc định; trống thì lấy mặc định; không có gì thì $fallback ---
 $GLOBALS['fields'] = array();
 same( 'option: chưa lưu → mặc định (điện thoại)', '0988 961 666', vgarco_option( 'lien_he.dien_thoai' ) );
 same( 'option: chưa lưu → mặc định (tên công ty)', 'Công ty TNHH Tư vấn Xây dựng VGARCO', vgarco_option( 'phap_nhan.ten' ) );
@@ -143,19 +117,16 @@ $home = vgarco_option( 'chi_so_trang_chu' );
 same( 'chỉ số trang chủ: mặc định có 3 mục', 3, count( $home ) );
 same( 'chỉ số trang chủ: mục đầu là 13+', '13+', $home[0]['so'] . $home[0]['hau_to'] );
 
-// --- Nhãn tiếng Việt ---
 $labels = vgarco_cpt_labels( 'Dự án' );
 same( 'nhãn: chữ thường có dấu', 'Thêm dự án mới', $labels['add_new_item'] );
 same( 'nhãn: nhiều từ', 'Thêm vị trí tuyển dụng mới', vgarco_cpt_labels( 'Vị trí tuyển dụng' )['add_new_item'] );
 
-// --- Dữ liệu mồi ---
 $seed = vgarco_seed_term_map();
 same( '7 loại công trình', 7, count( $seed['loai_cong_trinh'] ) );
 same( '3 chuyên mục tin', 3, count( $seed['chuyen_muc'] ) );
 check( 'slug loại công trình chỉ gồm a-z, số, gạch ngang', 0 === count( array_filter( array_keys( $seed['loai_cong_trinh'] ), fn( $s ) => ! preg_match( '/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $s ) ) ) );
 check( '"Y tế" có trong danh sách (chưa có dự án nhưng phải tạo sẵn)', isset( $seed['loai_cong_trinh']['y-te'] ) );
 
-// --- Trường ACF: cấu trúc hợp lệ ---
 $groups = vgarco_field_groups();
 same( 'số nhóm trường (4 kiểu nội dung + 3 nhóm cấu hình + 7 nhóm trang)', 14, count( $groups ) );
 
@@ -192,7 +163,6 @@ foreach ( $groups as $group ) {
 	$walk( $group['fields'], $group['key'] );
 }
 
-// Các trường bắt buộc theo phương án 6.2 phải có mặt.
 $du_an = array_column( $groups[0]['fields'], null, 'name' );
 foreach ( array( 'ma', 'dia_diem', 'quoc_gia', 'thoi_gian', 'vai_tro', 'pham_vi', 'chu_dau_tu', 'doi_tac', 'cong_bo_chu_dau_tu', 'anh_dau_trang', 'anh_the', 'anh_trinh_chieu', 'loai_anh_dai_dien', 'thu_vien', 'noi_bat', 'tieu_bieu', 'mo_ta_seo' ) as $name ) {
 	check( "du_an có trường {$name}", isset( $du_an[ $name ] ) );
@@ -203,7 +173,6 @@ same( 'du_an: ảnh trong thư viện → sao chép', 1, array_column( $du_an['t
 same( 'du_an: thư viện tối đa 15 ảnh', 15, $du_an['thu_vien']['max'] );
 same( 'du_an: mặc định KHÔNG công bố chủ đầu tư', 0, $du_an['cong_bo_chu_dau_tu']['default_value'] );
 
-// --- Kiểm tra định dạng mã ---
 same( 'slug hợp lệ', true, vgarco_validate_slug_value( true, 'bao-tang-qdnd-lao' ) );
 check( 'slug có dấu bị từ chối', is_string( vgarco_validate_slug_value( true, 'bảo-tàng' ) ) );
 check( 'slug có chữ hoa bị từ chối', is_string( vgarco_validate_slug_value( true, 'Bao-Tang' ) ) );
@@ -211,16 +180,11 @@ check( 'slug có gạch ngang cuối bị từ chối', is_string( vgarco_valida
 same( 'slug rỗng để ACF tự xử lý "bắt buộc"', true, vgarco_validate_slug_value( true, '' ) );
 same( 'giữ nguyên lỗi trước đó', 'lỗi cũ', vgarco_validate_slug_value( 'lỗi cũ', 'abc' ) );
 
-// --- Chiều rộng ảnh ---
 same( 'kích thước ảnh sinh ra', array( 480, 800, 1200, 1600, 2560 ), vgarco_image_widths() );
-
-/* ========== 2. mu-plugin: chặn thư ở staging ========== */
 
 $GLOBALS['hooks'] = array();
 require ROOT . '/wp-content/mu-plugins/vgarco-loader.php';
 
-// XML-RPC: bộ lọc xmlrpc_enabled chỉ chặn lệnh cần đăng nhập; system.listMethods/multicall/pingback vẫn trả lời (thấy trên WordPress 7.1 thật).
-// Mu-plugin phải kết thúc yêu cầu xmlrpc.php bằng 403 trước khi WordPress xử lý. Chạy tiến trình riêng vì mã dùng exit.
 $probe = sys_get_temp_dir() . '/vgarco-xmlrpc-probe.php';
 file_put_contents(
 	$probe,
@@ -270,9 +234,6 @@ same( 'staging: tên miền giả mạo kiểu vgarco.vn.evil.com bị chặn', 
 
 same( 'vgarco_mail_addresses: trích nhiều địa chỉ', array( 'a@b.vn', 'c@d.com' ), vgarco_mail_addresses( 'Tên A <a@b.vn>, c@d.com' ) );
 
-/* ========== 3. Theme: cây menu và HTML menu ========== */
-
-// Hàm giả tối thiểu cho menus.php / template-tags.php.
 function get_nav_menu_locations() {
 	return array();
 }
@@ -310,8 +271,6 @@ check( 'nav: liên kết con khác không có aria-current', str_contains( $html
 check( 'nav: mục không có con là liên kết thường', str_contains( $html, '<a href="/lien-he/">Liên hệ</a>' ) );
 same( 'nav: không sinh thẻ đóng thiếu (số <div> mở = số </div> đóng)', substr_count( $html, '<div' ), substr_count( $html, '</div>' ) );
 
-// Thoát HTML: ký tự đặc biệt không được phá markup — ở cả ba chỗ nhãn xuất hiện
-// (liên kết lá, nút của mục có con, liên kết con) và ở nhãn bảng.
 $evil = 'A "B" <script>alert(1)</script>';
 
 ob_start();
@@ -325,18 +284,14 @@ $xss_group = ob_get_clean();
 check( 'nav: không có thẻ <script> thật nào lọt vào HTML của mục có con', ! str_contains( $xss_group, '<script>' ) );
 same( 'nav: nhãn nút, nhãn bảng và liên kết con đều được thoát (3 lần)', 3, substr_count( $xss_group, '&lt;script&gt;' ) );
 
-// Chuỗi nhiều dòng: thoát HTML TRƯỚC khi đổi xuống dòng thành <br>.
 same( 'lines: xuống dòng thành <br>', 'Dòng 1<br>Dòng 2', vgarco_lines( "Dòng 1\nDòng 2" ) );
 same( 'lines: cắt khoảng trắng đầu/cuối', 'A', vgarco_lines( "\n A \n" ) );
 check( 'lines: thoát thẻ HTML nhưng vẫn giữ <br> do mình sinh', vgarco_lines( "<b>x</b>\ny" ) === '&lt;b&gt;x&lt;/b&gt;<br>y' );
 check( 'lines: không lọt thẻ <script>', ! str_contains( vgarco_lines( '<script>alert(1)</script>' ), '<script>' ) );
 
-// Biểu tượng: chỉ chấp nhận tên an toàn.
 function get_theme_file_path( $p = '' ) {
 	return ROOT . '/wp-content/themes/vgarco/' . ltrim( $p, '/' );
 }
-// Các phép thử này dùng đường dẫn CÓ TỒN TẠI nếu lớp chặn bị bỏ: nhờ vậy chúng phân biệt được
-// "bị chặn" với "không có tệp". (Thử '../functions' thì luôn ra rỗng dù có chặn hay không.)
 check( 'icon: chặn đi lùi thư mục (../icons/search có thật nếu không chặn)', '' === vgarco_icon( '../icons/search' ) );
 check( 'icon: chặn tên rỗng', '' === vgarco_icon( '' ) );
 check( 'icon: tên không có tệp trả về rỗng', '' === vgarco_icon( 'khong-co' ) );
@@ -344,7 +299,6 @@ $icon = vgarco_icon( 'search', 'x' );
 check( 'icon: thêm aria-hidden và class', str_starts_with( $icon, '<svg aria-hidden="true" focusable="false" class="x"' ) );
 check( 'icon: mọi biểu tượng dùng trong mẫu trang đều tồn tại', '' !== vgarco_icon( 'phone' ) && '' !== vgarco_icon( 'arrow-up-right' ) && '' !== vgarco_icon( 'arrow-up' ) );
 
-// Trang 404 theo ngữ cảnh: đoán mục từ đường dẫn bị lỗi.
 if ( ! function_exists( 'wp_parse_url' ) ) {
 	function wp_parse_url( $url, $component = -1 ) {
 		return parse_url( $url, $component );
@@ -376,7 +330,6 @@ same( '404: mục ở gốc site không khớp mọi thứ', '', vgarco_url_sect
 same( '404: đường dẫn gốc → không mục nào', '', vgarco_url_section( '/', $secs ) );
 same( '404: đường dẫn rỗng → không mục nào', '', vgarco_url_section( '', $secs ) );
 
-// Bộ chuyển ngôn ngữ (UC-10): mục liên kết và nhánh "chưa có bản dịch".
 $langs = array(
 	'vi' => array( 'url' => '/', 'active' => 1, 'native_name' => 'Tiếng Việt', 'missing' => 0 ),
 	'de' => array( 'url' => '/de/', 'active' => 0, 'native_name' => 'Deutsch', 'missing' => 1 ),
@@ -392,8 +345,6 @@ same( 'chuyển ngôn ngữ: thiếu bản dịch mà không có địa chỉ d�
 same( 'chuyển ngôn ngữ: địa chỉ dự phòng rỗng bị bỏ qua', '/de/', vgarco_switcher_items( $langs, array( 'de' => '' ) )[1]['url'] );
 same( 'chuyển ngôn ngữ: không có native_name → mã viết hoa', 'FR', vgarco_switcher_items( array( 'fr' => array( 'url' => '/fr/' ) ), array() )[0]['name'] );
 same( 'chuyển ngôn ngữ: thiếu cờ missing coi như có bản dịch', false, vgarco_switcher_items( array( 'de' => array( 'url' => '/de/' ) ), array( 'de' => '/x/' ) )[0]['missing'] );
-
-/* ---------- Kết quả ---------- */
 
 echo "\n";
 if ( $fail ) {

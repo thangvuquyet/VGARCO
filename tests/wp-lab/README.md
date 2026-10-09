@@ -76,6 +76,8 @@ Mọi kịch bản khác dọn dữ liệu này lúc bắt đầu, nên `demo` k
 
 - **Ảnh** lấy từ thư mục ngoài kho mã (đặt biến `VG_DEMO_PHOTOS`, mặc định là thư mục `vgarco-demo-photos` nằm cạnh thư mục kho mã); thiếu thư mục thì kịch bản in "BỎ QUA" (không phải lỗi). Thư mục này do `demo/prepare-photos.php` dựng từ ảnh gốc của dự án
   (cắt theo vùng nổi bật, **phóng to và làm nét** ảnh gốc thấp độ phân giải bằng ffmpeg, xuất qua `scripts/content/export-images.php`; có `contact-sheet.jpg` và `report.json` để xem lại).
+  Cách chạy: `php tests/wp-lab/demo/prepare-photos.php <thư-mục-ảnh-gốc> <thư-mục-ra> [--only=<mã-dự-án>]`. **Đây không phải quy trình cắt ảnh của website thật**: phương án mục 9.3 yêu cầu cắt **tay** (cắt tự động có thể xén mất mái hoặc nền công trình); công cụ chỉ dựng bản đề xuất để website thử có ảnh.
+  Ảnh được chọn theo xếp hạng (phối cảnh trước, rồi ảnh chụp; ảnh lớn hơn trước), bỏ ảnh toàn cảnh PANO và thư mục "giấy khen", cắt đúng tỉ lệ hero 21:9, trình chiếu 16:9, thẻ 4:3. Phóng to **không** tạo thêm chi tiết thật: ảnh mềm hơn bản gốc cùng cỡ, khi có ảnh gốc độ phân giải cao thì thay.
 - **Dự án chưa có ảnh riêng để trống có chủ ý** (3 trong 19: Đài kiểm soát không lưu Đồng Hới, Học viện Kỹ thuật & Công nghệ An ninh, Biệt thự tại Niedernhausen): thẻ vẫn có chữ và liên kết nhưng không có ảnh và không mang nhãn loại ảnh.
 
 ## So website thử với trang tĩnh: [`compare/`](compare/README.md)

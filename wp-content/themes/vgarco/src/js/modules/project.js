@@ -1,17 +1,3 @@
-// Chi tiết dự án: thư viện ảnh (chuyển ảnh, bàn phím, vuốt, tự chạy) và xem ảnh lớn.
-//
-// Máy chủ đã hiển thị sẵn ảnh đầu, các nút và ảnh nhỏ ở dạng liên kết tới tệp ảnh (không cần JS để xem ảnh).
-// JS thêm: chuyển ảnh, bàn phím (← → Home End), vuốt trên màn hình cảm ứng, xem ảnh lớn trong <dialog>, và TỰ CHẠY.
-//
-// Tự chạy (6,5 s/ảnh, như bản thiết kế) chỉ khi KHÔNG có lý do nào dưới đây — mỗi lý do đứng riêng, hết hết mới chạy:
-//   user     người dùng bấm nút tạm dừng (WCAG 2.2.2), hoặc hệ điều hành bật "giảm chuyển động" (khởi đầu ở trạng thái dừng; bấm nút để chạy);
-//   hover    rê CHUỘT vào thư viện (chạm trên cảm ứng không tính, để khỏi đứng mãi);
-//   focus    tiêu điểm BÀN PHÍM nằm trong thư viện (đang đọc chú thích, đang chọn ảnh);
-//   away     thư viện chưa/không còn nằm trong khung nhìn (không chuyển ảnh khi chưa ai thấy; thanh tiến độ bắt đầu khi thấy);
-//   lightbox đang xem ảnh lớn;
-//   và thẻ trình duyệt đang ẩn.
-// Người dùng tự chuyển ảnh thì thời gian đếm lại từ đầu. Ảnh tự chuyển KHÔNG đọc to cho trình đọc màn hình (mỗi 6,5 s sẽ là quấy rối); ảnh do người dùng chọn thì có.
-
 const SWIPE_DISTANCE = 50;
 const INTERVAL = 6500;
 
@@ -73,7 +59,6 @@ export default function initProject() {
 				.replace( '%3$s', slides[ index ].dataset.label ?? '' );
 		}
 
-		// Tải trước ảnh kề bên: ảnh ẩn (display:none) không được trình duyệt tải nếu còn lazy.
 		[ index + 1, index - 1 ].forEach( ( i ) => {
 			const img = slides[ ( ( i % total ) + total ) % total ].querySelector( 'img' );
 			if ( img ) {
@@ -81,8 +66,6 @@ export default function initProject() {
 			}
 		} );
 	}
-
-	/* ---- Tự chạy ---- */
 
 	const running = () => total > 1 && ! document.hidden && ! Object.values( holds ).some( Boolean );
 
@@ -92,7 +75,6 @@ export default function initProject() {
 		root.classList.remove( 'is-counting' );
 	}
 
-	// (Re)khởi động đếm giờ: thanh tiến độ của ảnh đang chọn chạy lại từ đầu (gỡ lớp, ép tính lại kiểu, gắn lại) cùng lúc với đồng hồ.
 	function startAuto() {
 		stopAuto();
 		if ( ! running() ) {
@@ -113,7 +95,6 @@ export default function initProject() {
 		}
 	}
 
-	// Chỉ đếm lại khi một lý do thật sự đổi, tránh đặt lại đồng hồ vô cớ.
 	function setHold( name, value ) {
 		if ( holds[ name ] !== value ) {
 			holds[ name ] = value;
@@ -121,13 +102,11 @@ export default function initProject() {
 		}
 	}
 
-	// Người dùng tự chuyển ảnh: hiện ảnh (có đọc to) rồi đếm lại; nếu đang bị giữ thì startAuto tự dừng.
 	function go( next ) {
 		show( next );
 		startAuto();
 	}
 
-	// Chỉ một ảnh: không có gì để chuyển; vẫn cho phóng to.
 	if ( total > 1 ) {
 		if ( controls ) {
 			controls.hidden = false;
@@ -137,7 +116,7 @@ export default function initProject() {
 		dots.forEach( ( dot, i ) => dot.addEventListener( 'click', () => go( i ) ) );
 		thumbs.forEach( ( thumb, i ) => {
 			thumb.addEventListener( 'click', ( event ) => {
-				event.preventDefault(); // không mở tệp ảnh trong tab mới
+				event.preventDefault();
 				go( i );
 			} );
 		} );
@@ -150,7 +129,6 @@ export default function initProject() {
 			}
 		} );
 
-		// Vuốt ngang trên màn hình cảm ứng. Chuột không vuốt để khỏi cản thao tác bấm mở ảnh lớn.
 		let startX = null;
 		stage.addEventListener( 'pointerdown', ( event ) => {
 			startX = event.pointerType === 'mouse' ? null : event.clientX;
@@ -169,7 +147,6 @@ export default function initProject() {
 			startX = null;
 		} );
 
-		// Các lý do khiến tự chạy đứng lại (xem đầu tệp).
 		root.style.setProperty( '--gallery-interval', INTERVAL + 'ms' );
 		toggle?.addEventListener( 'click', () => {
 			holds.user = ! holds.user;
@@ -187,7 +164,6 @@ export default function initProject() {
 			}
 		} );
 		root.addEventListener( 'pointerleave', () => setHold( 'hover', false ) );
-		// Chỉ tiêu điểm do bàn phím (:focus-visible): bấm chuột vào nút cũng làm nút nhận tiêu điểm nhưng khi đó con trỏ đã giữ thư viện đứng.
 		root.addEventListener( 'focusin', ( event ) => {
 			if ( event.target instanceof Element && event.target.matches( ':focus-visible' ) ) {
 				setHold( 'focus', true );
@@ -212,10 +188,8 @@ export default function initProject() {
 		startAuto();
 	}
 
-	/* ---- Xem ảnh lớn ---- */
-
 	if ( ! lightbox || typeof lightbox.showModal !== 'function' ) {
-		return; // trình duyệt quá cũ: bỏ qua phóng to, thư viện vẫn dùng được
+		return;
 	}
 
 	const bigImage = lightbox.querySelector( '[data-lightbox-image]' );
@@ -256,7 +230,6 @@ export default function initProject() {
 			fillLightbox();
 		}
 	} );
-	// Bấm vào nền tối (chính <dialog>, không phải ảnh hay nút) thì đóng.
 	lightbox.addEventListener( 'click', ( event ) => {
 		if ( event.target === lightbox ) {
 			lightbox.close();

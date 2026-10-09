@@ -1,11 +1,4 @@
 <?php
-/**
- * Kiểm thử tìm kiếm dự án (UC-09): chuẩn hóa, so khớp bỏ dấu, xếp hạng, giới hạn. Dùng 19 dự án thật của hồ sơ (tests/php/data/projects.json).
- *
- *   php -d extension_dir=<ext> -d extension=mbstring tests/php/search.php
- *
- * Không thay cho chạy thử đường REST và chỉ mục trên WordPress thật.
- */
 
 define( 'ABSPATH', __DIR__ . '/' );
 define( 'ROOT', dirname( __DIR__, 2 ) );
@@ -32,27 +25,19 @@ function titles( array $results ): array {
 	return array_column( $results, 'title' );
 }
 
-/* ---------- Chỉ mục từ dữ liệu thật ---------- */
-
 $index = fx_search_index();
 same( 'chỉ mục: 19 dự án', 19, count( $index ) );
-
-/* ---------- Chuẩn hóa ---------- */
 
 same( 'chuẩn hóa: bỏ dấu, hạ chữ, đ → d', 'bao tang lich su dai su', vgarco_search_normalize( 'Bảo Tàng Lịch Sử ĐẠI SỨ' ) );
 same( 'chuẩn hóa: gộp khoảng trắng và cắt hai đầu', 'bao tang', vgarco_search_normalize( "  bao \t\n  tang  " ) );
 same( 'chuẩn hóa: cắt ở 100 ký tự', 100, mb_strlen( vgarco_search_normalize( str_repeat( 'a', 300 ) ) ) );
 same( 'chuẩn hóa: tiếng Đức ä → ae, ß → ss', 'grosse', vgarco_search_normalize( 'Große' ) );
 
-/* ---------- Độ dài tối thiểu ---------- */
-
 foreach ( array( '', 'b', 'ba', '  ba  ', "b\t", 'đ ', ' ạ' ) as $short ) {
 	same( 'dưới 3 ký tự → rỗng: ' . json_encode( $short ), array(), vgarco_search_rank( $index, $short ) );
 }
 check( 'đúng 3 ký tự thì tìm', count( vgarco_search_rank( $index, 'lao' ) ) > 0 );
 check( '3 ký tự có dấu tính theo ký tự (không theo byte)', count( vgarco_search_rank( $index, 'lào' ) ) > 0 );
-
-/* ---------- So khớp ---------- */
 
 $museum = 'Bảo tàng Lịch sử Quân đội nhân dân Lào';
 $r      = vgarco_search_rank( $index, 'bao tang' );
@@ -73,13 +58,10 @@ same( 'mọi từ đều phải khớp: "truong bac" chỉ ra THCS Bắc Từ Li
 same( 'từ không có trong dự án nào → rỗng', array(), vgarco_search_rank( $index, 'khong-co-du-an-nay' ) );
 same( 'một từ đúng, một từ sai → rỗng (không phải "một trong")', array(), vgarco_search_rank( $index, 'bao tang zzzz' ) );
 
-// Ký tự đặc biệt chỉ là chữ, không phải mẫu tìm hay SQL.
 foreach ( array( '<script>alert(1)</script>', '%%%', '___', '.*', '\\', "'; DROP TABLE x; --", '(((', '[a-z]+' ) as $weird ) {
 	same( 'ký tự đặc biệt không ra kết quả và không lỗi: ' . json_encode( $weird ), array(), vgarco_search_rank( $index, $weird ) );
 }
 same( 'truy vấn dài 300 ký tự: cắt còn 100, không lỗi, không ra kết quả', array(), vgarco_search_rank( $index, str_repeat( 'a', 300 ) ) );
-
-/* ---------- Xếp hạng, giới hạn, hình dạng kết quả ---------- */
 
 $mini = array_map(
 	'vgarco_search_prepare',
@@ -116,12 +98,9 @@ $one = vgarco_search_rank( $index, 'bao tang' )[0] ?? array();
 same( 'kết quả chỉ có 5 trường công khai', array( 'location', 'thumb', 'title', 'url', 'years' ), ( function () use ( $one ) { $k = array_keys( $one ); sort( $k ); return $k; } )() );
 same( 'kết quả: đủ dữ liệu để hiển thị', array( $museum, 'Viêng Chăn, Lào', '2019–2020', 'https://vgarco.vn/du-an/museum/', 'https://vgarco.vn/x/museum-150.jpg' ), array( $one['title'] ?? '', $one['location'] ?? '', $one['years'] ?? '', $one['url'] ?? '', $one['thumb'] ?? '' ) );
 
-// Tiếng Đức: chuỗi truy vấn và chỉ mục đi qua cùng một bảng đổi nên gõ đúng chữ Đức là khớp.
 $german = array( vgarco_search_prepare( array( 'title' => 'Fußgängerzone Größe', 'location' => 'Köln', 'years' => '', 'types' => array(), 'url' => '/de/', 'thumb' => '' ) ) );
 same( 'tiếng Đức: gõ đúng "Größe" khớp', array( '/de/' ), array_column( vgarco_search_rank( $german, 'Größe' ), 'url' ) );
 same( 'tiếng Đức: gõ "koeln" khớp "Köln"', array( '/de/' ), array_column( vgarco_search_rank( $german, 'koeln' ), 'url' ) );
-
-/* ---------- Kết quả ---------- */
 
 if ( $fail ) {
 	foreach ( $fail as $line ) {

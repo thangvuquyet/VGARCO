@@ -1,12 +1,4 @@
 <?php
-/**
- * Biểu tượng VGARCO.
- *
- * TẠM THỜI: hình vẽ lại gần đúng theo bản thiết kế HTML. Thay bằng tệp SVG số hóa từ logo gốc
- * (thuộc nhóm A của dự toán, tuần 1) — chỉ cần sửa tệp này, mọi nơi dùng logo tự cập nhật.
- *
- * @package vgarco
- */
 
 defined( 'ABSPATH' ) || exit;
 ?>

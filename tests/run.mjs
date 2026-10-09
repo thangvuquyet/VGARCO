@@ -1,9 +1,3 @@
-// Chạy toàn bộ kiểm tra tự động không cần WordPress:
-//   node tests/run.mjs            cú pháp PHP, smoke, pages, cú pháp JS, build
-//   node tests/run.mjs --mutate   thêm kiểm thử đột biến (cố ý phá mã, xác nhận kiểm thử chuyển đỏ)
-//
-// Cần PHP 8.3 CLI. Chỉ đường dẫn bằng biến môi trường nếu không nằm trong PATH:
-//   PHP=C:\tools\php\php.exe  PHP_EXT=C:\tools\php\ext
 import { spawnSync } from 'node:child_process';
 import { readdirSync, statSync } from 'node:fs';
 import { join, dirname } from 'node:path';
@@ -29,7 +23,6 @@ const withApply = [ ...withMb, '-d', 'extension=gd', '-d', 'extension=fileinfo',
 
 const walk = ( dir, test, out = [] ) => {
 	for ( const name of readdirSync( dir ) ) {
-		// .lab: WordPress thật của tests/wp-lab (hàng nghìn tệp bên thứ ba, không phải mã của dự án)
 		if ( name === 'node_modules' || name === 'dist' || name === 'out' || name === '.lab' ) {
 			continue;
 		}
@@ -46,19 +39,16 @@ const report = ( name, ok, detail = '' ) => {
 	failed += ok ? 0 : 1;
 };
 
-// 1. Cú pháp PHP
 const phpFiles = [ ...walk( join( root, 'wp-content' ), ( p ) => p.endsWith( '.php' ) ), ...walk( join( root, 'tests' ), ( p ) => p.endsWith( '.php' ) ) ];
 const bad = phpFiles.filter( ( f ) => run( php, [ ...phpArgs, '-l', f ] ).status !== 0 );
 report( `php -l (${ phpFiles.length } tệp)`, bad.length === 0, bad.join( ', ' ) );
 
-// 2. Kiểm thử PHP
 for ( const script of [ 'smoke.php', 'pages.php', 'apply.php', 'search.php', 'seo.php', 'security.php', 'import.php', 'media.php', 'export-images.php' ] ) {
 	const r = run( php, [ ...( [ 'apply.php', 'media.php', 'export-images.php' ].includes( script ) ? withApply : withMb ), join( 'tests', 'php', script ) ] );
 	const last = ( r.stdout + r.stderr ).trim().split( '\n' ).pop();
 	report( script, r.status === 0, last );
 }
 
-// 2b. Công cụ dịch và bản dịch (Node), rồi đọc .mo bằng libintl (PHP) — độc lập với bộ biên dịch .mo của dự án
 {
 	const r = run( process.execPath, [ join( root, 'tests', 'i18n.mjs' ) ] );
 	report( 'i18n.mjs', r.status === 0, ( r.stdout + r.stderr ).trim().split( '\n' ).pop() );
@@ -80,7 +70,6 @@ for ( const script of [ 'smoke.php', 'pages.php', 'apply.php', 'search.php', 'se
 	}
 }
 
-// 3. Cú pháp JS
 const jsFiles = [
 	...walk( join( root, 'wp-content', 'themes', 'vgarco', 'src' ), ( p ) => p.endsWith( '.js' ) ),
 	...walk( join( root, 'scripts' ), ( p ) => p.endsWith( '.mjs' ) ),
@@ -89,12 +78,10 @@ const jsFiles = [
 const badJs = jsFiles.filter( ( f ) => run( process.execPath, [ '--check', f ] ).status !== 0 );
 report( `node --check (${ jsFiles.length } tệp)`, badJs.length === 0, badJs.join( ', ' ) );
 
-// 4. Build
 const theme = join( root, 'wp-content', 'themes', 'vgarco' );
 const build = run( 'npm', [ 'run', 'build' ], theme );
 report( 'vite build', build.status === 0, ( build.stdout.match( /built in [\d.]+m?s/ ) ?? [ build.stderr.trim().split( '\n' ).pop() ] )[ 0 ] );
 
-// 5. Đột biến (tùy chọn)
 if ( process.argv.includes( '--mutate' ) ) {
 	const r = run( process.execPath, [ join( root, 'tests', 'mutate.mjs' ) ] );
 	console.log( r.stdout );

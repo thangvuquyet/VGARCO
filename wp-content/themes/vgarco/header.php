@@ -1,10 +1,4 @@
 <?php
-/**
- * Đầu trang: khung <head>, liên kết bỏ qua, thanh đầu trang, mở <main>.
- * Đóng <main> ở footer.php.
- *
- * @package vgarco
- */
 
 defined( 'ABSPATH' ) || exit;
 ?>
@@ -31,9 +25,9 @@ defined( 'ABSPATH' ) || exit;
 	</nav>
 
 	<div class="header-actions">
-		<?php // Không có JS thì là liên kết tới danh mục dự án; JS chặn liên kết và mở hộp thoại tìm kiếm (template-parts/layout/search-dialog.php). ?>
+		<?php ?>
 		<a class="icon-button search-open" href="<?php echo esc_url( get_post_type_archive_link( 'du_an' ) ?: home_url( '/du-an/' ) ); ?>" data-vg-search-open aria-label="<?php esc_attr_e( 'Tìm kiếm dự án', 'vgarco' ); ?>">
-			<?php echo vgarco_icon( 'search' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- SVG của theme. ?>
+			<?php echo vgarco_icon( 'search' ); ?>
 		</a>
 		<?php vgarco_language_switcher(); ?>
 		<button type="button" class="icon-button menu-toggle" aria-expanded="false" aria-controls="main-nav"
@@ -46,10 +40,10 @@ defined( 'ABSPATH' ) || exit;
 </header>
 
 <main id="main">
-<?php // Hiện khi người dùng vừa chuyển ngôn ngữ tới trang chưa có bản dịch (UC-10 2a): main.js bỏ thuộc tính hidden. ?>
+<?php ?>
 <div class="lang-notice wrap" data-lang-notice role="status" hidden>
 	<p><?php esc_html_e( 'Nội dung này đang được dịch. Trong lúc chờ, mời bạn xem mục tương ứng.', 'vgarco' ); ?></p>
 	<button type="button" class="lang-notice-close" data-lang-notice-close aria-label="<?php esc_attr_e( 'Đóng', 'vgarco' ); ?>">
-		<?php echo vgarco_icon( 'close' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- SVG của theme. ?>
+		<?php echo vgarco_icon( 'close' ); ?>
 	</button>
 </div>

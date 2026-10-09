@@ -1,10 +1,4 @@
 <?php
-/**
- * Trường của kiểu nội dung "Lĩnh vực hoạt động" (mục 6.3 của phương án).
- * Đặc tả có 6 nhóm dịch vụ, 3 nhóm hiển thị ở trang chủ.
- *
- * @package vgarco-core
- */
 
 defined( 'ABSPATH' ) || exit;
 

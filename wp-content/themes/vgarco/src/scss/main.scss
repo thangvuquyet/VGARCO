@@ -1,5 +1,3 @@
-// Điểm vào của CSS. Thứ tự tầng quyết định độ ưu tiên: tầng đứng sau thắng tầng đứng trước,
-// không cần !important. (Bản thiết kế HTML gốc có 714 chỗ !important vì 8 tệp CSS đè lên nhau.)
 @use 'sass:meta';
 
 @layer reset, tokens, base, components, pages, utilities;

@@ -1,19 +1,7 @@
 <?php
-/**
- * Trường của trang "Cấu hình VGARCO" (mục 6.5 của phương án, yêu cầu 34).
- * Thông tin công ty, liên hệ, chỉ số, đối tác nhập một chỗ — không viết cứng số điện thoại vào mẫu trang.
- *
- * Giá trị mặc định nằm trong vgarco_option_defaults() (inc/helpers.php), không đặt ở đây:
- * ACF không áp giá trị mặc định cho trang cấu hình chưa từng được lưu.
- *
- * @package vgarco-core
- */
 
 defined( 'ABSPATH' ) || exit;
 
-/**
- * Quy tắc vị trí: chỉ hiện ở trang cấu hình VGARCO.
- */
 function vgarco_location_options_page(): array {
 	return array(
 		array(
@@ -26,9 +14,6 @@ function vgarco_location_options_page(): array {
 	);
 }
 
-/**
- * @return array[] Hai nhóm trường.
- */
 function vgarco_fields_cau_hinh(): array {
 	$o = vgarco_field_builder( 'opt' );
 
@@ -41,8 +26,6 @@ function vgarco_fields_cau_hinh(): array {
 		'menu_order'            => 0,
 		'location'              => vgarco_location_options_page(),
 	);
-
-	/* --- Nhóm 1: pháp nhân, liên hệ, mạng xã hội --- */
 
 	$phap_nhan = vgarco_field_builder( 'opt_phap_nhan' );
 	$lien_he   = vgarco_field_builder( 'opt_lien_he' );
@@ -130,8 +113,6 @@ function vgarco_fields_cau_hinh(): array {
 		),
 		$common
 	);
-
-	/* --- Nhóm 2: chỉ số, đối tác, ảnh mặc định, câu chuyện một công trình --- */
 
 	$m_home  = vgarco_field_builder( 'opt_cs_home' );
 	$m_abt   = vgarco_field_builder( 'opt_cs_about' );
@@ -230,8 +211,6 @@ function vgarco_fields_cau_hinh(): array {
 		),
 		$common
 	);
-
-	/* --- Nhóm 3: mẫu thư ứng tuyển --- */
 
 	$mail = vgarco_field_builder( 'opt_mau_thu' );
 	$hint = 'Chỗ điền: {ten} {vi_tri} {email} {dien_thoai} {thoi_diem} {ngon_ngu} {lien_ket}. Để trống thì dùng mẫu mặc định.';

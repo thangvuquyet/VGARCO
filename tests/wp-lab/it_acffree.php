@@ -1,10 +1,4 @@
 <?php
-/**
- * ACF BẢN MIỄN PHÍ thật (không phải shim): website không được sập khi thiếu ACF PRO (hết hạn giấy phép, tắt nhầm plugin).
- * Kỳ vọng: không lỗi nghiêm trọng, trang công khai vẫn hiện (dùng giá trị mặc định), quản trị viên được báo thiếu ACF PRO.
- * Tùy chọn: chỉ chạy khi đã giải nén plugin advanced-custom-fields vào .lab/wordpress/wp-content/plugins/ (README.md).
- * Đây KHÔNG thay cho kiểm thử với ACF PRO thật (trường lặp, trang cấu hình, ACFML) — bản miễn phí không có những phần đó.
- */
 require __DIR__ . '/lib.php';
 
 if ( ! is_file( WP_PLUGIN_DIR . '/advanced-custom-fields/acf.php' ) ) {
@@ -49,7 +43,7 @@ try {
 		echo "  (ghi chú) debug.log có nội dung, dòng đầu: " . trim( strtok( $log, "\n" ) ) . "\n";
 	}
 } finally {
-	update_option( 'active_plugins', $before ); // trả về như cũ để các kịch bản khác dùng shim
+	update_option( 'active_plugins', $before );
 	flush_rewrite_rules();
 }
 finish();

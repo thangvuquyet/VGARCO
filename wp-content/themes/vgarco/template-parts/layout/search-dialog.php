@@ -1,12 +1,4 @@
 <?php
-/**
- * Hộp thoại tìm kiếm dự án (UC-09). Chỉ hiện khi JS mở (thẻ <dialog> đóng thì ẩn); không có JS thì nút tìm kiếm ở đầu trang
- * là liên kết tới danh mục dự án. Kết quả do JS lấy từ REST /wp-json/vgarco/v1/search.
- *
- * Thông báo ở các thuộc tính data-* là chuỗi đã dịch: JS không viết cứng chữ nào.
- *
- * @package vgarco
- */
 
 defined( 'ABSPATH' ) || exit;
 
@@ -25,7 +17,7 @@ $lang = in_array( $lang, array( 'vi', 'de' ), true ) ? $lang : 'vi';
 	data-msg-many="<?php esc_attr_e( 'Có %d dự án phù hợp.', 'vgarco' ); ?>">
 	<div class="search-panel">
 		<button type="button" class="search-close icon-button" data-search-close aria-label="<?php esc_attr_e( 'Đóng tìm kiếm', 'vgarco' ); ?>">
-			<?php echo vgarco_icon( 'close' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- SVG của theme. ?>
+			<?php echo vgarco_icon( 'close' ); ?>
 		</button>
 		<h2 id="search-title"><?php esc_html_e( 'Tìm kiếm dự án', 'vgarco' ); ?></h2>
 		<label for="search-input"><?php esc_html_e( 'Nhập tên, địa điểm hoặc lĩnh vực', 'vgarco' ); ?></label>

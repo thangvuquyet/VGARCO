@@ -1,21 +1,7 @@
 <?php
-/**
- * Trường của các trang tĩnh (mục 6.5 của phương án): mỗi trang dùng một template, mỗi template một nhóm trường.
- *
- * Mọi ô chữ đều có bản mặc định trong template (giao diện): biên tập viên để trống thì trang vẫn hiển thị đúng
- * nội dung của bản thiết kế, nhập vào thì bản nhập luôn thắng. Ảnh và các khối phụ thuộc dữ liệu (ghi nhận, thành viên)
- * không có mặc định: để trống thì khối ẩn.
- *
- * @package vgarco-core
- */
 
 defined( 'ABSPATH' ) || exit;
 
-/**
- * Quy tắc vị trí: nhóm trường chỉ hiện ở trang dùng một template.
- *
- * @param string $template Ví dụ "templates/about.php".
- */
 function vgarco_location_page_template( string $template ): array {
 	return array(
 		array(
@@ -28,7 +14,6 @@ function vgarco_location_page_template( string $template ): array {
 	);
 }
 
-/** Quy tắc vị trí: chỉ hiện ở trang được đặt làm trang chủ (Cài đặt → Đọc). */
 function vgarco_location_front_page(): array {
 	return array(
 		array(
@@ -41,7 +26,6 @@ function vgarco_location_front_page(): array {
 	);
 }
 
-/** Khung chung của một nhóm trường trang. */
 function vgarco_page_group( string $key, string $title, string $template, array $fields ): array {
 	return array(
 		'key'                   => $key,
@@ -57,12 +41,10 @@ function vgarco_page_group( string $key, string $title, string $template, array 
 	);
 }
 
-/** Ô chữ một dòng, dịch theo từng ngôn ngữ. */
 function vgarco_page_text_field( Closure $b, string $name, string $label, string $hint = '' ): array {
 	return $b( $name, $label, 'text', 'translate', array( 'instructions' => $hint ) );
 }
 
-/** Ô nhiều dòng; $break = true: giữ xuống dòng làm chỗ ngắt dòng chủ ý. */
 function vgarco_page_area_field( Closure $b, string $name, string $label, string $hint = '', int $rows = 2 ): array {
 	return $b(
 		$name,
@@ -77,7 +59,6 @@ function vgarco_page_area_field( Closure $b, string $name, string $label, string
 	);
 }
 
-/** Ô tiêu đề: hai dòng, cụm nhấn đặt trong <em>. */
 function vgarco_page_heading_field( Closure $b, string $name, string $label ): array {
 	return vgarco_page_area_field(
 		$b,
@@ -91,10 +72,6 @@ function vgarco_page_tab( Closure $b, string $name, string $label ): array {
 	return $b( $name, $label, 'tab', 'ignore', array( 'placement' => 'top' ) );
 }
 
-/**
- * Trang chủ (mục 6.5: khẩu hiệu, đoạn giới thiệu, 3 nguyên tắc, lời dẫn các khối, nội dung CTA). Chỉ số và đối tác lấy từ trang Cấu hình;
- * dự án nổi bật/tiêu biểu, lĩnh vực và tin tức lấy từ chính các kiểu nội dung đó. Mọi ô có bản mặc định trong mẫu: để trống thì dùng bản mặc định.
- */
 function vgarco_fields_page_home(): array {
 	$b  = vgarco_field_builder( 'home' );
 	$nt = vgarco_field_builder( 'home_nt' );
@@ -174,12 +151,8 @@ function vgarco_fields_page_home(): array {
 	return $group;
 }
 
-/**
- * Trang Về công ty.
- */
 function vgarco_fields_page_about(): array {
 	$b = vgarco_field_builder( 'about' );
-	// Ô con của trường lặp cần tiền tố riêng: khóa trường phải duy nhất toàn site.
 	$moc = vgarco_field_builder( 'about_moc' );
 	$nt  = vgarco_field_builder( 'about_nguyen_tac' );
 
@@ -304,9 +277,6 @@ function vgarco_fields_page_about(): array {
 	);
 }
 
-/**
- * Trang Ban lãnh đạo: danh sách thành viên theo thứ tự nhập (UC-02 4a) và các nguyên tắc làm việc.
- */
 function vgarco_fields_page_leadership(): array {
 	$b  = vgarco_field_builder( 'lanh_dao' );
 	$tv = vgarco_field_builder( 'lanh_dao_tv' );
@@ -358,9 +328,6 @@ function vgarco_fields_page_leadership(): array {
 	);
 }
 
-/**
- * Trang Phòng ban: mở đầu, 4 nhãn, 6 bộ môn.
- */
 function vgarco_fields_page_departments(): array {
 	$b  = vgarco_field_builder( 'phong_ban' );
 	$bm = vgarco_field_builder( 'phong_ban_bm' );
@@ -395,9 +362,6 @@ function vgarco_fields_page_departments(): array {
 	);
 }
 
-/**
- * Trang Lĩnh vực hoạt động: chỉ phần mở đầu. Danh sách lĩnh vực nhập ở mục "Lĩnh vực hoạt động" (mỗi lĩnh vực một bài).
- */
 function vgarco_fields_page_services(): array {
 	$b = vgarco_field_builder( 'lv_trang' );
 
@@ -413,9 +377,6 @@ function vgarco_fields_page_services(): array {
 	);
 }
 
-/**
- * Trang Liên hệ: chỉ phần mở đầu. Điện thoại, email, mạng xã hội lấy từ Cấu hình VGARCO.
- */
 function vgarco_fields_page_contact(): array {
 	$b = vgarco_field_builder( 'lien_he_trang' );
 
@@ -431,10 +392,6 @@ function vgarco_fields_page_contact(): array {
 	);
 }
 
-/**
- * Trang Tuyển dụng: mở đầu (ảnh nền tùy chọn), lời dẫn khối tìm việc, khối "Chưa thấy vị trí phù hợp?".
- * Danh sách vị trí lấy từ mục "Vị trí tuyển dụng".
- */
 function vgarco_fields_page_careers(): array {
 	$b = vgarco_field_builder( 'tuyen_dung' );
 
@@ -470,11 +427,6 @@ function vgarco_fields_page_careers(): array {
 	);
 }
 
-/**
- * Tất cả nhóm trường của trang tĩnh.
- *
- * @return array[]
- */
 function vgarco_fields_trang(): array {
 	return array(
 		vgarco_fields_page_home(),

@@ -1,13 +1,4 @@
 <?php
-/**
- * Danh mục dự án (UC-04), dùng chung cho archive-du_an.php (tất cả) và taxonomy-loai_cong_trinh.php (một loại).
- * Trang tất cả dự án có bố cục biên tập (ba thẻ đầu lớn, còn lại là danh sách) và khối "Câu chuyện một công trình".
- * Trang một loại công trình dùng lưới đều, không có khối câu chuyện.
- *
- * @var object|null $args['term'] Thuật ngữ loai_cong_trinh; null = tất cả.
- *
- * @package vgarco
- */
 
 defined( 'ABSPATH' ) || exit;
 
@@ -51,7 +42,7 @@ vgarco_breadcrumb( $trail );
 				<?php get_template_part( 'template-parts/cards/project', null, array( 'project' => $project, 'arrow' => true ) ); ?>
 			<?php endforeach; ?>
 		</div>
-		<?php /* UC-04 bước 3: dòng "Đang hiển thị n dự án." (bản thiết kế: vùng trạng thái chỉ dành cho trình đọc màn hình). */ ?>
+		<?php ?>
 		<p class="sr-only" role="status">
 			<?php
 			echo esc_html(
@@ -74,7 +65,7 @@ vgarco_breadcrumb( $trail );
 				?>
 			</p>
 			<?php if ( $term ) : ?>
-				<a class="text-link" href="<?php echo esc_url( $all_url ); ?>"><?php esc_html_e( 'Xem tất cả dự án', 'vgarco' ); ?> <?php echo vgarco_icon( 'arrow-up-right' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></a>
+				<a class="text-link" href="<?php echo esc_url( $all_url ); ?>"><?php esc_html_e( 'Xem tất cả dự án', 'vgarco' ); ?> <?php echo vgarco_icon( 'arrow-up-right' ); ?></a>
 			<?php endif; ?>
 		</div>
 	<?php endif; ?>
@@ -90,15 +81,15 @@ vgarco_breadcrumb( $trail );
 	<section class="project-story on-dark" id="cau-chuyen" aria-labelledby="story-title" data-story>
 		<div class="story-text">
 			<p class="eyebrow light"><?php echo esc_html( $eyebrow ); ?></p>
-			<h2 id="story-title"><?php echo vgarco_heading( $story['title'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- đã lọc trong vgarco_heading(). ?></h2>
+			<h2 id="story-title"><?php echo vgarco_heading( $story['title'] ); ?></h2>
 			<?php if ( '' !== $story['text'] ) : ?>
 				<p><?php echo esc_html( $story['text'] ); ?></p>
 			<?php endif; ?>
 			<a class="story-link" href="<?php echo esc_url( $project['url'] ); ?>">
-				<?php esc_html_e( 'Khám phá câu chuyện', 'vgarco' ); ?> <?php echo vgarco_icon( 'arrow-up-right' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<?php esc_html_e( 'Khám phá câu chuyện', 'vgarco' ); ?> <?php echo vgarco_icon( 'arrow-up-right' ); ?>
 			</a>
 
-			<?php if ( $has_built ) : // Thiếu ảnh công trình thì không có gì để chuyển: ẩn nút (UC-04 6b). ?>
+			<?php if ( $has_built ) : ?>
 				<div class="story-switch" role="group" aria-label="<?php esc_attr_e( 'Xem phối cảnh thiết kế hoặc công trình thực tế', 'vgarco' ); ?>">
 					<button type="button" class="is-active" aria-pressed="true" data-story-show="design" data-caption="<?php echo esc_attr( vgarco_kind_label( 'thiet_ke' ) ); ?>">01 — <?php esc_html_e( 'Phối cảnh', 'vgarco' ); ?></button>
 					<button type="button" aria-pressed="false" data-story-show="built" data-caption="<?php echo esc_attr( vgarco_kind_label( 'cong_trinh' ) ); ?>">02 — <?php esc_html_e( 'Công trình', 'vgarco' ); ?></button>
@@ -113,7 +104,7 @@ vgarco_breadcrumb( $trail );
 				$views['built'] = $story['built'];
 			}
 			foreach ( $views as $view => $image_id ) {
-				echo vgarco_image( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- markup ảnh của WordPress.
+				echo vgarco_image(
 					$image_id,
 					array(
 						'size'  => 'vg-1600',

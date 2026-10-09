@@ -1,5 +1,4 @@
 <?php
-/** Duyệt toàn site như một trình thu thập: mọi liên kết nội bộ phải 200 (trừ 404 cố ý), mọi tài nguyên (CSS, JS, ảnh, phông) phải tải được. */
 require __DIR__ . '/lib.php';
 
 $base    = 'http://localhost:8080';

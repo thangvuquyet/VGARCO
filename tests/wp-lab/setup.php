@@ -1,7 +1,4 @@
 <?php
-/**
- * Kích hoạt plugin/theme, đặt đường dẫn đẹp, tạo trang theo mẫu. Do bootstrap.mjs gọi; chạy lại được.
- */
 
 define( 'LAB', __DIR__ . '/.lab' );
 $_SERVER['HTTP_HOST']   = 'localhost:8080';
@@ -14,7 +11,6 @@ function out( $m ) {
 	echo $m . "\n";
 }
 
-// Plugin: shim ACF trước, rồi vgarco-core (kích hoạt chạy vgarco_core_activate: kiểu nội dung, phân loại, dữ liệu mồi), rồi bộ bắt thư.
 foreach ( array( 'lab-acf-shim/lab-acf-shim.php', 'vgarco-core/vgarco-core.php', 'lab-mail-capture/lab-mail-capture.php', 'lab-lang/lab-lang.php' ) as $plugin ) {
 	if ( ! is_plugin_active( $plugin ) ) {
 		$r = activate_plugin( $plugin );
@@ -28,8 +24,6 @@ update_option( 'permalink_structure', '/%postname%/' );
 update_option( 'timezone_string', 'Asia/Ho_Chi_Minh' );
 update_option( 'blogdescription', 'Tư vấn thiết kế, giám sát và quản lý dự án xây dựng' );
 
-// Trang theo mẫu (khóa → [tiêu đề, đường dẫn đầy đủ, mẫu]) — đúng bản đồ đường dẫn của phương án 6.6: Ban lãnh đạo và Phòng ban là
-// trang CON của Về công ty (/gioi-thieu/ban-lanh-dao/), trang Tuyển dụng ở /tuyen-dung/ cùng tiền tố với chi tiết vị trí (/tuyen-dung/<slug>/).
 $pages = array(
 	'home'        => array( 'Trang chủ', 'trang-chu', '' ),
 	'about'       => array( 'Về công ty', 'gioi-thieu', 'templates/about.php' ),

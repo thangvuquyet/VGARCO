@@ -1,18 +1,6 @@
 <?php
-/**
- * Quản lý hồ sơ ứng tuyển trong trang quản trị (mục 6.4, 8.4, 10.4): kiểu nội dung riêng tư `ho_so_ut`, vai trò nhân sự tuyển dụng,
- * danh sách có bộ lọc, xem hồ sơ, tải CV có ghi nhật ký, xuất .xlsx, xóa (xóa thật kèm tệp CV) và tự xóa sau 12 tháng.
- *
- * Hồ sơ KHÔNG có URL công khai và không có trong tìm kiếm/sơ đồ site/REST mặc định.
- *
- * @package vgarco-core
- */
 
 defined( 'ABSPATH' ) || exit;
-
-/* -------------------------------------------------------------------------
- * Kiểu nội dung và quyền
- * ---------------------------------------------------------------------- */
 
 add_action(
 	'init',
@@ -37,14 +25,14 @@ add_action(
 				'has_archive'         => false,
 				'rewrite'             => false,
 				'query_var'           => false,
-				'can_export'          => false, // Công cụ Xuất của WordPress không được lấy dữ liệu cá nhân.
+				'can_export'          => false,
 				'menu_icon'           => 'dashicons-portfolio',
 				'menu_position'       => 9,
 				'supports'            => array( 'title' ),
 				'capability_type'     => array( 'ho_so_ut', 'ho_so_uts' ),
 				'map_meta_cap'        => true,
 				'capabilities'        => array(
-					'read'                   => 'vg_view_applications', // mặc định là "read": ai đăng nhập cũng "đọc" được hồ sơ đã xuất bản
+					'read'                   => 'vg_view_applications',
 					'edit_posts'             => 'vg_view_applications',
 					'edit_others_posts'      => 'vg_view_applications',
 					'edit_private_posts'     => 'vg_view_applications',
@@ -55,16 +43,13 @@ add_action(
 					'delete_private_posts'   => 'vg_delete_applications',
 					'delete_published_posts' => 'vg_delete_applications',
 					'publish_posts'          => 'do_not_allow',
-					'create_posts'           => 'do_not_allow', // hồ sơ chỉ đến từ biểu mẫu, không tạo tay
+					'create_posts'           => 'do_not_allow',
 				),
 			)
 		);
 	}
 );
 
-/**
- * Vai trò "Nhân sự tuyển dụng" và quyền của Quản trị viên. Chạy một lần mỗi phiên bản (không chạy mỗi lần tải trang).
- */
 function vgarco_apply_ensure_roles(): void {
 	$version = '1';
 	if ( get_option( 'vgarco_roles_version' ) === $version ) {
@@ -84,10 +69,6 @@ function vgarco_apply_ensure_roles(): void {
 	update_option( 'vgarco_roles_version', $version );
 }
 add_action( 'admin_init', 'vgarco_apply_ensure_roles' );
-
-/* -------------------------------------------------------------------------
- * Danh sách
- * ---------------------------------------------------------------------- */
 
 add_filter(
 	'manage_ho_so_ut_posts_columns',
@@ -143,7 +124,6 @@ function vgarco_apply_mail_status_label( string $status ): string {
 	)[ $status ] ?? '—';
 }
 
-/** Bộ lọc trên danh sách: vị trí, thư lỗi. */
 add_action(
 	'restrict_manage_posts',
 	static function ( string $post_type ): void {
@@ -151,13 +131,13 @@ add_action(
 			return;
 		}
 		$jobs = get_posts( array( 'post_type' => 'vi_tri', 'post_status' => 'any', 'posts_per_page' => 100, 'orderby' => 'title', 'order' => 'ASC', 'suppress_filters' => true ) );
-		$sel  = isset( $_GET['vi_tri_id'] ) ? absint( $_GET['vi_tri_id'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification
+		$sel  = isset( $_GET['vi_tri_id'] ) ? absint( $_GET['vi_tri_id'] ) : 0;
 		echo '<select name="vi_tri_id"><option value="">Tất cả vị trí</option>';
 		foreach ( $jobs as $job ) {
 			printf( '<option value="%d"%s>%s</option>', (int) $job->ID, selected( $sel, $job->ID, false ), esc_html( get_the_title( $job ) ) );
 		}
 		echo '</select>';
-		printf( '<label style="margin-left:6px"><input type="checkbox" name="thu_loi" value="1"%s> Chỉ hồ sơ lỗi thư</label>', checked( ! empty( $_GET['thu_loi'] ), true, false ) ); // phpcs:ignore WordPress.Security.NonceVerification
+		printf( '<label style="margin-left:6px"><input type="checkbox" name="thu_loi" value="1"%s> Chỉ hồ sơ lỗi thư</label>', checked( ! empty( $_GET['thu_loi'] ), true, false ) );
 	}
 );
 
@@ -168,10 +148,10 @@ add_action(
 			return;
 		}
 		$meta = array();
-		if ( ! empty( $_GET['vi_tri_id'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-			$meta[] = array( 'key' => 'vi_tri_id', 'value' => absint( $_GET['vi_tri_id'] ) ); // phpcs:ignore WordPress.Security.NonceVerification
+		if ( ! empty( $_GET['vi_tri_id'] ) ) {
+			$meta[] = array( 'key' => 'vi_tri_id', 'value' => absint( $_GET['vi_tri_id'] ) );
 		}
-		if ( ! empty( $_GET['thu_loi'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+		if ( ! empty( $_GET['thu_loi'] ) ) {
 			$meta[] = array(
 				'relation' => 'OR',
 				array( 'key' => 'thu_hr', 'value' => 'loi' ),
@@ -188,7 +168,6 @@ add_action(
 	}
 );
 
-/** Tìm theo tên, email hoặc số điện thoại. */
 add_filter(
 	'posts_search',
 	static function ( string $search, WP_Query $query ): string {
@@ -207,7 +186,6 @@ add_filter(
 	2
 );
 
-// Không có hành động "Sửa nhanh" và "Xem": hồ sơ chỉ đọc.
 add_filter(
 	'post_row_actions',
 	static function ( array $actions, WP_Post $post ): array {
@@ -224,7 +202,6 @@ add_filter(
 	2
 );
 
-// Xóa hồ sơ là xóa thật (không qua thùng rác): ứng viên yêu cầu xóa dữ liệu thì dữ liệu phải mất, cả tệp CV.
 add_filter(
 	'pre_trash_post',
 	static function ( $check, WP_Post $post ) {
@@ -247,10 +224,6 @@ add_action(
 	}
 );
 
-/* -------------------------------------------------------------------------
- * Trang xem hồ sơ (chỉ đọc)
- * ---------------------------------------------------------------------- */
-
 add_action(
 	'add_meta_boxes_ho_so_ut',
 	static function (): void {
@@ -260,7 +233,6 @@ add_action(
 	}
 );
 
-// Tiêu đề chỉ đọc: không có nút Cập nhật, tránh sửa nhầm dữ liệu ứng viên.
 add_action(
 	'admin_head-post.php',
 	static function (): void {
@@ -317,10 +289,6 @@ function vgarco_apply_render_record( WP_Post $post ): void {
 	}
 }
 
-/* -------------------------------------------------------------------------
- * Tải CV
- * ---------------------------------------------------------------------- */
-
 add_action(
 	'admin_post_vgarco_download_cv',
 	static function (): void {
@@ -335,7 +303,6 @@ add_action(
 			wp_die( 'Không tìm thấy tệp CV (có thể đã bị xóa theo thời hạn lưu trữ).', 'Không có tệp', array( 'response' => 404 ) );
 		}
 
-		// Ghi nhật ký TRƯỚC khi gửi tệp: ai tải, lúc nào.
 		$log   = (array) get_post_meta( $id, 'nhat_ky_tai', true );
 		$log[] = array( 'user' => get_current_user_id(), 'time' => time() );
 		update_post_meta( $id, 'nhat_ky_tai', array_slice( $log, -50 ) );
@@ -349,14 +316,10 @@ add_action(
 		header( 'Content-Length: ' . (int) filesize( $path ) );
 		header( 'Content-Disposition: attachment; filename="CV-' . $name . '.' . $ext . '"' );
 		header( 'X-Content-Type-Options: nosniff' );
-		readfile( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_readfile
+		readfile( $path );
 		exit;
 	}
 );
-
-/* -------------------------------------------------------------------------
- * Xuất .xlsx
- * ---------------------------------------------------------------------- */
 
 add_action(
 	'admin_notices',
@@ -368,8 +331,8 @@ add_action(
 		if ( current_user_can( 'vg_export_applications' ) ) {
 			$args = array( 'action' => 'vgarco_export_applications' );
 			foreach ( array( 'vi_tri_id', 'thu_loi', 's' ) as $key ) {
-				if ( ! empty( $_GET[ $key ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-					$args[ $key ] = sanitize_text_field( wp_unslash( $_GET[ $key ] ) ); // phpcs:ignore WordPress.Security.NonceVerification
+				if ( ! empty( $_GET[ $key ] ) ) {
+					$args[ $key ] = sanitize_text_field( wp_unslash( $_GET[ $key ] ) );
 				}
 			}
 			printf(
@@ -384,13 +347,6 @@ add_action(
 	}
 );
 
-/**
- * Trang "Xuất danh sách" (mục con của menu Hồ sơ ứng tuyển): chọn vị trí, khoảng ngày, chỉ hồ sơ lỗi thư.
- *
- * Trang này còn có lý do kỹ thuật: kiểu nội dung không cho tạo tay (create_posts = do_not_allow) nên menu chỉ còn MỘT mục con ("Tất cả"),
- * và WordPress thu gọn menu một mục rồi từ chối vai trò không có quyền edit_posts của lõi (như Nhân sự tuyển dụng) vào danh sách (403).
- * Có mục con thứ hai thì menu không bị thu gọn.
- */
 add_action(
 	'admin_menu',
 	static function (): void {
@@ -447,12 +403,11 @@ add_action(
 			$meta[] = array( 'relation' => 'OR', array( 'key' => 'thu_hr', 'value' => 'loi' ), array( 'key' => 'thu_ung_vien', 'value' => 'loi' ) );
 		}
 		if ( $meta ) {
-			$args['meta_query'] = $meta; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+			$args['meta_query'] = $meta;
 		}
 		if ( ! empty( $_GET['s'] ) ) {
 			$args['s'] = sanitize_text_field( wp_unslash( $_GET['s'] ) );
 		}
-		// Khoảng ngày nộp (Y-m-d, theo múi giờ website), tính cả ngày đầu và ngày cuối.
 		$date_query = array( 'inclusive' => true );
 		foreach ( array( 'tu' => 'after', 'den' => 'before' ) as $param => $bound ) {
 			$value = isset( $_GET[ $param ] ) ? sanitize_text_field( wp_unslash( $_GET[ $param ] ) ) : '';
@@ -495,20 +450,11 @@ add_action(
 		header( 'Content-Length: ' . strlen( $binary ) );
 		header( 'Content-Disposition: attachment; filename="ho-so-ung-tuyen-' . wp_date( 'Ymd' ) . '.xlsx"' );
 		header( 'X-Content-Type-Options: nosniff' );
-		echo $binary; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo $binary;
 		exit;
 	}
 );
 
-/* -------------------------------------------------------------------------
- * Tự xóa sau 12 tháng
- * ---------------------------------------------------------------------- */
-
-/**
- * Xóa hồ sơ nộp quá 12 tháng, cả tệp CV. Mỗi lần tối đa 200 hồ sơ để không quá tải; phần còn lại xử lý ở lần sau.
- *
- * @return int Số hồ sơ đã xóa.
- */
 function vgarco_apply_run_retention( int $now = 0 ): int {
 	$now    = $now ?: time();
 	$cutoff = vgarco_apply_retention_cutoff( $now );
@@ -525,7 +471,7 @@ function vgarco_apply_run_retention( int $now = 0 ): int {
 	);
 	$deleted = 0;
 	foreach ( $ids as $id ) {
-		if ( wp_delete_post( (int) $id, true ) ) { // before_delete_post xóa tệp CV
+		if ( wp_delete_post( (int) $id, true ) ) {
 			++$deleted;
 		}
 	}

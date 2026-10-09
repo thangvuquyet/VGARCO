@@ -1,11 +1,10 @@
-// So kiểu tính toán của các phần tử CÓ MẶT Ở CẢ HAI trang (website thử ↔ trang tĩnh): chỉ in chỗ khác.
 import { readFileSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const out = join( dirname( fileURLToPath( import.meta.url ) ), 'out' );
 const names = process.argv.slice( 2 );
-const IGNORE = new Set( [ 'minHeight' ] ); // min-height: 'auto' vs 'normal' khác theo ngữ cảnh, không có ý nghĩa
+const IGNORE = new Set( [ 'minHeight' ] );
 for ( const n of names ) {
 	if ( ! existsSync( join( out, `lab-${ n }.json` ) ) || ! existsSync( join( out, `st-${ n }.json` ) ) ) {
 		console.log( `== ${ n }: thiếu dữ liệu` );

@@ -1,13 +1,4 @@
 <?php
-/**
- * Chạy các mẫu trang THẬT của theme (header.php, index.php, footer.php) với hàm giả tối thiểu của WordPress,
- * ghi HTML ra tests/out/frame.html. Mọi cảnh báo/notice PHP bị đổi thành lỗi để không lọt vào production.
- *
- *   php -d extension_dir=<ext> -d extension=mbstring tests/php/render.php
- *
- * HTML này dùng để kiểm tra markup và chạy thử JS trên trình duyệt (tests/serve.mjs). Không thay cho chạy thử
- * trên WordPress thật.
- */
 
 error_reporting( E_ALL );
 set_error_handler(
@@ -21,15 +12,11 @@ define( 'ROOT', dirname( __DIR__, 2 ) );
 define( 'THEME', ROOT . '/wp-content/themes/vgarco' );
 define( 'VGARCO_CORE_DIR', ROOT . '/wp-content/plugins/vgarco-core/' );
 
-/* ---------- Hàm giả của WordPress ---------- */
-
 $GLOBALS['lang']     = $argv[1] ?? 'vi';
 $GLOBALS['template'] = $argv[2] ?? 'index';
-// Mẫu cần một đối tượng truy vấn: VG_FX_TERM=<slug loại công trình>, VG_FX_ID=<ID dự án>.
 $GLOBALS['term'] = getenv( 'VG_FX_TERM' ) ?: '';
 $GLOBALS['post_id'] = (int) getenv( 'VG_FX_ID' );
 
-// Hệ thống hook tối giản: đủ để chạy inc/enqueue.php thật (wp_enqueue_scripts → wp_head).
 $GLOBALS['actions'] = array();
 $GLOBALS['styles']  = array();
 $GLOBALS['modules'] = array();
@@ -45,7 +32,6 @@ function do_action( $hook ) {
 		}
 	}
 }
-// Bộ lọc thật (không chỉ bỏ qua): SEO dùng document_title_parts, document_title_separator và wp_robots.
 $GLOBALS['filters'] = array();
 function add_filter( $hook, $callback, $priority = 10, $args = 1 ) {
 	$GLOBALS['filters'][ $hook ][] = $callback;
@@ -58,7 +44,7 @@ function wp_enqueue_script_module( $id, $src ) {
 	$GLOBALS['modules'][ $id ] = $src;
 }
 function get_theme_file_uri( $p = '' ) {
-	return '/' . ltrim( $p, '/' ); // tests/serve.mjs phục vụ theme/dist dưới /dist/
+	return '/' . ltrim( $p, '/' );
 }
 function current_user_can() {
 	return false;
@@ -90,7 +76,6 @@ function esc_html_e( $t ) {
 function esc_attr_e( $t ) {
 	echo esc_attr( $t );
 }
-// VG_FX_ABS=1: địa chỉ tuyệt đối như WordPress thật (kiểm tra thẻ canonical/OG/JSON-LD, vốn đòi địa chỉ tuyệt đối).
 function home_url( $path = '' ) {
 	return ( getenv( 'VG_FX_ABS' ) ? 'https://vgarco.test' : '' ) . '/' . ltrim( $path, '/' );
 }
@@ -103,7 +88,6 @@ function language_attributes() {
 function bloginfo() {
 	echo 'UTF-8';
 }
-// Tiêu đề trang như wp_get_document_title(): phần "title" do template quyết định; theme lọc qua document_title_parts.
 function fx_base_title(): string {
 	$t = $GLOBALS['template'];
 	if ( str_starts_with( $t, 'single-' ) || str_starts_with( $t, 'templates/' ) ) {
@@ -111,7 +95,6 @@ function fx_base_title(): string {
 	}
 	return array( 'archive-du_an' => 'Dự án', 'archive-tin_tuc' => 'Tin tức', 'taxonomy-loai_cong_trinh' => $GLOBALS['term'], 'taxonomy-chuyen_muc' => $GLOBALS['term'], '404' => 'Page not found', 'page' => 'Bài thử', 'index' => 'Khung thử' )[ $t ] ?? 'Khung thử';
 }
-// Như wp_robots_no_robots() của lõi WordPress: noindex, cho đi theo liên kết (trang Ứng tuyển tự gọi qua add_filter).
 function wp_robots_no_robots( $robots ) {
 	$robots['noindex'] = true;
 	$robots['follow']  = true;
@@ -167,7 +150,7 @@ function sanitize_key( $k ) {
 	return strtolower( preg_replace( '/[^a-z0-9_\-]/i', '', $k ) );
 }
 function get_template_part( $slug, $name = null, $args = array() ) {
-	require THEME . '/' . $slug . '.php'; // $args nhìn thấy được trong mẫu, như WordPress
+	require THEME . '/' . $slug . '.php';
 }
 function get_header() {
 	require THEME . '/header.php';
@@ -190,7 +173,6 @@ function is_front_page() {
 function is_404() {
 	return '404' === $GLOBALS['template'];
 }
-// Đường dẫn bị lỗi của trang 404 (VG_FX_URI=/du-an/khong-co/).
 $_SERVER['REQUEST_URI'] = getenv( 'VG_FX_URI' ) ?: '/khong-co/';
 function wp_parse_url( $url, $component = -1 ) {
 	return parse_url( $url, $component );
@@ -198,7 +180,6 @@ function wp_parse_url( $url, $component = -1 ) {
 function wp_unslash( $v ) {
 	return $v;
 }
-// $_GET giả từ VG_FX_GET="q=kien&noi-lam-viec=ha-noi" (bộ lọc trang Tuyển dụng, ?id= của trang Ứng tuyển).
 if ( getenv( 'VG_FX_GET' ) ) {
 	parse_str( (string) getenv( 'VG_FX_GET' ), $_GET );
 }
@@ -222,7 +203,6 @@ function rest_url( $path = '' ) {
 function get_post_type( $id ) {
 	return $GLOBALS['fx']['posts'][ $id ]['type'] ?? false;
 }
-// Bỏ dấu: bảng ký tự tiếng Việt + Đức (WordPress có sẵn remove_accents với bảng đầy đủ hơn).
 function remove_accents( $s ) {
 	static $map = null;
 	$map ??= array_merge(
@@ -289,7 +269,6 @@ function get_terms( $args ) {
 	$out = array();
 	$id  = 1;
 	foreach ( vgarco_seed_term_map()[ $args['taxonomy'] ] ?? array() as $slug => $name ) {
-		// term_id = crc32(slug), giống get_queried_object() và bộ lọc theo loại của fixtures.
 		$out[] = (object) array( 'term_id' => crc32( $slug ), 'slug' => $slug, 'name' => html_entity_decode( $name ), 'taxonomy' => $args['taxonomy'] );
 		++$id;
 	}
@@ -307,7 +286,6 @@ function apply_filters( $hook, $value = null, ...$args ) {
 	}
 	if ( 'wpml_active_languages' === $hook ) {
 		$vi = 'vi' === $GLOBALS['lang'];
-		// VG_FX_MISSING=de: trang hiện tại chưa có bản dịch sang ngôn ngữ đó (WPML trả missing=1 và địa chỉ trang chủ của ngôn ngữ).
 		$missing = array_filter( explode( ',', (string) getenv( 'VG_FX_MISSING' ) ) );
 		return array(
 			'vi' => array( 'url' => '/', 'active' => $vi ? 1 : 0, 'native_name' => 'Tiếng Việt', 'missing' => in_array( 'vi', $missing, true ) ? 1 : 0 ),
@@ -315,12 +293,11 @@ function apply_filters( $hook, $value = null, ...$args ) {
 		);
 	}
 	if ( 'wpml_permalink' === $hook ) {
-		return ( 'de' === ( $args[0] ?? '' ) ? '/de' : '' ) . $value; // WPML thêm tiền tố thư mục ngôn ngữ
+		return ( 'de' === ( $args[0] ?? '' ) ? '/de' : '' ) . $value;
 	}
 	return $value;
 }
 
-// Vòng lặp giả cho index.php.
 $GLOBALS['posts'] = array( (object) array( 'title' => 'Bài thử', 'content' => '<p>Nội dung thử.</p>' ) );
 $GLOBALS['vg_loop']     = -1;
 function have_posts() {
@@ -345,8 +322,6 @@ function the_excerpt() {
 	the_content();
 }
 
-/* ---------- Nạp mã thật và kết xuất ---------- */
-
 require_once __DIR__ . '/fixtures.php';
 require_once VGARCO_CORE_DIR . 'inc/helpers.php';
 require_once THEME . '/inc/models.php';
@@ -357,7 +332,6 @@ require_once THEME . '/inc/template-tags.php';
 require_once THEME . '/inc/seo.php';
 require_once THEME . '/inc/enqueue.php';
 
-// Truy vấn chính giả cho trang danh sách tin tức: 9 bài mỗi trang, mới nhất trước, lọc theo chuyên mục nếu có.
 if ( in_array( $GLOBALS['template'], array( 'archive-tin_tuc', 'taxonomy-chuyen_muc' ), true ) ) {
 	$query = array( 'post_type' => 'tin_tuc', 'orderby' => 'date' );
 	if ( '' !== $GLOBALS['term'] ) {

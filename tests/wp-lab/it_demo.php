@@ -1,14 +1,4 @@
 <?php
-/**
- * Dữ liệu minh họa để website thử (localhost:8080) trông như trang tĩnh (127.0.0.1:4174): ảnh dự án thật, đủ 6 lĩnh vực, đối tác,
- * khối câu chuyện, tin và vị trí tuyển dụng. KHÔNG nằm trong thứ tự chạy mặc định (các kịch bản khác dựng dữ liệu riêng và dọn
- * dữ liệu này): gọi riêng bằng `node tests/wp-lab/run.mjs demo`, và nên chạy SAU CÙNG để phòng thử kết thúc ở trạng thái minh họa.
- *
- * Ảnh: các tệp chủ đã chuẩn bị bằng tests/wp-lab/demo/prepare-photos.php (ảnh gốc ở ngoài kho mã, không đưa vào Git).
- * Thư mục ảnh đặt bằng biến VG_DEMO_PHOTOS (mặc định: thư mục vgarco-demo-photos nằm cạnh thư mục kho mã); thiếu thư mục thì kịch bản BỎ QUA (không phải lỗi).
- * Dự án chưa có ảnh riêng (dai-kiem-soat-khong-luu-dong-hoi, hoc-vien-ky-thuat-va-cong-nghe-an-ninh, biet-thu-tai-niedernhausen)
- * được để trống có chủ ý — trang phải hiển thị tử tế khi thiếu ảnh. Chạy lại được: dọn dự án, ảnh, lĩnh vực, tin, vị trí rồi dựng lại.
- */
 require __DIR__ . '/lib.php';
 
 $photos = rtrim( str_replace( '\\', '/', (string) ( getenv( 'VG_DEMO_PHOTOS' ) ?: dirname( REPO ) . '/vgarco-demo-photos' ) ), '/' );
@@ -17,18 +7,15 @@ if ( ! is_file( $photos . '/images.csv' ) || ! is_dir( $photos . '/masters' ) ) 
 	exit( 0 );
 }
 
-/** Dự án tiếng Việt theo mã nhận diện (ma). */
 $by_ma = static function ( string $ma ): int {
 	$ids = get_posts( array( 'post_type' => 'du_an', 'post_status' => 'any', 'meta_key' => 'ma', 'meta_value' => $ma, 'fields' => 'ids', 'posts_per_page' => 1 ) );
 	return (int) ( $ids[0] ?? 0 );
 };
 
-// 1. Dọn lần chạy trước: dự án và ảnh. Tin, vị trí, lĩnh vực do it_seed.php dọn.
 foreach ( get_posts( array( 'post_type' => array( 'du_an', 'attachment' ), 'post_status' => 'any', 'posts_per_page' => -1, 'fields' => 'ids' ) ) as $id ) {
 	wp_delete_post( $id, true );
 }
 
-// 2. Nhập 19 dự án, đã công bố, kèm ảnh thật (16 dự án có ảnh).
 $cli = new VGARCO_CLI_Command();
 WP_CLI::$lines = array();
 try {
@@ -46,7 +33,6 @@ foreach ( array( 'dai-kiem-soat-khong-luu-dong-hoi', 'hoc-vien-ky-thuat-va-cong-
 	same( "dự án chưa có ảnh riêng ({$ma}) để trống, không dùng ảnh của dự án khác", 0, (int) get_field( 'anh_the', $by_ma( $ma ) ) );
 }
 
-// 3. Tin tức, vị trí tuyển dụng (it_seed.php chạy trong tiến trình riêng để dùng lại đúng dữ liệu của nó).
 foreach ( array( 'tin-tuc-cong-ty' => 'Tin tức công ty', 'thong-tin-bao-chi' => 'Thông tin báo chí', 'su-kien' => 'Sự kiện' ) as $slug => $name ) {
 	if ( ! term_exists( $slug, 'chuyen_muc' ) ) {
 		wp_insert_term( $name, 'chuyen_muc', array( 'slug' => $slug ) );
@@ -55,7 +41,6 @@ foreach ( array( 'tin-tuc-cong-ty' => 'Tin tức công ty', 'thong-tin-bao-chi' 
 exec( escapeshellarg( PHP_BINARY ) . ' -c ' . escapeshellarg( LAB . '/php.ini' ) . ' ' . escapeshellarg( __DIR__ . '/it_seed.php' ) . ' 2>&1', $seed_out, $seed_status );
 same( 'dữ liệu tin và vị trí: dựng được', 0, $seed_status );
 
-// Tin: ảnh đại diện lấy từ ảnh thẻ dự án; nội dung dài có tiêu đề phụ, trích dẫn, ảnh và chú thích.
 $thumb_of = static fn( string $ma ): int => (int) get_field( 'anh_the', $by_ma( $ma ) );
 $news     = array(
 	'Từ ý tưởng đến một công trình có thể vận hành'  => array( 'truong-thcs-chat-luong-cao-bac-tu-liem', 'Một quy trình rõ ràng giúp kiến trúc, kỹ thuật và triển khai cùng đi theo một mục tiêu.', 'Góc nhìn chuyên môn' ),
@@ -78,7 +63,6 @@ foreach ( get_posts( array( 'post_type' => 'tin_tuc', 'post_status' => 'publish'
 	update_field( 'chu_thich_anh', 'Ảnh: dự án trong hồ sơ năng lực VGARCO', $post->ID );
 }
 
-// Vị trí thứ ba đang mở, để danh sách tuyển dụng đủ ba dòng như trang mẫu.
 $job_id = wp_insert_post( array( 'post_type' => 'vi_tri', 'post_status' => 'publish', 'post_title' => 'Kỹ sư giám sát', 'post_name' => 'vt-giam-sat' ) );
 foreach ( array( 'trang_thai' => 'dang_nhan', 'han_nop' => gmdate( 'Ymd', strtotime( '+45 days' ) ), 'loai_hinh' => 'toan_thoi_gian', 'tom_tat' => 'Giám sát thi công tại hiện trường.', 'mo_ta_chung' => 'Giám sát chất lượng, tiến độ và an toàn thi công.', 'cong_viec' => "Giám sát thi công\nNghiệm thu khối lượng", 'yeu_cau' => "Tốt nghiệp xây dựng\n3 năm kinh nghiệm", 'quyen_loi' => "Bảo hiểm đầy đủ\nThưởng dự án" ) as $k => $v ) {
 	update_field( $k, $v, $job_id );
@@ -86,7 +70,6 @@ foreach ( array( 'trang_thai' => 'dang_nhan', 'han_nop' => gmdate( 'Ymd', strtot
 wp_set_object_terms( $job_id, 'nghe-an', 'noi_lam_viec' );
 wp_set_object_terms( $job_id, 'ket-cau', 'phong_ban' );
 
-// 4. Sáu lĩnh vực: trang chủ hiện các lĩnh vực có tóm tắt; mỗi lĩnh vực dẫn tới một dự án tham khảo có ảnh.
 $services = array(
 	array( 'Tư vấn thiết kế kiến trúc', 'thiet-ke-kien-truc', 'Ý tưởng · Hồ sơ', 'bao-tang-lich-su-quan-doi-nhan-dan-lao', 'Thiết kế quy hoạch, kiến trúc công trình, nội ngoại thất; phát triển phương án từ ý tưởng đến hồ sơ thiết kế.' ),
 	array( 'Thiết kế kết cấu', 'thiet-ke-ket-cau', '', 'truong-thcs-chat-luong-cao-bac-tu-liem', 'Giải pháp kết cấu cho công trình dân dụng và công nghiệp, phối hợp với kiến trúc và các bộ môn kỹ thuật.' ),
@@ -103,7 +86,6 @@ foreach ( $services as $i => [ $title, $anchor, $summary, $ref_ma, $text ] ) {
 	update_field( 'du_an_tham_khao', $by_ma( $ref_ma ), $id );
 }
 
-// 5. Cấu hình: đối tác, ảnh mặc định, khối câu chuyện (phối cảnh ↔ công trình thật của Bảo tàng Lịch sử Quân đội nhân dân Lào).
 $museum = $by_ma( 'bao-tang-lich-su-quan-doi-nhan-dan-lao' );
 $kinds  = array( 'thiet_ke' => 0, 'cong_trinh' => 0 );
 foreach ( (array) get_field( 'thu_vien', $museum ) as $row ) {
@@ -135,7 +117,6 @@ update_field(
 	'option'
 );
 
-// 6. Kiểm tra bằng trang thật (HTTP tới máy chủ thử).
 $home = http( 'GET', '/' );
 same( 'trang chủ: 200', 200, $home['status'] );
 $html = $home['body'];

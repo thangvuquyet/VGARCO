@@ -1,12 +1,6 @@
 <?php
 /**
  * Template Name: Lĩnh vực hoạt động
- *
- * Trang Lĩnh vực hoạt động (UC-03): danh sách các nhóm (bài của mục "Lĩnh vực hoạt động") dạng thu gọn, mỗi nhóm có neo.
- * Mở một nhóm thì khung ảnh bên cạnh đổi sang dự án tham khảo của nhóm đó. Nhóm chưa dịch tự vắng ở bản DE (WPML).
- * Không có JS: mọi nhóm mở sẵn, ảnh là ảnh của nhóm đầu.
- *
- * @package vgarco
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -16,7 +10,6 @@ get_header();
 $id       = (int) get_queried_object_id();
 $services = vgarco_services();
 
-// Ảnh hiển thị sẵn: của nhóm đầu tiên có dự án tham khảo (nhóm đầu tiên đang mở nếu có).
 $first_ref   = null;
 $first_index = 0;
 foreach ( $services as $index => $service ) {
@@ -27,7 +20,6 @@ foreach ( $services as $index => $service ) {
 	}
 }
 
-/** Ảnh, chú thích của một dự án tham khảo, dùng cho khung ảnh. */
 $ref_data = static function ( ?array $ref ): array {
 	if ( ! $ref ) {
 		return array( 'image' => 0, 'alt' => '', 'title' => '' );
@@ -52,7 +44,7 @@ vgarco_breadcrumb(
 		<div class="services-head">
 			<div>
 				<p class="eyebrow"><?php esc_html_e( 'Chuyên môn', 'vgarco' ); ?></p>
-				<h1 id="services-title"><?php echo vgarco_field_heading( 'hero_tieu_de', __( "Tư duy tổng thể.\n<em>Chăm chút từng chi tiết.</em>", 'vgarco' ), $id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- đã lọc trong vgarco_heading(). ?></h1>
+				<h1 id="services-title"><?php echo vgarco_field_heading( 'hero_tieu_de', __( "Tư duy tổng thể.\n<em>Chăm chút từng chi tiết.</em>", 'vgarco' ), $id ); ?></h1>
 			</div>
 			<p class="section-description"><?php echo esc_html( vgarco_field_text( 'hero_mo_ta', __( 'Kết nối kiến trúc và kỹ thuật, từ khảo sát ban đầu đến thiết kế và quản lý triển khai.', 'vgarco' ), $id ) ); ?></p>
 		</div>
@@ -63,7 +55,7 @@ vgarco_breadcrumb(
 				<?php if ( $first['image'] > 0 ) : ?>
 					<figure class="service-image">
 						<?php
-						echo vgarco_image( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- markup ảnh của WordPress.
+						echo vgarco_image(
 							$first['image'],
 							array(
 								'size'  => 'vg-1200',
@@ -95,7 +87,7 @@ vgarco_breadcrumb(
 								<?php echo esc_html( $service['title'] ); ?>
 								<span class="plus" aria-hidden="true">+</span>
 							</summary>
-							<div class="service-body"><?php echo $service['description']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- nội dung biên tập, đã qua the_content. ?></div>
+							<div class="service-body"><?php echo $service['description']; ?></div>
 						</details>
 					<?php endforeach; ?>
 				</div>

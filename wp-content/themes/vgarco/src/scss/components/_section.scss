@@ -1,8 +1,5 @@
 @use '../mixins' as *;
 
-// Thành phần dùng chung giữa các trang: nhãn khối, mũi tên tròn, thẻ dự án, đoạn dẫn.
-
-// Nhãn khối: chữ nhỏ viết hoa có gạch đỏ phía trước. ("Về VGARCO", "Dự án tiêu biểu"...)
 .section-label {
   display: flex;
   align-items: center;
@@ -10,7 +7,7 @@
   width: fit-content;
   max-width: 100%;
   margin-bottom: 1.0625rem;
-  font-size: 0.9375rem; // 15
+  font-size: 0.9375rem;
   font-weight: 700;
   line-height: 1.45;
   letter-spacing: 0.105em;
@@ -28,7 +25,7 @@
   @include up($bp-md) {
     gap: 0.875rem;
     margin-bottom: 1.25rem;
-    font-size: 1.125rem; // 18
+    font-size: 1.125rem;
 
     &::before {
       width: 38px;
@@ -40,7 +37,6 @@
   text-transform: uppercase;
 }
 
-// Mũi tên tròn nền đen.
 .round-arrow {
   display: grid;
   flex-shrink: 0;
@@ -65,7 +61,6 @@
   }
 }
 
-// Khối tiêu đề: nhãn + tiêu đề bên trái, đoạn mô tả bên phải.
 .section-heading {
   display: grid;
   gap: 1.375rem;
@@ -80,7 +75,6 @@
   }
 }
 
-// Nhãn đứng trên tiêu đề khối cách xa hơn nhãn đứng đầu mục (26 so với 20 px ở bản thiết kế).
 .section-heading .section-label {
   margin-bottom: 1.6rem;
 }
@@ -100,18 +94,17 @@
   color: var(--c-ink-muted);
 
   @include up($bp-md) {
-    font-size: 1.0625rem; // 17
+    font-size: 1.0625rem;
   }
 }
 
-// --- Thẻ dự án ---
 .project-card {
   a {
     display: block;
   }
 
   h3 {
-    font-size: 1.375rem; // 22
+    font-size: 1.375rem;
     line-height: 1.32;
     letter-spacing: -0.025em;
   }
@@ -131,22 +124,20 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.3, 1); // như bản đầu của theme: vào nhanh, dừng êm
+    transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.3, 1);
   }
 }
 
-// Phóng 5,5% khi rê chuột (bản đầu của theme). Không phủ màu đỏ như bản đầu: ảnh phối cảnh kiến trúc không được đổi màu.
 .project-card a:hover .project-photo img {
   transform: scale(1.055);
 }
 
-// Nhãn loại ảnh ("Phối cảnh thiết kế" / "Ảnh công trình") ở góc dưới bên trái ảnh.
 .image-label {
   position: absolute;
   bottom: 0.625rem;
   left: 0.625rem;
   padding: 0.625rem 0.75rem;
-  font-size: 0.8125rem; // 13
+  font-size: 0.8125rem;
   line-height: 1.35;
   letter-spacing: 0.03em;
   text-transform: uppercase;

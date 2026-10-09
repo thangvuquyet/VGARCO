@@ -1,5 +1,4 @@
 <?php
-/** Trang công khai trên WordPress thật: SEO, tìm kiếm, 404, tài nguyên, sơ đồ trang, bề mặt tấn công (mu-plugin), dịch. */
 require __DIR__ . '/lib.php';
 
 $jobs = get_option( 'lab_job_ids' );
@@ -24,7 +23,6 @@ $ld   = static function ( DOMXPath $x ): array {
 };
 @unlink( LAB . '/debug.log' );
 
-/* ---- Trang chủ ---- */
 $home = http( 'GET', '/' );
 $x    = $dom( $home['body'] );
 same( 'trang chủ: 200', 200, $home['status'] );
@@ -38,11 +36,9 @@ same( 'trang chủ: JSON-LD Organization hợp lệ', array( 'Công ty TNHH Tư 
 check( 'trang chủ: logo trong JSON-LD tải được (200)', 200 === http( 'GET', wp_parse_url( $j['Organization']['logo'] ?? $base, PHP_URL_PATH ) )['status'] );
 check( 'trang chủ: tệp CSS và JS của theme tải được (200)', 200 === http( 'GET', wp_parse_url( $attr( $x, '//link[@rel="stylesheet" and contains(@href,"dist")]', 'href' ), PHP_URL_PATH ) )['status'] && 200 === http( 'GET', wp_parse_url( $attr( $x, '//script[@type="module" and contains(@src,"dist")]', 'src' ), PHP_URL_PATH ) )['status'] );
 check( 'trang chủ: có hộp thoại tìm kiếm với địa chỉ REST thật', str_contains( $attr( $x, '//dialog[@id="search-dialog"]', 'data-endpoint' ), '/wp-json/vgarco/v1/search' ) );
-// Phòng thử không có WPML: plugin lab-lang giả lập locale `vi` và bộ lọc wpml_active_languages (giống WPML ở chỗ theme dùng).
 same( 'trang chủ: thuộc tính lang của <html> là vi (locale của WPML theo ngôn ngữ đang xem)', 'vi', $attr( $x, '//html', 'lang' ) );
 $switch = $x->query( '//div[contains(@class,"language-switch")]/a' );
 same( 'trang chủ: bộ chuyển ngôn ngữ VI/DE, VI đang chọn', array( 2, 'vi' ), array( $switch->length, $attr( $x, '//div[contains(@class,"language-switch")]/a[@aria-current="true"]', 'hreflang' ) ) );
-// Preload phông: trang tiếng Việt cần hai tập con (latin + vietnamese); lỗi mức ưu tiên của wp_head từng làm thẻ này không bao giờ được in.
 $preloads = $x->query( '//link[@rel="preload" and @as="font"]' );
 same( 'trang chủ: 2 thẻ preload phông (latin + vietnamese) đều có crossorigin', array( 2, 2 ), array( $preloads->length, $x->query( '//link[@rel="preload" and @as="font" and @crossorigin]' )->length ) );
 check( 'trang chủ: các tệp phông được preload tải được (200)', 2 === $preloads->length && 200 === http( 'GET', wp_parse_url( $preloads->item( 0 )->getAttribute( 'href' ), PHP_URL_PATH ) )['status'] && 200 === http( 'GET', wp_parse_url( $preloads->item( 1 )->getAttribute( 'href' ), PHP_URL_PATH ) )['status'] );
@@ -51,7 +47,6 @@ $dx      = $dom( $de_home['body'] );
 same( 'trang chủ bản Đức (giả lập): <html lang="de-DE">, chỉ preload tập latin, DE đang chọn', array( 'de-DE', 1, 'de' ), array( $attr( $dx, '//html', 'lang' ), $dx->query( '//link[@rel="preload" and @as="font"]' )->length, $attr( $dx, '//div[contains(@class,"language-switch")]/a[@aria-current="true"]', 'hreflang' ) ) );
 check( 'không có phông/script từ miền ngoài (Google Fonts…)', ! preg_match( '#(fonts\.googleapis|fonts\.gstatic|google-analytics|googletagmanager)#', $home['body'] ) );
 
-/* ---- Dự án ---- */
 wp_cache_flush();
 $p     = get_posts( array( 'post_type' => 'du_an', 'meta_key' => 'ma', 'meta_value' => 'bao-tang-lich-su-quan-doi-nhan-dan-lao', 'posts_per_page' => 1 ) )[0];
 $url   = get_permalink( $p );
@@ -80,7 +75,6 @@ foreach ( get_terms( array( 'taxonomy' => 'chuyen_muc', 'hide_empty' => false ) 
 	check( "chuyên mục tin {$term->slug}: trang 200", 200 === $r['status'] );
 }
 
-/* ---- Tin tức, tuyển dụng ---- */
 $news = http( 'GET', '/tin-tuc/' );
 $x    = $dom( $news['body'] );
 same( 'tin tức: 200 và 3 bài', array( 200, 3 ), array( $news['status'], $x->query( '//article[contains(@class,"news-row")]' )->length ) );
@@ -98,12 +92,10 @@ foreach ( array( 'cu' => 'quá hạn', 'dong' => 'đã đóng' ) as $k => $why )
 	$cx = $dom( $c['body'] );
 	check( "vị trí {$why}: không có JobPosting, không có nút ứng tuyển, có thông báo ngừng nhận", ! isset( $ld( $cx )['JobPosting'] ) && ! str_contains( $c['body'], '/ung-tuyen/?id=' ) && str_contains( $c['body'], 'ngừng nhận hồ sơ' ) );
 }
-// Bản đồ đường dẫn tiếng Việt của phương án 6.6: trang Tuyển dụng và chi tiết vị trí CÙNG tiền tố /tuyen-dung/, Ban lãnh đạo và Phòng ban là trang con của Về công ty.
 foreach ( array( '/' => 'Từ ý tưởng', '/gioi-thieu/' => 'Đến giá trị dài lâu', '/gioi-thieu/ban-lanh-dao/' => 'Ban lãnh đạo', '/gioi-thieu/phong-ban/' => 'Nhiều chuyên môn', '/linh-vuc-hoat-dong/' => 'Tư duy tổng thể', '/du-an/' => 'Tất cả dự án', '/tin-tuc/' => 'Tin tức', '/tuyen-dung/' => 'Chọn công việc', '/tuyen-dung/vt-kts/' => 'Kiến trúc sư thiết kế', '/lien-he/' => 'Một cuộc trò chuyện', '/chinh-sach-bao-ve-du-lieu/' => 'Chính sách bảo vệ dữ liệu' ) as $path => $needle ) {
 	$r = http( 'GET', $path );
 	check( "bản đồ đường dẫn: {$path} trả 200 và đúng trang", 200 === $r['status'] && ( str_contains( strip_tags( $r['body'] ), $needle ) || '/' === $path || '/lien-he/' === $path ) );
 }
-// WordPress đoán đường dẫn thiếu cấp cha và chuyển hướng 301 về đúng trang; đường dẫn không tồn tại thì 404.
 foreach ( array( '/ban-lanh-dao/' => '/gioi-thieu/ban-lanh-dao/', '/phong-ban/' => '/gioi-thieu/phong-ban/' ) as $short => $full ) {
 	$r = http( 'GET', $short );
 	check( "đường dẫn thiếu cấp cha {$short}: 301 về {$full}", 301 === $r['status'] && str_contains( $r['headers'], 'Location: ' . $base . $full ) );
@@ -121,7 +113,6 @@ check( 'trang Ứng tuyển: noindex, có biểu mẫu trỏ REST, tên vị tr�
 $closed = http( 'GET', '/ung-tuyen/?id=' . $jobs['dong'] );
 check( 'trang Ứng tuyển cho vị trí đã đóng: không có biểu mẫu', 0 === $dom( $closed['body'] )->query( '//form[@id="job-apply-form"]' )->length );
 
-/* ---- 404 và trang chung ---- */
 $n404 = http( 'GET', '/du-an/khong-co-du-an-nay/' );
 $nx   = $dom( $n404['body'] );
 same( '404: trạng thái 404 thật', 404, $n404['status'] );
@@ -134,7 +125,6 @@ $legal = http( 'GET', '/chinh-sach-bao-ve-du-lieu/' );
 $lx    = $dom( $legal['body'] );
 same( 'trang pháp lý (page.php): 200, một H1, nội dung trong .entry-content', array( 200, 1, true ), array( $legal['status'], $lx->query( '//h1' )->length, str_contains( $legal['body'], 'Nội dung chính sách bảo vệ dữ liệu' ) ) );
 
-/* ---- Tìm kiếm ---- */
 $s = http( 'GET', '/wp-json/vgarco/v1/search?q=' . rawurlencode( 'bảo tàng' ) . '&lang=vi' );
 same( 'tìm kiếm: 200 và ra bảo tàng', array( 200, true ), array( $s['status'], 'Bảo tàng Lịch sử Quân đội nhân dân Lào' === ( $s['json']['results'][0]['title'] ?? '' ) ) );
 check( 'tìm kiếm: Cache-Control public 300 giây', (bool) preg_match( '/cache-control:\s*public,\s*max-age=300/i', $s['headers'] ) );
@@ -149,7 +139,6 @@ check( 'tìm kiếm: tối đa 10 kết quả', count( $many['json']['results'] 
 check( 'tìm kiếm: chuỗi độc hại không gây lỗi và không lộ', 200 === ( $xss = http( 'GET', '/wp-json/vgarco/v1/search?q=' . rawurlencode( '<script>alert(1)</script>' ) . '&lang=vi' ) )['status'] && array() === $xss['json']['results'] );
 $sql = http( 'GET', '/wp-json/vgarco/v1/search?q=' . rawurlencode( "' OR 1=1 --" ) . '&lang=vi' );
 check( 'tìm kiếm: SQL injection không có tác dụng', 200 === $sql['status'] && array() === $sql['json']['results'] );
-// Chỉ mục được làm mới khi đổi dự án.
 wp_update_post( array( 'ID' => $p->ID, 'post_title' => 'Bảo tàng Đổi Tên Để Thử Chỉ Mục' ) );
 $after = http( 'GET', '/wp-json/vgarco/v1/search?q=' . rawurlencode( 'đổi tên để thử' ) . '&lang=vi' );
 same( 'tìm kiếm: sửa tên dự án thì chỉ mục tự làm mới (không chờ 24 giờ)', 'Bảo tàng Đổi Tên Để Thử Chỉ Mục', $after['json']['results'][0]['title'] ?? '' );
@@ -158,7 +147,6 @@ wp_update_post( array( 'ID' => $p->ID, 'post_status' => 'draft' ) );
 same( 'tìm kiếm: gỡ dự án khỏi xuất bản thì biến mất khỏi kết quả', array(), http( 'GET', '/wp-json/vgarco/v1/search?q=' . rawurlencode( 'bảo tàng lịch sử' ) . '&lang=vi' )['json']['results'] );
 wp_update_post( array( 'ID' => $p->ID, 'post_status' => 'publish' ) );
 
-/* ---- Sơ đồ trang ---- */
 $sm = http( 'GET', '/wp-sitemap.xml' );
 $subs = array();
 preg_match_all( '#<loc>([^<]+)</loc>#', $sm['body'], $mm );
@@ -167,7 +155,6 @@ foreach ( $mm[1] as $loc ) {
 }
 check( 'sơ đồ trang: có dự án, tin tức, vị trí, trang; không có hồ sơ ứng tuyển, người dùng, lĩnh vực', (bool) preg_grep( '/du_an/', $subs ) && (bool) preg_grep( '/tin_tuc/', $subs ) && (bool) preg_grep( '/vi_tri/', $subs ) && (bool) preg_grep( '/posts-page/', $subs ) && ! preg_grep( '/ho_so_ut|users|linh_vuc/', $subs ) );
 
-/* ---- Bề mặt tấn công (mu-plugin vgarco-loader) ---- */
 same( '/?author=1 → 404 (không lộ tên đăng nhập)', 404, http( 'GET', '/?author=1' )['status'] );
 $ua = http( 'GET', '/wp-json/wp/v2/users' );
 check( 'REST users: khách không xem được danh sách', in_array( $ua['status'], array( 401, 403, 404 ), true ) && ! str_contains( $ua['body'], 'labadmin' ) );
@@ -181,7 +168,6 @@ check( 'REST users/me khi chưa đăng nhập: không tồn tại với khách (
 check( 'không lộ phiên bản WordPress trong <head> (generator)', ! preg_match( '/<meta name="generator"/i', $home['body'] ) );
 check( 'emoji/oEmbed rác không nạp (cleanup): không có wp-emoji-release', ! str_contains( $home['body'], 'wp-emoji-release' ) );
 
-/* ---- Dịch: bản .mo nạp qua cơ chế của WordPress ---- */
 $GLOBALS['l10n']['vgarco'] ??= null;
 check( 'bản dịch tiếng Đức của theme nạp được bằng load_textdomain thật', load_textdomain( 'lab-de-check', get_theme_file_path( 'languages/de_DE.mo' ) ) && 'Kontakt' === __( 'Liên hệ', 'lab-de-check' ) && 'Karriere' === __( 'Tuyển dụng', 'lab-de-check' ) );
 check( 'bản dịch của plugin nạp được', load_textdomain( 'lab-de-core', VGARCO_CORE_DIR . 'languages/vgarco-core-de_DE.mo' ) && 'Teilzeit' === __( 'Bán thời gian', 'lab-de-core' ) );

@@ -1,6 +1,3 @@
-// Trích chuỗi gettext từ mã PHP ra tệp .pot (không cần WP-CLI hay xgettext).
-//   node scripts/i18n/extract.mjs            ghi theme/languages/vgarco.pot và plugin/languages/vgarco-core.pot
-//   node scripts/i18n/extract.mjs --check    chỉ kiểm tra tệp .pot đã mới chưa (dùng trong kiểm thử)
 import { readdirSync, readFileSync, writeFileSync, existsSync, statSync } from 'node:fs';
 import { join, relative, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -8,7 +5,6 @@ import { newEntry, writePo } from './po.mjs';
 
 const root = join( dirname( fileURLToPath( import.meta.url ) ), '..', '..' );
 
-/** Vị trí đối số theo hàm: chỉ số của msgid, plural, context và domain. */
 const FUNCTIONS = {
 	__: { id: 0, domain: 1 },
 	esc_html__: { id: 0, domain: 1 },
@@ -39,7 +35,6 @@ function walk( dir, out = [] ) {
 	return out;
 }
 
-/** Đọc chuỗi PHP nguyên văn ('...' hoặc "...") → nội dung, hoặc null nếu không phải chuỗi thuần. */
 export function phpLiteral( src ) {
 	const s = src.trim();
 	let m;
@@ -47,13 +42,11 @@ export function phpLiteral( src ) {
 		return m[ 1 ].replace( /\\(['\\])/g, '$1' );
 	}
 	if ( ( m = s.match( /^"((?:[^"\\$]|\\.)*)"$/s ) ) ) {
-		// Dấu $ không thoát nghĩa là nội suy biến: không phải chuỗi thuần.
 		return m[ 1 ].replace( /\\(n|t|r|"|\\|\$)/g, ( _, c ) => ( { n: '\n', t: '\t', r: '\r', '"': '"', '\\': '\\', $: '$' } )[ c ] );
 	}
 	return null;
 }
 
-/** Tách các đối số ở mức cao nhất của một lời gọi hàm, bắt đầu ngay sau dấu "(" . */
 export function splitArgs( src, start ) {
 	const args = [];
 	let depth = 0;
@@ -90,21 +83,15 @@ export function splitArgs( src, start ) {
 			cur += c;
 		}
 	}
-	return args; // lời gọi không đóng: bỏ
+	return args;
 }
 
-/**
- * Trích chuỗi từ một tệp PHP.
- *
- * @returns {{found: Array, dynamic: Array}}
- */
 export function extractFromSource( src, file, domain ) {
 	const found = [];
 	const dynamic = [];
 	const re = new RegExp( '\\b(' + Object.keys( FUNCTIONS ).join( '|' ) + ')\\s*\\(', 'g' );
 	let m;
 	while ( ( m = re.exec( src ) ) ) {
-		// Bỏ qua lời khai báo hàm: "function __(" hay "->__(".
 		const before = src.slice( Math.max( 0, m.index - 12 ), m.index );
 		if ( /(?:function\s+|->|::)$/.test( before ) ) {
 			continue;
@@ -114,7 +101,7 @@ export function extractFromSource( src, file, domain ) {
 		const line = src.slice( 0, m.index ).split( '\n' ).length;
 
 		if ( args[ spec.domain ] === undefined || phpLiteral( args[ spec.domain ] ) !== domain ) {
-			continue; // domain khác (của WordPress lõi hay plugin khác)
+			continue;
 		}
 		const id = phpLiteral( args[ spec.id ] ?? '' );
 		if ( id === null ) {
@@ -124,17 +111,14 @@ export function extractFromSource( src, file, domain ) {
 		const plural = spec.plural === undefined ? null : phpLiteral( args[ spec.plural ] ?? '' );
 		const ctxt = spec.ctxt === undefined ? null : phpLiteral( args[ spec.ctxt ] ?? '' );
 
-		// Chú thích cho người dịch ngay trước lời gọi: /* translators: ... */
 		const prefix = src.slice( Math.max( 0, m.index - 400 ), m.index );
 		const comment = prefix.match( /\/\*\s*translators:\s*([\s\S]*?)\*\/\s*$/ ) ?? prefix.match( /\/\/\s*translators:\s*(.*)\s*$/ );
 
-		// Tham chiếu chỉ gồm tên tệp, không có số dòng: thêm/bớt một dòng mã không làm .pot (và .po) đổi, giảm nhiễu khi so sánh.
 		found.push( { id, plural, ctxt, ref: file, line, comment: comment ? 'translators: ' + comment[ 1 ].replace( /\s+/g, ' ' ).trim() : '' } );
 	}
 	return { found, dynamic };
 }
 
-/** Gộp các lần xuất hiện của cùng (ngữ cảnh, msgid) thành mục .pot. */
 export function buildPot( found, project, domain ) {
 	const map = new Map();
 	for ( const f of found ) {

@@ -1,11 +1,4 @@
 <?php
-/**
- * Kiểm thử phần thuần của khóa đăng nhập sai (inc/security-lib.php) và xóa cache Cloudflare (inc/cache-lib.php).
- *
- *   php -d extension_dir=<ext> -d extension=mbstring tests/php/security.php
- *
- * Phần nối WordPress (hook authenticate, wp_login_failed, cron, wp_remote_post) cần chạy trên WordPress thật.
- */
 
 define( 'ABSPATH', __DIR__ . '/' );
 define( 'ROOT', dirname( __DIR__, 2 ) );
@@ -30,16 +23,12 @@ function same( string $label, $expected, $actual ): void {
 
 $now = 1_800_000_000;
 
-/* ========== Khóa đăng nhập: dọn lượt sai ========== */
-
 same( 'prune: giữ lượt trong cửa sổ, bỏ lượt ở mép và quá cũ', array( $now - 899, $now ), vgarco_lockout_prune( array( $now - 901, $now - 900, $now - 899, $now ), $now, 900 ) );
 same( 'prune: mốc ở tương lai (dữ liệu hỏng) bị bỏ', array( $now ), vgarco_lockout_prune( array( $now + 1, $now, $now + 99999 ), $now, 900 ) );
 same( 'prune: sắp tăng dần', array( $now - 30, $now - 20, $now - 10 ), vgarco_lockout_prune( array( $now - 10, $now - 30, $now - 20 ), $now, 900 ) );
 same( 'prune: rỗng', array(), vgarco_lockout_prune( array(), $now, 900 ) );
 same( 'state: dữ liệu rỗng hoặc hỏng → trạng thái sạch', array( 'attempts' => array(), 'until' => 0 ), vgarco_lockout_state( 'rác' ) );
 same( 'state: ép kiểu số', array( 'attempts' => array( 5 ), 'until' => 7 ), vgarco_lockout_state( array( 'attempts' => array( '5' ), 'until' => '7' ) ) );
-
-/* ========== Khóa IP: 5 lần sai / 15 phút → khóa 15 phút ========== */
 
 $state = vgarco_lockout_state( null );
 $times = array();
@@ -60,7 +49,6 @@ $during = vgarco_lockout_record_ip( $locked, $t5 + 100 );
 same( 'IP: thử tiếp khi đang khóa KHÔNG kéo dài khóa và không báo lại', array( $locked['until'], false ), array( $during['state']['until'], $during['triggered'] ) );
 same( 'IP: thử tiếp khi đang khóa không ghi thêm lượt sai', array(), $during['state']['attempts'] );
 
-// Sau khi hết khóa cần đủ 5 lượt mới nữa.
 $after = $locked;
 for ( $i = 0; $i < 4; $i++ ) {
 	$after = vgarco_lockout_record_ip( $after, $t5 + 1000 + $i )['state'];
@@ -68,27 +56,23 @@ for ( $i = 0; $i < 4; $i++ ) {
 same( 'IP: sau khi hết khóa, 4 lượt sai mới vẫn chưa khóa', 0, vgarco_lockout_remaining( $after, $t5 + 1004 ) );
 check( 'IP: lượt thứ 5 của đợt mới lại khóa', vgarco_lockout_record_ip( $after, $t5 + 1005 )['triggered'] );
 
-// Lượt sai rải rác quá 15 phút không cộng dồn.
 $slow = vgarco_lockout_state( null );
 foreach ( array( 0, 200, 400, 600 ) as $t ) {
 	$slow = vgarco_lockout_record_ip( $slow, $now + $t )['state'];
 }
-$r = vgarco_lockout_record_ip( $slow, $now + 1000 ); // lượt đầu (t=0) đã quá 900 s
+$r = vgarco_lockout_record_ip( $slow, $now + 1000 );
 same( 'IP: lượt sai cũ hơn 15 phút không tính vào ngưỡng', array( false, 0 ), array( $r['triggered'], vgarco_lockout_remaining( $r['state'], $now + 1000 ) ) );
-$r = vgarco_lockout_record_ip( $slow, $now + 899 ); // cả 5 lượt nằm trong 15 phút
+$r = vgarco_lockout_record_ip( $slow, $now + 899 );
 same( 'IP: 5 lượt trong đúng 15 phút thì khóa', true, $r['triggered'] );
-$r = vgarco_lockout_record_ip( $slow, $now + 900 ); // t=0 vừa hết hạn (mép cửa sổ)
+$r = vgarco_lockout_record_ip( $slow, $now + 900 );
 same( 'IP: lượt ở mép cửa sổ (đúng 900 s) đã hết hạn nên chưa khóa', false, $r['triggered'] );
 
-// Khóa vẫn đúng hạn dù các lượt sai đầu đã trôi khỏi cửa sổ (lỗi kinh điển: tính khóa từ danh sách lượt thay vì lưu mốc hết khóa).
 $early = vgarco_lockout_state( null );
 foreach ( array( 0, 100, 200, 300, 400 ) as $t ) {
 	$early = vgarco_lockout_record_ip( $early, $now + $t )['state'];
 }
 same( 'IP: khóa từ lượt thứ 5 (t=400) kéo dài tới t=1300', 1300 - 901, vgarco_lockout_remaining( $early, $now + 901 ) );
 same( 'IP: vẫn khóa ở t=1299', 1, vgarco_lockout_remaining( $early, $now + 1299 ) );
-
-/* ========== Khóa tài khoản: 10 lần sai / 1 giờ → khóa 1 giờ + báo quản trị ========== */
 
 $u      = vgarco_lockout_state( null );
 $notify = 0;
@@ -104,14 +88,12 @@ same( 'tài khoản: khóa 1 giờ kể từ lượt thứ 10', 3600, vgarco_loc
 same( 'tài khoản: báo quản trị đúng MỘT lần dù thử tiếp 12 lượt', 1, $notify );
 $slow_user = vgarco_lockout_state( null );
 for ( $i = 0; $i < 9; $i++ ) {
-	$slow_user = vgarco_lockout_record_user( $slow_user, $now + $i * 400 )['state']; // 9 lượt trải trong 3200 s
+	$slow_user = vgarco_lockout_record_user( $slow_user, $now + $i * 400 )['state'];
 }
 same( 'tài khoản: 9 lượt rải trong 1 giờ chưa khóa', 0, vgarco_lockout_remaining( $slow_user, $now + 3200 ) );
 check( 'tài khoản: lượt thứ 10 trong cửa sổ 1 giờ thì khóa', vgarco_lockout_record_user( $slow_user, $now + 3599 )['triggered'] );
 check( 'tài khoản: lượt thứ 10 nhưng lượt đầu đã quá 1 giờ thì không khóa', ! vgarco_lockout_record_user( $slow_user, $now + 3700 )['triggered'] );
 check( 'ngưỡng IP (5) thấp hơn ngưỡng tài khoản (10)', VGARCO_LOCK_IP_MAX < VGARCO_LOCK_USER_MAX && VGARCO_LOCK_IP_DURATION < VGARCO_LOCK_USER_DURATION );
-
-/* ========== Khóa lưu trữ, thông báo lỗi ========== */
 
 $k1 = vgarco_lockout_key( 'user', 'Admin', 'muoi' );
 same( 'khóa: tên đăng nhập không phân biệt hoa thường và khoảng trắng', $k1, vgarco_lockout_key( 'user', '  admin ', 'muoi' ) );
@@ -125,8 +107,6 @@ $msg = vgarco_login_error_message();
 check( 'thông báo lỗi: không nhắc tên đăng nhập hay mật khẩu là cái sai', ! preg_match( '/mật khẩu (sai|không đúng)|không tồn tại|tên đăng nhập (sai|không)/iu', $msg ) );
 check( 'thông báo lỗi: nói chung chung rằng thông tin sai hoặc bị tạm khóa', str_contains( $msg, 'Thông tin đăng nhập không đúng' ) && str_contains( $msg, 'tạm khóa' ) );
 same( 'mã lỗi tiết lộ tài khoản', array( 'invalid_username', 'incorrect_password', 'invalid_email', 'invalidcombo', 'empty_username', 'empty_password' ), vgarco_login_leaky_codes() );
-
-/* ========== Xóa cache Cloudflare ========== */
 
 $zone = str_repeat( 'a1', 16 );
 $req  = vgarco_cf_purge_request( $zone, 'tok_abcDEF123' );
@@ -159,7 +139,6 @@ same( 'cache: kiểu nội dung khác (menu, revision) không xóa', false, vgar
 same( 'cache: đủ 5 kiểu công khai', array( 'page', 'du_an', 'linh_vuc', 'tin_tuc', 'vi_tri' ), vgarco_cache_public_types() );
 check( 'cache: độ trễ gom thay đổi là 30 giây', 30 === VGARCO_CACHE_PURGE_DELAY );
 
-// Cron 00:10 theo giờ Việt Nam (UTC+7): 00:10 VN = 17:10 UTC hôm trước.
 $vn = 'Asia/Ho_Chi_Minh';
 $t  = static fn( string $s ): int => ( new DateTimeImmutable( $s, new DateTimeZone( 'UTC' ) ) )->getTimestamp();
 same( 'cron: lúc 10:00 VN (03:00 UTC) → 00:10 VN hôm sau', $t( '2026-10-01 17:10:00' ), vgarco_next_daily_run( $t( '2026-10-01 03:00:00' ), $vn ) );
@@ -169,8 +148,6 @@ same( 'cron: 00:10:01 VN → hôm sau', $t( '2026-10-01 17:10:00' ), vgarco_next
 same( 'cron: múi giờ khác (UTC) → 00:10 UTC', $t( '2026-10-01 00:10:00' ), vgarco_next_daily_run( $t( '2026-09-30 12:00:00' ), 'UTC' ) );
 same( 'cron: giờ phút tùy chỉnh', $t( '2026-09-30 19:30:00' ), vgarco_next_daily_run( $t( '2026-09-30 05:00:00' ), $vn, 2, 30 ) );
 check( 'cron: luôn ở tương lai', vgarco_next_daily_run( $now, $vn ) > $now && vgarco_next_daily_run( $now, $vn ) - $now <= 86400 );
-
-/* ---------- Kết quả ---------- */
 
 if ( $fail ) {
 	foreach ( $fail as $line ) {

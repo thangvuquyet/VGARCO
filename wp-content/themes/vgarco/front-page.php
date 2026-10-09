@@ -1,17 +1,10 @@
 <?php
-/**
- * Trang chủ (UC-01). Nội dung biên tập viên nhập: dự án nổi bật/tiêu biểu, lĩnh vực, tin tức, chỉ số, đối tác.
- * Chữ của trang (khẩu hiệu, đoạn giới thiệu, 3 nguyên tắc, lời dẫn các khối, CTA) nhập ở nhóm trường "Nội dung trang chủ" của trang được đặt làm
- * trang chủ; để trống thì dùng bản mặc định là chuỗi gettext trong mẫu này (bản tiếng Đức nằm ở languages/).
- *
- * @package vgarco
- */
 
 defined( 'ABSPATH' ) || exit;
 
 get_header();
 
-$id        = (int) get_queried_object_id(); // trang chủ tĩnh; chưa đặt trang chủ thì 0 và mọi ô dùng bản mặc định
+$id        = (int) get_queried_object_id();
 $t         = static fn( string $name, string $default ): string => vgarco_field_text( $name, $default, $id );
 $slides    = vgarco_hero_slides();
 $showcase  = vgarco_showcase_projects( 3 );
@@ -21,7 +14,6 @@ $facts     = (array) vgarco_option( 'chi_so_trang_chu', array() );
 $partners  = array_values( array_filter( (array) vgarco_option( 'doi_tac', array() ), static fn( $p ) => ! empty( $p['ten'] ) ) );
 $projects  = get_post_type_archive_link( 'du_an' ) ?: home_url( '/du-an/' );
 $news_url  = get_post_type_archive_link( 'tin_tuc' ) ?: home_url( '/tin-tuc/' );
-// Dải chữ chạy ngang: mỗi dòng một cụm; nhập ít hơn 2 cụm thì dùng bản mặc định.
 $band = vgarco_split_lines( vgarco_field_text( 'dai_chu', '', $id ) );
 if ( count( $band ) < 2 ) {
 	$band = array(
@@ -30,7 +22,6 @@ if ( count( $band ) < 2 ) {
 		__( 'Dấu ấn VGARCO', 'vgarco' ),
 	);
 }
-// Ba nguyên tắc: nhập dòng nào thì hiển thị dòng đó (tối đa 3); không nhập gì thì dùng ba nguyên tắc mặc định.
 $methods = array_slice(
 	array_map(
 		static fn( array $row ): array => array( $row['tieu_de'], $row['mo_ta'] ),
@@ -53,16 +44,16 @@ $methods = array_slice(
 <section class="hero" aria-label="<?php esc_attr_e( 'Dự án nổi bật', 'vgarco' ); ?>">
 	<div class="hero-content">
 		<p class="eyebrow"><?php echo esc_html( $t( 'hero_nhan', __( 'Kiến trúc bắt đầu từ một tầm nhìn', 'vgarco' ) ) ); ?></p>
-		<h1><?php echo vgarco_field_heading( 'hero_tieu_de', __( "Mỗi công trình,\nmột <em>dấu ấn.</em>", 'vgarco' ), $id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- đã lọc trong vgarco_heading(). ?></h1>
-		<p class="hero-description"><?php echo vgarco_field_lines( 'hero_mo_ta', __( "Chúng tôi kết nối ý tưởng kiến trúc với\nnăng lực kỹ thuật để tạo nên những\nkhông gian có giá trị dài lâu.", 'vgarco' ), $id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- đã thoát trong vgarco_lines(). ?></p>
+		<h1><?php echo vgarco_field_heading( 'hero_tieu_de', __( "Mỗi công trình,\nmột <em>dấu ấn.</em>", 'vgarco' ), $id ); ?></h1>
+		<p class="hero-description"><?php echo vgarco_field_lines( 'hero_mo_ta', __( "Chúng tôi kết nối ý tưởng kiến trúc với\nnăng lực kỹ thuật để tạo nên những\nkhông gian có giá trị dài lâu.", 'vgarco' ), $id ); ?></p>
 		<a class="hero-explore" href="<?php echo esc_url( $projects ); ?>">
-			<span class="round-arrow" aria-hidden="true"><?php echo vgarco_icon( 'arrow-up-right' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
+			<span class="round-arrow" aria-hidden="true"><?php echo vgarco_icon( 'arrow-up-right' ); ?></span>
 			<span><?php echo esc_html( $t( 'hero_nut', __( 'Khám phá công trình', 'vgarco' ) ) ); ?><small><?php echo esc_html( $t( 'hero_nut_nhan', __( 'Dấu ấn VGARCO', 'vgarco' ) ) ); ?></small></span>
 		</a>
 		<p class="hero-footnote"><?php echo esc_html( $t( 'hero_chan_1', __( 'Hà Nội, Việt Nam', 'vgarco' ) ) ); ?> <span><?php echo esc_html( $t( 'hero_chan_2', __( 'Hoạt động từ 2013', 'vgarco' ) ) ); ?></span></p>
 	</div>
 
-	<a class="hero-process-rail" href="<?php echo esc_url( $showcase ? '#du-an' : $projects ); // Chưa có dự án tiêu biểu thì khối #du-an không tồn tại. ?>" aria-label="<?php esc_attr_e( 'Từ bản vẽ đến công trình', 'vgarco' ); ?>">
+	<a class="hero-process-rail" href="<?php echo esc_url( $showcase ? '#du-an' : $projects ); ?>" aria-label="<?php esc_attr_e( 'Từ bản vẽ đến công trình', 'vgarco' ); ?>">
 		<span class="process-line" aria-hidden="true"></span>
 		<strong><?php echo esc_html( $t( 'hero_rail_1', __( 'Từ bản vẽ', 'vgarco' ) ) ); ?></strong>
 		<span class="process-arrow" aria-hidden="true">&rarr;</span>
@@ -75,14 +66,14 @@ $methods = array_slice(
 				<div class="showcase-images">
 					<?php foreach ( $slides as $i => $slide ) : ?>
 						<?php
-						echo vgarco_image( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- markup ảnh của WordPress.
+						echo vgarco_image(
 							$slide['image_id'],
 							array(
 								'size'     => 'vg-1600',
 								'sizes'    => '(min-width: 1001px) 55vw, 100vw',
 								'alt'      => $slide['alt'],
 								'class'    => 'showcase-image' . ( 0 === $i ? ' is-active' : '' ),
-								'priority' => 0 === $i, // ảnh LCP: không lazy, ưu tiên cao
+								'priority' => 0 === $i,
 							)
 						);
 						?>
@@ -92,7 +83,7 @@ $methods = array_slice(
 				<div class="showcase-watermark" aria-hidden="true">VG</div>
 
 				<?php if ( count( $slides ) > 1 ) : ?>
-					<?php // Chấm chọn ảnh: chỉ khi có từ 2 ảnh; ẩn tới khi home.js chạy (không JS thì bấm không làm gì). ?>
+					<?php ?>
 					<div class="showcase-dots on-dark" data-hero-dots role="group" aria-label="<?php esc_attr_e( 'Chọn ảnh trình chiếu', 'vgarco' ); ?>" hidden>
 						<?php foreach ( $slides as $i => $slide ) : ?>
 							<button type="button" class="showcase-dot" data-hero-dot<?php echo 0 === $i ? ' aria-current="true"' : ''; ?>
@@ -109,7 +100,7 @@ $methods = array_slice(
 							<?php endif; ?>
 							<a class="hero-project-link" href="<?php echo esc_url( $slide['url'] ); ?>">
 								<span><?php echo esc_html( $slide['title'] ); ?></span>
-								<?php echo vgarco_icon( 'arrow-up-right' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+								<?php echo vgarco_icon( 'arrow-up-right' ); ?>
 							</a>
 							<small><?php echo esc_html( $slide['kind_label'] ); ?></small>
 						</div>
@@ -125,7 +116,7 @@ $methods = array_slice(
 		<?php foreach ( array( false, true ) as $duplicate ) : ?>
 			<div class="marquee-group"<?php echo $duplicate ? ' aria-hidden="true"' : ''; ?>>
 				<?php foreach ( $band as $phrase ) : ?>
-					<span><?php echo esc_html( $phrase ); ?></span><?php echo vgarco_icon( 'asterisk' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					<span><?php echo esc_html( $phrase ); ?></span><?php echo vgarco_icon( 'asterisk' ); ?>
 				<?php endforeach; ?>
 			</div>
 		<?php endforeach; ?>
@@ -134,24 +125,24 @@ $methods = array_slice(
 		aria-label="<?php esc_attr_e( 'Tạm dừng chuyển động', 'vgarco' ); ?>"
 		data-label-pause="<?php esc_attr_e( 'Tạm dừng chuyển động', 'vgarco' ); ?>"
 		data-label-play="<?php esc_attr_e( 'Tiếp tục chuyển động', 'vgarco' ); ?>">
-		<?php echo vgarco_icon( 'pause', 'icon-pause' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-		<?php echo vgarco_icon( 'play', 'icon-play' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+		<?php echo vgarco_icon( 'pause', 'icon-pause' ); ?>
+		<?php echo vgarco_icon( 'play', 'icon-play' ); ?>
 	</button>
 </div>
 
 <section class="section wrap home-about" id="gioi-thieu">
 	<p class="section-label"><?php echo esc_html( $t( 'gt_nhan', __( 'Về VGARCO', 'vgarco' ) ) ); ?></p>
 	<div class="home-about-copy">
-		<h2><?php echo vgarco_field_heading( 'gt_tieu_de', __( "Thiết kế tốt bắt đầu\ntừ việc <em>thấu hiểu.</em>", 'vgarco' ), $id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></h2>
+		<h2><?php echo vgarco_field_heading( 'gt_tieu_de', __( "Thiết kế tốt bắt đầu\ntừ việc <em>thấu hiểu.</em>", 'vgarco' ), $id ); ?></h2>
 		<p><?php echo esc_html( $t( 'gt_doan_1', __( 'Từ năm 2013, VGARCO kết nối kiến trúc và kỹ thuật trong các dự án tại Việt Nam, Lào và CHLB Đức.', 'vgarco' ) ) ); ?></p>
 		<p><?php echo esc_html( $t( 'gt_doan_2', __( 'Chúng tôi theo đuổi những giải pháp rõ ràng, khả thi và có giá trị dài lâu — từ ý tưởng đầu tiên đến khi công trình được đưa vào sử dụng.', 'vgarco' ) ) ); ?></p>
-		<a class="text-link" href="<?php echo esc_url( vgarco_page_url( 'about' ) ); ?>"><?php echo esc_html( $t( 'gt_lien_ket', __( 'Về công ty', 'vgarco' ) ) ); ?> <?php echo vgarco_icon( 'arrow-up-right' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></a>
+		<a class="text-link" href="<?php echo esc_url( vgarco_page_url( 'about' ) ); ?>"><?php echo esc_html( $t( 'gt_lien_ket', __( 'Về công ty', 'vgarco' ) ) ); ?> <?php echo vgarco_icon( 'arrow-up-right' ); ?></a>
 	</div>
 	<?php if ( $facts ) : ?>
 		<div class="home-facts">
 			<?php foreach ( $facts as $fact ) : ?>
 				<p>
-					<strong><?php echo esc_html( $fact['so'] ?? '' ); ?><?php echo ! empty( $fact['hau_to'] ) ? '<span>' . esc_html( $fact['hau_to'] ) . '</span>' : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></strong>
+					<strong><?php echo esc_html( $fact['so'] ?? '' ); ?><?php echo ! empty( $fact['hau_to'] ) ? '<span>' . esc_html( $fact['hau_to'] ) . '</span>' : ''; ?></strong>
 					<span><?php echo esc_html( $fact['nhan'] ?? '' ); ?></span>
 				</p>
 			<?php endforeach; ?>
@@ -173,9 +164,9 @@ $methods = array_slice(
 		<div class="section-heading">
 			<div>
 				<p class="section-label"><?php echo esc_html( $t( 'da_nhan', __( 'Dự án tiêu biểu', 'vgarco' ) ) ); ?></p>
-				<h2><?php echo vgarco_field_heading( 'da_tieu_de', __( "Những công trình\nmang <em>dấu ấn riêng.</em>", 'vgarco' ), $id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></h2>
+				<h2><?php echo vgarco_field_heading( 'da_tieu_de', __( "Những công trình\nmang <em>dấu ấn riêng.</em>", 'vgarco' ), $id ); ?></h2>
 			</div>
-			<p class="section-description"><?php echo vgarco_field_lines( 'da_mo_ta', __( "Mỗi dự án là một lời giải riêng\ncho bối cảnh, công năng và con người.", 'vgarco' ), $id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></p>
+			<p class="section-description"><?php echo vgarco_field_lines( 'da_mo_ta', __( "Mỗi dự án là một lời giải riêng\ncho bối cảnh, công năng và con người.", 'vgarco' ), $id ); ?></p>
 		</div>
 		<div class="project-grid">
 			<?php foreach ( $showcase as $project ) : ?>
@@ -183,7 +174,7 @@ $methods = array_slice(
 			<?php endforeach; ?>
 		</div>
 		<div class="projects-archive">
-			<a class="text-link" href="<?php echo esc_url( $projects ); ?>"><?php echo esc_html( $t( 'da_lien_ket', __( 'Xem toàn bộ dự án', 'vgarco' ) ) ); ?> <?php echo vgarco_icon( 'arrow-up-right' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></a>
+			<a class="text-link" href="<?php echo esc_url( $projects ); ?>"><?php echo esc_html( $t( 'da_lien_ket', __( 'Xem toàn bộ dự án', 'vgarco' ) ) ); ?> <?php echo vgarco_icon( 'arrow-up-right' ); ?></a>
 		</div>
 	</section>
 <?php endif; ?>
@@ -193,9 +184,9 @@ $methods = array_slice(
 		<div class="wrap">
 			<div>
 				<p class="section-label"><?php echo esc_html( $t( 'cm_nhan', __( 'Chuyên môn', 'vgarco' ) ) ); ?></p>
-				<h2><?php echo vgarco_field_heading( 'cm_tieu_de', __( "Tư duy tổng thể.\n<em>Chăm chút từng chi tiết.</em>", 'vgarco' ), $id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></h2>
+				<h2><?php echo vgarco_field_heading( 'cm_tieu_de', __( "Tư duy tổng thể.\n<em>Chăm chút từng chi tiết.</em>", 'vgarco' ), $id ); ?></h2>
 				<p class="home-services-copy"><?php echo esc_html( $t( 'cm_mo_ta', __( 'Từ khảo sát ban đầu đến hồ sơ kỹ thuật và công trường, mỗi bộ môn được điều phối trong cùng một logic thiết kế.', 'vgarco' ) ) ); ?></p>
-				<a class="text-link" href="<?php echo esc_url( vgarco_page_url( 'services' ) ); ?>"><?php echo esc_html( $t( 'cm_lien_ket', __( 'Khám phá các lĩnh vực', 'vgarco' ) ) ); ?> <?php echo vgarco_icon( 'arrow-up-right' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></a>
+				<a class="text-link" href="<?php echo esc_url( vgarco_page_url( 'services' ) ); ?>"><?php echo esc_html( $t( 'cm_lien_ket', __( 'Khám phá các lĩnh vực', 'vgarco' ) ) ); ?> <?php echo vgarco_icon( 'arrow-up-right' ); ?></a>
 			</div>
 			<div class="service-preview-list">
 				<?php foreach ( $services as $n => $service ) : ?>
@@ -245,15 +236,15 @@ $methods = array_slice(
 		<div class="home-news-head">
 			<div>
 				<p class="section-label"><?php echo esc_html( $t( 'tt_nhan', __( 'Tin tức & hoạt động', 'vgarco' ) ) ); ?></p>
-				<h2><?php echo vgarco_field_heading( 'tt_tieu_de', __( 'Góc nhìn từ <em>VGARCO.</em>', 'vgarco' ), $id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></h2>
+				<h2><?php echo vgarco_field_heading( 'tt_tieu_de', __( 'Góc nhìn từ <em>VGARCO.</em>', 'vgarco' ), $id ); ?></h2>
 			</div>
-			<a class="text-link" href="<?php echo esc_url( $news_url ); ?>"><?php echo esc_html( $t( 'tt_lien_ket', __( 'Đến trang tin tức', 'vgarco' ) ) ); ?> <?php echo vgarco_icon( 'arrow-up-right' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></a>
+			<a class="text-link" href="<?php echo esc_url( $news_url ); ?>"><?php echo esc_html( $t( 'tt_lien_ket', __( 'Đến trang tin tức', 'vgarco' ) ) ); ?> <?php echo vgarco_icon( 'arrow-up-right' ); ?></a>
 		</div>
 		<div class="home-news-grid">
 			<?php foreach ( $news as $item ) : ?>
 				<a class="home-news-card" href="<?php echo esc_url( $item['url'] ); ?>">
 					<?php
-					echo vgarco_image( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					echo vgarco_image(
 						$item['image_id'],
 						array(
 							'size'  => 'vg-800',
@@ -277,12 +268,12 @@ $methods = array_slice(
 	<div class="wrap">
 		<div class="page-cta-copy">
 			<p class="section-label"><?php echo esc_html( $t( 'cta_nhan', __( 'Bắt đầu một dự án', 'vgarco' ) ) ); ?></p>
-			<h2><?php echo vgarco_field_heading( 'cta_tieu_de', __( "Cùng đặt nền móng\n<em>cho điều tiếp theo.</em>", 'vgarco' ), $id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></h2>
+			<h2><?php echo vgarco_field_heading( 'cta_tieu_de', __( "Cùng đặt nền móng\n<em>cho điều tiếp theo.</em>", 'vgarco' ), $id ); ?></h2>
 			<p class="cta-support"><?php echo esc_html( $t( 'cta_mo_ta', __( 'Chia sẻ bối cảnh, nhu cầu và mục tiêu của bạn. VGARCO sẽ cùng trao đổi để xác định bước khởi đầu phù hợp.', 'vgarco' ) ) ); ?></p>
-			<a class="text-link" href="<?php echo esc_url( vgarco_page_url( 'contact' ) ); ?>"><?php echo esc_html( $t( 'cta_lien_ket', __( 'Trao đổi với chúng tôi', 'vgarco' ) ) ); ?> <?php echo vgarco_icon( 'arrow-up-right' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></a>
+			<a class="text-link" href="<?php echo esc_url( vgarco_page_url( 'contact' ) ); ?>"><?php echo esc_html( $t( 'cta_lien_ket', __( 'Trao đổi với chúng tôi', 'vgarco' ) ) ); ?> <?php echo vgarco_icon( 'arrow-up-right' ); ?></a>
 		</div>
 		<a class="cta-circle" href="<?php echo esc_url( vgarco_page_url( 'contact' ) ); ?>" aria-label="<?php esc_attr_e( 'Liên hệ VGARCO', 'vgarco' ); ?>">
-			<?php echo vgarco_icon( 'arrow-up-right' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+			<?php echo vgarco_icon( 'arrow-up-right' ); ?>
 		</a>
 	</div>
 </section>

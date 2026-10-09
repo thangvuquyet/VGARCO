@@ -1,8 +1,3 @@
-// Trang Lĩnh vực hoạt động (UC-03): mở nhóm theo neo trên đường dẫn (#thiet-ke-kien-truc) và đổi khung ảnh theo nhóm đang mở.
-//
-// Máy chủ đã hiển thị sẵn nhóm đầu tiên ở trạng thái mở. Từ trang chủ bấm vào một lĩnh vực sẽ tới #<neo>: nhóm đó phải mở và
-// cuộn tới (UC-03 1a). Trình duyệt tự cuộn tới phần tử nhưng phần tử <details> đóng thì chỉ thấy dòng tiêu đề.
-
 export default function initServices() {
 	const root = document.querySelector( '[data-services]' );
 	if ( ! root ) {
@@ -15,7 +10,6 @@ export default function initServices() {
 	const number = root.querySelector( '[data-service-number]' );
 
 	function showReference( item ) {
-		// Nhóm không có dự án tham khảo thì giữ nguyên ảnh đang hiển thị.
 		if ( ! image || ! item.dataset.image ) {
 			return;
 		}

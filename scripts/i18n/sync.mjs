@@ -1,10 +1,3 @@
-// Đồng bộ bản dịch tiếng Đức: trích chuỗi (.pot) → gộp vào de_DE.po (giữ bản dịch đã có, điền chỗ trống từ bản thiết kế HTML) → biên dịch .mo.
-//   node scripts/i18n/sync.mjs            cập nhật tệp
-//   node scripts/i18n/sync.mjs --check    chỉ kiểm tra: .pot mới, .po đủ mục, .mo khớp .po, ký hiệu %s nhất quán (dùng trong kiểm thử)
-//
-// Bản dịch mồi lấy từ từ điển của bản thiết kế HTML (de.js, pages-de.js, updates-de.js): đó là BẢN NHÁP do nhà thầu soạn,
-// phải để đối tác Đức hiệu đính trước khi công bố (Mốc 2). Mục khớp chính xác đánh dấu đã dịch; mục khớp gần đúng (khác khoảng trắng,
-// ngắt dòng, hoa/thường) đánh dấu "fuzzy" — KHÔNG vào .mo cho tới khi người hiệu đính bỏ cờ.
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -15,18 +8,15 @@ import { parsePo, writePo, compileMo, parseMo, placeholders, newEntry, moKey } f
 const root = join( dirname( fileURLToPath( import.meta.url ) ), '..', '..' );
 const PROTOTYPE = process.env.VG_PROTOTYPE ?? 'C:/Users/ThangVq/OneDrive - Mobifone/Documents/ChatGPT/Project1/vgarco-preview';
 
-/** Bản dịch số nhiều và chuỗi đặc biệt không có trong bản thiết kế. */
 const OVERRIDES = {
 	'%s dự án': [ '%s Projekt', '%s Projekte' ],
 };
 
-/** Bản nháp tiếng Đức của nhà thầu cho chuỗi không có trong bản thiết kế HTML (scripts/i18n/de-draft.json). */
 const DRAFT = JSON.parse( readFileSync( join( dirname( fileURLToPath( import.meta.url ) ), 'de-draft.json' ), 'utf8' ) );
 const draftFor = ( id ) => ( DRAFT[ id ] === undefined ? null : Array.isArray( DRAFT[ id ] ) ? DRAFT[ id ] : { text: DRAFT[ id ], exact: true } );
 
 const collapse = ( s ) => s.replace( /\s+/g, ' ' ).trim();
 
-/** Nạp từ điển VI→DE của bản thiết kế (các tệp gán vào window.VGARCO_DE). */
 export function loadPrototypeDictionary( dir = PROTOTYPE ) {
 	const window = {};
 	for ( const name of [ 'de.js', 'pages-de.js', 'updates-de.js' ] ) {
@@ -38,17 +28,10 @@ export function loadPrototypeDictionary( dir = PROTOTYPE ) {
 	return window.VGARCO_DE ?? {};
 }
 
-/**
- * Tìm bản dịch của một chuỗi trong từ điển.
- *
- * @returns {{text: string, exact: boolean}|null}
- */
 export function lookup( dict, index, id ) {
 	if ( dict[ id ] !== undefined ) {
 		return { text: dict[ id ], exact: true };
 	}
-	// Tiêu đề nhiều dòng có cụm nhấn: "Dòng 1\n<em>Dòng 2</em>". Bản thiết kế dịch từng dòng riêng (không có thẻ <em>),
-	// nên dịch từng dòng rồi ghép lại đúng cấu trúc; chỗ ngắt dòng và cụm nhấn giữ như chuỗi gốc.
 	if ( /\n|<em>/.test( id ) ) {
 		const parts = id.split( '\n' ).map( ( line ) => {
 			const em = line.match( /^<em>(.*)<\/em>$/s );
@@ -65,7 +48,7 @@ export function lookup( dict, index, id ) {
 	}
 	const flat = collapse( id );
 	if ( index.has( flat ) ) {
-		return { text: index.get( flat ), exact: false }; // khác ngắt dòng/khoảng trắng: người hiệu đính đặt lại chỗ ngắt
+		return { text: index.get( flat ), exact: false };
 	}
 	const upper = flat.toLocaleUpperCase( 'vi' );
 	if ( flat === upper && index.has( 'U:' + upper ) ) {
@@ -94,13 +77,6 @@ const HEADER_DE = [
 	'',
 ].join( '\n' );
 
-/**
- * Gộp mẫu (.pot) vào bản dịch hiện có.
- *
- * @param {import('./po.mjs').PoEntry[]} pot
- * @param {import('./po.mjs').PoEntry[]} existing
- * @param {(entry) => ({text: string, exact: boolean}|string[]|null)} suggest Gợi ý cho mục còn trống.
- */
 export function mergePo( pot, existing, suggest, project ) {
 	const old = new Map( existing.filter( ( e ) => e.id !== '' ).map( ( e ) => [ moKey( e ), e ] ) );
 	const header = newEntry( '' );
@@ -130,7 +106,6 @@ export function mergePo( pot, existing, suggest, project ) {
 				}
 			}
 		}
-		// Ký hiệu %s/%d phải khớp msgid: nếu không, bỏ gợi ý thay vì để sinh lỗi khi in.
 		if ( e.str.some( Boolean ) && e.str.some( ( t ) => t && placeholders( t ).join() !== placeholders( p.id ).join() ) ) {
 			e.str = p.plural === null ? [ '' ] : [ '', '' ];
 			e.flags = e.flags.filter( ( f ) => f !== 'fuzzy' );
@@ -140,7 +115,6 @@ export function mergePo( pot, existing, suggest, project ) {
 	return entries;
 }
 
-/** Kiểm tra một bộ .po/.mo; trả danh sách lỗi. */
 export function validate( pot, po, moBuffer ) {
 	const errors = [];
 	const potKeys = new Set( pot.filter( ( e ) => e.id !== '' ).map( moKey ) );

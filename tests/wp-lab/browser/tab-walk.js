@@ -1,18 +1,3 @@
-// Duyệt trang bằng phím Tab THẬT và ghi lại từng điểm dừng: thứ tự, tên, có vòng tiêu điểm nhìn thấy không, có nằm ngoài khung nhìn/ẩn không.
-// Phím Tab phải là phím thật (computer { action: 'key', text: 'Tab', repeat: N }), không phải dispatchEvent: `:focus-visible` chỉ đúng với tiêu điểm do bàn phím.
-//
-//   await fetch('http://127.0.0.1:9100/b/tab-walk.js').then(r => r.text()).then(t => (0, eval)(t));
-//   vgTabStart();                    // bắt đầu ghi; sau đó bấm Tab N lần bằng phím thật
-//   ...                              // (bấm Tab)
-//   vgTabReport();                   // { dung: [...], loi: [...] }; `loi` rỗng là đạt
-//
-// Cửa sổ trình duyệt nhúng khi ẩn không chạy cuộn mượt, nên tiêu điểm "nằm ngoài khung nhìn" là giả: trước khi bấm Tab chạy
-//   document.documentElement.style.setProperty( 'scroll-behavior', 'auto', 'important' );
-// (tiêu điểm vẫn tự cuộn trang tới phần tử — kiểm bằng `scrollY` sau lượt duyệt).
-//
-// Báo lỗi khi: điểm dừng không có tên truy cập; không có vòng tiêu điểm (outline hoặc box-shadow) khi :focus-visible; phần tử ẩn/0 kích thước nhận tiêu điểm;
-// tiêu điểm đứng lại ở một phần tử (bẫy bàn phím); hoặc điểm dừng nằm sau phần tử bị cuộn khỏi khung nhìn mà trang không cuộn theo.
-
 window.vgTabStart = function () {
 	window.__vgTab = [];
 	document.addEventListener( 'focusin', window.__vgTabHandler = ( e ) => {

@@ -1,8 +1,4 @@
 <?php
-/**
- * Dữ liệu và hàm phụ chung cho kiểm thử tìm kiếm: chỉ mục 19 dự án thật (tests/php/data/projects.json) qua đúng mã của plugin.
- * Dùng bởi search.php (kiểm thử) và tests/serve.mjs (đường REST giả để thử hộp thoại trên trình duyệt).
- */
 
 defined( 'ABSPATH' ) || define( 'ABSPATH', __DIR__ . '/' );
 defined( 'ROOT' ) || define( 'ROOT', dirname( __DIR__, 2 ) );
@@ -20,13 +16,9 @@ function remove_accents( $s ) {
 }
 
 $plugin = ROOT . '/wp-content/plugins/vgarco-core/inc/';
-require_once $plugin . 'careers/jobs.php'; // vgarco_fold()
+require_once $plugin . 'careers/jobs.php';
 require_once $plugin . 'search-lib.php';
 
-
-/**
- * @param bool $local true = địa chỉ thử trên máy (tests/serve.mjs: ảnh ở /img/, trang ở /<mã>/).
- */
 function fx_search_index( bool $local = false ): array {
 	$type_names = array(
 		'diplomatic'     => 'Ngoại giao & công quyền',

@@ -1,8 +1,5 @@
 @use '../mixins' as *;
 
-// Tin tức (UC-06). Số đo lấy từ bản thiết kế ở 390 và 1440 px.
-
-// ===================================================================== DANH SÁCH
 .news-section {
   padding-block: 1.75rem 2.5rem;
   border-top: 1px solid var(--c-line);
@@ -15,7 +12,6 @@
 .news-page-head {
   margin-bottom: 1.375rem;
 
-  // Tiêu đề trang trình bày như một nhãn: chữ thường của h1 được thu về cỡ nhãn (bản thiết kế không có h1).
   .eyebrow {
     margin-bottom: 0.75rem;
     font-size: var(--fs-small);
@@ -86,7 +82,6 @@
     align-items: center;
     padding-block: 1.625rem;
 
-    // 601–800 px: ảnh nhỏ 96 px bên trái, ngày và chuyên mục xuống dưới đoạn chữ (như bản thiết kế); cột ngày riêng bên phải chỉ từ 801 px.
     @include up($bp-tablet) {
       grid-template-columns: 96px minmax(0, 1fr);
       gap: 1rem;
@@ -130,7 +125,7 @@
     }
 
     @include up($bp-news) {
-      aspect-ratio: 1.5625 / 1; // 150 × 96
+      aspect-ratio: 1.5625 / 1;
     }
 
     img {
@@ -222,7 +217,6 @@
   color: var(--c-ink-muted);
 }
 
-// --- Phân trang ---
 .pagination {
   margin-top: 2.5rem;
 
@@ -258,7 +252,6 @@
   }
 }
 
-// ===================================================================== CHI TIẾT
 .news-article-head {
   display: grid;
   gap: 1.125rem;

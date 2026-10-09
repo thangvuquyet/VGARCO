@@ -1,18 +1,7 @@
 <?php
-/**
- * Phân loại (mục 6.1 của phương án).
- *
- * @package vgarco-core
- */
 
 defined( 'ABSPATH' ) || exit;
 
-/**
- * Bộ nhãn chuẩn cho một phân loại.
- *
- * @param string $name Tên hiển thị.
- * @return array
- */
 function vgarco_tax_labels( string $name ): array {
 	$lower = mb_strtolower( $name );
 
@@ -32,8 +21,6 @@ function vgarco_tax_labels( string $name ): array {
 }
 
 function vgarco_register_taxonomies(): void {
-	// Loại công trình — 7 nhóm cố định, một dự án có thể thuộc nhiều nhóm
-	// (Học viện thuộc cả Giáo dục và Quân sự & an ninh). Đường dẫn: /du-an/loai/<nhóm>/.
 	register_taxonomy(
 		'loai_cong_trinh',
 		array( 'du_an' ),
@@ -51,7 +38,6 @@ function vgarco_register_taxonomies(): void {
 		)
 	);
 
-	// Chuyên mục tin — 3 mục cố định.
 	register_taxonomy(
 		'chuyen_muc',
 		array( 'tin_tuc' ),
@@ -69,8 +55,6 @@ function vgarco_register_taxonomies(): void {
 		)
 	);
 
-	// Bộ lọc tuyển dụng: chỉ dùng làm điều kiện lọc, không có trang riêng.
-	// Dạng phân cấp để biên tập viên tích chọn từ danh sách có sẵn thay vì gõ tay (tránh sai chính tả).
 	register_taxonomy(
 		'noi_lam_viec',
 		array( 'vi_tri' ),
@@ -101,6 +85,4 @@ function vgarco_register_taxonomies(): void {
 		)
 	);
 }
-// Ưu tiên 5, trước kiểu nội dung (ưu tiên 10): WordPress xếp quy tắc đường dẫn theo thứ tự đăng ký. Đăng ký sau thì quy tắc ảnh đính kèm
-// của dự án (du-an/[^/]+/([^/]+)/) khớp trước và /du-an/loai/<nhóm>/ thành 404 (phát hiện khi chạy trên WordPress 7.1 thật).
 add_action( 'init', 'vgarco_register_taxonomies', 5 );

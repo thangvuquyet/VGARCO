@@ -1,14 +1,6 @@
 <?php
-/**
- * Kiểm thử phần thuần của nhập liệu bằng bảng tính (inc/cli/import-lib.php): đọc CSV kiểu Excel, kiểm tra từng dòng, kế hoạch nhập,
- * so sánh xem trước (--dry-run) và images.csv. Dùng nội dung CSV thật (BOM, CRLF, ô nhiều dòng, dấu ; trong ô...).
- *
- *   php -d extension_dir=<ext> -d extension=mbstring tests/php/import.php
- *
- * Phần ghi vào WordPress/WPML (wp vgarco import) cần chạy trên WordPress thật.
- */
 
-require_once __DIR__ . '/search-index.php'; // ABSPATH, ROOT, remove_accents() giả, vgarco_fold()
+require_once __DIR__ . '/search-index.php';
 require_once ROOT . '/wp-content/plugins/vgarco-core/inc/cli/import-lib.php';
 
 $pass = 0;
@@ -26,8 +18,6 @@ function check( string $label, bool $condition ): void {
 function same( string $label, $expected, $actual ): void {
 	check( $label . ' — mong đợi ' . var_export( $expected, true ) . ', nhận ' . var_export( $actual, true ), $expected === $actual );
 }
-
-/* ========== CSV ========== */
 
 $bom = "\xEF\xBB\xBF";
 $p   = vgarco_csv_parse( $bom . "Ma;Ten_VI ;thu_tu\r\nbao-tang;Bảo tàng;1\r\ntruong;Trường;2\r\n" );
@@ -62,8 +52,6 @@ same( 'csv: ô giữ xuống dòng bên trong, cắt khoảng trắng hai đầu
 same( 'csv: dòng cuối không có xuống dòng vẫn đọc', 1, count( vgarco_csv_parse( "a;b\n1;2" )['rows'] ) );
 same( 'csv: CR đơn (Mac cũ)', 2, count( vgarco_csv_parse( "a;b\r1;2\r3;4" )['rows'] ) );
 
-/* ========== Giá trị ========== */
-
 foreach ( array( '' => '0', '0' => '0', 'false' => '0', 'Không' => '0', 'no' => '0', '1' => '1', 'TRUE' => '1', 'Có' => '1', 'x' => '1', 'yes' => '1' ) as $in => $out ) {
 	same( 'bool: ' . json_encode( $in ), $out, vgarco_import_bool( (string) $in ) );
 }
@@ -84,8 +72,6 @@ foreach ( array( 'bao-tang-qdnd-lao', 'a', 'a1-b2' ) as $ok ) {
 foreach ( array( '', 'Bao-Tang', 'bao_tang', 'bao tang', '-a', 'a-', 'a--b', 'bảo-tàng' ) as $bad ) {
 	check( 'slug không hợp lệ: ' . json_encode( $bad ), ! vgarco_import_slug_valid( $bad ) );
 }
-
-/* ========== Kế hoạch dự án ========== */
 
 $allowed = array( 'terms' => array( 'van-hoa-di-tich' => 'Văn hóa & di tích', 'giao-duc-dao-tao' => 'Giáo dục & đào tạo', 'y-te' => 'Y tế' ) );
 $full    = array(
@@ -109,7 +95,6 @@ same( 'kế hoạch tối thiểu: không lỗi, không bản DE, mặc định 
 same( 'kế hoạch: nội dung HTML bị thoát', '<p>&lt;b&gt;x&lt;/b&gt;</p>', vgarco_import_project_plan( array( 'ma' => 'a', 'ten_vi' => 'T', 'mo_ta_vi' => '<b>x</b>' ), 1, $allowed )['plan']['vi']['content'] );
 same( 'kế hoạch: loại trùng chỉ tính một lần', array( 'y-te' ), vgarco_import_project_plan( array( 'ma' => 'a', 'ten_vi' => 'T', 'loai' => 'y-te, Y tế|y-te' ), 1, $allowed )['plan']['terms'] );
 
-// Lỗi: gom mọi lỗi của dòng một lượt, nêu số dòng.
 $bad = vgarco_import_project_plan(
 	array( 'ma' => 'Bảo Tàng', 'ten_vi' => '', 'thu_tu' => '-1', 'slug_vi' => 'Sai Slug', 'loai' => 'khong-co', 'quoc_gia' => 'Sao Hỏa', 'cong_bo_chu_dau_tu' => 'maybe', 'loai_anh_dai_dien' => 'ảnh', 'thoi_gian' => str_repeat( '9', 21 ), 'mo_ta_seo_vi' => str_repeat( 'x', 161 ) ),
 	9,
@@ -123,8 +108,6 @@ foreach ( array( '"ma"', '"ten_vi"', '"thu_tu"', '"slug_vi"', '"loai"', '"quoc_g
 same( 'kế hoạch lỗi: thiếu ma', true, str_contains( vgarco_import_project_plan( array( 'ten_vi' => 'T' ), 4, $allowed )['errors'][0] ?? '', 'thiếu "ma"' ) );
 check( 'kế hoạch lỗi: có trường tiếng Đức mà thiếu ten_de', (bool) array_filter( vgarco_import_project_plan( array( 'ma' => 'a', 'ten_vi' => 'T', 'dia_diem_de' => 'Hanoi' ), 3, $allowed )['errors'], static fn( $e ) => str_contains( $e, 'ten_de' ) ) );
 same( 'kế hoạch: đúng 160 ký tự SEO và 20 ký tự thời gian vẫn hợp lệ', array(), vgarco_import_project_plan( array( 'ma' => 'a', 'ten_vi' => 'T', 'mo_ta_seo_vi' => str_repeat( 'ạ', 160 ), 'thoi_gian' => str_repeat( '9', 20 ) ), 1, $allowed )['errors'] );
-
-/* ========== Cả tệp ========== */
 
 $csv = $bom . "ma;thu_tu;ten_vi;loai;noi_bat;tieu_bieu\r\n"
 	. "a;1;Dự án A;y-te;1;1\r\n"
@@ -150,8 +133,6 @@ $mixed = vgarco_import_projects( "ma;ten_vi;quoc_gia\na;A;xx\nB-sai;;vn\nc;C;la\
 same( 'tệp: lỗi nhiều dòng được báo MỘT lượt (dòng 2 và dòng 3), kế hoạch rỗng', array( array(), true ), array( $mixed['plans'], ! empty( array_filter( $mixed['errors'], static fn( $e ) => str_starts_with( $e, 'Dòng 2' ) ) ) && ! empty( array_filter( $mixed['errors'], static fn( $e ) => str_starts_with( $e, 'Dòng 3' ) ) ) ) );
 check( 'tệp: tên cột có thể viết hoa (Ma, TEN_VI)', array() === vgarco_import_projects( "Ma;TEN_VI\na;A\n", $allowed )['errors'] );
 
-/* ========== So sánh xem trước ========== */
-
 $flat = vgarco_import_flatten( $plan, 'vi' );
 same( 'flatten: khóa cơ bản và siêu dữ liệu', true, isset( $flat['post_title'], $flat['post_name'], $flat['post_content'], $flat['menu_order'], $flat['meta.dia_diem'], $flat['meta.thoi_gian'], $flat['meta.quoc_gia'], $flat['terms.loai_cong_trinh'] ) );
 same( 'flatten: loại công trình nối bằng dấu phẩy', 'van-hoa-di-tich,giao-duc-dao-tao', $flat['terms.loai_cong_trinh'] );
@@ -173,8 +154,6 @@ $new3                 = $flat;
 $new3['menu_order']   = '0';
 same( 'diff: thứ tự 0 là giá trị thật, được cập nhật', array( 'menu_order' => array( '5', '0' ) ), vgarco_import_diff( $cur3, $new3 ) );
 same( 'diff: khoảng trắng thừa không tạo khác biệt', array(), vgarco_import_diff( array( 'post_title' => ' A ' ), array( 'post_title' => 'A' ) ) );
-
-/* ========== images.csv ========== */
 
 $known = array( 'a', 'b' );
 $img   = "ma;tep;vai_tro;thu_tu;loai_anh;chu_thich_vi;chu_thich_de\n"
@@ -223,8 +202,6 @@ for ( $i = 1; $i <= 16; $i++ ) {
 check( 'ảnh: 16 ảnh thư viện → lỗi (tối đa 15)', (bool) array_filter( vgarco_import_images( $sixteen, $known )['errors'], static fn( $e ) => str_contains( $e, 'tối đa 15' ) ) );
 same( 'ảnh: đúng 15 ảnh thư viện thì được', array(), vgarco_import_images( str_replace( "a;16.jpg;tv;Ảnh 16\n", '', $sixteen ), $known )['errors'] );
 
-/* ========== Tệp mẫu trong kho (content/) phải nhập được ========== */
-
 $seed_terms = array(
 	'ngoai-giao-cong-quyen' => 'Ngoại giao & công quyền', 'quan-su-an-ninh' => 'Quân sự & an ninh', 'giao-duc-dao-tao' => 'Giáo dục & đào tạo',
 	'van-hoa-di-tich' => 'Văn hóa & di tích', 'y-te' => 'Y tế', 'cong-nghiep-ha-tang' => 'Công nghiệp & hạ tầng', 'nha-o-dan-dung' => 'Nhà ở & công trình dân dụng',
@@ -237,8 +214,6 @@ same( 'content/projects.csv: 3 nổi bật, 3 tiêu biểu', array( 3, 3 ), arra
 same( 'content/projects.csv: mọi dự án có ít nhất một loại công trình', 0, count( array_filter( array_column( $repo['plans'], 'terms' ), static fn( $t ) => ! $t ) ) );
 $repo_images = vgarco_import_images( (string) file_get_contents( ROOT . '/content/images.example.csv' ), array_column( $repo['plans'], 'ma' ) );
 same( 'content/images.example.csv: hợp lệ với projects.csv', array( array(), true ), array( $repo_images['errors'], isset( $repo_images['images']['bao-tang-lich-su-quan-doi-nhan-dan-lao']['tv'][1] ) ) );
-
-/* ---------- Kết quả ---------- */
 
 if ( $fail ) {
 	foreach ( $fail as $line ) {

@@ -1,15 +1,3 @@
-// Kiểm tra nhanh một website VGARCO đang chạy (sau triển khai, sau cập nhật, trước nghiệm thu).
-//
-//   node scripts/ops/smoke.mjs <địa-chỉ-gốc> [--env=local|staging|production]
-//   node scripts/ops/smoke.mjs https://vgarco.vn --env=production
-//   node scripts/ops/smoke.mjs http://localhost:8080 --env=local        (phòng thử tests/wp-lab)
-//
-// Chỉ ĐỌC (GET/HEAD), không gửi hồ sơ, không đăng nhập. Mỗi lần chạy xin MỘT mã bảo mật (tính vào giới hạn 30 lượt/giờ/IP).
-// Mã thoát: 0 = mọi phép kiểm đạt; 1 = có phép kiểm hỏng; 2 = dùng sai lệnh.
-//
-// --env=production thêm: HTTPS, header bảo mật của Nginx, cho lập chỉ mục, http:// chuyển sang https://.
-// --env=staging và local: phải có noindex (staging không bao giờ được xuất hiện trên Google).
-
 const args = process.argv.slice(2);
 const base = args.find((a) => !a.startsWith('--'))?.replace(/\/$/, '');
 const env = (args.find((a) => a.startsWith('--env='))?.slice(6)) ?? 'local';
@@ -30,19 +18,16 @@ const get = async (path, opts = {}) => {
 };
 const json = (s) => { try { return JSON.parse(s); } catch { return null; } };
 
-// 1. Trang công khai
 const pages = { '/': 'VGARCO', '/gioi-thieu/': '', '/linh-vuc-hoat-dong/': '', '/du-an/': '', '/tin-tuc/': '', '/tuyen-dung/': '', '/lien-he/': '', '/chinh-sach-bao-ve-du-lieu/': '' };
 for (const [path, needle] of Object.entries(pages)) {
   const r = await get(path);
   check(`trang ${path} trả 200`, r.status === 200 && r.text.includes(needle) && /<h1[\s>]/.test(r.text), r.status ? `HTTP ${r.status}` : r.error);
 }
 
-// 2. 404 thật (không phải 200 giả)
 const nf = await get('/trang-khong-ton-tai-' + Date.now() + '/');
 check('trang không có trả 404 thật', nf.status === 404, `HTTP ${nf.status}`);
 check('trang 404 có noindex', /<meta name=["']robots["'][^>]*noindex/i.test(nf.text));
 
-// 3. REST của VGARCO
 const s = await get('/wp-json/vgarco/v1/search?q=' + encodeURIComponent('dự án') + '&lang=vi');
 check('tìm kiếm REST trả JSON có mảng results', s.status === 200 && Array.isArray(json(s.text)?.results), `HTTP ${s.status}`);
 const sBad = await get('/wp-json/vgarco/v1/search?q=abc');
@@ -52,14 +37,12 @@ const tj = json(t.text);
 check('xin mã bảo mật trả token và ảnh', t.status === 200 && typeof tj?.token === 'string' && /^data:image\/png;base64,/.test(tj?.image ?? ''), `HTTP ${t.status}`);
 check('mã bảo mật không được cache', /no-store|no-cache|private/i.test(t.headers.get('cache-control') ?? ''), t.headers.get('cache-control') ?? '(không có header)');
 
-// 4. Bề mặt tấn công đã đóng
 const x = await get('/xmlrpc.php', { method: 'POST', body: '<?xml version="1.0"?><methodCall><methodName>system.listMethods</methodName></methodCall>' });
 check('xmlrpc.php không trả danh sách phương thức', x.status !== 200 && !x.text.includes('methodResponse'), `HTTP ${x.status}`);
 const a = await get('/?author=1');
 check('/?author=1 không chuyển hướng sang trang tác giả', a.status === 404 || (a.status >= 300 && a.status < 400 && !/\/author\//.test(a.headers.get('location') ?? '')), `HTTP ${a.status} ${a.headers.get('location') ?? ''}`);
 const u = await get('/wp-json/wp/v2/users');
 check('danh sách người dùng REST không lộ cho khách', !(u.status === 200 && Array.isArray(json(u.text)) && json(u.text).length), `HTTP ${u.status}`);
-// readme.html và license.txt có sẵn trong gói WordPress (lộ phiên bản): Nginx phải chặn ở staging/production; phòng thử local không có Nginx nên bỏ qua.
 const exposed = ['/wp-config.php', '/.git/config', '/.env', '/wp-content/debug.log', '/wp-content/uploads/', ...(env === 'local' ? [] : ['/readme.html', '/license.txt'])];
 for (const path of exposed) {
   const r = await get(path);
@@ -67,7 +50,6 @@ for (const path of exposed) {
   check(`${path} không lộ nội dung`, !leaked, `HTTP ${r.status}`);
 }
 
-// 5. Theo môi trường
 const home = await get('/');
 const noindex = /<meta name=["']robots["'][^>]*noindex/i.test(home.text);
 if (env === 'production') {
@@ -90,7 +72,6 @@ if (env === 'production') {
 }
 check('không tải phông/script từ miền ngoài (Google Fonts...)', !/(fonts\.googleapis|fonts\.gstatic|googletagmanager|google-analytics)/.test(home.text));
 
-// Kết quả
 const width = Math.max(...results.map((r) => r.label.length));
 for (const r of results) console.log(`${r.ok ? 'ĐẠT ' : 'HỎNG'}  ${r.label.padEnd(width)}  ${r.ok ? '' : r.detail}`);
 const bad = results.filter((r) => !r.ok).length;

@@ -1,20 +1,7 @@
 <?php
-/**
- * Hàm dùng trong mẫu trang.
- *
- * @package vgarco
- */
 
 defined( 'ABSPATH' ) || exit;
 
-/**
- * Biểu tượng SVG nội tuyến từ assets/icons/<tên>.svg. Tệp là tài sản của theme (tin cậy).
- * Thêm aria-hidden: biểu tượng chỉ trang trí, nhãn đọc màn hình nằm ở nút/liên kết chứa nó.
- *
- * @param string $name  Tên tệp không đuôi: chỉ chữ thường, số, gạch ngang.
- * @param string $class Lớp CSS tùy chọn.
- * @return string Mã SVG hoặc chuỗi rỗng.
- */
 function vgarco_icon( string $name, string $class = '' ): string {
 	static $cache = array();
 
@@ -24,7 +11,7 @@ function vgarco_icon( string $name, string $class = '' ): string {
 
 	if ( ! isset( $cache[ $name ] ) ) {
 		$file           = get_theme_file_path( "assets/icons/{$name}.svg" );
-		$cache[ $name ] = is_readable( $file ) ? trim( (string) file_get_contents( $file ) ) : ''; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$cache[ $name ] = is_readable( $file ) ? trim( (string) file_get_contents( $file ) ) : '';
 	}
 
 	if ( '' === $cache[ $name ] ) {
@@ -35,26 +22,12 @@ function vgarco_icon( string $name, string $class = '' ): string {
 	return (string) preg_replace( '/^<svg\b/', '<svg ' . $attributes, $cache[ $name ], 1 );
 }
 
-/**
- * Thoát HTML rồi đổi xuống dòng thành <br>. Dùng cho chuỗi có ngắt dòng chủ ý (địa chỉ, khẩu hiệu).
- * Người biên tập quyết định chỗ ngắt dòng, kể cả ở bản tiếng Đức, thay vì để trình duyệt tự ngắt.
- *
- * @param string $text Văn bản thuần, có thể có ký tự xuống dòng.
- * @return string HTML đã thoát, an toàn để in trực tiếp.
- */
 function vgarco_lines( string $text ): string {
-	// Không dùng nl2br(): nó giữ lại ký tự xuống dòng sau <br>.
 	return (string) preg_replace( '/\r\n|\r|\n/', '<br>', esc_html( trim( $text ) ) );
 }
 
-/**
- * Đường dẫn vị trí ("Trang chủ / Dự án / Tên dự án"). Mục cuối là trang hiện tại, không có liên kết.
- *
- * @param array[] $trail    Mỗi phần tử: [ nhãn, địa chỉ ] — bỏ địa chỉ ở mục cuối.
- * @param string  $modifier Lớp bổ sung (ví dụ "breadcrumb--detail" cho trang chi tiết).
- */
 function vgarco_breadcrumb( array $trail, string $modifier = '' ): void {
-	vgarco_breadcrumb_trail( $trail ); // nhớ lại để seo.php in BreadcrumbList ở cuối trang
+	vgarco_breadcrumb_trail( $trail );
 	echo '<nav class="breadcrumb wrap' . ( '' !== $modifier ? ' ' . esc_attr( $modifier ) : '' ) . '" aria-label="' . esc_attr__( 'Đường dẫn vị trí', 'vgarco' ) . '"><ol>';
 	$last = count( $trail ) - 1;
 	foreach ( $trail as $i => $crumb ) {
@@ -67,12 +40,6 @@ function vgarco_breadcrumb( array $trail, string $modifier = '' ): void {
 	echo '</ol></nav>';
 }
 
-/**
- * Đường dẫn vị trí của trang hiện tại: đặt khi mẫu trang gọi vgarco_breadcrumb(), đọc ở chân trang để in JSON-LD BreadcrumbList.
- *
- * @param array[]|null $set Đặt đường dẫn mới; null để chỉ đọc.
- * @return array[] Mỗi phần tử: [nhãn, địa chỉ] hoặc [nhãn] cho mục cuối.
- */
 function vgarco_breadcrumb_trail( ?array $set = null ): array {
 	static $trail = array();
 	if ( null !== $set ) {
@@ -81,13 +48,6 @@ function vgarco_breadcrumb_trail( ?array $set = null ): array {
 	return $trail;
 }
 
-/**
- * Phân trang (UC-06: quá 9 bài thì chia trang). Không có gì để in khi chỉ một trang.
- *
- * @param int      $current Trang hiện tại (từ 1).
- * @param int      $total   Tổng số trang.
- * @param callable $url     Nhận số trang, trả địa chỉ.
- */
 function vgarco_pagination( int $current, int $total, callable $url ): string {
 	if ( $total < 2 ) {
 		return '';
@@ -119,16 +79,10 @@ function vgarco_pagination( int $current, int $total, callable $url ): string {
 	return $html . '</ul></nav>';
 }
 
-/**
- * Số có chữ số 0 đứng đầu ("07"), dùng cho số thứ tự và số lượng ở tiêu đề trang.
- */
 function vgarco_pad( int $number ): string {
 	return sprintf( '%02d', $number );
 }
 
-/**
- * Khóa loại trang: JS dùng để nạp đúng module (data-vg-page ở thẻ body).
- */
 function vgarco_page_key(): string {
 	if ( is_front_page() ) {
 		return 'home';
@@ -158,17 +112,6 @@ function vgarco_page_key(): string {
 	return 'default';
 }
 
-/**
- * Các mục của bộ chuyển ngôn ngữ (UC-10) — phần THUẦN, kiểm thử được.
- *
- * Có bản dịch → liên kết thẳng tới trang tương ứng. Chưa có bản dịch (2a) → liên kết tới trang danh mục tương ứng của ngôn ngữ đích
- * (dự án → danh mục dự án; tin → trang tin; vị trí → trang tuyển dụng; trang khác → trang chủ), và đánh dấu "missing" để JS báo
- * "nội dung đang được cập nhật" ở trang đích.
- *
- * @param array<string,array> $languages Kết quả wpml_active_languages (skip_missing = 0): mã → [url, active, native_name, missing].
- * @param array<string,string> $fallbacks Mã ngôn ngữ → địa chỉ dự phòng (chỉ cần cho ngôn ngữ thiếu bản dịch).
- * @return array[] Mỗi mục: code, url, active (bool), missing (bool), name.
- */
 function vgarco_switcher_items( array $languages, array $fallbacks ): array {
 	$items = array();
 	foreach ( $languages as $code => $language ) {
@@ -185,13 +128,6 @@ function vgarco_switcher_items( array $languages, array $fallbacks ): array {
 	return $items;
 }
 
-/**
- * Địa chỉ dự phòng cho mỗi ngôn ngữ thiếu bản dịch của trang hiện tại, theo loại trang. Địa chỉ đi qua WPML nên đúng ngôn ngữ đích
- * (kể cả phần đường dẫn đã dịch).
- *
- * @param array<string,array> $languages Xem vgarco_switcher_items().
- * @return array<string,string>
- */
 function vgarco_switcher_fallbacks( array $languages ): array {
 	$target = home_url( '/' );
 	if ( is_singular( 'du_an' ) || is_tax( 'loai_cong_trinh' ) ) {
@@ -211,13 +147,6 @@ function vgarco_switcher_fallbacks( array $languages ): array {
 	return $fallbacks;
 }
 
-/**
- * Bộ chuyển ngôn ngữ VI / DE.
- *
- * Dùng liên kết thật (không phải nút + JS): chuyển ngôn ngữ hoạt động không cần JS và công cụ tìm kiếm thấy được.
- * Chỉ hiện khi có ít nhất 2 ngôn ngữ đang hiển thị với khách — ngôn ngữ ở chế độ ẩn (DE trước Mốc 2)
- * WPML tự loại khỏi danh sách với khách vãng lai.
- */
 function vgarco_language_switcher(): void {
 	$languages = apply_filters( 'wpml_active_languages', null, array( 'skip_missing' => 0 ) );
 
@@ -240,13 +169,6 @@ function vgarco_language_switcher(): void {
 	echo '</div>';
 }
 
-/**
- * Kênh mạng xã hội ở chân trang: có địa chỉ thì là liên kết, chưa có thì ghi "Đang cập nhật" (yêu cầu 29).
- *
- * @param string $label Tên kênh cho trình đọc màn hình.
- * @param string $url   Địa chỉ, có thể rỗng.
- * @param string $glyph Ký tự hiển thị trong vòng tròn.
- */
 function vgarco_social_item( string $label, string $url, string $glyph ): void {
 	if ( '' !== $url ) {
 		printf(
@@ -266,12 +188,6 @@ function vgarco_social_item( string $label, string $url, string $glyph ): void {
 	);
 }
 
-/**
- * Các mục chính cho trang 404 (yêu cầu 35): địa chỉ, nhãn, lời nhắn theo ngữ cảnh. Địa chỉ lấy qua WPML nên đúng ngôn ngữ đang xem.
- * Mục có 'match' => true dùng để đoán ngữ cảnh từ đường dẫn bị lỗi.
- *
- * @return array<string,array{label:string,url:string,message:string,action:string,match:bool}>
- */
 function vgarco_error_sections(): array {
 	return array(
 		'du_an'   => array(
@@ -305,14 +221,6 @@ function vgarco_error_sections(): array {
 	);
 }
 
-/**
- * Đoán mục của một đường dẫn: mục nào có đường dẫn là tiền tố của $path (dài nhất thắng). So khớp theo từng đoạn nên
- * "/tuyen-dung-khac/" không khớp mục "/tuyen-dung/". Không phân biệt hoa thường.
- *
- * @param string                     $path     Đường dẫn của yêu cầu bị lỗi, ví dụ "/du-an/khong-co/".
- * @param array<string,array>        $sections Kết quả của vgarco_error_sections().
- * @return string Khóa của mục, hoặc '' nếu không mục nào khớp.
- */
 function vgarco_url_section( string $path, array $sections ): string {
 	$path = strtolower( '/' . trim( $path, '/' ) . '/' );
 	$best = '';
@@ -324,7 +232,7 @@ function vgarco_url_section( string $path, array $sections ): string {
 		}
 		$prefix = strtolower( '/' . trim( (string) wp_parse_url( (string) $section['url'], PHP_URL_PATH ), '/' ) . '/' );
 		if ( '//' === $prefix || '/' === $prefix ) {
-			continue; // mục nằm ở gốc site: khớp mọi thứ, vô nghĩa
+			continue;
 		}
 		if ( str_starts_with( $path, $prefix ) && strlen( $prefix ) > $len ) {
 			$best = (string) $key;

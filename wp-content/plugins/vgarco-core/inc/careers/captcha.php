@@ -1,20 +1,10 @@
 <?php
-/**
- * Mã bảo mật của biểu mẫu ứng tuyển (mục 8.3 bước 0 và 6): 5 ký tự, ảnh PNG do máy chủ vẽ bằng GD.
- * Mã KHÔNG bao giờ nằm trong HTML hay JSON dạng chữ — chỉ có ảnh; máy chủ chỉ lưu băm của mã.
- * Bỏ các ký tự dễ nhầm (0/O, 1/I/L) để người thật đọc được ngay lần đầu.
- *
- * @package vgarco-core
- */
 
 defined( 'ABSPATH' ) || exit;
 
 const VGARCO_CAPTCHA_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
 const VGARCO_CAPTCHA_LENGTH   = 5;
 
-/**
- * Sinh mã ngẫu nhiên bằng nguồn ngẫu nhiên mật mã học.
- */
 function vgarco_captcha_code(): string {
 	$code = '';
 	for ( $i = 0; $i < VGARCO_CAPTCHA_LENGTH; $i++ ) {
@@ -23,25 +13,14 @@ function vgarco_captcha_code(): string {
 	return $code;
 }
 
-/**
- * Chuẩn hóa câu trả lời của người dùng để so sánh: bỏ khoảng trắng, không phân biệt hoa thường.
- * Chữ thường của ký tự nhìn giống nhau (o/0...) không được sửa hộ — alphabet đã loại các ký tự đó.
- */
 function vgarco_captcha_normalize( string $answer ): string {
 	return strtoupper( preg_replace( '/\s+/', '', $answer ) ?? '' );
 }
 
-/**
- * Băm mã để lưu (không lưu chính mã). Muối gắn với website nên băm không dùng lại được nơi khác.
- */
 function vgarco_captcha_hash( string $code, string $salt ): string {
 	return hash_hmac( 'sha256', vgarco_captcha_normalize( $code ), $salt );
 }
 
-/**
- * Vẽ mã thành ảnh PNG (data URI): mỗi ký tự lệch vị trí và nghiêng khác nhau, có đường nhiễu và chấm nhiễu.
- * Không có GD thì trả SVG dự phòng (kém chống máy đọc hơn nhưng vẫn dùng được cho người).
- */
 function vgarco_captcha_image( string $code ): string {
 	if ( ! function_exists( 'imagecreatetruecolor' ) || ! function_exists( 'imagestring' ) ) {
 		return vgarco_captcha_svg( $code );
@@ -53,7 +32,6 @@ function vgarco_captcha_image( string $code ): string {
 	$bg     = imagecolorallocate( $img, 241, 242, 238 );
 	imagefilledrectangle( $img, 0, 0, $width, $height, $bg );
 
-	// Nhiễu nền: đường và chấm màu gần màu nền, không đủ đậm để che mã.
 	for ( $i = 0; $i < 6; $i++ ) {
 		$shade = imagecolorallocate( $img, random_int( 150, 205 ), random_int( 150, 205 ), random_int( 150, 205 ) );
 		imageline( $img, random_int( 0, $width ), random_int( 0, $height ), random_int( 0, $width ), random_int( 0, $height ), $shade );
@@ -62,7 +40,6 @@ function vgarco_captcha_image( string $code ): string {
 		imagesetpixel( $img, random_int( 0, $width - 1 ), random_int( 0, $height - 1 ), imagecolorallocate( $img, random_int( 120, 200 ), random_int( 120, 200 ), random_int( 120, 200 ) ) );
 	}
 
-	// Không dựa vào FreeType (có thể thiếu): vẽ ký tự bằng phông dựng sẵn của GD vào ảnh nhỏ rồi phóng to, mỗi ký tự một cỡ.
 	$step = (int) floor( ( $width - 20 ) / VGARCO_CAPTCHA_LENGTH );
 	foreach ( str_split( $code ) as $i => $char ) {
 		$tile  = imagecreatetruecolor( 12, 18 );
@@ -76,7 +53,6 @@ function vgarco_captcha_image( string $code ): string {
 		imagedestroy( $tile );
 	}
 
-	// Một nét nhiễu đậm cắt ngang các ký tự.
 	$stroke = imagecolorallocate( $img, random_int( 40, 100 ), random_int( 40, 100 ), random_int( 40, 100 ) );
 	imageline( $img, 0, random_int( 15, 45 ), $width, random_int( 15, 45 ), $stroke );
 
@@ -87,9 +63,6 @@ function vgarco_captcha_image( string $code ): string {
 	return 'data:image/png;base64,' . base64_encode( $png );
 }
 
-/**
- * Ảnh SVG dự phòng khi máy chủ thiếu GD.
- */
 function vgarco_captcha_svg( string $code ): string {
 	$chars = '';
 	foreach ( str_split( $code ) as $i => $char ) {

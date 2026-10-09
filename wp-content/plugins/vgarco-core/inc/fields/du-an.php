@@ -1,10 +1,4 @@
 <?php
-/**
- * Trường của kiểu nội dung "Dự án" (mục 6.2 của phương án).
- * Mô tả dự án nhập ở khung soạn thảo phía trên; tên loại công trình chọn ở hộp bên phải.
- *
- * @package vgarco-core
- */
 
 defined( 'ABSPATH' ) || exit;
 

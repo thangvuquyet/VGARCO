@@ -1,17 +1,10 @@
 <?php
-/**
- * Trang "Cấu hình VGARCO" (ACF PRO Options Page).
- * Chỉ quản trị viên chỉnh được: chứa thông tin pháp nhân và số liệu công bố với khách hàng.
- *
- * @package vgarco-core
- */
 
 defined( 'ABSPATH' ) || exit;
 
 add_action(
 	'acf/init',
 	static function (): void {
-		// acf_add_options_page chỉ có ở ACF PRO. Thiếu thì thông báo ở inc/fields.php.
 		if ( ! function_exists( 'acf_add_options_page' ) ) {
 			return;
 		}

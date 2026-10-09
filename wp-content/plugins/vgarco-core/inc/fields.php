@@ -1,18 +1,4 @@
 <?php
-/**
- * Trường dữ liệu ACF — khai báo bằng mã (Local field groups), nằm trong Git.
- *
- * Vì sao khai báo bằng mã thay vì nhập trong trang quản trị: cấu hình trường được kiểm soát phiên bản,
- * đồng nhất giữa local/staging/production, và biên tập viên không sửa nhầm được cấu trúc.
- *
- * Độ ưu tiên dịch (wpml_cf_preferences, do ACFML đọc):
- *   'translate' — mỗi ngôn ngữ một giá trị (chữ hiển thị);
- *   'copy'      — bản dịch luôn lấy giá trị của bản gốc (ảnh, số, lựa chọn);
- *   'ignore'    — không đồng bộ.
- * Chưa kiểm chứng trên WPML/ACFML thật; kiểm ở spike ngày N2 (phương án mục 6.7).
- *
- * @package vgarco-core
- */
 
 defined( 'ABSPATH' ) || exit;
 
@@ -23,9 +9,6 @@ require_once VGARCO_CORE_DIR . 'inc/fields/vi-tri.php';
 require_once VGARCO_CORE_DIR . 'inc/fields/cau-hinh.php';
 require_once VGARCO_CORE_DIR . 'inc/fields/trang.php';
 
-/**
- * Chuyển tên chế độ dịch sang số của WPML (0 bỏ qua, 1 sao chép, 2 dịch, 3 sao chép một lần).
- */
 function vgarco_wpml_pref( string $mode ): int {
 	$map = array(
 		'ignore'    => 0,
@@ -36,12 +19,6 @@ function vgarco_wpml_pref( string $mode ): int {
 	return $map[ $mode ] ?? 0;
 }
 
-/**
- * Tạo hàm dựng trường cho một nhóm. Khóa trường sinh cố định theo tiền tố + tên,
- * nên không đổi giữa các lần triển khai (ACF dùng khóa để nối dữ liệu đã lưu).
- *
- * @param string $prefix Tiền tố duy nhất của nhóm.
- */
 function vgarco_field_builder( string $prefix ): Closure {
 	return static function ( string $name, string $label, string $type, string $wpml, array $args = array() ) use ( $prefix ): array {
 		return array_merge(
@@ -57,9 +34,6 @@ function vgarco_field_builder( string $prefix ): Closure {
 	};
 }
 
-/**
- * Quy tắc vị trí: nhóm trường chỉ hiện ở một kiểu nội dung.
- */
 function vgarco_location_post_type( string $post_type ): array {
 	return array(
 		array(
@@ -72,11 +46,6 @@ function vgarco_location_post_type( string $post_type ): array {
 	);
 }
 
-/**
- * Tất cả nhóm trường của website.
- *
- * @return array[]
- */
 function vgarco_field_groups(): array {
 	return array_merge(
 		array(
@@ -102,13 +71,6 @@ add_action(
 	}
 );
 
-/**
- * Kiểm tra định dạng mã: chữ thường không dấu, số, gạch ngang.
- *
- * @param true|string $valid Kết quả kiểm tra trước đó.
- * @param mixed       $value Giá trị nhập.
- * @return true|string
- */
 function vgarco_validate_slug_value( $valid, $value ) {
 	if ( true !== $valid ) {
 		return $valid;
@@ -121,7 +83,6 @@ function vgarco_validate_slug_value( $valid, $value ) {
 add_filter( 'acf/validate_value/key=field_vg_du_an_ma', 'vgarco_validate_slug_value', 10, 2 );
 add_filter( 'acf/validate_value/key=field_vg_linh_vuc_neo', 'vgarco_validate_slug_value', 10, 2 );
 
-// Thiếu ACF PRO thì trang quản trị không có trường nào — báo rõ thay vì để biên tập viên tự dò.
 add_action(
 	'admin_notices',
 	static function (): void {

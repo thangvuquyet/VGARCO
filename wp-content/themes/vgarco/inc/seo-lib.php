@@ -1,18 +1,7 @@
 <?php
-/**
- * SEO cơ bản (mục 8.9 của phương án): các hàm THUẦN dựng thẻ meta, Open Graph và dữ liệu có cấu trúc (JSON-LD).
- * Không gọi WordPress nên kiểm thử được bằng dữ liệu giả (tests/php/seo.php). Phần lấy dữ liệu từ WordPress nằm ở seo.php.
- *
- * Mọi chuỗi đi vào HTML đều được thoát ở đây; JSON-LD dùng JSON_HEX_TAG để không thể "thoát" khỏi thẻ <script>.
- *
- * @package vgarco
- */
 
 defined( 'ABSPATH' ) || exit;
 
-/**
- * Mô tả cho công cụ tìm kiếm: bỏ thẻ HTML, gộp khoảng trắng, cắt ở ranh giới từ (tối đa $max ký tự, kể cả dấu …).
- */
 function vgarco_seo_description( string $text, int $max = 160 ): string {
 	$text = html_entity_decode( strip_tags( $text ), ENT_QUOTES, 'UTF-8' );
 	$text = trim( (string) preg_replace( '/\s+/u', ' ', $text ) );
@@ -24,15 +13,11 @@ function vgarco_seo_description( string $text, int $max = 160 ): string {
 	$cut   = mb_substr( $text, 0, $max - 1 );
 	$space = mb_strrpos( $cut, ' ' );
 	if ( false !== $space && $space > $max * 0.6 ) {
-		$cut = mb_substr( $cut, 0, $space ); // không cắt giữa từ
+		$cut = mb_substr( $cut, 0, $space );
 	}
 	return rtrim( $cut, " \t,;:.-–—" ) . '…';
 }
 
-/**
- * Chỉ nhận địa chỉ tuyệt đối http(s). Mọi thứ khác (javascript:, data:, đường dẫn tương đối) trả về rỗng:
- * thẻ OG và JSON-LD bắt buộc dùng địa chỉ tuyệt đối.
- */
 function vgarco_seo_url( string $url ): string {
 	$url = trim( $url );
 	if ( ! preg_match( '#^https?://[^\s<>"\']+$#i', $url ) ) {
@@ -41,18 +26,10 @@ function vgarco_seo_url( string $url ): string {
 	return false !== filter_var( $url, FILTER_VALIDATE_URL ) ? $url : '';
 }
 
-/** Thoát giá trị thuộc tính HTML. */
 function vgarco_seo_attr( string $value ): string {
 	return htmlspecialchars( $value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8' );
 }
 
-/**
- * Các thẻ <meta>/<link> của một trang.
- *
- * @param array $m description, canonical, title, type (website|article), image, image_width, image_height, image_alt,
- *                 locale, alternates (mảng locale), site_name, published (ISO 8601, chỉ với type=article).
- * @return string HTML, mỗi thẻ một dòng. Thẻ không có dữ liệu thì bỏ.
- */
 function vgarco_seo_tags( array $m ): string {
 	$out = array();
 	$add = static function ( string $tag ) use ( &$out ): void {
@@ -111,9 +88,6 @@ function vgarco_seo_tags( array $m ): string {
 	return implode( "\n", $out ) . "\n";
 }
 
-/**
- * Thẻ <script type="application/ld+json">. JSON_HEX_TAG/AMP/APOS/QUOT mã hóa < > & ' " nên một tiêu đề chứa "</script>" không phá được trang.
- */
 function vgarco_seo_jsonld( array $data ): string {
 	if ( ! $data ) {
 		return '';
@@ -122,11 +96,6 @@ function vgarco_seo_jsonld( array $data ): string {
 	return false === $json ? '' : '<script type="application/ld+json">' . $json . "</script>\n";
 }
 
-/**
- * Tổ chức (Organization) cho trang chủ: tên, địa chỉ, điện thoại, logo.
- *
- * @param array $o name, url, logo, phone, email, street, country (mã ISO, mặc định VN), same_as (mảng địa chỉ mạng xã hội).
- */
 function vgarco_seo_org( array $o ): array {
 	$data = array(
 		'@context' => 'https://schema.org',
@@ -160,13 +129,6 @@ function vgarco_seo_org( array $o ): array {
 	return $data;
 }
 
-/**
- * BreadcrumbList từ đường dẫn vị trí của trang. Mục cuối (trang hiện tại) không có liên kết trong $trail: dùng $current_url.
- * Có ít hơn 2 mục thì không đáng in.
- *
- * @param array[] $trail        Mỗi phần tử: [nhãn, địa chỉ tuyệt đối] hoặc [nhãn] cho mục cuối.
- * @param string  $current_url  Địa chỉ trang hiện tại.
- */
 function vgarco_seo_breadcrumbs( array $trail, string $current_url = '' ): array {
 	$items = array();
 	foreach ( array_values( $trail ) as $i => $crumb ) {
@@ -192,7 +154,6 @@ function vgarco_seo_breadcrumbs( array $trail, string $current_url = '' ): array
 	);
 }
 
-/** Loại hình làm việc của schema.org. */
 function vgarco_seo_employment_type( string $type ): string {
 	return array(
 		'toan_thoi_gian' => 'FULL_TIME',
@@ -201,12 +162,6 @@ function vgarco_seo_employment_type( string $type ): string {
 	)[ $type ] ?? 'FULL_TIME';
 }
 
-/**
- * Mô tả vị trí tuyển dụng dạng HTML đơn giản cho JobPosting (schema.org cho phép HTML trong description).
- *
- * @param string   $summary  Tóm tắt (có thể rỗng).
- * @param array[]  $sections Mỗi phần: [tiêu đề, mảng dòng].
- */
 function vgarco_seo_job_html( string $summary, array $sections ): string {
 	$html = '';
 	if ( '' !== trim( $summary ) ) {
@@ -226,11 +181,6 @@ function vgarco_seo_job_html( string $summary, array $sections ): string {
 	return $html;
 }
 
-/**
- * JobPosting (Google Jobs). Chỉ dựng cho vị trí ĐANG nhận hồ sơ: tin quá hạn không được đưa cho công cụ tìm kiếm.
- *
- * @param array $j open (bool), title, url, description_html, posted (Y-m-d), deadline (Ymd hoặc rỗng), type, location (tên), org (xem vgarco_seo_org).
- */
 function vgarco_seo_job( array $j ): array {
 	if ( empty( $j['open'] ) || '' === trim( (string) ( $j['title'] ?? '' ) ) || '' === trim( (string) ( $j['description_html'] ?? '' ) ) ) {
 		return array();
@@ -260,7 +210,7 @@ function vgarco_seo_job( array $j ): array {
 
 	$deadline = (string) ( $j['deadline'] ?? '' );
 	if ( preg_match( '/^(\d{4})(\d{2})(\d{2})$/', $deadline, $d ) && checkdate( (int) $d[2], (int) $d[3], (int) $d[1] ) ) {
-		$data['validThrough'] = "{$d[1]}-{$d[2]}-{$d[3]}T23:59:59+07:00"; // hết ngày hạn nộp theo giờ Việt Nam
+		$data['validThrough'] = "{$d[1]}-{$d[2]}-{$d[3]}T23:59:59+07:00";
 	}
 	if ( '' !== trim( (string) ( $j['location'] ?? '' ) ) ) {
 		$data['jobLocation'] = array(

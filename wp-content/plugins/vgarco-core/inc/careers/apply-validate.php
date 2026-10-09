@@ -1,24 +1,9 @@
 <?php
-/**
- * Kiểm tra dữ liệu ứng tuyển ở MÁY CHỦ (mục 8.3 bước 8–9) — lớp kiểm tra thứ hai sau trình duyệt, và là lớp duy nhất đáng tin.
- * Hàm thuần (không gọi WordPress): kiểm thử được bằng tệp thật.
- *
- * Mã lỗi trả về khớp với data-msg-* của biểu mẫu (templates/apply.php) và modules/apply.js:
- * required, email, phone, file_required, file_type, file_size, file_invalid, consent.
- *
- * @package vgarco-core
- */
 
 defined( 'ABSPATH' ) || exit;
 
 const VGARCO_CV_MAX_BYTES = 10 * 1024 * 1024;
 
-/**
- * Kiểm tra các trường văn bản và ô đồng ý.
- *
- * @param array $in name, email, phone, consent (chuỗi thô từ yêu cầu).
- * @return array<string,string> tên trường => mã lỗi; rỗng nếu hợp lệ.
- */
 function vgarco_apply_validate_fields( array $in ): array {
 	$errors = array();
 
@@ -41,7 +26,6 @@ function vgarco_apply_validate_fields( array $in ): array {
 		$errors['phone'] = 'required';
 	} else {
 		$digits = preg_replace( '/\D/', '', $phone ) ?? '';
-		// Chỉ cho số, khoảng trắng và các ký tự thường gặp trong số điện thoại; 8–15 chữ số (chuẩn E.164).
 		if ( strlen( $digits ) < 8 || strlen( $digits ) > 15 || preg_match( '/[^\d\s+().-]/', $phone ) ) {
 			$errors['phone'] = 'phone';
 		}
@@ -54,10 +38,6 @@ function vgarco_apply_validate_fields( array $in ): array {
 	return $errors;
 }
 
-/**
- * Làm sạch tên tệp gốc để lưu và hiển thị: bỏ đường dẫn, ký tự điều khiển, ký tự nguy hiểm; cắt độ dài.
- * Tên gốc CHỈ dùng để hiển thị — tệp trên đĩa luôn có tên ngẫu nhiên.
- */
 function vgarco_apply_clean_filename( string $name ): string {
 	$name = basename( str_replace( '\\', '/', $name ) );
 	$name = preg_replace( '/[\x00-\x1F\x7F<>:"|?*]+/u', '', $name ) ?? '';
@@ -69,13 +49,6 @@ function vgarco_apply_clean_filename( string $name ): string {
 	return '' !== $name ? $name : 'cv';
 }
 
-/**
- * Kiểm tra tệp CV: mã lỗi tải lên, dung lượng, đuôi, LOẠI THẬT của nội dung (không tin đuôi hay MIME do trình duyệt gửi),
- * và nội dung nguy hiểm (macro). Chỉ nhận PDF, DOC, DOCX.
- *
- * @param array|null $file Phần tử của $_FILES: name, tmp_name, error, size.
- * @return array{ok: bool, error: string, ext: string, mime: string, name: string, size: int}
- */
 function vgarco_apply_validate_cv( ?array $file ): array {
 	$fail = static fn( string $code ): array => array( 'ok' => false, 'error' => $code, 'ext' => '', 'mime' => '', 'name' => '', 'size' => 0 );
 
@@ -97,7 +70,7 @@ function vgarco_apply_validate_cv( ?array $file ): array {
 		return $fail( 'file_size' );
 	}
 	if ( $size < 16 ) {
-		return $fail( 'file_invalid' ); // rỗng hoặc quá ngắn để là một tài liệu
+		return $fail( 'file_invalid' );
 	}
 
 	$name = vgarco_apply_clean_filename( (string) ( $file['name'] ?? '' ) );
@@ -108,7 +81,6 @@ function vgarco_apply_validate_cv( ?array $file ): array {
 
 	$head = (string) file_get_contents( $path, false, null, 0, 8 );
 
-	// Loại thật theo nội dung. PDF: bắt đầu bằng %PDF-. DOC: tệp OLE (D0 CF 11 E0). DOCX: ZIP (PK) có word/document.xml.
 	if ( 'pdf' === $ext ) {
 		if ( ! str_starts_with( $head, '%PDF-' ) ) {
 			return $fail( 'file_invalid' );
@@ -118,8 +90,6 @@ function vgarco_apply_validate_cv( ?array $file ): array {
 		if ( "\xD0\xCF\x11\xE0\xA1\xB1\x1A\xE1" !== $head ) {
 			return $fail( 'file_invalid' );
 		}
-		// .doc chứa macro có luồng "_VBA_PROJECT" trong tệp OLE (tên luồng lưu dạng UTF-16LE). Chỉ tìm đúng tên này: các chữ như
-		// "VBA" hay "Macros" có thể là kỹ năng ghi trong chính CV, không phải dấu hiệu macro.
 		if ( str_contains( (string) file_get_contents( $path ), mb_convert_encoding( '_VBA_PROJECT', 'UTF-16LE', 'UTF-8' ) ) ) {
 			return $fail( 'file_invalid' );
 		}
@@ -136,7 +106,6 @@ function vgarco_apply_validate_cv( ?array $file ): array {
 		$has_macro    = false;
 		for ( $i = 0; $i < $zip->numFiles; $i++ ) {
 			$entry = (string) $zip->getNameIndex( $i );
-			// Tệp có macro đổi đuôi thành .docx vẫn mang vbaProject.bin (kể cả đặt ở thư mục khác).
 			if ( preg_match( '/vbaProject\.bin$/i', $entry ) || str_contains( strtolower( $entry ), 'vbadata' ) ) {
 				$has_macro = true;
 			}
@@ -148,7 +117,6 @@ function vgarco_apply_validate_cv( ?array $file ): array {
 		$mime = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
 	}
 
-	// Đối chiếu thêm bằng finfo (nếu có): loại đoán được không được là chương trình chạy được hay trang web.
 	if ( function_exists( 'finfo_open' ) ) {
 		$finfo    = finfo_open( FILEINFO_MIME_TYPE );
 		$detected = $finfo ? (string) finfo_file( $finfo, $path ) : '';

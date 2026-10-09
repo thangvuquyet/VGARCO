@@ -1,6 +1,5 @@
 @use '../mixins' as *;
 
-// Đường dẫn vị trí. Số đo lấy từ bản thiết kế: 20 px từ 701 px, 16 px ở màn nhỏ; khoảng cách 18 / 12 px hai bên dấu "/".
 .breadcrumb {
   padding: 1rem 0 0.25rem;
   font-size: 1rem;
@@ -18,9 +17,9 @@
 
   li + li::before {
     content: '/';
-    content: '/' / ''; // trình đọc màn hình không đọc "gạch chéo" ở mỗi mục
+    content: '/' / '';
     margin-right: 0.75rem;
-    color: #aeb1aa; // chỉ là dấu phân cách trang trí, không mang thông tin
+    color: #aeb1aa;
   }
 
   a:hover {

@@ -1,11 +1,9 @@
 <?php
-/** Quản trị hồ sơ ứng tuyển trên WordPress thật: vai trò, quyền, danh sách, xem hồ sơ, tải CV, xuất .xlsx, xóa, tự xóa 12 tháng, cảnh báo. */
 require __DIR__ . '/lib.php';
 
 $jobs = get_option( 'lab_job_ids' );
 vgarco_apply_ensure_roles();
 
-// Người dùng thử (mật khẩu ngẫu nhiên, không dùng đăng nhập bằng mật khẩu ở đây).
 $user = static function ( string $login, string $role ): int {
 	$u = get_user_by( 'login', $login );
 	if ( $u ) {
@@ -18,9 +16,8 @@ lab_clear_mail();
 $admin  = (int) get_user_by( 'login', 'labadmin' )->ID;
 $hr     = $user( 'lab_hr', 'vg_tuyen_dung' );
 $editor = $user( 'lab_editor', 'editor' );
-lab_clear_mail(); // bỏ thư "có tài khoản quản trị mới" nếu có
+lab_clear_mail();
 
-/* ---- Vai trò và quyền ---- */
 $caps = array_keys( vgarco_recruit_caps() );
 $role = get_role( 'vg_tuyen_dung' );
 check( 'vai trò vg_tuyen_dung tồn tại, có đủ 4 quyền riêng của hồ sơ', $role && ! array_diff( $caps, array_keys( array_filter( $role->capabilities ) ) ) );
@@ -29,7 +26,6 @@ check( 'Quản trị viên có đủ 4 quyền', ! array_diff( $caps, array_keys
 check( 'Biên tập viên KHÔNG có quyền nào của hồ sơ ứng tuyển', ! array_intersect( $caps, array_keys( array_filter( get_role( 'editor' )->capabilities ) ) ) );
 check( 'Tác giả/Cộng tác viên cũng không có', ! array_intersect( $caps, array_keys( array_filter( get_role( 'author' )->capabilities ) ) ) && ! array_intersect( $caps, array_keys( array_filter( get_role( 'contributor' )->capabilities ) ) ) );
 
-// Tạo hai hồ sơ qua đường nộp thật (một tên chứa công thức Excel).
 wp_cache_flush();
 foreach ( get_posts( array( 'post_type' => 'ho_so_ut', 'post_status' => 'any', 'posts_per_page' => -1, 'fields' => 'ids' ) ) as $old ) {
 	wp_delete_post( $old, true );
@@ -52,7 +48,6 @@ wp_cache_flush();
 $ck = array( 'admin' => lab_cookie_for( $admin ), 'hr' => lab_cookie_for( $hr ), 'editor' => lab_cookie_for( $editor ) );
 $get = static fn( string $who, string $path ): array => http( 'GET', $path, array( 'headers' => array( 'Cookie: ' . $ck[ $who ] ) ) );
 
-/* ---- Danh sách ---- */
 $list = $get( 'admin', '/wp-admin/edit.php?post_type=ho_so_ut' );
 same( 'danh sách (Quản trị viên): 200', 200, $list['status'] );
 check( 'danh sách: hiện tên ứng viên, vị trí, email, trạng thái thư', str_contains( $list['body'], 'Trần Thị Bình' ) && str_contains( $list['body'], 'Kiến trúc sư thiết kế' ) && str_contains( $list['body'], 'binh@example.com' ) && str_contains( $list['body'], 'HR: đã gửi' ) );
@@ -71,14 +66,12 @@ check( 'tìm theo email trong danh sách', str_contains( $search['body'], 'Lê V
 $filter = $get( 'admin', '/wp-admin/edit.php?post_type=ho_so_ut&vi_tri_id=' . $jobs['ketcau'] );
 check( 'lọc theo vị trí', str_contains( $filter['body'], 'evil@example.com' ) && ! str_contains( $filter['body'], 'binh@example.com' ) );
 
-/* ---- Xem hồ sơ ---- */
 $view = $get( 'hr', "/wp-admin/post.php?post={$a}&action=edit" );
 same( 'xem hồ sơ (Nhân sự): 200', 200, $view['status'] );
 check( 'xem hồ sơ: thấy họ tên, email, tệp CV, nút Tải CV và Xóa; không có khung soạn tiêu đề/nút Cập nhật', str_contains( $view['body'], 'binh@example.com' ) && str_contains( $view['body'], 'CV.pdf' ) && str_contains( $view['body'], 'Tải CV' ) && str_contains( $view['body'], 'Xóa hồ sơ và CV' ) && ! str_contains( $view['body'], 'id="publish"' ) );
 $ed_view = $get( 'editor', "/wp-admin/post.php?post={$a}&action=edit" );
 check( 'xem hồ sơ (Biên tập viên): bị từ chối', in_array( $ed_view['status'], array( 403, 302 ), true ) && ! str_contains( $ed_view['body'], 'binh@example.com' ) );
 
-/* ---- Tải CV ---- */
 preg_match( '#href="([^"]*admin-post\.php\?action=vgarco_download_cv[^"]*)"#', $view['body'], $m );
 $dl_url = html_entity_decode( $m[1] ?? '' );
 check( 'có liên kết tải CV kèm nonce', '' !== $dl_url && str_contains( $dl_url, '_wpnonce=' ) );
@@ -97,7 +90,6 @@ check( 'tải CV khi chưa đăng nhập: không trả CV', in_array( $anon['sta
 $editor_dl = $get( 'editor', $path );
 same( 'tải CV bằng Biên tập viên (nonce của người khác): bị từ chối', true, 200 !== $editor_dl['status'] && ! str_contains( $editor_dl['body'], 'Nội dung CV' ) );
 
-/* ---- Xuất .xlsx ---- */
 $ex_page = $get( 'hr', '/wp-admin/edit.php?post_type=ho_so_ut&page=vgarco-export' );
 same( 'trang Xuất danh sách (Nhân sự): 200, có bộ lọc vị trí, ngày, nonce', array( 200, true ), array( $ex_page['status'], str_contains( $ex_page['body'], 'name="tu"' ) && str_contains( $ex_page['body'], 'name="vi_tri_id"' ) && str_contains( $ex_page['body'], '_wpnonce' ) ) );
 same( 'trang Xuất danh sách (Biên tập viên): bị từ chối', 403, $get( 'editor', '/wp-admin/edit.php?post_type=ho_so_ut&page=vgarco-export' )['status'] );
@@ -117,7 +109,6 @@ check( 'xuất .xlsx: bảng tính là XML đúng cú pháp', @$dom->loadXML( $s
 check( 'xuất .xlsx: không chứa đường dẫn CV hay nội dung CV', ! str_contains( $sheet, 'cv/20' ) && ! str_contains( $sheet, 'Nội dung CV' ) );
 same( 'xuất .xlsx bằng Biên tập viên: bị từ chối', true, 200 !== $get( 'editor', $ex_path )['status'] );
 
-/* ---- Xóa: xóa thật kèm tệp ---- */
 wp_cache_flush();
 $file_b = vgarco_apply_cv_file( (string) get_post_meta( $b, 'cv_duong_dan', true ) );
 check( 'trước khi xóa: tệp CV của hồ sơ thứ hai có thật', is_file( $file_b ) );
@@ -126,12 +117,11 @@ check( 'Biên tập viên không có quyền xóa hồ sơ', ! current_user_can(
 wp_set_current_user( $hr );
 check( 'Nhân sự tuyển dụng có quyền xem và xóa hồ sơ', current_user_can( 'edit_post', $b ) && current_user_can( 'delete_post', $b ) );
 check( 'không ai có quyền tạo hồ sơ tay hay xuất bản', ! current_user_can( 'publish_posts' ) && ! current_user_can( get_post_type_object( 'ho_so_ut' )->cap->create_posts ) );
-$res = wp_trash_post( $b ); // "Bỏ vào thùng rác" phải thành xóa thật
+$res = wp_trash_post( $b );
 check( 'bỏ vào thùng rác = xóa thật (không còn bản ghi, không còn trong thùng rác)', (bool) $res && null === get_post( $b ) );
 check( 'xóa hồ sơ → xóa luôn tệp CV khỏi đĩa', ! is_file( $file_b ) );
 wp_set_current_user( 0 );
 
-/* ---- Tự xóa sau 12 tháng ---- */
 $file_c = vgarco_apply_cv_file( (string) get_post_meta( $c, 'cv_duong_dan', true ) );
 $old    = gmdate( 'Y-m-d H:i:s', strtotime( '-13 months' ) );
 wp_update_post( array( 'ID' => $c, 'post_date' => $old, 'post_date_gmt' => $old ) );
@@ -143,7 +133,6 @@ same( 'tự xóa: chỉ hồ sơ quá 12 tháng bị xóa (1), hồ sơ 11 thán
 check( 'tự xóa: tệp CV của hồ sơ quá hạn cũng bị xóa', ! is_file( $file_c ) );
 check( 'có lịch xóa hằng ngày', false !== wp_next_scheduled( 'vgarco_apply_retention' ) );
 
-/* ---- Cảnh báo ---- */
 vgarco_alert( 'Cảnh báo thử từ kiểm thử tích hợp' );
 $dash = $get( 'admin', '/wp-admin/' );
 check( 'cảnh báo hiện cho Quản trị viên ở trang quản trị', str_contains( $dash['body'], 'Cảnh báo thử từ kiểm thử tích hợp' ) );
@@ -154,7 +143,6 @@ $dismiss = $get( 'admin', wp_parse_url( $dm, PHP_URL_PATH ) . '?' . wp_parse_url
 wp_cache_flush();
 check( 'ẩn cảnh báo: xóa khỏi hệ thống', in_array( $dismiss['status'], array( 302, 200 ), true ) && ! get_option( 'vgarco_alerts' ) );
 
-/* ---- Lịch cron đã đăng ký ---- */
 check( 'cron xóa cache Cloudflare hằng ngày đã đăng ký', false !== wp_next_scheduled( 'vgarco_cf_purge_daily' ) );
 $next = wp_next_scheduled( 'vgarco_cf_purge_daily' );
 same( 'cron cache: chạy lúc 00:10 giờ Việt Nam', '00:10', ( new DateTimeImmutable( '@' . $next ) )->setTimezone( new DateTimeZone( 'Asia/Ho_Chi_Minh' ) )->format( 'H:i' ) );

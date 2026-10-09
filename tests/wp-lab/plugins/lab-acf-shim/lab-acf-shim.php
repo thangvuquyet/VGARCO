@@ -2,8 +2,6 @@
 /**
  * Plugin Name: LAB — ACF PRO shim
  * Description: CHỈ DÙNG TRONG MÔI TRƯỜNG THỬ. Giả lập phần nhỏ của ACF PRO mà vgarco-core dùng (get_field, update_field, nhóm trường cục bộ,
- *              trang cấu hình) bằng meta bài viết/options, để chạy thử các luồng trước khi có giấy phép ACF PRO. KHÔNG kiểm chứng việc tích hợp ACF thật.
- *              Thay bằng ACF PRO thật khi có tệp cài đặt.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -72,7 +70,6 @@ function acf_add_options_page( array $args ) {
 	return $args;
 }
 
-// ACF PRO bắn acf/init rồi acf/include_fields ở init, ưu tiên 5.
 add_action(
 	'init',
 	static function (): void {
@@ -82,7 +79,6 @@ add_action(
 	5
 );
 
-// acf/save_post bắn khi lưu bài (sau save_post), như ACF.
 add_action(
 	'save_post',
 	static function ( int $post_id ): void {

@@ -1,10 +1,4 @@
 <?php
-/**
- * Trường của kiểu nội dung "Tin tức" (UC-06). Ảnh đầu bài là ảnh đại diện của bài;
- * tóm tắt dùng ô "Trích dẫn" mặc định của WordPress.
- *
- * @package vgarco-core
- */
 
 defined( 'ABSPATH' ) || exit;
 

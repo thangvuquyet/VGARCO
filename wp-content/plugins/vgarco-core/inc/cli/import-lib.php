@@ -1,23 +1,7 @@
 <?php
-/**
- * Nhập liệu bằng bảng tính (mục 8.7) — phần THUẦN: đọc CSV, kiểm tra từng dòng, dựng "kế hoạch" nhập và so sánh để xem trước (--dry-run).
- * Không gọi WordPress nên kiểm thử được bằng tệp CSV thật (tests/php/import.php). Phần ghi vào WordPress/WPML nằm ở import.php.
- *
- * Quy tắc: cập nhật theo khóa `ma` (chạy lại không tạo bản trùng); mọi lỗi của cả tệp được gom và báo MỘT LƯỢT trước khi ghi bất cứ thứ gì.
- *
- * @package vgarco-core
- */
 
 defined( 'ABSPATH' ) || exit;
 
-/* -------------------------------------------------------------------------
- * CSV
- * ---------------------------------------------------------------------- */
-
-/**
- * Tự nhận dấu phân cách của dòng tiêu đề (Excel tiếng Việt xuất ";", bản tiếng Anh xuất ","; bảng dán từ web là tab).
- * Đếm bên ngoài dấu nháy; dấu xuất hiện nhiều nhất thắng, hòa thì ưu tiên ";".
- */
 function vgarco_csv_detect_delimiter( string $first_line ): string {
 	$counts = array( ';' => 0, ',' => 0, "\t" => 0 );
 	$quoted = false;
@@ -32,14 +16,6 @@ function vgarco_csv_detect_delimiter( string $first_line ): string {
 	return array_key_first( $counts ) && reset( $counts ) > 0 ? (string) array_key_first( $counts ) : ';';
 }
 
-/**
- * Đọc CSV: ô có dấu nháy kép chứa được dấu phân cách, xuống dòng và "" (nháy kép thoát). Bỏ BOM, chấp nhận CRLF/LF/CR, bỏ dòng trống.
- *
- * @param string      $text      Nội dung (UTF-8).
- * @param string|null $delimiter Null để tự nhận.
- * @return array{headers: string[], rows: array[], lines: int[], errors: string[]} rows: mảng kết hợp theo tiêu đề (đã cắt khoảng trắng);
- *         lines: số dòng gốc của từng hàng (để báo lỗi).
- */
 function vgarco_csv_parse( string $text, ?string $delimiter = null ): array {
 	$text = preg_replace( '/^\xEF\xBB\xBF/', '', $text ) ?? '';
 	if ( ! mb_check_encoding( $text, 'UTF-8' ) ) {
@@ -47,7 +23,6 @@ function vgarco_csv_parse( string $text, ?string $delimiter = null ): array {
 	}
 	$delimiter ??= vgarco_csv_detect_delimiter( strtok( $text, "\r\n" ) ?: '' );
 
-	// Tách thành các bản ghi, mỗi bản ghi là mảng ô; theo dõi số dòng bắt đầu.
 	$records  = array();
 	$record   = array();
 	$cell     = '';
@@ -85,7 +60,7 @@ function vgarco_csv_parse( string $text, ?string $delimiter = null ): array {
 			}
 			$record[] = $cell;
 			if ( array_filter( $record, static fn( string $x ): bool => '' !== trim( $x ) ) ) {
-				$records[] = array( $start, $record ); // dòng toàn ô trống (Excel hay xuất thừa ";;;") bị bỏ
+				$records[] = array( $start, $record );
 			}
 			$record = array();
 			$cell   = '';
@@ -134,11 +109,6 @@ function vgarco_csv_parse( string $text, ?string $delimiter = null ): array {
 	return array( 'headers' => array_values( array_filter( $headers ) ), 'rows' => $rows, 'lines' => $lines, 'errors' => $errors );
 }
 
-/* -------------------------------------------------------------------------
- * Giá trị
- * ---------------------------------------------------------------------- */
-
-/** Đúng/sai trong bảng tính: 1/0, true/false, yes/no, có/không, x. Để trống = 0. Giá trị lạ → null. */
 function vgarco_import_bool( string $value ): ?string {
 	$v = vgarco_fold( trim( $value ) );
 	if ( in_array( $v, array( '', '0', 'false', 'no', 'khong', 'n', 'nein' ), true ) ) {
@@ -150,7 +120,6 @@ function vgarco_import_bool( string $value ): ?string {
 	return null;
 }
 
-/** Quốc gia: nhận mã (vn/la/de) hoặc tên thường gặp. Rỗng → ''. Lạ → null. */
 function vgarco_import_country( string $value ): ?string {
 	$v = vgarco_fold( trim( $value ) );
 	if ( '' === $v ) {
@@ -164,7 +133,6 @@ function vgarco_import_country( string $value ): ?string {
 	return $map[ $v ] ?? null;
 }
 
-/** Văn bản thuần trong ô → HTML: thoát mọi thẻ, dòng trống tách đoạn <p>, xuống dòng đơn thành <br>. */
 function vgarco_import_paragraphs( string $text ): string {
 	$text = trim( str_replace( array( "\r\n", "\r" ), "\n", $text ) );
 	if ( '' === $text ) {
@@ -177,16 +145,10 @@ function vgarco_import_paragraphs( string $text ): string {
 	return rtrim( $html, "\n" );
 }
 
-/** Mã hợp lệ: chữ thường không dấu, số, gạch ngang (cùng quy tắc với ô "Mã dự án" trong trang quản trị). */
 function vgarco_import_slug_valid( string $slug ): bool {
 	return 1 === preg_match( '/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $slug );
 }
 
-/* -------------------------------------------------------------------------
- * Dự án
- * ---------------------------------------------------------------------- */
-
-/** Cột của projects.csv: bắt buộc và tùy chọn. */
 function vgarco_import_project_columns(): array {
 	return array(
 		'required' => array( 'ma', 'ten_vi' ),
@@ -198,12 +160,6 @@ function vgarco_import_project_columns(): array {
 	);
 }
 
-/**
- * Kiểm tra dòng tiêu đề của projects.csv.
- *
- * @param string[] $headers
- * @return string[] Lỗi.
- */
 function vgarco_import_project_header_errors( array $headers ): array {
 	$cols   = vgarco_import_project_columns();
 	$errors = array();
@@ -216,13 +172,6 @@ function vgarco_import_project_header_errors( array $headers ): array {
 	return $errors;
 }
 
-/**
- * Chuyển một dòng projects.csv thành kế hoạch nhập, kèm mọi lỗi của dòng (không dừng ở lỗi đầu tiên).
- *
- * @param array<string,string> $row
- * @param array{terms: array<string,string>} $allowed terms: slug => tên của các loại công trình hợp lệ.
- * @return array{plan: ?array, errors: string[]}
- */
 function vgarco_import_project_plan( array $row, int $line, array $allowed ): array {
 	$errors = array();
 	$e      = static function ( string $msg ) use ( &$errors, $line ): void {
@@ -288,7 +237,6 @@ function vgarco_import_project_plan( array $row, int $line, array $allowed ): ar
 		}
 	}
 
-	// Loại công trình: nhiều giá trị ngăn cách bằng | hoặc dấu phẩy; nhận slug hoặc tên.
 	$terms  = array();
 	$by_key = array();
 	foreach ( $allowed['terms'] ?? array() as $slug => $name ) {
@@ -321,7 +269,7 @@ function vgarco_import_project_plan( array $row, int $line, array $allowed ): ar
 			'vai_tro'   => $get( "vai_tro_{$l}" ),
 			'pham_vi'   => $get( "pham_vi_{$l}" ),
 			'chu_dau_tu' => $get( "chu_dau_tu_{$l}" ),
-			'doi_tac'   => $get( "doi_tac_{$l}" ) ?: $get( 'doi_tac' ), // tên đối tác là danh từ riêng: một cột chung là đủ
+			'doi_tac'   => $get( "doi_tac_{$l}" ) ?: $get( 'doi_tac' ),
 			'mo_ta_seo' => $get( "mo_ta_seo_{$l}" ),
 		),
 	);
@@ -346,11 +294,6 @@ function vgarco_import_project_plan( array $row, int $line, array $allowed ): ar
 	);
 }
 
-/**
- * Đọc cả tệp projects.csv: kiểm tra tiêu đề, từng dòng, trùng `ma`, vượt giới hạn trang chủ (5 nổi bật, 3 tiêu biểu).
- *
- * @return array{plans: array[], errors: string[]} Có lỗi thì plans rỗng (không ghi gì cả khi tệp còn lỗi).
- */
 function vgarco_import_projects( string $csv, array $allowed ): array {
 	$parsed = vgarco_csv_parse( $csv );
 	$errors = $parsed['errors'];
@@ -389,12 +332,6 @@ function vgarco_import_projects( string $csv, array $allowed ): array {
 	return $errors ? array( 'plans' => array(), 'errors' => $errors ) : array( 'plans' => $plans, 'errors' => array() );
 }
 
-/**
- * Các trường của một ngôn ngữ trong kế hoạch, dạng phẳng để so sánh với bài đang có.
- *
- * @param string $lang vi | de
- * @return array<string,string>
- */
 function vgarco_import_flatten( array $plan, string $lang ): array {
 	$part = $plan[ $lang ] ?? null;
 	if ( ! $part ) {
@@ -416,21 +353,13 @@ function vgarco_import_flatten( array $plan, string $lang ): array {
 	return $flat;
 }
 
-/**
- * So sánh để xem trước: chỉ các trường KHÁC. Ô trống trong bảng không xóa dữ liệu đã có (biên tập viên có thể đã nhập tay):
- * trường có giá trị mới rỗng bị bỏ qua.
- *
- * @param array<string,string> $current Giá trị hiện có (cùng khóa với vgarco_import_flatten). Rỗng = chưa có bài.
- * @param array<string,string> $planned
- * @return array<string,array{0:string,1:string}> khóa → [cũ, mới]
- */
 function vgarco_import_diff( array $current, array $planned ): array {
 	$diff = array();
 	foreach ( $planned as $key => $new ) {
 		$new = trim( (string) $new );
 		$old = trim( (string) ( $current[ $key ] ?? '' ) );
 		if ( '' === $new && '' !== $old && 'menu_order' !== $key ) {
-			continue; // không xóa dữ liệu đã có bằng ô trống
+			continue;
 		}
 		if ( $old !== $new ) {
 			$diff[ $key ] = array( $old, $new );
@@ -439,11 +368,6 @@ function vgarco_import_diff( array $current, array $planned ): array {
 	return $diff;
 }
 
-/* -------------------------------------------------------------------------
- * Ảnh
- * ---------------------------------------------------------------------- */
-
-/** Vai trò của ảnh: ô nào của dự án. */
 function vgarco_import_image_roles(): array {
 	return array(
 		'hero'  => 'anh_dau_trang',
@@ -453,9 +377,6 @@ function vgarco_import_image_roles(): array {
 	);
 }
 
-/**
- * Đường dẫn tệp ảnh trong thư mục --images: tương đối, không "..", không ổ đĩa, không thoát thư mục; chỉ jpg/jpeg/png/webp.
- */
 function vgarco_import_image_path_valid( string $path ): bool {
 	if ( '' === $path || str_contains( $path, '..' ) || str_contains( $path, '\\' ) || str_starts_with( $path, '/' ) || preg_match( '/^[a-z]:/i', $path ) || str_contains( $path, "\0" ) ) {
 		return false;
@@ -463,13 +384,6 @@ function vgarco_import_image_path_valid( string $path ): bool {
 	return 1 === preg_match( '/\.(jpe?g|png|webp)$/i', $path );
 }
 
-/**
- * Đọc images.csv thành ảnh theo từng dự án.
- *
- * @param string   $csv
- * @param string[] $known_codes Các `ma` hợp lệ (từ projects.csv hoặc đã có trong CSDL).
- * @return array{images: array<string,array>, errors: string[]} images[ma] = [hero, the, slide (đường dẫn hoặc ''), tv => [file, kind, caption_vi, caption_de]].
- */
 function vgarco_import_images( string $csv, array $known_codes ): array {
 	$parsed = vgarco_csv_parse( $csv );
 	$errors = $parsed['errors'];
@@ -538,7 +452,6 @@ function vgarco_import_images( string $csv, array $known_codes ): array {
 		if ( count( $set['tv'] ) > 15 ) {
 			$errors[] = "Dự án \"{$ma}\" có " . count( $set['tv'] ) . ' ảnh thư viện, tối đa 15.';
 		}
-		// Sắp theo thu_tu; ô trống đứng cuối; cùng thứ tự giữ thứ tự dòng.
 		usort( $set['tv'], static fn( array $a, array $b ): int => array( $a['order'], $a['line'] ) <=> array( $b['order'], $b['line'] ) );
 		$set['tv'] = array_map( static fn( array $i ): array => array_diff_key( $i, array( 'order' => 1, 'line' => 1 ) ), $set['tv'] );
 	}

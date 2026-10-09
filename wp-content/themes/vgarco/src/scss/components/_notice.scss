@@ -1,6 +1,5 @@
 @use '../mixins' as *;
 
-// Thông báo dưới đầu trang (UC-10 2a): "nội dung đang được dịch". Không có trong bản thiết kế HTML; dùng màu nền ấm và đường kẻ của site.
 .lang-notice {
   display: flex;
   gap: 1rem;

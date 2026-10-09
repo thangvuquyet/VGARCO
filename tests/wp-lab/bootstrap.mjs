@@ -1,8 +1,3 @@
-// Dựng môi trường thử WordPress thật (SQLite) vào tests/wp-lab/.lab. Chạy lại được; --reset để dựng lại từ đầu.
-//
-//   PHP=<php.exe> PHP_EXT=<thư mục ext> node tests/wp-lab/bootstrap.mjs <wordpress.zip> <sqlite-database-integration.zip>
-//
-// Hai tệp zip tải tay từ wordpress.org (README.md). Không thêm gì vào Git: .lab/ nằm trong .gitignore.
 import { existsSync, mkdirSync, readFileSync, writeFileSync, rmSync, symlinkSync, cpSync, readdirSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
@@ -18,7 +13,6 @@ const ext = process.env.PHP_EXT ?? '';
 const slash = (p) => p.replace(/\\/g, '/');
 const die = (msg) => { console.error('LỖI: ' + msg); process.exit(1); };
 
-// Báo rõ khi không tìm thấy PHP (lỗi hay gặp nhất: chưa đặt biến PHP).
 if (spawnSync(php, ['-v']).error) {
   console.error([
     `Không chạy được PHP ("${php}"). Đặt biến PHP (và PHP_EXT = thư mục ext) trỏ tới php, ví dụ:`,
@@ -41,7 +35,6 @@ function unzip(zip, to) {
   if (r.status !== 0) die(`không giải nén được ${zip}: ${(r.stderr || r.stdout || '').trim()}`);
 }
 
-// 1. Lõi WordPress và plugin SQLite
 if (!existsSync(join(wp, 'wp-load.php'))) {
   const [wpZip, sqliteZip] = args.map((a) => resolve(a));
   if (!wpZip || !sqliteZip || !existsSync(wpZip) || !existsSync(sqliteZip)) die('cần đủ hai tệp: <wordpress.zip> <sqlite-database-integration.zip> (xem README.md)');
@@ -52,7 +45,6 @@ if (!existsSync(join(wp, 'wp-load.php'))) {
   console.log('Đã giải nén WordPress và plugin SQLite');
 }
 
-// 2. Drop-in CSDL, cấu hình, php.ini
 const sqlitePlugin = join(wp, 'wp-content', 'plugins', 'sqlite-database-integration');
 const dropin = readFileSync(join(sqlitePlugin, 'db.copy'), 'utf8')
   .replaceAll('{SQLITE_IMPLEMENTATION_FOLDER_PATH}', slash(sqlitePlugin))
@@ -102,7 +94,6 @@ writeFileSync(ini, [
   'display_errors = On', 'error_reporting = E_ALL', 'date.timezone = Asia/Ho_Chi_Minh', 'default_charset = "UTF-8"',
 ].join('\n') + '\n');
 
-// 3. Nối mã của dự án (liên kết, không sao chép: sửa mã là thấy ngay) và plugin giả của môi trường thử
 function link(target, path) {
   rmSync(path, { recursive: true, force: true });
   symlinkSync(target, path, 'junction');
@@ -113,7 +104,6 @@ link(join(repo, 'wp-content', 'plugins', 'vgarco-core'), join(wp, 'wp-content', 
 link(join(repo, 'wp-content', 'themes', 'vgarco'), join(wp, 'wp-content', 'themes', 'vgarco'));
 for (const p of readdirSync(join(here, 'plugins'))) link(join(here, 'plugins', p), join(wp, 'wp-content', 'plugins', p));
 
-// 4. Cài đặt và kích hoạt
 for (const script of ['install.php', 'setup.php']) {
   const r = spawnSync(php, ['-c', ini, join(here, script)], { encoding: 'utf8' });
   process.stdout.write(r.stdout || '');

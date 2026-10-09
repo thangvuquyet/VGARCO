@@ -5,6 +5,58 @@ trình chiếu ảnh, xem phóng to, sao chép liên kết, lọc tuyển dụng
 ngay; để giữ lại, chạy tay `php -c tests/wp-lab/.lab/php.ini -S localhost:8080 -t tests/wp-lab/.lab/wordpress tests/wp-lab/router.php`), mở `http://localhost:8080`,
 dán nội dung tệp vào Console (F12) rồi gọi hàm.
 
+## Cách nạp và gọi từng tệp
+
+Các tệp `.js` ở đây không có chú thích đầu tệp; cách dùng nằm ở đây. Mỗi tệp gắn hàm vào `window`: dán nội dung tệp vào Console (F12) của một trang ở http://localhost:8080, hoặc nạp qua máy chủ công cụ
+(`node tests/wp-lab/compare/collector.mjs`, cổng 9100): `await fetch('http://127.0.0.1:9100/b/<tên-tệp>.js').then(r => r.text()).then(t => (0, eval)(t));`.
+Mỗi trang được nạp trong một iframe rộng đúng W px (media query theo độ rộng của iframe). Mỗi lệnh nên dưới ~45 giây (cửa sổ trình duyệt nhúng giới hạn thời gian một lệnh).
+
+**`axe-check.js`** — axe-core trên trang thật. Cần `node tests/serve.mjs 4174` (phục vụ `/axe/axe.min.js`). Bộ quy tắc WCAG 2.0/2.1/2.2 A và AA + best-practice như `tests/a11y.md`; `.gallery-watermark` (chữ trang trí `aria-hidden`) được loại ra.
+
+```js
+await vgAxe( [ '/', '/gioi-thieu/', '/du-an/', '/tin-tuc/', '/tuyen-dung/' ], [ 1440, 768, 390 ] );   // mảng { url, w, n (số vi phạm), v (mô tả) }; n === 0 ở mọi dòng là đạt
+await vgAxe( [ '/?lab_lang=de', '/tuyen-dung/?lab_lang=de' ], [ 1440, 390 ] );                       // giao diện tiếng Đức
+await vgAxeState( 'hộp thoại tìm kiếm', '/', 1440, async ( d, w ) => { /* thao tác trên d (document của iframe), w (window) */ } );
+```
+
+**Phép đối chứng bắt buộc** khi đổi cách chạy: chèn lỗi cố ý rồi chắc chắn bộ chạy báo được. Một lần chạy "0 vi phạm" mà chưa từng thấy nó báo lỗi thì chưa chứng minh được gì.
+
+```js
+await vgAxeState( 'đối chứng', '/', 1440, ( d ) => d.querySelector( 'main' ).insertAdjacentHTML( 'beforeend', '<img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" width="40" height="40">' ) );   // phải ra image-alt(critical)
+```
+
+**`layout-check.js`** — bố cục (xem mục "Bố cục" bên dưới): `vgLayout( W, urls, lang )` và `vgLayoutDiff( de, vi )`. Bỏ qua chữ `.sr-only`, phần ẩn và dải đối tác chạy ngang (tràn theo thiết kế).
+
+**`structure-check.js`** — số cột thật của mọi khối lưới/flex ở nhiều độ rộng; chạy ở cả theme (http://localhost:8080) và bản thiết kế HTML (`node server.cjs` → http://localhost:4173) rồi so hai bên.
+
+```js
+const W = [ 600, 601, 700, 701, 800, 801, 900, 901, 1000, 1001, 1180, 1181 ];
+await vgSweep( [ [ 'tin-tuc', '/tin-tuc/' ] ], W );              // mỗi độ rộng một dòng: các khối lưới/flex và số cột (g150/298/210 = lưới 3 cột); "!!SCROLL" = cả trang cuộn ngang được
+await vgSweep( [ [ 'news', '/news.html' ] ], W, 700 );           // cùng trang ở bản thiết kế (trang nạp bằng JS cần chờ lâu hơn: 700 ms)
+await vgCramped( [ [ 'tin-tuc', '/tin-tuc/?lab_lang=de' ] ], [ 601, 701, 768, 801 ] );   // đoạn chữ từ 3 dòng mà dưới 24 ký tự/dòng
+```
+
+Cách đọc: tìm độ rộng mà hai bên đổi số cột khác nhau; khác biệt có chủ đích thì ghi lại, còn lại sửa theme theo bản thiết kế (biến `$bp-*` trong `src/scss/_mixins.scss`).
+Chữ trên khối `a.nav-next` ở trang tin hiện ra dưới 24 ký tự/dòng nhưng là nhãn + tiêu đề trên hai dòng riêng: dương tính giả.
+
+**`reduced-motion-check.js`** — mô phỏng "giảm chuyển động" (viết lại truy vấn media trong CSS + `matchMedia` giả, ghi trang vào iframe cùng nguồn). Chỉ là mô phỏng: không thay cho thiết lập thật của hệ điều hành.
+
+```js
+await vgReduced( '/' );                                                 // `loi` rỗng là đạt
+await vgReduced( '/du-an/bao-tang-lich-su-quan-doi-nhan-dan-lao/' );
+await vgReduced( '/', 1440, false );                                    // đối chứng: KHÔNG giảm chuyển động; phải thấy chuyenCanh và hoatAnh khác không
+```
+
+**`tab-walk.js`** — duyệt bằng phím Tab THẬT và ghi từng điểm dừng (tên, vòng tiêu điểm, có nằm trong khung nhìn không). Phím phải là phím thật (`computer { action: 'key', text: 'Tab', repeat: N }`), không phải `dispatchEvent`: `:focus-visible` chỉ đúng với tiêu điểm do bàn phím.
+
+```js
+document.documentElement.style.setProperty( 'scroll-behavior', 'auto', 'important' );   // cửa sổ ẩn không chạy cuộn mượt: không đặt thì điểm dừng sau lượt cuộn bị báo "ngoài khung nhìn" giả
+vgTabStart();      // bắt đầu ghi; rồi bấm Tab N lần bằng phím thật
+vgTabReport();     // { soDiemDung, dung, loi }; loi rỗng là đạt
+```
+
+Báo lỗi khi: điểm dừng không có tên truy cập; có `:focus-visible` mà không có vòng tiêu điểm; phần tử ẩn/0 kích thước nhận tiêu điểm; tiêu điểm đứng lại ở một phần tử (bẫy bàn phím); điểm dừng nằm ngoài khung nhìn mà trang không cuộn theo.
+
 ## Bố cục: `layout-check.js`
 
 ```js
@@ -22,7 +74,7 @@ Hai kết quả "lỗi" được chấp nhận: mục cuối đường dẫn v�
 ## Cấu trúc bố cục so với bản thiết kế: `structure-check.js`
 
 `layout-check.js` chỉ bắt chữ tràn; nó **không** bắt được cột chữ bị bóp hẹp hay trang đổi số cột sớm/muộn hơn bản thiết kế. `structure-check.js` làm việc đó: `vgSweep` in số cột thật của mọi khối lưới/flex
-ở nhiều độ rộng (chạy ở cả theme và bản thiết kế HTML `node server.cjs` → http://localhost:4173, rồi so hai bên), `vgCramped` liệt kê đoạn chữ dưới 24 ký tự/dòng. Cách dùng ở đầu tệp.
+ở nhiều độ rộng (chạy ở cả theme và bản thiết kế HTML `node server.cjs` → http://localhost:4173, rồi so hai bên), `vgCramped` liệt kê đoạn chữ dưới 24 ký tự/dòng. Cách dùng ở mục "Cách nạp và gọi từng tệp" bên dưới.
 
 Bản thiết kế **không** đổi bố cục cùng một độ rộng ở mọi trang (Tin tức 800 px, chi tiết vị trí 900 px, Tuyển dụng 600 px, Dự án 1000 px); theme dùng các biến `$bp-*` trong `src/scss/_mixins.scss` cho từng trang.
 Kiểm ngày 05/10/2026 ở 600–1181 px (cả VI và DE):
@@ -39,7 +91,7 @@ Kiểm ngày 05/10/2026 ở 600–1181 px (cả VI và DE):
 ## Trợ năng trên trang thật: `axe-check.js`
 
 axe-core chạy trên trang thật của website thử ở nhiều độ rộng, cả tiếng Đức và các trạng thái động (hộp thoại tìm kiếm, menu di động, biểu mẫu báo lỗi, hộp xem ảnh).
-Cần thêm `node tests/serve.mjs 4174` (phục vụ `/axe/axe.min.js`). Cách dùng và **phép đối chứng bắt buộc** ở đầu tệp; kết quả ngày 05/10/2026 ở `tests/a11y.md`.
+Cần thêm `node tests/serve.mjs 4174` (phục vụ `/axe/axe.min.js`). Cách dùng và **phép đối chứng bắt buộc** ở mục "Cách nạp và gọi từng tệp" bên dưới; kết quả ngày 05/10/2026 ở `tests/a11y.md`.
 
 ## Thao tác JS
 
@@ -149,4 +201,4 @@ Chuẩn bị: `node tests/wp-lab/run.mjs demo` (xem `tests/wp-lab/README.md`), `
 | So kiểu hiển thị website thử ↔ trang tĩnh (1440 px) | `compare/cmpstyles.mjs` | Trang chủ 0/107 phần tử khác, danh mục dự án 0/63, tin tức 0/54: xem `compare/README.md` |
 
 **Mô phỏng giảm chuyển động không thay cho thiết lập thật** của hệ điều hành (Windows: Cài đặt → Trợ năng → Hiệu ứng hình ảnh → tắt "Hiệu ứng hoạt hình"): phần CSS (viết lại truy vấn media) và phần JS (`matchMedia` giả) được đo, nhưng việc trình duyệt thật báo `prefers-reduced-motion: reduce` thì chỉ người dùng thử được.
-Khi chạy `tab-walk.js` trong cửa sổ ẩn, đặt `scroll-behavior: auto` trước (xem đầu tệp), nếu không các điểm dừng sau lượt cuộn mượt bị báo "ngoài khung nhìn" giả.
+Khi chạy `tab-walk.js` trong cửa sổ ẩn, đặt `scroll-behavior: auto` trước (xem mục "Cách nạp và gọi từng tệp"), nếu không các điểm dừng sau lượt cuộn mượt bị báo "ngoài khung nhìn" giả.

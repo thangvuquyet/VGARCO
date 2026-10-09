@@ -1,21 +1,7 @@
 <?php
-/**
- * Kiểu nội dung (mục 6.1 của phương án). Nằm trong plugin, không nằm trong theme.
- *
- * Tin tức dùng kiểu riêng `tin_tuc` thay vì `post`: WPML không dịch được phần tiền tố cố định
- * trong đường dẫn của bài viết thường, nên bản tiếng Đức sẽ ra /de/tin-tuc/... thay vì /de/aktuelles/...
- *
- * @package vgarco-core
- */
 
 defined( 'ABSPATH' ) || exit;
 
-/**
- * Bộ nhãn tiếng Việt chuẩn cho một kiểu nội dung.
- *
- * @param string $name Tên hiển thị, ví dụ "Dự án".
- * @return array
- */
 function vgarco_cpt_labels( string $name ): array {
 	$lower = mb_strtolower( $name );
 
@@ -38,13 +24,12 @@ function vgarco_cpt_labels( string $name ): array {
 }
 
 function vgarco_register_post_types(): void {
-	// Dự án: 20 hồ sơ, sắp theo "Thứ tự" (menu_order) do chủ đầu tư quyết định.
 	register_post_type(
 		'du_an',
 		array(
 			'labels'              => vgarco_cpt_labels( 'Dự án' ),
 			'public'              => true,
-			'exclude_from_search' => true, // Tìm kiếm dự án chạy qua REST riêng, không dùng /?s=.
+			'exclude_from_search' => true,
 			'has_archive'         => true,
 			'rewrite'             => array(
 				'slug'       => 'du-an',
@@ -57,7 +42,6 @@ function vgarco_register_post_types(): void {
 		)
 	);
 
-	// Lĩnh vực hoạt động: hiển thị trong một trang duy nhất, mỗi mục có mã neo — không có trang riêng.
 	register_post_type(
 		'linh_vuc',
 		array(
@@ -101,7 +85,6 @@ function vgarco_register_post_types(): void {
 		)
 	);
 
-	// Vị trí tuyển dụng: có trang chi tiết, KHÔNG có trang lưu trữ — trang /tuyen-dung/ là một trang tĩnh.
 	register_post_type(
 		'vi_tri',
 		array(

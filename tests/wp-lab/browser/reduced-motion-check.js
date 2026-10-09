@@ -1,19 +1,3 @@
-// Mô phỏng "giảm chuyển động" (prefers-reduced-motion: reduce) khi KHÔNG đổi được thiết lập của hệ điều hành.
-//
-// Cách làm: tải trang bằng fetch, viết lại các truy vấn media trong CSS (reduce → all, no-preference → not all), gắn `matchMedia` giả cho
-// phần JS (home.js, project.js đọc `(prefers-reduced-motion: reduce)`), rồi ghi trang vào một iframe cùng nguồn để mã của trang chạy như thường.
-// Đây là MÔ PHỎNG: không thay cho việc bật thiết lập thật trên Windows/macOS/Android (vẫn nằm ở danh sách việc của người dùng).
-//
-// Nạp qua máy chủ công cụ (node tests/wp-lab/compare/collector.mjs, cổng 9100), rồi gọi trong Console của một trang ở http://localhost:8080:
-//
-//   await fetch('http://127.0.0.1:9100/b/reduced-motion-check.js').then(r => r.text()).then(t => (0, eval)(t));
-//   await vgReduced('/');                                    // trang chủ
-//   await vgReduced('/du-an/bao-tang-lich-su-quan-doi-nhan-dan-lao/');   // thư viện ảnh dự án
-//   await vgReduced('/', 1440, false);                       // đối chứng: KHÔNG giảm chuyển động (phải thấy hoạt ảnh/chuyển cảnh chạy)
-//
-// Kết quả: { dong, ... } với `loi` là danh sách điều không đạt (rỗng = đạt). Luôn chạy thêm lần đối chứng (tham số thứ ba false):
-// phải thấy `chuyenCanh` và `hoatAnh` khác không, nếu không thì phép đo không phát hiện được gì.
-
 window.vgReduced = async function ( url, W = 1440, reduce = true ) {
 	const base = location.origin;
 	const html = await fetch( url ).then( ( r ) => r.text() );

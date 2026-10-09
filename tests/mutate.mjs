@@ -1,6 +1,3 @@
-// Kiểm thử đột biến: cố ý phá mã trong BẢN SAO, xác nhận bộ kiểm thử smoke.php chuyển sang đỏ.
-// Kiểm thử không bao giờ đỏ thì chưa chắc đã kiểm được gì — đây là cách biết chúng có thật sự bắt lỗi.
-// Chạy qua: node tests/run.mjs --mutate  (hoặc trực tiếp: node tests/mutate.mjs)
 import { cpSync, mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { join, dirname } from 'node:path';
@@ -48,7 +45,6 @@ const M = [
   ['validate slug: cho phép chữ hoa', 'wp-content/plugins/vgarco-core/inc/fields.php',
     "'/^[a-z0-9]+(?:-[a-z0-9]+)*$/'", "'/^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*$/'"],
 
-  // --- Mẫu trang (bộ kiểm thử pages.php) ---
   ['danh mục: trang loại không lọc theo loại', 'wp-content/themes/vgarco/inc/models.php',
     "$args['tax_query'] = array(", "$args['zz_bo_loc'] = array(", 'pages'],
   ['danh mục: bỏ số 0 đứng đầu ở số lượng', 'wp-content/themes/vgarco/template-parts/catalogue.php',
@@ -57,8 +53,8 @@ const M = [
     "<?php if ( $term ) : ?>\n\t\t\t\t<a class=\"text-link\"", "<?php if ( false ) : ?>\n\t\t\t\t<a class=\"text-link\"", 'pages'],
   ['danh mục: hiện "0 dự án" khi rỗng', 'wp-content/themes/vgarco/template-parts/catalogue.php',
     "<?php if ( $catalogue['count'] > 0 ) : ?>", "<?php if ( true ) : ?>", 'pages'],
-  ['câu chuyện: hiện nút chuyển dù thiếu ảnh công trình', 'wp-content/themes/vgarco/template-parts/catalogue.php',
-    "<?php if ( $has_built ) : //", "<?php if ( true ) : //", 'pages'],
+  ["câu chuyện: hiện nút chuyển dù thiếu ảnh công trình", "wp-content/themes/vgarco/template-parts/catalogue.php",
+    "<?php if ( $has_built ) :", "<?php if ( true ) :", "pages"],
   ['câu chuyện: ảnh ẩn vẫn lộ cho trình đọc màn hình', 'wp-content/themes/vgarco/template-parts/catalogue.php',
     "array( 'aria-hidden' => 'true' )", "array()", 'pages'],
   ['câu chuyện: tiêu đề không qua bộ lọc <em>', 'wp-content/themes/vgarco/template-parts/catalogue.php',
@@ -198,7 +194,7 @@ const M = [
   ["nộp hồ sơ: mã bảo mật luôn đúng", "wp-content/plugins/vgarco-core/inc/careers/apply-process.php",
     "$captcha_ok = $entry && hash_equals( (string) $entry['hash'], $deps['hash']( (string) ( $in['captcha'] ?? '' ) ) );", "$captcha_ok = (bool) $entry;", 'apply'],
   ["nộp hồ sơ: mã sai không hủy token (thử mã vô hạn)", "wp-content/plugins/vgarco-core/inc/careers/apply-process.php",
-    "\t\t\t$deps['token_consume']( $token ); // mã sai: hủy token, buộc phải dùng mã mới\n", "", 'apply'],
+    "\t\t\t$deps['token_consume']( $token );\n", "", "apply"],
   ["nộp hồ sơ: lỗi trường vẫn tiêu thụ mã bảo mật", "wp-content/plugins/vgarco-core/inc/careers/apply-process.php",
     "\tif ( $errors ) {\n\t\treturn", "\tif ( $errors ) {\n\t\t$deps['token_consume']( $token );\n\t\treturn", 'apply'],
   ["nộp hồ sơ: không kiểm tra lại vị trí còn mở", "wp-content/plugins/vgarco-core/inc/careers/apply-process.php",
@@ -210,7 +206,7 @@ const M = [
   ["nộp hồ sơ: không xóa tệp khi ghi bản ghi lỗi", "wp-content/plugins/vgarco-core/inc/careers/apply-process.php",
     "\t\t$deps['delete_cv']( $stored['path'] );\n", "", 'apply'],
   ["nộp hồ sơ: lỗi thư làm mất hồ sơ", "wp-content/plugins/vgarco-core/inc/careers/apply-process.php",
-    "unset( $e ); // đã có bản ghi; cron thử lại thư", "throw $e;", 'apply'],
+    "unset( $e );", "throw $e;", "apply"],
   ["nộp hồ sơ: ngôn ngữ lạ được lưu nguyên", "wp-content/plugins/vgarco-core/inc/careers/apply-process.php",
     "in_array( $in['lang'] ?? '', array( 'vi', 'de' ), true ) ? $in['lang'] : 'vi'", "$in['lang'] ?? 'vi'", 'apply'],
   ["nộp hồ sơ: hai yêu cầu song song cùng token đều được nhận", "wp-content/plugins/vgarco-core/inc/careers/apply-process.php",
@@ -466,7 +462,7 @@ const M = [
   ["nhập liệu: dấu nháy kép không giữ được dấu ; trong ô", "wp-content/plugins/vgarco-core/inc/cli/import-lib.php",
     "if ( '\"' === $c && '' === $cell ) {", "if ( false ) {", 'import'],
   ["nhập liệu: bỏ dòng ;;; (Excel xuất thừa)", "wp-content/plugins/vgarco-core/inc/cli/import-lib.php",
-    "if ( array_filter( $record, static fn( string $x ): bool => '' !== trim( $x ) ) ) {\n\t\t\t\t$records[] = array( $start, $record ); // dòng toàn ô trống", "if ( true ) {\n\t\t\t\t$records[] = array( $start, $record ); // dòng toàn ô trống", 'import'],
+    "if ( array_filter( $record, static fn( string $x ): bool => '' !== trim( $x ) ) ) {\n\t\t\t\t$records[] = array( $start, $record );", "if ( true ) {\n\t\t\t\t$records[] = array( $start, $record );", "import"],
   ["nhập liệu: số dòng không tính xuống dòng trong ô", "wp-content/plugins/vgarco-core/inc/cli/import-lib.php",
     "\t\t\t\tif ( \"\\n\" === $c ) {\n\t\t\t\t\t++$line;\n\t\t\t\t}", "", 'import'],
   ["nhập liệu: nháy kép thoát \"\" không xử lý", "wp-content/plugins/vgarco-core/inc/cli/import-lib.php",
@@ -524,8 +520,7 @@ const M = [
   ["đường dẫn: phân loại đăng ký sau kiểu nội dung", "wp-content/plugins/vgarco-core/inc/taxonomies.php",
     "add_action( 'init', 'vgarco_register_taxonomies', 5 );", "add_action( 'init', 'vgarco_register_taxonomies', 10 );"],
   ["đường dẫn: kích hoạt đăng ký kiểu nội dung trước phân loại", "wp-content/plugins/vgarco-core/vgarco-core.php",
-    "\tvgarco_register_taxonomies(); // trước kiểu nội dung, cùng thứ tự với lúc chạy thường (xem taxonomies.php)\n\tvgarco_register_post_types();",
-    "\tvgarco_register_post_types();\n\tvgarco_register_taxonomies();"],
+    "\tvgarco_register_taxonomies();\n\tvgarco_register_post_types();", "\tvgarco_register_post_types();\n\tvgarco_register_taxonomies();"],
   ["đăng nhập: bộ chặn khóa chạy trước kiểm tra mật khẩu của lõi", "wp-content/plugins/vgarco-core/inc/security.php",
     "add_filter( 'authenticate', 'vgarco_auth_guard', 98, 3 );", "add_filter( 'authenticate', 'vgarco_auth_guard', 1, 3 );"],
   ["đăng nhập: thông báo chung chạy trước bộ chặn khóa", "wp-content/plugins/vgarco-core/inc/security.php",
@@ -537,9 +532,9 @@ const M = [
   ["ảnh: bỏ bộ gỡ siêu dữ liệu khi tải lên", "wp-content/plugins/vgarco-core/inc/media.php",
     "add_filter( 'wp_handle_upload', 'vgarco_sanitize_uploaded_image' );", ""],
   ["ảnh: giữ mọi đoạn APPn (EXIF, XMP, IPTC)", "wp-content/plugins/vgarco-core/inc/media-lib.php",
-    "if ( $marker >= 0xE0 && $marker <= 0xEF ) { // APPn: chỉ giữ JFIF, ICC, Adobe", "if ( false ) {", 'media'],
+    "if ( $marker >= 0xE0 && $marker <= 0xEF ) {", "if ( false ) {", "media"],
   ["ảnh: giữ ghi chú COM", "wp-content/plugins/vgarco-core/inc/media-lib.php",
-    "} elseif ( 0xFE === $marker ) { // ghi chú\n\t\t\t$keep = false;", "} elseif ( 0xFE === $marker ) { // ghi chú\n\t\t\t$keep = true;", 'media'],
+    "} elseif ( 0xFE === $marker ) {\n\t\t\t$keep = false;", "} elseif ( 0xFE === $marker ) {\n\t\t\t$keep = true;", "media"],
   ["ảnh: làm mất hồ sơ màu ICC", "wp-content/plugins/vgarco-core/inc/media-lib.php",
     "\n\t\t\t\t|| ( 0xE2 === $marker && str_starts_with( $payload, \"ICC_PROFILE\\0\" ) )", "", 'media'],
   ["ảnh: đọc hướng xoay sai thứ tự byte", "wp-content/plugins/vgarco-core/inc/media-lib.php",
@@ -547,7 +542,7 @@ const M = [
   ["ảnh: nhận hướng xoay ngoài 1–8", "wp-content/plugins/vgarco-core/inc/media-lib.php",
     "return ( $value >= 1 && $value <= 8 ) ? $value : 1;", "return $value;", 'media'],
   ["ảnh: JPEG kết thúc trước dữ liệu quét vẫn nhận", "wp-content/plugins/vgarco-core/inc/media-lib.php",
-    "if ( 0xD9 === $marker ) { // kết thúc ảnh trước khi có dữ liệu quét\n\t\t\treturn null;", "if ( 0xD9 === $marker ) { // kết thúc ảnh trước khi có dữ liệu quét\n\t\t\treturn array( 'segments' => $segments, 'scan' => $pos );", 'media'],
+    "if ( 0xD9 === $marker ) {\n\t\t\treturn null;", "if ( 0xD9 === $marker ) {\n\t\t\treturn array( 'segments' => $segments, 'scan' => $pos );", "media"],
   ["ảnh: PNG giữ khối tEXt", "wp-content/plugins/vgarco-core/inc/media-lib.php",
     "array( 'eXIf', 'tEXt', 'zTXt', 'iTXt', 'tIME' )", "array( 'eXIf', 'zTXt', 'iTXt', 'tIME' )", 'media'],
   ["ảnh: PNG giữ khối eXIf", "wp-content/plugins/vgarco-core/inc/media-lib.php",
@@ -657,9 +652,9 @@ const M = [
   ["thư viện: nút tạm dừng thiếu nhãn \"tiếp tục\"", "wp-content/themes/vgarco/template-parts/project-gallery.php",
     "data-label-play=\"<?php esc_attr_e( 'Tiếp tục chuyển động', 'vgarco' ); ?>\">", "data-label-play=\"\">", 'pages'],
   ["thư viện: nút tạm dừng và nút chuyển hiện cả khi chỉ có một ảnh", "wp-content/themes/vgarco/template-parts/project-gallery.php",
-    "\t\t<?php if ( $many ) : ?>\n\t\t\t<?php // Nút tạm dừng", "\t\t<?php if ( true ) : ?>\n\t\t\t<?php // Nút tạm dừng", 'pages'],
+    "\t\t<?php if ( $many ) : ?>\n\t\t\t<?php", "\t\t<?php if ( true ) : ?>\n\t\t\t<?php", "pages"],
   ["thư viện: nút tạm dừng thiếu biểu tượng \"chạy\"", "wp-content/themes/vgarco/template-parts/project-gallery.php",
-    "\t\t\t\t<?php echo vgarco_icon( 'play', 'icon-play' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>\n\t\t\t</button>\n\n\t\t\t<div class=\"project-gallery-controls\"", "\t\t\t</button>\n\n\t\t\t<div class=\"project-gallery-controls\"", 'pages'],
+    "\t\t\t\t<?php echo vgarco_icon( 'play', 'icon-play' ); ?>\n\t\t\t</button>\n\n\t\t\t<div class=\"project-gallery-controls\"", "\t\t\t</button>\n\n\t\t\t<div class=\"project-gallery-controls\"", "pages"],
   ["thư viện: thanh tiến độ không chạy", "wp-content/themes/vgarco/src/scss/pages/_project.scss",
     "animation: gallery-progress var(--gallery-interval, 6.5s) linear forwards;", "animation: none;", 'pages'],
   ["thư viện: thanh tiến độ bắt đầu từ đầy", "wp-content/themes/vgarco/src/scss/pages/_project.scss",
@@ -723,7 +718,7 @@ const M = [
   ["nút biểu tượng: rê chuột không đổi đỏ", "wp-content/themes/vgarco/src/scss/_base.scss",
     "  &:hover {\n    color: var(--c-brand);\n  }\n\n  @include up($bp-phone) {", "  @include up($bp-phone) {", 'pages'],
   ["nút menu: hai vạch cố định màu đen (không đổi đỏ cùng nút)", "wp-content/themes/vgarco/src/scss/components/_header.scss",
-    "background: currentcolor; // theo màu chữ", "background: var(--c-ink); // theo màu chữ", 'pages'],
+    "background: currentcolor;", "background: var(--c-ink);", "pages"],
   ["menu: liên kết thường không có gạch chân khi rê chuột", "wp-content/themes/vgarco/src/scss/components/_nav.scss",
     "  .nav > a:hover::after,\n  .nav > a:focus-visible::after {", "  .nav > a:focus-visible::after {", 'pages'],
   ["vòng \"Khám phá công trình\": không có chuyển cảnh", "wp-content/themes/vgarco/src/scss/components/_section.scss",
@@ -749,7 +744,7 @@ const M = [
   ["ô đối tác: rê chuột không đổi nền", "wp-content/themes/vgarco/src/scss/pages/_home.scss",
     "    color: var(--c-label);\n    background: #f2f3ef;", "    color: var(--c-label);", 'pages'],
   ["hàng lĩnh vực: chữ đổi đỏ thương hiệu thay vì đỏ nhạt", "wp-content/themes/vgarco/src/scss/pages/_home.scss",
-    "như bản thiết kế: --label-red), không phải đỏ thương hiệu.\n    &:hover {\n      color: var(--c-label);", "như bản thiết kế: --label-red), không phải đỏ thương hiệu.\n    &:hover {\n      color: var(--c-brand);", 'pages'],
+    "      font-size: 1.3125rem;\n    }\n\n    &:hover {\n      color: var(--c-label);", "      font-size: 1.3125rem;\n    }\n\n    &:hover {\n      color: var(--c-brand);", "pages"],
   ["vòng CTA: không xoay khi rê chuột", "wp-content/themes/vgarco/src/scss/pages/_home.scss",
     "    transform: rotate(45deg) scale(1.06);", "    transform: scale(1.06);", 'pages'],
   ["vòng CTA: không có chuyển cảnh", "wp-content/themes/vgarco/src/scss/pages/_home.scss",
@@ -825,20 +820,28 @@ const M = [
   ["kích hoạt: không tạo vai trò Nhân sự (chờ admin_init)", "wp-content/plugins/vgarco-core/vgarco-core.php",
     "\tvgarco_apply_ensure_roles();\n", ""],
   ["preload phông: in ở wp_head mức 1 (WordPress bỏ qua)", "wp-content/themes/vgarco/inc/enqueue.php",
-    "\t\t\t\t2 // KHÔNG dùng 1:", "\t\t\t\t1 // KHÔNG dùng 1:", 'pages'],
+    "\t\t\t\t2", "\t\t\t\t1", "pages"],
   ["preload phông: thiếu crossorigin", "wp-content/themes/vgarco/inc/enqueue.php",
     "as=\"font\" type=\"font/woff2\" crossorigin>", "as=\"font\" type=\"font/woff2\">", 'pages'],
   ["thẻ dự án: nhãn loại ảnh hiện cả khi chưa có ảnh", "wp-content/themes/vgarco/template-parts/cards/project.php",
     "<?php if ( $image_id > 0 ) :", "<?php if ( true ) :", 'pages'],
 ];
 
+if (process.argv[2] === '--check') {
+  let stale = 0;
+  for (const [name, file, from] of M) {
+    const n = readFileSync(join(src, file), 'utf8').replace(/\r\n/g, '\n').split(from).length - 1;
+    if (n !== 1) { stale++; console.log(`${name.padEnd(60)} => đoạn gốc xuất hiện ${n} lần trong ${file}`); }
+  }
+  console.log(`${M.length} đột biến, ${stale} đã lỗi thời (đoạn gốc không còn đúng một lần)`);
+  process.exit(stale ? 1 : 0);
+}
+
 let caught = 0, missed = 0, skipped = 0;
-// node tests/mutate.mjs "khóa đăng nhập"  → chỉ chạy các đột biến có tên chứa chuỗi đó (chạy nhanh khi đang viết thêm)
 const only = process.argv[2];
 for (const [name, file, from, to, suite = 'smoke'] of M.filter(([n]) => !only || n.includes(only))) {
   rmSync(work, { recursive: true, force: true });
   mkdirSync(join(work, 'tests'), { recursive: true });
-  // Bỏ node_modules và dist (rất nặng, kiểm thử PHP không cần): mỗi lần sao chép nhanh hơn hàng chục lần.
   cpSync(join(src, 'wp-content'), join(work, 'wp-content'), { recursive: true, filter: (from) => !/[\\/](node_modules|dist)([\\/]|$)/.test(from) });
   cpSync(join(src, 'tests', 'php'), join(work, 'tests', 'php'), { recursive: true });
   if (suite === 'export-images') cpSync(join(src, 'scripts'), join(work, 'scripts'), { recursive: true });

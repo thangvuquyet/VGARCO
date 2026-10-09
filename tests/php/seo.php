@@ -1,12 +1,4 @@
 <?php
-/**
- * Kiểm thử các hàm thuần của SEO cơ bản (inc/seo-lib.php): mô tả, địa chỉ, thẻ meta/OG, JSON-LD (Organization, BreadcrumbList,
- * JobPosting). Kiểm tra cả thoát ký tự (chống phá HTML/JSON-LD) và các trường hợp thiếu dữ liệu.
- *
- *   php -d extension_dir=<ext> -d extension=mbstring tests/php/seo.php
- *
- * Phần lấy dữ liệu từ WordPress (seo.php) được kiểm tra qua HTML kết xuất ở tests/php/pages.php.
- */
 
 define( 'ABSPATH', __DIR__ . '/' );
 define( 'ROOT', dirname( __DIR__, 2 ) );
@@ -28,14 +20,12 @@ function same( string $label, $expected, $actual ): void {
 	check( $label . ' — mong đợi ' . var_export( $expected, true ) . ', nhận ' . var_export( $actual, true ), $expected === $actual );
 }
 
-/* ========== Mô tả ========== */
-
 same( 'mô tả: ngắn giữ nguyên', 'Tư vấn thiết kế công trình.', vgarco_seo_description( 'Tư vấn thiết kế công trình.' ) );
 same( 'mô tả: bỏ thẻ HTML và giải mã thực thể', 'A & B "C" <ok>', vgarco_seo_description( '<p>A &amp; B <b>"C"</b> &lt;ok&gt;</p>' ) );
 same( 'mô tả: gộp khoảng trắng và xuống dòng', 'Dòng một dòng hai', vgarco_seo_description( "  Dòng   một\n\n\tdòng  hai " ) );
 same( 'mô tả: rỗng', '', vgarco_seo_description( '   ' ) );
 
-$long = str_repeat( 'công trình ', 40 ); // 440 ký tự
+$long = str_repeat( 'công trình ', 40 );
 $cut  = vgarco_seo_description( $long );
 check( 'mô tả: dài thì cắt còn tối đa 160 ký tự (tính cả dấu …)', mb_strlen( $cut ) <= 160 && str_ends_with( $cut, '…' ) );
 check( 'mô tả: cắt ở ranh giới từ (không có từ dở dang)', str_ends_with( $cut, 'trình…' ) || str_ends_with( $cut, 'công…' ) );
@@ -45,16 +35,12 @@ same( 'mô tả: bỏ dấu câu thừa ngay trước dấu …', 'Alpha beta…
 check( 'mô tả: tiếng Việt và emoji không bị cắt vỡ byte', mb_check_encoding( vgarco_seo_description( str_repeat( 'Đường 😀 ', 50 ) ), 'UTF-8' ) );
 check( 'mô tả: tham số độ dài tùy chỉnh', mb_strlen( vgarco_seo_description( str_repeat( 'ab ', 50 ), 40 ) ) <= 40 && str_ends_with( vgarco_seo_description( str_repeat( 'ab ', 50 ), 40 ), '…' ) );
 
-/* ========== Địa chỉ ========== */
-
 same( 'url: https hợp lệ', 'https://vgarco.vn/du-an/', vgarco_seo_url( 'https://vgarco.vn/du-an/' ) );
 same( 'url: http hợp lệ', 'http://vgarco.vn/', vgarco_seo_url( 'http://vgarco.vn/' ) );
 same( 'url: cắt khoảng trắng hai đầu', 'https://vgarco.vn/', vgarco_seo_url( "  https://vgarco.vn/ \n" ) );
 foreach ( array( '', '/du-an/', '//vgarco.vn/x', 'javascript:alert(1)', 'data:text/html,<b>', 'ftp://vgarco.vn/x', 'https://vgarco.vn/a b', 'https://vgarco.vn/"><script>', "https://vgarco.vn/'x", 'vgarco.vn' ) as $bad ) {
 	same( 'url: từ chối ' . json_encode( $bad ), '', vgarco_seo_url( $bad ) );
 }
-
-/* ========== Thẻ meta và Open Graph ========== */
 
 $page = array(
 	'description' => 'Mô tả ngắn của dự án.',
@@ -104,7 +90,6 @@ check( 'thẻ: ảnh không có địa chỉ tuyệt đối thì bỏ hẳn ản
 check( 'thẻ: canonical tương đối thì bỏ (cả og:url)', ! str_contains( vgarco_seo_tags( array_merge( $page, array( 'canonical' => '/du-an/x/' ) ) ), 'canonical' ) && ! str_contains( vgarco_seo_tags( array_merge( $page, array( 'canonical' => '/du-an/x/' ) ) ), 'og:url' ) );
 check( 'thẻ: mô tả quá dài được cắt', mb_strlen( (string) $content( '//meta[@name="description"]' )[0] ) <= 160 && 161 > mb_strlen( (string) ( function () use ( $page ) { preg_match( '/name="description" content="([^"]*)"/u', vgarco_seo_tags( array_merge( $page, array( 'description' => str_repeat( 'từ ', 100 ) ) ) ), $m ); return $m[1] ?? ''; } )() ) );
 
-// Thoát ký tự: giá trị độc không phá được thuộc tính.
 $evil = vgarco_seo_tags( array_merge( $page, array( 'title' => '"><script>alert(1)</script>', 'description' => '"><img src=x onerror=alert(1)>', 'image_alt' => "' onmouseover='alert(1)", 'site_name' => '"><b>' ) ) );
 check( 'thoát: không có thẻ <script> hay <img> thật trong thẻ meta', ! str_contains( $evil, '<script' ) && ! str_contains( $evil, '<img' ) && ! str_contains( $evil, '<b>' ) );
 check( 'thoát: dấu nháy kép và nháy đơn đều được mã hóa', 0 === preg_match( '/content="[^"]*"[^>]*"[^>]*>.*onerror/s', str_replace( '&quot;', '', $evil ) ) && ! str_contains( $evil, "' onmouseover=" ) );
@@ -113,8 +98,6 @@ $evil_dom = new DOMDocument();
 $evil_x = new DOMXPath( $evil_dom );
 same( 'thoát: nội dung độc nằm nguyên văn trong thuộc tính (không thành thẻ)', '"><script>alert(1)</script>', $evil_x->query( '//meta[@property="og:title"]' )->item( 0 )->getAttribute( 'content' ) );
 same( 'thoát: không thẻ con lạ nào được sinh ra trong <head>', 0, $evil_x->query( '//head/*[not(self::meta or self::link)]' )->length );
-
-/* ========== JSON-LD ========== */
 
 $org_in = array(
 	'name' => 'Công ty TNHH Tư vấn Xây dựng VGARCO', 'url' => 'https://vgarco.vn/', 'logo' => 'https://vgarco.vn/logo.svg',
@@ -142,7 +125,6 @@ $evil_ld = vgarco_seo_jsonld( array( '@context' => 'https://schema.org', 'name' 
 same( 'jsonld: tên chứa </script> không phá được thẻ (chỉ một thẻ đóng duy nhất)', 1, substr_count( strtolower( $evil_ld ), '</script>' ) );
 check( 'jsonld: tên độc vẫn giải mã về nguyên văn', ( json_decode( substr( $evil_ld, strlen( '<script type="application/ld+json">' ), -strlen( "</script>\n" ) ), true )['name'] ?? '' ) === '</script><script>alert(1)</script> & "quote" \'apos\'' );
 
-// BreadcrumbList
 $trail = array( array( 'Trang chủ', 'https://vgarco.vn/' ), array( 'Dự án', 'https://vgarco.vn/du-an/' ), array( 'Bảo tàng' ) );
 $bc    = vgarco_seo_breadcrumbs( $trail, 'https://vgarco.vn/du-an/bao-tang/' );
 same( 'breadcrumb: loại', 'BreadcrumbList', $bc['@type'] ?? '' );
@@ -155,7 +137,6 @@ $rel = vgarco_seo_breadcrumbs( array( array( 'Trang chủ', '/' ), array( 'Dự 
 check( 'breadcrumb: địa chỉ tương đối bị bỏ khỏi item (không in địa chỉ sai)', ! isset( $rel['itemListElement'][0]['item'], $rel['itemListElement'][1]['item'] ) );
 same( 'breadcrumb: mục giữa không có địa chỉ không mượn địa chỉ trang hiện tại', false, isset( vgarco_seo_breadcrumbs( array( array( 'A', 'https://vgarco.vn/' ), array( 'B' ), array( 'C' ) ), 'https://vgarco.vn/c/' )['itemListElement'][1]['item'] ) );
 
-// JobPosting
 $job_in = array(
 	'open' => true, 'title' => 'Kiến trúc sư thiết kế', 'url' => 'https://vgarco.vn/tuyen-dung/kts/', 'description_html' => '<p>Mô tả</p>',
 	'posted' => '2026-09-01', 'deadline' => '20261031', 'type' => 'toan_thoi_gian', 'location' => 'Hà Nội', 'org' => $org_in,
@@ -179,8 +160,6 @@ check( 'job: không có nơi làm việc thì không có jobLocation', ! isset( 
 $html_desc = vgarco_seo_job_html( 'Tóm tắt <b>', array( array( 'Công việc', array( 'Thiết kế', '', '  ', 'Giám sát <script>' ) ), array( 'Yêu cầu', array() ), array( 'Quyền lợi', array( 'Bảo hiểm' ) ) ) );
 same( 'job_html: tóm tắt và các phần có dòng; bỏ phần rỗng; thoát HTML', '<p>Tóm tắt &lt;b&gt;</p><h3>Công việc</h3><ul><li>Thiết kế</li><li>Giám sát &lt;script&gt;</li></ul><h3>Quyền lợi</h3><ul><li>Bảo hiểm</li></ul>', $html_desc );
 same( 'job_html: không có gì → rỗng', '', vgarco_seo_job_html( '', array( array( 'Công việc', array() ) ) ) );
-
-/* ---------- Kết quả ---------- */
 
 if ( $fail ) {
 	foreach ( $fail as $line ) {

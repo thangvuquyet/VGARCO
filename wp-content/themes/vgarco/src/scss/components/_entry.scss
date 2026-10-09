@@ -1,7 +1,5 @@
 @use '../mixins' as *;
 
-// Nội dung do biên tập viên soạn trong trình soạn thảo khối (mô tả dự án, bài viết, trang pháp lý).
-// Chỉ định dạng các khối được phép (inc/editor.php): đoạn, tiêu đề, danh sách, trích dẫn, ảnh, bảng.
 .entry-content {
   > * + * {
     margin-top: 1.25rem;

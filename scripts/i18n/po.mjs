@@ -1,35 +1,19 @@
-// Đọc/ghi tệp .po và biên dịch .mo (định dạng nhị phân GNU gettext) — không cần cài gettext.
-// Đủ dùng cho dự án: ngữ cảnh (msgctxt), số nhiều (msgid_plural, msgstr[n]), chú thích, cờ (fuzzy, php-format).
-
-/** Giải mã chuỗi trong dấu nháy kép của .po. */
 export function unescapePo( s ) {
 	return s.replace( /\\(["\\nrt])/g, ( _, c ) => ( { n: '\n', r: '\r', t: '\t', '"': '"', '\\': '\\' } )[ c ] );
 }
 
-/** Mã hóa chuỗi để ghi vào .po. */
 export function escapePo( s ) {
 	return s.replace( /\\/g, '\\\\' ).replace( /"/g, '\\"' ).replace( /\n/g, '\\n' ).replace( /\r/g, '\\r' ).replace( /\t/g, '\\t' );
 }
 
-/**
- * @typedef {{ctxt: string|null, id: string, plural: string|null, str: string[], refs: string[], extracted: string[], comments: string[], flags: string[]}} PoEntry
- */
-
-/** @returns {PoEntry} */
 export function newEntry( id = '' ) {
 	return { ctxt: null, id, plural: null, str: [ '' ], refs: [], extracted: [], comments: [], flags: [] };
 }
 
-/**
- * Phân tích nội dung .po.
- *
- * @param {string} text
- * @returns {PoEntry[]} Mục đầu tiên có id rỗng là phần đầu (header) nếu có.
- */
 export function parsePo( text ) {
 	const entries = [];
 	let cur = null;
-	let field = null; // trường đang nối dòng: 'ctxt' | 'id' | 'plural' | 'str:N'
+	let field = null;
 	const flush = () => {
 		if ( cur && ( cur.id !== '' || cur.str.some( Boolean ) || cur.refs.length || cur.ctxt !== null ) ) {
 			entries.push( cur );
@@ -46,10 +30,9 @@ export function parsePo( text ) {
 			continue;
 		}
 		if ( line.startsWith( '#~' ) ) {
-			continue; // mục đã lỗi thời
+			continue;
 		}
 		if ( line.startsWith( '#' ) ) {
-			// Chú thích của mục kế tiếp. Nếu mục hiện tại đã có msgid thì đây là mục mới.
 			if ( cur && field !== null ) {
 				flush();
 			}
@@ -109,12 +92,10 @@ function quoted( label, value ) {
 	if ( ! value.includes( '\n' ) || value === '\n' ) {
 		return `${ label } "${ escapePo( value ) }"`;
 	}
-	// Nhiều dòng: dòng đầu rỗng, mỗi dòng của chuỗi một dòng .po (theo quy ước của gettext).
 	const parts = value.split( /(?<=\n)/ );
 	return [ `${ label } ""`, ...parts.map( ( p ) => `"${ escapePo( p ) }"` ) ].join( '\n' );
 }
 
-/** Ghi danh sách mục ra văn bản .po. */
 export function writePo( entries ) {
 	const blocks = entries.map( ( e ) => {
 		const lines = [];
@@ -144,21 +125,14 @@ export function writePo( entries ) {
 	return blocks.join( '\n\n' ) + '\n';
 }
 
-/** Khóa tra cứu của mục trong MO: ngữ cảnh + \x04 + msgid (+ \0 + số nhiều). */
 export function moKey( e ) {
 	return ( e.ctxt !== null ? e.ctxt + '\x04' : '' ) + e.id + ( e.plural !== null ? '\0' + e.plural : '' );
 }
 
-/**
- * Biên dịch sang .mo. Bỏ mục chưa dịch và mục fuzzy (như msgfmt mặc định); giữ phần đầu.
- *
- * @param {PoEntry[]} entries
- * @returns {Buffer}
- */
 export function compileMo( entries ) {
 	const used = entries.filter( ( e ) => {
 		if ( e.id === '' && e.ctxt === null ) {
-			return true; // header
+			return true;
 		}
 		return ! e.flags.includes( 'fuzzy' ) && e.str.some( ( s ) => s !== '' );
 	} );
@@ -186,11 +160,11 @@ export function compileMo( entries ) {
 
 	const head = Buffer.alloc( headerSize + tablesSize );
 	head.writeUInt32LE( 0x950412de, 0 );
-	head.writeUInt32LE( 0, 4 ); // phiên bản
+	head.writeUInt32LE( 0, 4 );
 	head.writeUInt32LE( n, 8 );
-	head.writeUInt32LE( headerSize, 12 ); // bảng chuỗi gốc
-	head.writeUInt32LE( headerSize + 8 * n, 16 ); // bảng chuỗi dịch
-	head.writeUInt32LE( 0, 20 ); // không dùng bảng băm
+	head.writeUInt32LE( headerSize, 12 );
+	head.writeUInt32LE( headerSize + 8 * n, 16 );
+	head.writeUInt32LE( 0, 20 );
 	head.writeUInt32LE( headerSize + 16 * n, 24 );
 	origTable.forEach( ( [ len, off ], i ) => {
 		head.writeUInt32LE( len, headerSize + 8 * i );
@@ -203,12 +177,6 @@ export function compileMo( entries ) {
 	return Buffer.concat( [ head, ...chunks ] );
 }
 
-/**
- * Đọc .mo (để kiểm tra vòng khứ hồi).
- *
- * @param {Buffer} buf
- * @returns {Map<string,string>} khóa (ngữ cảnh\x04msgid[\0số nhiều]) → bản dịch (các dạng nối bằng \0)
- */
 export function parseMo( buf ) {
 	const magic = buf.readUInt32LE( 0 );
 	if ( magic !== 0x950412de ) {
@@ -226,7 +194,6 @@ export function parseMo( buf ) {
 	return map;
 }
 
-/** Các ký hiệu printf trong chuỗi, để so sánh msgid với msgstr. */
 export function placeholders( s ) {
 	return ( s.match( /%(?:\d+\$)?[sdfu%]/g ) ?? [] ).filter( ( p ) => p !== '%%' ).sort();
 }

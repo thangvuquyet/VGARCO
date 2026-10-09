@@ -1,7 +1,5 @@
 @use '../mixins' as *;
 
-// Ban lãnh đạo (UC-02). Số đo lấy từ bản thiết kế ở 390 và 1440 px; nấc giữa (701–999 px) xếp hai cột như máy tính.
-
 .leadership-content {
   display: grid;
   gap: 1.875rem;
@@ -27,7 +25,7 @@
 
   h2 {
     margin-bottom: 1.25rem;
-    font-size: 2.375rem; // 38
+    font-size: 2.375rem;
     line-height: 1.2;
     letter-spacing: -0.035em;
 
@@ -48,7 +46,6 @@
   }
 }
 
-// Hình đại diện: ảnh chân dung, hoặc chữ cái đầu của họ tên trên nền tối khi chưa có ảnh.
 .leader-monogram,
 .leader-photo {
   min-height: 290px;
@@ -66,7 +63,7 @@
   align-items: center;
   justify-content: center;
   font-family: var(--ff-accent);
-  font-size: 5.9375rem; // 95
+  font-size: 5.9375rem;
   font-style: italic;
   line-height: 1;
   letter-spacing: -0.07em;
@@ -83,7 +80,7 @@
   }
 
   @include up($bp-md) {
-    font-size: 7.5rem; // 120
+    font-size: 7.5rem;
   }
 }
 
@@ -135,7 +132,6 @@
   }
 }
 
-// ===================================================================== NGUYÊN TẮC
 .leadership-principles {
   padding-bottom: 3.25rem;
 

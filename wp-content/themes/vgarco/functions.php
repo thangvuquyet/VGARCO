@@ -1,10 +1,4 @@
 <?php
-/**
- * Giao diện VGARCO — chỉ nạp các tệp trong inc/.
- * Kiểu nội dung, phân loại và trường dữ liệu nằm ở plugin vgarco-core, không nằm ở đây.
- *
- * @package vgarco
- */
 
 defined( 'ABSPATH' ) || exit;
 

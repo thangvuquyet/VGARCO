@@ -1,13 +1,5 @@
 @use '../mixins' as *;
 
-// Hộp thoại tìm kiếm dự án (UC-09). Nguồn: #search-dialog của bản thiết kế HTML (740 px, đệm 48 / 35×24, ô nhập chỉ có gạch chân,
-// kết quả là dãy ảnh nhỏ + tên + "địa điểm · năm").
-//
-// Khác bản thiết kế, có chủ đích:
-//  - ô nhập giữ dấu hiệu tiêu điểm nhìn thấy được (gạch chân đậm màu cam); bản thiết kế bỏ hẳn viền tiêu điểm (WCAG 2.4.7);
-//  - chữ phụ dưới tên dự án 13–14 px (bản thiết kế 12 px ở máy tính);
-//  - kết quả là liên kết tới trang dự án, không phải nút mở cửa sổ con.
-
 .search-dialog {
   width: 740px;
   max-width: calc(100% - 2.25rem);
@@ -24,7 +16,6 @@
   }
 }
 
-// Đang mở hộp thoại thì không cuộn trang phía sau.
 body:has(.search-dialog[open]) {
   overflow: hidden;
 }
@@ -39,7 +30,7 @@ body:has(.search-dialog[open]) {
 
   h2 {
     margin: 0.9375rem 0 1.75rem;
-    padding-right: 3rem; // chừa chỗ cho nút đóng
+    padding-right: 3rem;
     font-size: 1.6875rem;
     font-weight: 600;
     line-height: 1.15;
@@ -78,14 +69,12 @@ body:has(.search-dialog[open]) {
       color: var(--c-ink-muted);
     }
 
-    // Dấu hiệu tiêu điểm: gạch chân dày thêm màu cam, không đổi kích thước ô.
     &:focus-visible {
       outline: none;
       border-bottom-color: var(--c-focus);
       box-shadow: 0 1px 0 0 var(--c-focus);
     }
 
-    // Xóa nút "x" mặc định của ô search trên Chrome/Safari: đã có nút đóng cả hộp thoại.
     &::-webkit-search-cancel-button {
       appearance: none;
     }

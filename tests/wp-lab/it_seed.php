@@ -1,8 +1,4 @@
 <?php
-/**
- * Dữ liệu mẫu cho các kiểm thử sau: tin tức, vị trí tuyển dụng (đang mở / quá hạn / đã đóng), nơi làm việc, phòng ban, dịch vụ.
- * Chạy lại được (dọn rồi tạo lại bài tin/vị trí/lĩnh vực).
- */
 require __DIR__ . '/lib.php';
 
 foreach ( get_posts( array( 'post_type' => array( 'tin_tuc', 'vi_tri', 'linh_vuc', 'ho_so_ut' ), 'post_status' => 'any', 'posts_per_page' => -1, 'fields' => 'ids' ) ) as $id ) {

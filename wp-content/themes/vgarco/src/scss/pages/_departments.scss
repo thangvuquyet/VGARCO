@@ -1,7 +1,5 @@
 @use '../mixins' as *;
 
-// Phòng ban (UC-02). Số đo lấy từ bản thiết kế ở 390 và 1440 px.
-
 .department-editorial {
   display: grid;
   gap: 3.375rem;
@@ -30,7 +28,6 @@
     }
   }
 
-  // Di động: dòng nhấn nằm riêng một dòng, nhỏ hơn 8% so với dòng trên.
   h1 em {
     display: block;
     font-size: 0.92em;

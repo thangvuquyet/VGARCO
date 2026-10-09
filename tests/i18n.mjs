@@ -1,10 +1,3 @@
-// Kiểm thử công cụ dịch (scripts/i18n) và trạng thái bản dịch trong kho:
-//   - po.mjs: đọc/ghi .po, biên dịch .mo (thử vòng khứ hồi và cấu trúc nhị phân)
-//   - extract.mjs: trích chuỗi gettext từ mã PHP
-//   - sync.mjs: tra từ điển, gộp bản dịch (không mất bản sửa tay), kiểm tra
-//   - trạng thái thật của kho: .pot mới, .po đủ mục, .mo khớp .po, ký hiệu %s nhất quán, theme dịch đủ 100%
-//
-//   node tests/i18n.mjs
 import { readFileSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -17,8 +10,6 @@ let pass = 0;
 const fail = [];
 const check = ( label, ok ) => ( ok ? pass++ : fail.push( label ) );
 const same = ( label, expected, actual ) => check( `${ label } — mong đợi ${ JSON.stringify( expected ) }, nhận ${ JSON.stringify( actual ) }`, JSON.stringify( expected ) === JSON.stringify( actual ) );
-
-/* ========== po.mjs ========== */
 
 const tricky = 'Dòng 1\n\t"trích dẫn" và \\ gạch ngược\r\nCuối';
 same( 'po: thoát rồi giải mã trả về đúng chuỗi gốc', tricky, unescapePo( escapePo( tricky ) ) );
@@ -84,7 +75,6 @@ same( 'mo: số nhiều ghép bằng \\0', 'Stelle\0Stellen', map.get( 'vị tr�
 same( 'mo: chuỗi nhiều dòng', 'Zeile eins\nZeile zwei', map.get( 'Dòng một\ndòng hai' ) );
 same( 'mo: bỏ mục chưa dịch và mục fuzzy', [ false, false ], [ map.has( 'Chưa dịch' ), map.has( 'Chưa chắc' ) ] );
 check( 'mo: có phần đầu (khóa rỗng) mang Plural-Forms', ( map.get( '' ) ?? '' ).includes( 'Plural-Forms' ) );
-// Cấu trúc nhị phân: bảng chuỗi gốc phải xếp tăng dần theo byte (người đọc dùng tìm kiếm nhị phân), mỗi chuỗi kết thúc bằng NUL.
 const n = mo.readUInt32LE( 8 );
 const origAt = mo.readUInt32LE( 12 );
 const keys = [];
@@ -104,8 +94,6 @@ same( 'mo: Unicode xếp theo byte UTF-8', [ 'Z', '~', 'a', 'ä', 'é', 'Đ', '�
 
 same( 'placeholders: %s %d %1$s, bỏ %%', [ '%1$s', '%d', '%s' ], placeholders( 'a %s b %d c %1$s d 100%%' ) );
 same( 'placeholders: không có', [], placeholders( 'Xin chào' ) );
-
-/* ========== extract.mjs ========== */
 
 same( 'phpLiteral: nháy đơn với \\\' và \\\\', "it's \\ ok", phpLiteral( "'it\\'s \\\\ ok'" ) );
 same( 'phpLiteral: nháy kép với \\n và \\"', 'a\nb"c', phpLiteral( '"a\\nb\\"c"' ) );
@@ -145,8 +133,6 @@ same( 'pot: chuỗi dùng ở hai tệp → một mục, hai tham chiếu', [ 'a
 same( 'pot: cờ php-format cho chuỗi có %s', true, pot.find( ( e ) => e.id === 'Gọi %s' ).flags.includes( 'php-format' ) );
 same( 'pot: mục đầu là header', '', pot[ 0 ].id );
 
-/* ========== sync.mjs: tra từ điển và gộp ========== */
-
 const dict = {
 	'Tuyển dụng': 'Karriere',
 	'Từ những ý tưởng.': 'Von ersten Ideen.',
@@ -181,9 +167,6 @@ const errs = validate( [ newEntry( '' ), newEntry( 'A %s' ), newEntry( 'B' ) ], 
 same( 'validate: phát hiện mục thiếu, mục thừa và ký hiệu lệch', 3, errs.length );
 check( 'validate: .mo lệch so với .po bị phát hiện', validate( [ newEntry( '' ) ], [ newEntry( '' ) ], Buffer.from( 'sai' ) ).some( ( e ) => e.includes( '.mo không khớp' ) ) );
 
-/* ========== Trạng thái thật của kho ========== */
-
-// Chuỗi cố ý KHÔNG dịch sang tiếng Đức: thư báo cho nhân sự (luôn tiếng Việt) và cảnh báo quản trị.
 const VIETNAMESE_ONLY = [
 	'[VGARCO] Hồ sơ ứng tuyển: {vi_tri} — {ten}',
 	'Có hồ sơ ứng tuyển mới.',
@@ -219,8 +202,6 @@ for ( const t of extractAll() ) {
 	check( `${ t.domain }: .mo có header tiếng Đức`, ( mo.get( '' ) ?? '' ).includes( 'Language: de' ) && ( mo.get( '' ) ?? '' ).includes( 'nplurals=2' ) );
 	check( `${ t.domain }: mọi mục đã dịch đều có trong .mo`, po.filter( ( e ) => e.id !== '' && e.str.some( Boolean ) && ! e.flags.includes( 'fuzzy' ) ).every( ( e ) => mo.has( moKey( e ) ) ) );
 }
-
-/* ---------- Kết quả ---------- */
 
 if ( fail.length ) {
 	fail.forEach( ( f ) => console.log( `  ✗ ${ f }` ) );

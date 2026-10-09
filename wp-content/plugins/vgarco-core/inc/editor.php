@@ -1,10 +1,4 @@
 <?php
-/**
- * Trình soạn thảo: giới hạn khối được dùng để biên tập viên không phá bố cục (mục 6.2),
- * và ẩn menu "Bài viết" mặc định (tin tức là kiểu nội dung riêng `tin_tuc`).
- *
- * @package vgarco-core
- */
 
 defined( 'ABSPATH' ) || exit;
 

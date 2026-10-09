@@ -1,13 +1,4 @@
 <?php
-/**
- * Danh sách tin tức (UC-06), dùng chung cho archive-tin_tuc.php (tất cả) và taxonomy-chuyen_muc.php (một chuyên mục).
- * Bộ lọc là các liên kết thật tới trang chuyên mục (không phải nút + JS): chia sẻ được, công cụ tìm kiếm thấy được.
- * Mới nhất trước, 9 bài mỗi trang (inc/query.php). Chuyên mục rỗng: thông báo, vẫn giữ bộ lọc và mục đang chọn (4a).
- *
- * @var object|null $args['term'] Thuật ngữ chuyen_muc; null = tất cả.
- *
- * @package vgarco
- */
 
 defined( 'ABSPATH' ) || exit;
 
@@ -52,7 +43,7 @@ vgarco_breadcrumb( $trail );
 						<?php if ( $item['image_id'] > 0 ) : ?>
 							<figure>
 								<?php
-								echo vgarco_image( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- markup ảnh của WordPress.
+								echo vgarco_image(
 									$item['image_id'],
 									array(
 										'size'  => 'vg-480',
@@ -77,7 +68,7 @@ vgarco_breadcrumb( $trail );
 							<?php if ( '' !== $item['topic'] ) : ?>
 								<small><?php echo esc_html( $item['topic'] ); ?></small>
 							<?php endif; ?>
-							<span class="row-arrow" aria-hidden="true"><?php echo vgarco_icon( 'arrow-up-right' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
+							<span class="row-arrow" aria-hidden="true"><?php echo vgarco_icon( 'arrow-up-right' ); ?></span>
 						</div>
 					</a>
 				</article>
@@ -85,7 +76,7 @@ vgarco_breadcrumb( $trail );
 		</div>
 
 		<?php
-		echo vgarco_pagination( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- đã thoát trong hàm.
+		echo vgarco_pagination(
 			$paged,
 			$pages,
 			static fn( int $page ): string => (string) get_pagenum_link( $page )

@@ -1,9 +1,4 @@
 <?php
-/**
- * Danh mục dự án theo một loại công trình (UC-04). Nội dung ở template-parts/catalogue.php.
- *
- * @package vgarco
- */
 
 defined( 'ABSPATH' ) || exit;
 

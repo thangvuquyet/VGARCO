@@ -12,10 +12,10 @@ $page_url = (string) get_permalink( $id );
 $all      = vgarco_open_jobs();
 $filters  = vgarco_job_filters( $all );
 
-$q_raw = isset( $_GET['q'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['q'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- bộ lọc công khai, chỉ đọc.
+$q_raw = isset( $_GET['q'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['q'] ) ) : '';
 $query = mb_substr( $q_raw, 0, 100 );
-$loc   = isset( $_GET['noi-lam-viec'] ) ? sanitize_key( wp_unslash( (string) $_GET['noi-lam-viec'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-$dept  = isset( $_GET['phong-ban'] ) ? sanitize_key( wp_unslash( (string) $_GET['phong-ban'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+$loc   = isset( $_GET['noi-lam-viec'] ) ? sanitize_key( wp_unslash( (string) $_GET['noi-lam-viec'] ) ) : '';
+$dept  = isset( $_GET['phong-ban'] ) ? sanitize_key( wp_unslash( (string) $_GET['phong-ban'] ) ) : '';
 $loc   = isset( $filters['locations'][ $loc ] ) ? $loc : '';
 $dept  = isset( $filters['departments'][ $dept ] ) ? $dept : '';
 
@@ -35,7 +35,7 @@ vgarco_breadcrumb(
 <section class="career-intro on-dark">
 	<?php if ( $hero > 0 ) : ?>
 		<?php
-		echo vgarco_image( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- markup ảnh của WordPress.
+		echo vgarco_image(
 			$hero,
 			array(
 				'size'     => 'vg-1600',
@@ -49,10 +49,10 @@ vgarco_breadcrumb(
 	<?php endif; ?>
 	<div class="wrap career-intro-inner">
 		<p class="eyebrow"><?php echo esc_html( vgarco_field_text( 'hero_nhan', __( 'Cơ hội nghề nghiệp', 'vgarco' ), $id ) ); ?></p>
-		<h1><?php echo vgarco_field_heading( 'hero_tieu_de', __( "Chọn công việc.\n<em>Cùng tạo dấu ấn.</em>", 'vgarco' ), $id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- đã lọc trong vgarco_heading(). ?></h1>
+		<h1><?php echo vgarco_field_heading( 'hero_tieu_de', __( "Chọn công việc.\n<em>Cùng tạo dấu ấn.</em>", 'vgarco' ), $id ); ?></h1>
 		<div class="career-intro-caption">
 			<span><?php echo esc_html( vgarco_field_text( 'hero_chu_thich_nho', __( 'VGARCO / People & Practice', 'vgarco' ), $id ) ); ?></span>
-			<strong><?php echo vgarco_field_lines( 'hero_chu_thich', __( "Cùng làm nghề.\nCùng tạo giá trị.", 'vgarco' ), $id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- đã thoát trong vgarco_lines(). ?></strong>
+			<strong><?php echo vgarco_field_lines( 'hero_chu_thich', __( "Cùng làm nghề.\nCùng tạo giá trị.", 'vgarco' ), $id ); ?></strong>
 		</div>
 	</div>
 </section>
@@ -110,7 +110,7 @@ vgarco_breadcrumb(
 			<?php foreach ( $all as $job ) : ?>
 				<?php
 				$shown   = in_array( $job['id'], array_column( $jobs, 'id' ), true );
-				$number += $shown ? 1 : 0; // số thứ tự chỉ đếm các vị trí đang hiển thị
+				$number += $shown ? 1 : 0;
 				?>
 				<article class="job-card"<?php echo $shown ? '' : ' hidden'; ?>
 					data-search="<?php echo esc_attr( $job['search'] ); ?>" data-location="<?php echo esc_attr( $job['location']['slug'] ); ?>" data-department="<?php echo esc_attr( $job['department']['slug'] ); ?>">
@@ -130,7 +130,7 @@ vgarco_breadcrumb(
 					</div>
 					<a class="job-detail-button" href="<?php echo esc_url( $job['url'] ); ?>" aria-label="<?php echo esc_attr( sprintf( /* translators: %s: tên vị trí */ __( 'Xem chi tiết: %s', 'vgarco' ), $job['title'] ) ); ?>">
 						<span><?php esc_html_e( 'Xem chi tiết', 'vgarco' ); ?></span>
-						<span class="job-detail-arrow" aria-hidden="true"><?php echo vgarco_icon( 'arrow-up-right' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
+						<span class="job-detail-arrow" aria-hidden="true"><?php echo vgarco_icon( 'arrow-up-right' ); ?></span>
 					</a>
 				</article>
 			<?php endforeach; ?>
@@ -138,7 +138,7 @@ vgarco_breadcrumb(
 			<div class="jobs-empty" data-job-empty<?php echo $jobs ? ' hidden' : ''; ?>>
 				<h3><?php esc_html_e( 'Chưa tìm thấy vị trí phù hợp', 'vgarco' ); ?></h3>
 				<p><?php esc_html_e( 'Thử từ khóa khác hoặc bỏ bớt điều kiện lọc.', 'vgarco' ); ?></p>
-				<a class="text-link" href="<?php echo esc_url( $page_url ); ?>" data-job-reset><?php esc_html_e( 'Xem tất cả vị trí', 'vgarco' ); ?> <?php echo vgarco_icon( 'arrow-up-right' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></a>
+				<a class="text-link" href="<?php echo esc_url( $page_url ); ?>" data-job-reset><?php esc_html_e( 'Xem tất cả vị trí', 'vgarco' ); ?> <?php echo vgarco_icon( 'arrow-up-right' ); ?></a>
 			</div>
 		</div>
 	<?php else : ?>
@@ -156,7 +156,7 @@ vgarco_breadcrumb(
 			<h2><?php echo esc_html( vgarco_field_text( 'connect_tieu_de', __( 'Chưa thấy vị trí phù hợp?', 'vgarco' ), $id ) ); ?></h2>
 			<p><?php echo esc_html( vgarco_field_text( 'connect_mo_ta', __( 'Bạn có thể gửi hồ sơ giới thiệu qua email để kết nối với đội ngũ VGARCO.', 'vgarco' ), $id ) ); ?></p>
 		</div>
-		<a class="text-link" href="<?php echo esc_url( 'mailto:' . $mail ); ?>"><?php echo esc_html( $mail ); ?> <?php echo vgarco_icon( 'arrow-up-right' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></a>
+		<a class="text-link" href="<?php echo esc_url( 'mailto:' . $mail ); ?>"><?php echo esc_html( $mail ); ?> <?php echo vgarco_icon( 'arrow-up-right' ); ?></a>
 	</section>
 <?php endif; ?>
 

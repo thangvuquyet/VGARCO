@@ -1,6 +1,3 @@
-// Kết xuất bộ trang chuẩn (dữ liệu mặc định của tests/php/fixtures.php) ra tests/out/ để kiểm tra trên trình duyệt:
-// trợ năng bằng axe-core (xem tests/a11y.md), đo hình học, thử JS.
-//   node tests/render-all.mjs            in danh sách đường dẫn (mở qua tests/serve.mjs)
 import { spawnSync } from 'node:child_process';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -42,10 +39,8 @@ if ( process.argv[ 1 ] === fileURLToPath( import.meta.url ) ) {
 		}
 		out.push( alias ?? file );
 		if ( alias ) {
-			// render.php ghi ra tên theo mẫu; bản tiếng Đức ghi đè bản tiếng Việt nên đổi tên ngay.
 			const fs = await import( 'node:fs' );
 			fs.copyFileSync( join( root, 'tests', 'out', file ), join( root, 'tests', 'out', alias ) );
-			// kết xuất lại bản tiếng Việt để tệp gốc đúng ngôn ngữ
 			spawnSync( php, [ ...args, '-d', 'extension=mbstring', join( root, 'tests', 'php', 'render.php' ), 'vi', template ], { env: { ...process.env, VG_FX_ABS: '1', ...env }, encoding: 'utf8' } );
 		}
 	}

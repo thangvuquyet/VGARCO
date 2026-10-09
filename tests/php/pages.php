@@ -1,10 +1,4 @@
 <?php
-/**
- * Kiểm thử cấu trúc HTML của các mẫu trang: chạy render.php cho từng mẫu (có nội dung và trạng thái rỗng),
- * phân tích bằng DOM rồi kiểm tra các yêu cầu của đặc tả (một H1, ảnh LCP, alt, trường trống tự ẩn...).
- *
- *   php -d extension_dir=<ext> -d extension=mbstring tests/php/pages.php
- */
 
 error_reporting( E_ALL );
 define( 'ROOT', dirname( __DIR__, 2 ) );
@@ -21,14 +15,6 @@ function same( string $label, $expected, $actual ): void {
 	check( $label . ' — mong đợi ' . var_export( $expected, true ) . ', nhận ' . var_export( $actual, true ), $expected === $actual );
 }
 
-/**
- * Kết xuất một mẫu bằng render.php trong tiến trình con, trả về DOMXPath.
- *
- * @param string $template Tên mẫu (front-page, ...).
- * @param bool   $empty    true = website chưa có nội dung.
- * @param string $lang     vi | de
- * @param array  $env      Biến môi trường thêm cho render.php (VG_FX_TERM, VG_FX_ID, VG_FX_NO_BUILT...).
- */
 function render( string $template, bool $empty = false, string $lang = 'vi', array $env = array() ): DOMXPath {
 	$names  = array( 'index' => 'frame', 'front-page' => 'home' );
 	$suffix = ( ! empty( $env['VG_FX_TERM'] ) ? '-' . $env['VG_FX_TERM'] : '' ) . ( ! empty( $env['VG_FX_ID'] ) ? '-' . $env['VG_FX_ID'] : '' );
@@ -69,7 +55,6 @@ function cls( string $c ): string {
 	return "contains(concat(' ', normalize-space(@class), ' '), ' {$c} ')";
 }
 
-/** Kiểm tra chung cho mọi trang. */
 function common_checks( DOMXPath $x, string $name ): void {
 	same( "{$name}: đúng một H1", 1, q( $x, '//h1' )->length );
 
@@ -79,7 +64,6 @@ function common_checks( DOMXPath $x, string $name ): void {
 	}
 	same( "{$name}: không trùng id", array(), array_keys( array_filter( array_count_values( $ids ), static fn( $c ) => $c > 1 ) ) );
 
-	// Ảnh trong hộp thoại (xem ảnh lớn) do JS điền và chỉ hiện khi mở: không có kích thước cố định, không gây nhảy bố cục.
 	$bad_img = 0;
 	foreach ( q( $x, '//img[not(ancestor::dialog)]' ) as $img ) {
 		if ( ! $img->hasAttribute( 'alt' ) || ! $img->hasAttribute( 'width' ) || ! $img->hasAttribute( 'height' ) ) {
@@ -88,7 +72,6 @@ function common_checks( DOMXPath $x, string $name ): void {
 	}
 	same( "{$name}: mọi ảnh có alt, width, height (không nhảy bố cục — CLS)", 0, $bad_img );
 
-	// Liên kết #neo phải có đích.
 	$broken = array();
 	foreach ( q( $x, '//a[starts-with(@href, "#") and string-length(@href) > 1]' ) as $a ) {
 		$target = substr( $a->getAttribute( 'href' ), 1 );
@@ -98,7 +81,6 @@ function common_checks( DOMXPath $x, string $name ): void {
 	}
 	same( "{$name}: liên kết neo đều có đích", array(), $broken );
 
-	// Nút chỉ chứa biểu tượng phải có tên đọc được.
 	$nameless = 0;
 	foreach ( q( $x, '//button' ) as $b ) {
 		if ( '' === trim( $b->textContent ) && '' === $b->getAttribute( 'aria-label' ) ) {
@@ -107,7 +89,6 @@ function common_checks( DOMXPath $x, string $name ): void {
 	}
 	same( "{$name}: nút không chữ đều có aria-label", 0, $nameless );
 
-	// Thứ tự tiêu đề (WCAG 1.3.1 / axe heading-order): không nhảy cấp (h1 → h3). Hộp thoại ngoài <main> được bỏ qua.
 	$level = 0;
 	$skips = array();
 	foreach ( q( $x, '//main//*[self::h1 or self::h2 or self::h3 or self::h4 or self::h5 or self::h6][not(ancestor::dialog)]' ) as $h ) {
@@ -119,11 +100,9 @@ function common_checks( DOMXPath $x, string $name ): void {
 	}
 	same( "{$name}: tiêu đề không nhảy cấp", array(), $skips );
 
-	// UC-10 2a: khung thông báo "nội dung đang được dịch" có sẵn nhưng ẩn (JS chỉ mở khi người dùng vừa chuyển sang trang chưa có bản dịch).
 	$notice = q( $x, '//main/div[@data-lang-notice]' );
 	check( "{$name}: khung thông báo chuyển ngôn ngữ ẩn sẵn, có role=status, có chữ và nút đóng có tên", 1 === $notice->length && $notice->item( 0 )->hasAttribute( 'hidden' ) && 'status' === $notice->item( 0 )->getAttribute( 'role' ) && '' !== trim( $notice->item( 0 )->textContent ) && 1 === q( $x, '//main/div[@data-lang-notice]/button[@data-lang-notice-close and string-length(@aria-label) > 0]' )->length );
 
-	// SEO: tối đa một canonical và một mô tả; mọi khối JSON-LD là JSON hợp lệ có @context.
 	same( "{$name}: tối đa một thẻ canonical", true, q( $x, '//link[@rel="canonical"]' )->length <= 1 );
 	same( "{$name}: tối đa một meta description", true, q( $x, '//meta[@name="description"]' )->length <= 1 );
 	$bad_ld = 0;
@@ -135,7 +114,6 @@ function common_checks( DOMXPath $x, string $name ): void {
 	}
 	same( "{$name}: mọi khối JSON-LD là JSON hợp lệ", 0, $bad_ld );
 
-	// Tìm kiếm (UC-09): nút ở đầu trang là liên kết dự phòng (không JS vẫn đi được), hộp thoại nằm ngoài <main>.
 	$opener = q( $x, '//header//a[@data-vg-search-open]' );
 	check( "{$name}: nút tìm kiếm là liên kết có địa chỉ và tên đọc được", 1 === $opener->length && '' !== $opener->item( 0 )->getAttribute( 'href' ) && '' !== $opener->item( 0 )->getAttribute( 'aria-label' ) );
 	$dialog = q( $x, '//dialog[@id="search-dialog"]' );
@@ -154,8 +132,6 @@ function common_checks( DOMXPath $x, string $name ): void {
 	}
 }
 
-/* ========================= Trang chủ, có nội dung ========================= */
-
 $x = render( 'front-page' );
 common_checks( $x, 'trang chủ' );
 
@@ -171,7 +147,6 @@ same( 'hero: đúng một chú thích hiển thị', 1, q( $x, '//*[' . cls( 'sh
 check( 'hero: liên kết chú thích trỏ tới dự án', q( $x, '//a[' . cls( 'hero-project-link' ) . ']' )->item( 0 )->getAttribute( 'href' ) === '/du-an/101/' );
 check( 'hero: nhãn đường dẫn "Từ bản vẽ" trỏ tới #du-an', 1 === q( $x, '//a[' . cls( 'hero-process-rail' ) . ' and @href="#du-an"]' )->length );
 
-// Chấm chọn ảnh của hero (như bản đầu của theme): một nút cho mỗi ảnh, ẩn tới khi home.js chạy, đúng một nút đang chọn.
 $dots = q( $x, '//*[@data-hero-dots]//button[@data-hero-dot]' );
 same( 'hero: mỗi ảnh một chấm chọn', 3, $dots->length );
 same( 'hero: nhóm chấm có nhãn đọc được và vai trò group', array( 'group', 'Chọn ảnh trình chiếu' ), array( q( $x, '//*[@data-hero-dots]' )->item( 0 )->getAttribute( 'role' ), q( $x, '//*[@data-hero-dots]' )->item( 0 )->getAttribute( 'aria-label' ) ) );
@@ -183,7 +158,6 @@ check( 'hero: nhóm chấm khai báo on-dark để vòng tiêu điểm đổi sa
 $one = render( 'front-page', false, 'vi', array( 'VG_FX_ONE_FEATURED' => '1' ) );
 same( 'hero một ảnh: có 1 ảnh', 1, q( $one, '//*[' . cls( 'showcase-images' ) . ']/img' )->length );
 same( 'hero một ảnh: không có chấm chọn ảnh (không có gì để chọn)', 0, q( $one, '//*[@data-hero-dots]' )->length );
-// Bản dịch tiếng Đức của nhãn chấm kiểm ở tests/i18n.mjs (mọi chuỗi phải có bản dịch) và tests/php/gettext.php (.mo khớp .po); trình kết xuất giả ở đây không nạp .mo.
 
 $toggle = q( $x, '//button[' . cls( 'motion-toggle' ) . ']' )->item( 0 );
 check( 'nút dừng: có aria-pressed=false ban đầu', null !== $toggle && 'false' === $toggle->getAttribute( 'aria-pressed' ) );
@@ -213,13 +187,10 @@ check( 'tin tức: mới nhất trước', str_contains( q( $x, '(//*[' . cls( '
 check( 'CTA: nền đỏ khai báo on-dark để vòng tiêu điểm đổi sang trắng', 1 === q( $x, '//section[' . cls( 'page-cta' ) . ' and ' . cls( 'on-dark' ) . ']' )->length );
 check( 'CTA: hai liên kết tới trang Liên hệ', 2 === q( $x, '//section[' . cls( 'page-cta' ) . ']//a[@href="/lien-he/"]' )->length );
 
-// Ngôn ngữ: bản tiếng Đức chưa có bản dịch thì hiện chuỗi gốc (không rỗng, không lỗi).
 $de = render( 'front-page', false, 'de' );
 common_checks( $de, 'trang chủ tiếng Đức' );
 same( 'trang chủ tiếng Đức: hộp thoại tìm kiếm gửi lang=de', 'de', q( $de, '//dialog[@id="search-dialog"]' )->item( 0 )->getAttribute( 'data-lang' ) );
 check( 'trang chủ tiếng Đức: vẫn đủ nội dung (chuỗi chưa dịch giữ tiếng Việt)', 1 === q( $de, '//h1' )->length && q( $de, '//h1' )->item( 0 )->textContent !== '' );
-
-/* ========================= Trang chủ, website mới cài ========================= */
 
 $e = render( 'front-page', true );
 common_checks( $e, 'trang chủ rỗng' );
@@ -230,8 +201,6 @@ same( 'rỗng: ẩn khối đối tác', 0, q( $e, '//*[' . cls( 'partners-strip
 same( 'rỗng: ẩn khối tin tức (UC-01 8a)', 0, q( $e, '//*[' . cls( 'home-news' ) . ']' )->length );
 check( 'rỗng: các khối còn lại vẫn có (giới thiệu, dải chữ, CTA)', 1 === q( $e, '//*[' . cls( 'home-about' ) . ']' )->length && 1 === q( $e, '//*[' . cls( 'marquee' ) . ']' )->length && 1 === q( $e, '//*[' . cls( 'page-cta' ) . ']' )->length );
 check( 'rỗng: chỉ số dùng mặc định trong mã (13+, 03, 06)', 3 === q( $e, '//*[' . cls( 'home-facts' ) . ']/p' )->length );
-
-/* ========================= Danh mục dự án (UC-04) ========================= */
 
 $c = render( 'archive-du_an' );
 common_checks( $c, 'danh mục' );
@@ -260,7 +229,6 @@ same( 'câu chuyện: nút chuyển mang nhãn chú thích (dịch được) tro
 same( 'câu chuyện: liên kết "Khám phá" trỏ tới trang dự án được chọn (Bảo tàng)', 1, q( $c, '//section[' . cls( 'project-story' ) . ']//a[' . cls( 'story-link' ) . ' and @href="/du-an/106/"]' )->length );
 check( 'câu chuyện: dòng nhãn ghép "Câu chuyện một công trình / năm"', str_contains( q( $c, '//section[' . cls( 'project-story' ) . ']//p[' . cls( 'eyebrow' ) . ']' )->item( 0 )->textContent, 'Câu chuyện một công trình / 2019–2020' ) );
 
-// Dự án chưa có ảnh riêng (để trống có chủ ý): thẻ vẫn còn đủ chữ và liên kết, nhưng không có thẻ ảnh và không treo nhãn loại ảnh trên ô trống.
 $bl     = render( 'archive-du_an', false, 'vi', array( 'VG_FX_BLANK' => '108' ) );
 $bl_art = '//*[' . cls( 'catalogue-grid' ) . ']/article[.//a[@href="/du-an/108/"]]';
 same( 'danh mục có dự án chưa có ảnh: vẫn đủ 19 thẻ', 19, q( $bl, '//*[' . cls( 'catalogue-grid' ) . ']/article' )->length );
@@ -268,16 +236,13 @@ same( 'danh mục có dự án chưa có ảnh: thẻ trống không có ảnh v
 same( 'danh mục có dự án chưa có ảnh: thẻ trống vẫn có tiêu đề và vùng ảnh (giữ nhịp lưới)', array( 1, 1 ), array( q( $bl, $bl_art . '//h3' )->length, q( $bl, $bl_art . '//*[' . cls( 'project-photo' ) . ']' )->length ) );
 same( 'danh mục có dự án chưa có ảnh: 18 thẻ còn lại giữ nhãn loại ảnh', 18, q( $bl, '//*[' . cls( 'catalogue-grid' ) . ']//*[' . cls( 'image-label' ) . ']' )->length );
 
-// Thiếu ảnh công trình: chỉ còn ảnh phối cảnh, không có nút chuyển (UC-04 6b).
 $nb =render( 'archive-du_an', false, 'vi', array( 'VG_FX_NO_BUILT' => '1' ) );
 same( 'câu chuyện thiếu ảnh công trình: một ảnh', 1, q( $nb, '//img[' . cls( 'story-image' ) . ']' )->length );
 same( 'câu chuyện thiếu ảnh công trình: ẩn nút chuyển', 0, q( $nb, '//*[' . cls( 'story-switch' ) . ']' )->length );
 
-// Dự án được chọn cho khối câu chuyện đã gỡ về bản nháp: khối tự ẩn, không lỗi, không lộ dự án chưa xuất bản.
 $dr = render( 'archive-du_an', false, 'vi', array( 'VG_FX_STORY_DRAFT' => '1' ) );
 same( 'câu chuyện: dự án chưa xuất bản thì ẩn cả khối', 0, q( $dr, '//section[' . cls( 'project-story' ) . ']' )->length );
 
-// Một loại công trình: lưới đều, không có khối câu chuyện, đường dẫn 3 cấp.
 $f = render( 'taxonomy-loai_cong_trinh', false, 'vi', array( 'VG_FX_TERM' => 'giao-duc' ) );
 common_checks( $f, 'danh mục theo loại' );
 same( 'theo loại: 7 thẻ (chỉ các dự án của loại đó)', 7, q( $f, '//*[' . cls( 'catalogue-grid' ) . ']/article' )->length );
@@ -290,7 +255,6 @@ same( 'theo loại: đường dẫn 3 cấp', array( 'Trang chủ', 'Dự án', 
 same( 'theo loại: cấp giữa của đường dẫn là liên kết về /du-an/', 1, q( $f, '//nav[' . cls( 'breadcrumb' ) . ']//a[@href="/du-an/"]' )->length );
 same( 'theo loại: mọi thẻ đều thuộc loại giáo dục (dòng meta)', 7, q( $f, '//*[' . cls( 'catalogue-grid' ) . ']//*[' . cls( 'project-meta' ) . ']/span[contains(., "Giáo dục & đào tạo")]' )->length );
 
-// Loại chưa có dự án nào: thông báo và đường về danh mục (UC-04 5b), không lưới trống, không số lượng.
 $z = render( 'taxonomy-loai_cong_trinh', false, 'vi', array( 'VG_FX_TERM' => 'y-te' ) );
 common_checks( $z, 'loại rỗng' );
 same( 'loại rỗng: không có dòng "Đang hiển thị" (đã có thông báo rỗng)', 0, q( $z, '//p[' . cls( 'sr-only' ) . ' and @role="status"]' )->length );
@@ -299,16 +263,12 @@ same( 'loại rỗng: có thông báo', 1, q( $z, '//*[' . cls( 'catalogue-empty
 same( 'loại rỗng: liên kết "Xem tất cả dự án" về /du-an/', 1, q( $z, '//*[' . cls( 'catalogue-empty' ) . ']//a[@href="/du-an/"]' )->length );
 same( 'loại rỗng: không hiện số lượng "0 dự án"', 0, q( $z, '//*[' . cls( 'project-head-meta' ) . ']//span' )->length );
 
-// Website mới cài: không có dự án — trang vẫn dùng được, không có khối câu chuyện.
 $ce = render( 'archive-du_an', true );
 common_checks( $ce, 'danh mục rỗng' );
 same( 'danh mục rỗng: có thông báo, không có lưới', array( 1, 0 ), array( q( $ce, '//*[' . cls( 'catalogue-empty' ) . ']' )->length, q( $ce, '//*[' . cls( 'catalogue-grid' ) . ']' )->length ) );
 same( 'danh mục rỗng: không có liên kết "Xem tất cả" (đang ở trang tất cả)', 0, q( $ce, '//*[' . cls( 'catalogue-empty' ) . ']//a' )->length );
 same( 'danh mục rỗng: không có khối câu chuyện', 0, q( $ce, '//section[' . cls( 'project-story' ) . ']' )->length );
 
-/* ========================= Chi tiết dự án (UC-05) ========================= */
-
-// 106 = Bảo tàng: đủ thông tin, hai ảnh thư viện, vị trí thứ 6/19.
 $d = render( 'single-du_an', false, 'vi', array( 'VG_FX_ID' => '106' ) );
 common_checks( $d, 'chi tiết dự án' );
 same( 'chi tiết: h1 là tên dự án', 'Bảo tàng Lịch sử Quân đội nhân dân Lào', trim( q( $d, '//h1' )->item( 0 )->textContent ) );
@@ -347,7 +307,6 @@ check( 'thư viện: khung trình chiếu focus được bằng bàn phím và c
 same( 'thư viện: có vùng thông báo cho trình đọc màn hình khi đổi ảnh', 1, q( $d, '//*[@data-gallery-status and @aria-live="polite"]' )->length );
 check( 'thư viện: định dạng thông báo lấy từ thuộc tính (dịch được)', str_contains( q( $d, '//section[@data-gallery]' )->item( 0 )->getAttribute( 'data-status' ), '%1$d' ) );
 check( 'thư viện: hộp xem ảnh lớn là <dialog> có nhãn; mọi nút trong đó có tên (đóng, trước, sau)', 1 === q( $d, '//dialog[@data-gallery-lightbox and @aria-label != ""]' )->length && 3 === q( $d, '//dialog[@data-gallery-lightbox]//button[@aria-label != ""]' )->length && 0 === q( $d, '//dialog[@data-gallery-lightbox]//button[not(@aria-label) or @aria-label = ""]' )->length );
-// Thư viện TỰ CHẠY (6,5 s, 06/10/2026) nên bắt buộc có cách tạm dừng ngay trong khung (WCAG 2.2.2). Tự chạy do JS quyết định, máy chủ không đặt thuộc tính nào.
 $toggle = q( $d, '//*[@data-gallery-stage]/button[@data-gallery-toggle]' );
 same( 'thư viện: có đúng một nút tạm dừng tự chạy trong khung trình chiếu (WCAG 2.2.2)', 1, $toggle->length );
 check( 'thư viện: nút tạm dừng ẩn tới khi JS sẵn sàng, aria-pressed=false, type=button', 1 === $toggle->length && $toggle->item( 0 )->hasAttribute( 'hidden' ) && 'false' === $toggle->item( 0 )->getAttribute( 'aria-pressed' ) && 'button' === $toggle->item( 0 )->getAttribute( 'type' ) );
@@ -359,12 +318,10 @@ same( 'dự án tiếp theo: có khối, nền tối khai báo on-dark', 1, q( $
 check( 'dự án tiếp theo: dự án kế trong danh mục (Biệt thự Niedernhausen)', 1 === q( $d, '//a[' . cls( 'project-next-link' ) . ' and @href="/du-an/107/"]' )->length );
 same( 'dự án tiếp theo: dòng meta gồm loại và địa điểm', array( 'Nhà ở & công trình dân dụng', 'Niedernhausen, CHLB Đức' ), array_map( static fn( $x ) => trim( $x->textContent ), iterator_to_array( q( $d, '//*[' . cls( 'project-next-meta' ) . ']/span' ) ) ) );
 
-// 119 = dự án cuối danh mục: "tiếp theo" quay về dự án đầu (UC-05 8a).
 $last = render( 'single-du_an', false, 'vi', array( 'VG_FX_ID' => '119' ) );
 check( 'dự án cuối: "tiếp theo" quay về dự án đầu tiên', 1 === q( $last, '//a[' . cls( 'project-next-link' ) . ' and @href="/du-an/101/"]' )->length );
 check( 'dự án cuối: vị trí 19 / 19', str_contains( q( $last, '//p[' . cls( 'project-detail-index' ) . ']/span[' . cls( 'sr-only' ) . ']' )->item( 0 )->textContent, 'Dự án thứ 19 trong 19 dự án' ) );
 
-// 104 = Đài kiểm soát không lưu: đủ chủ đầu tư/đối tác, không có ảnh thư viện.
 $t = render( 'single-du_an', false, 'vi', array( 'VG_FX_ID' => '104' ) );
 common_checks( $t, 'chi tiết không thư viện' );
 same( 'không thư viện: ẩn cả khối (UC-05 4a)', 0, q( $t, '//section[' . cls( 'project-detail-gallery' ) . ']' )->length );
@@ -373,7 +330,6 @@ $np = render( 'single-du_an', false, 'vi', array( 'VG_FX_ID' => '104', 'VG_FX_HI
 same( 'chưa công bố chủ đầu tư: ẩn Chủ đầu tư và Đối tác (mục 3.2 #8)', array( 'Địa điểm', 'Thời gian', 'Vai trò VGARCO' ), array_map( static fn( $x ) => trim( $x->textContent ), iterator_to_array( q( $np, '//aside//dt' ) ) ) );
 check( 'chưa công bố chủ đầu tư: tên đơn vị không lọt vào HTML ở bất kỳ chỗ nào', ! str_contains( (string) file_get_contents( ROOT . '/tests/out/single-du_an-104.html' ), 'Quản lý bay Miền Bắc' ) );
 
-// 109 = Dự án Bản Còn: không có địa điểm, năm, chủ đầu tư, vai trò → không có cột thông tin, không có phạm vi.
 $b = render( 'single-du_an', false, 'vi', array( 'VG_FX_ID' => '109' ) );
 common_checks( $b, 'chi tiết thiếu thông tin' );
 same( 'thiếu thông tin: không có cột thông tin dự án', 0, q( $b, '//aside' )->length );
@@ -381,7 +337,6 @@ same( 'thiếu thông tin: không có khối phạm vi tham gia', 0, q( $b, '//*
 same( 'thiếu thông tin: vẫn có phần mô tả', 1, q( $b, '//*[' . cls( 'project-detail-copy' ) . ']/div[' . cls( 'entry-content' ) . ']' )->length );
 same( 'thiếu thông tin: ảnh bìa không có địa điểm thì chú thích dùng tên loại công trình', 'Văn hóa & di tích', trim( q( $b, '//figure[' . cls( 'project-detail-cover' ) . ']/figcaption/span[2]' )->item( 0 )->textContent ) );
 
-// 111 = Cục Biên phòng: chỉ một ảnh thư viện → không có nút chuyển, số đếm, ảnh nhỏ; vẫn phóng to được.
 $one = render( 'single-du_an', false, 'vi', array( 'VG_FX_ID' => '111' ) );
 common_checks( $one, 'chi tiết một ảnh' );
 same( 'một ảnh: đúng 1 ảnh trong thư viện', 1, q( $one, '//figure[@data-gallery-slide]' )->length );
@@ -391,9 +346,6 @@ same( 'một ảnh: vẫn có nút phóng to và hộp xem ảnh lớn', array( 
 same( 'một ảnh: hộp xem ảnh lớn không có nút trước/sau', 0, q( $one, '//dialog//button[@data-lightbox-prev or @data-lightbox-next]' )->length );
 same( 'một ảnh: chú thích không có số thứ tự "01"', 0, q( $one, '//*[' . cls( 'gallery-caption-index' ) . ']' )->length );
 
-/* ========================= Về công ty (UC-02) ========================= */
-
-// Cài mới: chưa nhập gì — chữ mặc định đủ, ảnh và khối ghi nhận ẩn.
 $a = render( 'templates/about', false, 'vi', array( 'VG_FX_ID' => '501' ) );
 common_checks( $a, 'về công ty' );
 check( 'về công ty: trang thuộc module "about" (data-vg-page)', 1 === q( $a, '//body[@data-vg-page="about"]' )->length );
@@ -414,7 +366,6 @@ same( 'về công ty: 3 quốc gia', array( 'Việt Nam', 'Lào', 'CHLB Đức' 
 same( 'về công ty: chưa nhập thì ẩn khối "Sự ghi nhận" (UC-02 2c)', 0, q( $a, '//section[' . cls( 'recognition' ) . ']' )->length );
 same( 'về công ty: không ảnh nào trên trang khi chưa chọn ảnh', 0, q( $a, '//main//img' )->length );
 
-// Biên tập viên đã chọn ảnh và nhập khối ghi nhận.
 $f2 = render( 'templates/about', false, 'vi', array( 'VG_FX_ID' => '501', 'VG_FX_PAGE_FULL' => '1' ) );
 common_checks( $f2, 'về công ty đủ ảnh' );
 $cover2 = q( $f2, '//figure[' . cls( 'about-cover' ) . ']/img' )->item( 0 );
@@ -431,7 +382,6 @@ check( 'ghi nhận: khối gắn nhãn bằng tiêu đề của nó', 1 === q( $
 $f3 = render( 'templates/about', false, 'vi', array( 'VG_FX_ID' => '501', 'VG_FX_PAGE_FULL' => '1', 'VG_FX_NO_AWARD_POST' => '1' ) );
 same( 'ghi nhận: không chọn bài viết thì ẩn nút nhưng giữ khối', array( 1, 0 ), array( q( $f3, '//section[@id="ghi-nhan"]' )->length, q( $f3, '//section[@id="ghi-nhan"]//a' )->length ) );
 
-// Biên tập viên ghi đè chữ: bản nhập luôn thắng bản mặc định; dòng trống bị bỏ; nội dung độc hại bị chặn.
 $o = render( 'templates/about', false, 'vi', array( 'VG_FX_ID' => '501', 'VG_FX_PAGE_OVERRIDE' => '1' ) );
 check( 'ghi đè: tiêu đề do biên tập viên nhập thắng bản mặc định, giữ cụm nhấn', str_contains( trim( q( $o, '//h1' )->item( 0 )->textContent ), 'Tiêu đề do biên tập viên nhập.' ) && 1 === q( $o, '//h1/em' )->length );
 same( 'ghi đè: dòng lặp trống hoàn toàn bị bỏ — chỉ còn 1 mốc (không lẫn 4 mốc mặc định)', 1, q( $o, '//ol[' . cls( 'timeline' ) . ']/li' )->length );
@@ -440,9 +390,6 @@ same( 'an toàn: <img onerror> trong tiêu đề bị loại', 0, q( $o, '//img[
 same( 'an toàn: <script> trong ô chữ bị thoát, không thành thẻ script trong trang', 0, q( $o, '//main//script' )->length );
 check( 'an toàn: chữ "<b>đậm</b>" trong ô chữ hiển thị nguyên văn, không thành thẻ', 0 === q( $o, '//main//b' )->length && str_contains( q( $o, '//*[' . cls( 'masthead-bottom' ) . ']/p[1]' )->item( 0 )->textContent, '<b>đậm</b>' ) );
 
-/* ========================= Ban lãnh đạo, Phòng ban, Lĩnh vực, Liên hệ ========================= */
-
-// --- Ban lãnh đạo ---
 $l = render( 'templates/leadership', false, 'vi', array( 'VG_FX_ID' => '502' ) );
 common_checks( $l, 'ban lãnh đạo' );
 same( 'lãnh đạo: h1 chỉ dành cho trình đọc màn hình ("Ban lãnh đạo")', array( 'Ban lãnh đạo', 1 ), array( trim( q( $l, '//h1' )->item( 0 )->textContent ), q( $l, '//h1[' . cls( 'sr-only' ) . ']' )->length ) );
@@ -461,7 +408,6 @@ same( 'lãnh đạo: thành viên không có vai trò/trọng tâm thì ẩn kh�
 same( 'an toàn: <b> trong họ tên hiển thị nguyên văn, không thành thẻ', 0, q( $lo, '//main//b' )->length );
 same( 'lãnh đạo: nhập một nguyên tắc thì chỉ hiện một', 1, q( $lo, '//div[' . cls( 'leadership-principle-grid' ) . ']/article' )->length );
 
-// --- Phòng ban ---
 $d2 = render( 'templates/departments', false, 'vi', array( 'VG_FX_ID' => '503' ) );
 common_checks( $d2, 'phòng ban' );
 same( 'phòng ban: h1 có ngắt dòng và cụm nhấn', 1, q( $d2, '//h1[count(br)=1 and count(em)=1]' )->length );
@@ -473,7 +419,6 @@ $d3 = render( 'templates/departments', false, 'vi', array( 'VG_FX_ID' => '503', 
 same( 'phòng ban: bản nhập thắng — nhãn bỏ dòng trống và khoảng trắng', array( 'Thiết kế', 'Kỹ thuật' ), array_map( static fn( $n ) => trim( $n->textContent ), iterator_to_array( q( $d3, '//ul[' . cls( 'department-tags' ) . ']/li' ) ) ) );
 same( 'phòng ban: dòng bộ môn trống hoàn toàn bị bỏ, số thứ tự liền nhau', array( 'Bộ môn A', '01', 'Bộ môn B', '02' ), array( trim( q( $d3, '(//div[' . cls( 'discipline-matrix' ) . ']/article/h3)[1]' )->item( 0 )->textContent ), trim( q( $d3, '(//div[' . cls( 'discipline-matrix' ) . ']/article/span)[1]' )->item( 0 )->textContent ), trim( q( $d3, '(//div[' . cls( 'discipline-matrix' ) . ']/article/h3)[2]' )->item( 0 )->textContent ), trim( q( $d3, '(//div[' . cls( 'discipline-matrix' ) . ']/article/span)[2]' )->item( 0 )->textContent ) ) );
 
-// --- Lĩnh vực hoạt động ---
 $s = render( 'templates/services', false, 'vi', array( 'VG_FX_ID' => '504' ) );
 common_checks( $s, 'lĩnh vực' );
 check( 'lĩnh vực: trang thuộc module "services" (data-vg-page)', 1 === q( $s, '//body[@data-vg-page="services"]' )->length );
@@ -492,7 +437,6 @@ $se = render( 'templates/services', true, 'vi', array( 'VG_FX_ID' => '504' ) );
 common_checks( $se, 'lĩnh vực rỗng' );
 same( 'lĩnh vực: chưa có nhóm nào thì báo đang cập nhật, không có danh sách', array( 0, 1 ), array( q( $se, '//details' )->length, q( $se, '//*[' . cls( 'services-empty' ) . ']' )->length ) );
 
-// --- Liên hệ ---
 $c2 = render( 'templates/contact', false, 'vi', array( 'VG_FX_ID' => '505' ) );
 common_checks( $c2, 'liên hệ' );
 check( 'liên hệ: trang thuộc module "contact" (data-vg-page)', 1 === q( $c2, '//body[@data-vg-page="contact"]' )->length );
@@ -513,17 +457,13 @@ check( 'liên hệ: mẫu tiêu đề và nội dung email có chỗ điền và
 check( 'liên hệ: có vùng trạng thái cho trình đọc màn hình', 1 === q( $c2, '//*[@data-status and @role="status"]' )->length );
 same( 'liên hệ: không có thẻ script nội tuyến hay tài nguyên bên ngoài trong nội dung', 0, q( $c2, '//main//script | //main//*[starts-with(@src, "http") or starts-with(@href, "http")]' )->length );
 
-// Bài tư liệu và dự án tham khảo chưa xuất bản không được lộ ra công khai.
 $ad = render( 'templates/about', false, 'vi', array( 'VG_FX_ID' => '501', 'VG_FX_PAGE_FULL' => '1', 'VG_FX_AWARD_DRAFT' => '1' ) );
 same( 'ghi nhận: bài tư liệu chưa xuất bản thì ẩn nút, giữ khối', array( 1, 0 ), array( q( $ad, '//section[@id="ghi-nhan"]' )->length, q( $ad, '//section[@id="ghi-nhan"]//a' )->length ) );
 $rd = render( 'templates/services', false, 'vi', array( 'VG_FX_ID' => '504', 'VG_FX_REF_DRAFT' => '1' ) );
 same( 'lĩnh vực: dự án tham khảo chưa xuất bản bị bỏ — nhóm đó không có ảnh, khung ảnh dùng dự án kế tiếp', array( 0, 5, 'Phối cảnh thiết kế — Đài kiểm soát không lưu Đồng Hới' ), array( q( $rd, '//details[@id="thiet-ke-kien-truc" and @data-image]' )->length, q( $rd, '//details[@data-image]' )->length, q( $rd, '//figure[' . cls( 'service-image' ) . ']/img' )->item( 0 )->getAttribute( 'alt' ) ) );
 
-/* ========================= Tin tức (UC-06) ========================= */
-
 $titles = static fn( DOMXPath $d, string $expr ): array => array_map( static fn( $n ) => trim( $n->textContent ), iterator_to_array( q( $d, $expr ) ) );
 
-// --- Danh sách: tất cả ---
 $n1 = render( 'archive-tin_tuc' );
 common_checks( $n1, 'tin tức' );
 check( 'tin tức: trang thuộc module "news" (data-vg-page)', 1 === q( $n1, '//body[@data-vg-page="news"]' )->length );
@@ -536,7 +476,6 @@ same( 'tin tức: ảnh nhỏ lazy và alt rỗng (tiêu đề bên cạnh đã 
 same( 'tin tức: ít bài thì không có phân trang', 0, q( $n1, '//nav[' . cls( 'pagination' ) . ']' )->length );
 same( 'tin tức: mọi dòng là liên kết tới bài', 3, q( $n1, '//article[' . cls( 'news-row' ) . ']/a[starts-with(@href, "/tin-tuc/")]' )->length );
 
-// --- Phân trang: 23 bài = 3 trang, 9 bài mỗi trang ---
 $p1 = render( 'archive-tin_tuc', false, 'vi', array( 'VG_FX_NEWS_MANY' => '1' ) );
 same( 'phân trang: trang 1 có 9 bài', 9, q( $p1, '//article[' . cls( 'news-row' ) . ']' )->length );
 same( 'phân trang: trang 1 — có 1,2,3 và "→", không có "←"; trang hiện tại là chữ, không là liên kết', array( '1', '2', '3', '→' ), $titles( $p1, '//nav[' . cls( 'pagination' ) . ']//li' ) );
@@ -547,7 +486,6 @@ same( 'phân trang: trang 2 — 9 bài, có cả "←" và "→"', array( 9, '�
 $p3 = render( 'archive-tin_tuc', false, 'vi', array( 'VG_FX_NEWS_MANY' => '1', 'VG_FX_PAGED' => '3' ) );
 same( 'phân trang: trang cuối — 5 bài, có "←", không có "→"', array( 5, '←', 0 ), array( q( $p3, '//article[' . cls( 'news-row' ) . ']' )->length, $titles( $p3, '//nav[' . cls( 'pagination' ) . ']//li' )[0], q( $p3, '//nav[' . cls( 'pagination' ) . ']//a[@aria-label="Trang sau"]' )->length ) );
 
-// --- Theo chuyên mục ---
 $k = render( 'taxonomy-chuyen_muc', false, 'vi', array( 'VG_FX_TERM' => 'su-kien' ) );
 common_checks( $k, 'tin tức theo chuyên mục' );
 same( 'chuyên mục: chỉ bài của mục "Sự kiện"', array( 'Chia sẻ chuyên môn cùng đội ngũ VGARCO' ), $titles( $k, '//div[' . cls( 'news-list' ) . ']//h2' ) );
@@ -558,7 +496,6 @@ $ke = render( 'taxonomy-chuyen_muc', true, 'vi', array( 'VG_FX_TERM' => 'thong-t
 common_checks( $ke, 'chuyên mục rỗng' );
 same( 'chuyên mục rỗng: thông báo, giữ bộ lọc và mục đang chọn (UC-06 4a)', array( 1, 0, array( 'Thông tin báo chí' ) ), array( q( $ke, '//*[' . cls( 'news-empty' ) . ']' )->length, q( $ke, '//div[' . cls( 'news-list' ) . ']' )->length, $titles( $ke, '//nav[' . cls( 'news-filters' ) . ']//a[@aria-current="page"]' ) ) );
 
-// --- Chi tiết ---
 $a1 = render( 'single-tin_tuc', false, 'vi', array( 'VG_FX_ID' => '302' ) );
 common_checks( $a1, 'chi tiết tin' );
 check( 'chi tiết tin: trang thuộc module "article" (data-vg-page)', 1 === q( $a1, '//body[@data-vg-page="article"]' )->length );
@@ -578,11 +515,8 @@ same( 'bài đầu danh sách: không có "Bài trước", còn "Bài tiếp the
 $al = render( 'single-tin_tuc', false, 'vi', array( 'VG_FX_ID' => '301' ) );
 same( 'bài cuối danh sách: không có "Bài tiếp theo", còn "Bài trước" (UC-06 7a)', array( 1, 0 ), array( q( $al, '//a[' . cls( 'nav-prev' ) . ']' )->length, q( $al, '//a[' . cls( 'nav-next' ) . ']' )->length ) );
 
-/* ========================= Tuyển dụng (UC-07) và ứng tuyển (UC-08) ========================= */
-
 $card_titles = static fn( DOMXPath $d ): array => array_map( static fn( $n ) => trim( $n->textContent ), iterator_to_array( q( $d, '//article[' . cls( 'job-card' ) . ' and not(@hidden)]//h3' ) ) );
 
-// --- Danh sách ---
 $j = render( 'templates/careers', false, 'vi', array( 'VG_FX_ID' => '506' ) );
 common_checks( $j, 'tuyển dụng' );
 check( 'tuyển dụng: trang thuộc module "careers" (data-vg-page)', 1 === q( $j, '//body[@data-vg-page="careers"]' )->length );
@@ -599,7 +533,6 @@ check( 'tuyển dụng: biểu mẫu tìm là GET, có role=search, mọi ô có
 same( 'tuyển dụng: chưa lọc thì nút "Xóa bộ lọc" và thông báo rỗng đều ẩn', array( 1, 1 ), array( q( $j, '//a[@data-job-reset and ' . cls( 'job-reset' ) . ' and @hidden]' )->length, q( $j, '//div[@data-job-empty and @hidden]' )->length ) );
 check( 'tuyển dụng: khối "Chưa thấy vị trí phù hợp?" có liên kết mailto tới email chung', 1 === q( $j, '//section[' . cls( 'career-connect' ) . ']//a[@href="mailto:vgarco.cc@gmail.com"]' )->length );
 
-// --- Lọc bằng URL (không JS) ---
 $jf = render( 'templates/careers', false, 'vi', array( 'VG_FX_ID' => '506', 'VG_FX_GET' => 'q=kien+truc&noi-lam-viec=ha-noi' ) );
 same( 'lọc: "kien truc" (không dấu) + Hà Nội → chỉ Kiến trúc sư', array( 'Kiến trúc sư thiết kế' ), $card_titles( $jf ) );
 same( 'lọc: số lượng cập nhật "01", số thứ tự tính lại, ô nhập giữ giá trị, nơi làm việc được chọn', array( '01', 'kien truc', 'ha-noi' ), array( trim( q( $jf, '//p[@data-job-count]/strong' )->item( 0 )->textContent ), q( $jf, '//input[@name="q"]' )->item( 0 )->getAttribute( 'value' ), q( $jf, '//select[@name="noi-lam-viec"]/option[@selected]' )->item( 0 )->getAttribute( 'value' ) ) );
@@ -620,12 +553,10 @@ same( 'an toàn: từ khóa độc hại trong URL không thành thẻ script', 
 $jl = render( 'templates/careers', false, 'vi', array( 'VG_FX_ID' => '506', 'VG_FX_GET' => 'q=' . str_repeat( 'a', 300 ) ) );
 same( 'lọc: từ khóa dài bị cắt ở 100 ký tự', 100, strlen( q( $jl, '//input[@name="q"]' )->item( 0 )->getAttribute( 'value' ) ) );
 
-// --- Chưa có vị trí nào (UC-07 3a) ---
 $j0 = render( 'templates/careers', false, 'vi', array( 'VG_FX_ID' => '506', 'VG_FX_NO_JOBS' => '1' ) );
 common_checks( $j0, 'tuyển dụng rỗng' );
 same( 'chưa có vị trí: thông báo, không có biểu mẫu tìm/thẻ, vẫn có khối "Chưa thấy vị trí phù hợp?" (3a, 3b)', array( 1, 0, 0, 1 ), array( q( $j0, '//*[' . cls( 'jobs-empty' ) . ']' )->length, q( $j0, '//form[@data-job-form]' )->length, q( $j0, '//article[' . cls( 'job-card' ) . ']' )->length, q( $j0, '//section[' . cls( 'career-connect' ) . ']' )->length ) );
 
-// --- Chi tiết vị trí ---
 $v = render( 'single-vi_tri', false, 'vi', array( 'VG_FX_ID' => '401' ) );
 common_checks( $v, 'chi tiết vị trí' );
 same( 'chi tiết vị trí: h1, đường dẫn 3 cấp', array( 'Kiến trúc sư thiết kế', array( 'Trang chủ', 'Tuyển dụng', 'Kiến trúc sư thiết kế' ) ), array( trim( q( $v, '//h1' )->item( 0 )->textContent ), array_map( static fn( $n ) => trim( $n->textContent ), iterator_to_array( q( $v, '//nav[' . cls( 'breadcrumb' ) . ']//li' ) ) ) ) );
@@ -642,7 +573,6 @@ same( 'chi tiết vị trí: quá hạn → hiện "Đã ngừng nhận hồ sơ
 $v5 = render( 'single-vi_tri', false, 'vi', array( 'VG_FX_ID' => '405' ) );
 same( 'chi tiết vị trí: đóng thủ công → cũng ngừng nhận dù không có hạn', array( 0, 1 ), array( q( $v5, '//a[' . cls( 'job-apply-primary' ) . ']' )->length, q( $v5, '//p[' . cls( 'job-closed' ) . ']' )->length ) );
 
-// --- Ứng tuyển ---
 $a = render( 'templates/apply', false, 'vi', array( 'VG_FX_ID' => '507', 'VG_FX_GET' => 'id=401' ) );
 common_checks( $a, 'ứng tuyển' );
 check( 'ứng tuyển: trang thuộc module "apply" (data-vg-page)', 1 === q( $a, '//body[@data-vg-page="apply"]' )->length );
@@ -670,8 +600,6 @@ foreach ( array( '999' => 'không tồn tại', '404' => 'quá hạn', '405' => 
 $ac = render( 'templates/apply', false, 'vi', array( 'VG_FX_ID' => '507', 'VG_FX_GET' => 'id=404' ) );
 same( 'ứng tuyển (quá hạn): nói rõ đã ngừng nhận hồ sơ và nêu tên vị trí', array( 'Vị trí này đã ngừng nhận hồ sơ', 'Thực tập sinh kiến trúc' ), array( trim( q( $ac, '//h1' )->item( 0 )->textContent ), trim( q( $ac, '//section[' . cls( 'job-apply-head' ) . ']/p[2]' )->item( 0 )->textContent ) ) );
 
-/* ========================= Trang chủ: chữ do biên tập viên nhập (mục 6.5) ========================= */
-
 $ho = render( 'front-page', false, 'vi', array( 'VG_FX_ID' => '500', 'VG_FX_PAGE_OVERRIDE' => '1' ) );
 common_checks( $ho, 'trang chủ (đã nhập chữ)' );
 same( 'trang chủ nhập: nhãn ghi đè, thẻ HTML bị thoát thành chữ', array( 'Nhãn <b>ghi đè</b>', 0 ), array( trim( q( $ho, '//section[' . cls( 'hero' ) . ']//p[' . cls( 'eyebrow' ) . ']' )->item( 0 )->textContent ), q( $ho, '//section[' . cls( 'hero' ) . ']//p[' . cls( 'eyebrow' ) . ']/b' )->length ) );
@@ -688,8 +616,6 @@ $hb = render( 'front-page', false, 'vi', array( 'VG_FX_ID' => '500', 'VG_FX_PAGE
 same( 'trang chủ nhập: dải chữ chỉ có 1 cụm thì dùng 3 cụm mặc định', array( 'Tư duy kiến trúc', 'Năng lực thực thi', 'Dấu ấn VGARCO' ), array_map( static fn( $n ) => trim( $n->textContent ), iterator_to_array( q( $hb, '(//div[' . cls( 'marquee-group' ) . '])[1]/span' ) ) ) );
 $hd = render( 'front-page', false, 'vi', array( 'VG_FX_ID' => '500' ) );
 same( 'trang chủ: có trang chủ tĩnh nhưng chưa nhập gì → đúng bản mặc định (3 nguyên tắc)', array( 3, 'Hiểu đúng bối cảnh' ), array( q( $hd, '//div[' . cls( 'home-methods' ) . ']/article' )->length, trim( q( $hd, '//div[' . cls( 'home-methods' ) . ']/article[1]/h3' )->item( 0 )->textContent ) ) );
-
-/* ========================= Trang 404 theo ngữ cảnh (yêu cầu 35) ========================= */
 
 $contexts = array(
 	'/du-an/khong-co/'        => array( '/du-an/', 'Xem tất cả dự án', 'dự án' ),
@@ -717,22 +643,15 @@ foreach ( $contexts as $uri => $expect ) {
 	same( "404 {$uri}: 4 liên kết mục chính (dự án, tin, tuyển dụng, liên hệ)", array( '/du-an/', '/tin-tuc/', '/tuyen-dung/', '/lien-he/' ), array_map( static fn( $a ) => $a->getAttribute( 'href' ), iterator_to_array( q( $n, '//nav[' . cls( 'error-links' ) . ']//a' ) ) ) );
 	check( "404 {$uri}: đường dẫn bị lỗi không bị in ra trang (chống XSS phản chiếu)", ! str_contains( $n->document->saveHTML(), 'khong-co' ) );
 }
-// Đường dẫn chứa mã độc: không xuất hiện trong HTML.
 $xss = render( '404', false, 'vi', array( 'VG_FX_URI' => '/du-an/"><script>alert(1)</script>/' ) );
 same( '404: đường dẫn chứa <script> không lọt vào HTML', 0, q( $xss, '//script[contains(., "alert(1)")]' )->length );
 $de404 = render( '404', false, 'de', array( 'VG_FX_URI' => '/du-an/x/' ) );
 common_checks( $de404, '404 tiếng Đức' );
 
-/* ========================= Quy tắc SCSS tĩnh (lỗi axe đã gặp) ========================= */
-
 $contact_scss = (string) file_get_contents( ROOT . '/wp-content/themes/vgarco/src/scss/pages/_contact.scss' );
 $careers_scss = (string) file_get_contents( ROOT . '/wp-content/themes/vgarco/src/scss/pages/_careers.scss' );
 check( 'SCSS: chữ trắng của ô đồng ý chỉ áp dụng trong biểu mẫu liên hệ (nền tối), không toàn cục — nếu không ô đồng ý ở biểu mẫu ứng tuyển (nền sáng) thành chữ trắng trên nền trắng', 1 === preg_match( '/^\.contact-form \.consent-label \{/m', $contact_scss ) && 0 === preg_match( '/^\.consent-label \{/m', $contact_scss ) );
 check( 'SCSS: ô đồng ý ở biểu mẫu ứng tuyển có màu chữ tối tường minh', 1 === preg_match( '/\.job-apply-form \.consent-label \{[^}]*color: var\(--c-ink\);/s', $careers_scss ) );
-
-/* ========================= Chuyển động theo bản đầu của theme (05/10/2026) ========================= */
-// Hành vi thật (trượt, mờ dần, đổ bóng khi cuộn, rê chuột) chỉ kiểm được trên trình duyệt: xem tests/wp-lab/browser/README.md.
-// Ở đây giữ các quy tắc dễ bị phá nhất: tắt khi giảm chuyển động, menu đóng không còn nằm trong thứ tự Tab, trang không cuộn ngang vì menu nằm ngoài màn hình.
 
 $scss_dir = ROOT . '/wp-content/themes/vgarco/src/scss/';
 $reset    = (string) file_get_contents( $scss_dir . '_reset.scss' );
@@ -780,8 +699,6 @@ check( 'project.js: rê chuột chỉ tính con trỏ chuột; tiêu điểm ch�
 check( 'project.js: mở ảnh lớn thì dừng, đóng thì chạy lại; nút tạm dừng hiện khi có JS; giảm chuyển động bật thì khởi đầu ở trạng thái dừng', str_contains( $projjs, "setHold( 'lightbox', true );" ) && str_contains( $projjs, "lightbox.addEventListener( 'close', () => setHold( 'lightbox', false ) );" ) && str_contains( $projjs, 'toggle.hidden = false;' ) && str_contains( $projjs, 'user: reduced.matches' ) );
 check( 'project.js: chỉ đặt lại đồng hồ khi một lý do thật sự đổi; thanh tiến độ chạy lại từ đầu (ép tính lại kiểu)', str_contains( $projjs, 'if ( holds[ name ] !== value ) {' ) && str_contains( $projjs, 'void root.offsetWidth;' ) );
 
-/* ---- Hiệu ứng của NÚT và LIÊN KẾT theo bản thiết kế HTML (07/10/2026) ---- */
-// Đối chiếu bằng cách mô phỏng rê chuột trên cả hai trang (bản thiết kế và theme): thiếu chuyển cảnh chung làm mọi đổi màu "giật".
 $aboutscss   = (string) file_get_contents( $scss_dir . 'pages/_about.scss' );
 $newsscss    = (string) file_get_contents( $scss_dir . 'pages/_news.scss' );
 $careersscss = (string) file_get_contents( $scss_dir . 'pages/_careers.scss' );
@@ -801,8 +718,8 @@ check( 'nhãn "Từ bản vẽ → Đến công trình": mũi tên xoay 90° r�
 check( 'ảnh hero: rê chuột vào khung thì phóng 1,8% và đậm màu hơn (chỉ thiết bị có chuột)', 1 === preg_match( '/@media \(hover: hover\) \{\s*\.hero-frame:hover \.showcase-image \{\s*filter: saturate\(1\) contrast\(1\.035\);\s*transform: scale\(1\.018\);/', $homescss ) );
 check( 'nút dừng chuyển động: rê chuột nền đen chữ trắng; đang dừng thì chữ đỏ', 1 === preg_match( '/\.motion-toggle \{.*?&:hover \{\s*color: #fff;\s*background: var\(--c-ink\);\s*border-color: var\(--c-ink\);\s*\}\s*&\[aria-pressed=\'true\'\] \{\s*color: var\(--c-brand\);/s', $homescss ) );
 check( 'dải đối tác: rê chuột vào dải thì dừng chạy; từng ô đổi nền và chữ trong 0,2 s', 1 === preg_match( '/\.partner-marquee:hover \.partner-track \{\s*animation-play-state: paused;/', $homescss ) && 1 === preg_match( '/\.partner-logo \{.*?transition:\s*background-color 0\.2s,\s*color 0\.2s;\s*&:hover \{\s*color: var\(--c-label\);\s*background: #f2f3ef;/s', $homescss ) );
-check( 'hàng lĩnh vực: chữ đổi đỏ nhạt của nhãn (không phải đỏ thương hiệu) như bản thiết kế', 1 === preg_match( '/&:hover \{\s*color: var\(--c-label\);\s*\}\s*\/\/ Đường kẻ đỏ quét/', $homescss ) );
-check( 'vòng tròn CTA: rê chuột/tiêu điểm thì nền trắng, chữ đỏ panel, xoay 45° và phóng 6% (0,28 s)', 1 === preg_match( '/transition:\s*transform 0\.28s,\s*background-color 0\.28s,\s*color 0\.28s,\s*border-color 0\.28s;\s*\/\/[^\n]*\n\s*&:hover,\s*&:focus-visible \{\s*color: var\(--c-panel\);\s*background: #fff;\s*transform: rotate\(45deg\) scale\(1\.06\);/', $homescss ) );
+check( 'hàng lĩnh vực: chữ đổi đỏ nhạt của nhãn (không phải đỏ thương hiệu) như bản thiết kế', 1 === preg_match( '/&:hover \{\s*color: var\(--c-label\);\s*\}\s*&::after/', $homescss ) );
+check( 'vòng tròn CTA: rê chuột/tiêu điểm thì nền trắng, chữ đỏ panel, xoay 45° và phóng 6% (0,28 s)', 1 === preg_match( '/transition:\s*transform 0\.28s,\s*background-color 0\.28s,\s*color 0\.28s,\s*border-color 0\.28s;\s*&:hover,\s*&:focus-visible \{\s*color: var\(--c-panel\);\s*background: #fff;\s*transform: rotate\(45deg\) scale\(1\.06\);/', $homescss ) );
 check( 'vòng mũi tên ở góc ảnh thẻ dự án: rê chuột vào thẻ đổi nền đỏ, mũi tên trắng (0,2 s)', 1 === preg_match( '/transition:\s*background-color 0\.2s,\s*color 0\.2s;/', $projectsscss ) && 1 === preg_match( '/\.project-card a:hover \.circle-arrow,\s*\.project-card a:focus-visible \.circle-arrow \{\s*color: #fff;\s*background: var\(--c-brand\);/', $projectsscss ) );
 check( 'chân trang: biểu tượng kết nối đổi đỏ và nhấc lên 2 px khi rê chuột', 1 === preg_match( '/> a \{\s*transition:\s*color 0\.22s,\s*border-color 0\.22s,\s*transform 0\.22s;\s*\}.*?> a:hover \{[^}]*transform: translateY\(-2px\);/s', $footerscss ) );
 check( 'đường dẫn trang (breadcrumb) và nút cuộn xuống ở Về công ty: rê chuột đỏ như bản thiết kế (không phải đen)', 1 === preg_match( '/a:hover \{\s*color: var\(--c-brand\);/', $crumbscss ) && 1 === preg_match( '/\.about-scroll \{.*?&:hover \{\s*color: #fff;\s*background: var\(--c-brand\);\s*border-color: var\(--c-brand\);/s', $aboutscss ) );
@@ -818,8 +735,6 @@ check( 'trang chủ: vòng CTA ẩn hẳn khi bấm dừng chuyển động và 
 check( 'trang chủ: hàng lĩnh vực có đường kẻ đỏ quét từ trái khi rê chuột hoặc lấy tiêu điểm (transform, không đổi bố cục)', 1 === preg_match( '/\.service-preview-list \{.*?&::after \{[^}]*transform: scaleX\(0\);\s*transform-origin: left;\s*transition: transform 0\.3s ease;.*?&:hover::after,\s*&:focus-visible::after \{\s*transform: scaleX\(1\);/s', $homescss ) );
 
 check( 'home.js: chấm đang chọn đánh dấu bằng aria-current khớp ảnh đang hiện', str_contains( $homejs, "dot.setAttribute( 'aria-current', 'true' )" ) && str_contains( $homejs, "dot.removeAttribute( 'aria-current' )" ) );
-
-/* ========================= Bộ chuyển ngôn ngữ (UC-10) ========================= */
 
 $de_link = static function ( DOMXPath $n ): array {
 	$a = q( $n, '//div[' . cls( 'language-switch' ) . ']/a[@hreflang="de"]' );
@@ -845,8 +760,6 @@ foreach ( $switch_cases as $label => [ $template, $env, $fallback ] ) {
 $de_miss = render( 'front-page', false, 'de', array( 'VG_FX_MISSING' => 'vi' ) );
 same( 'chuyển ngôn ngữ: từ trang DE sang VI chưa có bản dịch cũng đánh dấu missing (đối xứng)', array( '/', true ), array( q( $de_miss, '//div[' . cls( 'language-switch' ) . ']/a[@hreflang="vi"]' )->item( 0 )->getAttribute( 'href' ), q( $de_miss, '//div[' . cls( 'language-switch' ) . ']/a[@hreflang="vi"]' )->item( 0 )->hasAttribute( 'data-lang-missing' ) ) );
 same( 'chuyển ngôn ngữ: ngôn ngữ đang xem mang aria-current', 1, q( $de_miss, '//div[' . cls( 'language-switch' ) . ']/a[@hreflang="de" and @aria-current="true"]' )->length );
-
-/* ========================= SEO cơ bản (mục 8.9) ========================= */
 
 $abs = array( 'VG_FX_ABS' => '1' );
 $meta = static fn( DOMXPath $n, string $q ): string => $n->query( $q )->length ? ( $n->query( $q )->item( 0 )->getAttribute( 'content' ) ?: $n->query( $q )->item( 0 )->getAttribute( 'href' ) ) : '';
@@ -913,23 +826,15 @@ check( 'SEO staging: noindex VÀ nofollow (toàn bộ môi trường không ph�
 $dh = render( 'front-page', false, 'de', $abs );
 same( 'SEO tiếng Đức: og:locale de_DE, bản thay thế vi_VN', array( 'de_DE', 'vi_VN' ), array( $meta( $dh, '//meta[@property="og:locale"]' ), $meta( $dh, '//meta[@property="og:locale:alternate"]' ) ) );
 
-/* ========================= Trang nội dung chung (trang pháp lý) ========================= */
-
 $p = render( 'page' );
 common_checks( $p, 'trang chung' );
 same( 'trang chung: h1 là tiêu đề trang', 'Bài thử', trim( q( $p, '//h1' )->item( 0 )->textContent ) );
 check( 'trang chung: nội dung nằm trong .entry-content của bài viết .page-basic', 1 === q( $p, '//article[' . cls( 'page-basic' ) . ']/div[' . cls( 'entry-content' ) . ']/p[contains(., "Nội dung thử")]' )->length );
 check( 'trang chung: đường dẫn vị trí kết thúc bằng tiêu đề, mục cuối là aria-current', 1 === q( $p, '//nav[' . cls( 'breadcrumb' ) . ']//li[@aria-current="page" and contains(., "Bài thử")]' )->length );
 
-/* ========================= Preload phông (đọc mã nguồn: lỗi chỉ lộ trên WordPress thật) ========================= */
-
-// wp_enqueue_scripts chạy ở wp_head mức 1; callback thêm vào CÙNG mức khi đang lặp bị WordPress bỏ qua, nên thẻ preload phải ở mức 2 trở lên.
-// Bản dựng thử không thấy lỗi này (không có wp_head thật), nên giữ một phép kiểm trên mã nguồn.
 $enqueue_php = (string) file_get_contents( ROOT . '/wp-content/themes/vgarco/inc/enqueue.php' );
-check( 'preload phông: in ở wp_head với mức ưu tiên 2 (mức 1 bị WordPress bỏ qua khi đang lặp)', 1 === preg_match( "/add_action\(\s*'wp_head',.*?printf\( '<link rel=\"preload\".*?\},\s*2 \/\//s", $enqueue_php ) );
+check( 'preload phông: in ở wp_head với mức ưu tiên 2 (mức 1 bị WordPress bỏ qua khi đang lặp)', 1 === preg_match( "/add_action\(\s*'wp_head',.*?printf\( '<link rel=\"preload\".*?\},\s*2\s*\);/s", $enqueue_php ) );
 check( 'preload phông: thẻ có crossorigin (thiếu thì trình duyệt tải phông hai lần)', str_contains( $enqueue_php, 'as="font" type="font/woff2" crossorigin' ) );
-
-/* ---------- Kết quả ---------- */
 
 echo "\n";
 if ( $fail ) {

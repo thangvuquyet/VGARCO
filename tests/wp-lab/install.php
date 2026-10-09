@@ -1,8 +1,4 @@
 <?php
-/**
- * Cài WordPress vào SQLite cho môi trường thử. Do bootstrap.mjs gọi; chạy lại được.
- * Mật khẩu quản trị thử được sinh ngẫu nhiên và ghi vào .lab/credentials.txt (không vào Git).
- */
 
 define( 'LAB', __DIR__ . '/.lab' );
 $_SERVER['HTTP_HOST']   = 'localhost:8080';

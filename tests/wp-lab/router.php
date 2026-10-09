@@ -1,5 +1,4 @@
 <?php
-// Bộ định tuyến cho máy chủ PHP tích hợp: tệp có thật thì phục vụ, còn lại đưa vào index.php của WordPress (đường dẫn đẹp).
 $root = __DIR__ . '/.lab/wordpress';
 $path = parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH );
 $file = $root . $path;

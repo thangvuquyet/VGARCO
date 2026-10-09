@@ -1,15 +1,4 @@
 <?php
-/**
- * Thư viện ảnh của dự án (UC-05): một khung trình chiếu, nút trước/sau, chấm tiến độ, dải ảnh nhỏ, phóng to.
- * Chỉ một ảnh: ẩn nút chuyển, số đếm, nút dừng và dải ảnh nhỏ (UC-05 gallery 1 ảnh).
- * Không có JS: thấy ảnh đầu, đứng yên; ảnh nhỏ là liên kết tới tệp ảnh. JS thêm việc chuyển ảnh, bàn phím, vuốt, phóng to
- * và TỰ CHẠY (6,5 s/ảnh, như bản thiết kế) — nên có nút tạm dừng ngay trong khung (WCAG 2.2.2); máy bật "giảm chuyển động" thì khởi đầu ở trạng thái dừng.
- *
- * @var array[] $args['gallery'] Mỗi phần tử: image, kind, kind_label, caption.
- * @var string  $args['title']   Tên dự án (dùng cho alt).
- *
- * @package vgarco
- */
 
 defined( 'ABSPATH' ) || exit;
 
@@ -22,7 +11,6 @@ if ( ! $gallery ) {
 $total = count( $gallery );
 $many  = $total > 1;
 
-/** Nhãn của một ảnh: chú thích do biên tập viên nhập, thiếu thì dùng loại ảnh. */
 $label = static fn( array $item ): string => '' !== $item['caption'] ? $item['caption'] : $item['kind_label'];
 ?>
 <section class="project-detail-gallery" aria-labelledby="gallery-title" data-gallery data-total="<?php echo esc_attr( (string) $total ); ?>"
@@ -30,7 +18,7 @@ $label = static fn( array $item ): string => '' !== $item['caption'] ? $item['ca
 	<div class="wrap gallery-head">
 		<div>
 			<p class="eyebrow"><?php esc_html_e( 'Hình ảnh dự án', 'vgarco' ); ?></p>
-			<h2 id="gallery-title"><?php echo vgarco_heading( __( "Từng góc nhìn.\n<em>Một câu chuyện.</em>", 'vgarco' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- đã lọc trong vgarco_heading(). ?></h2>
+			<h2 id="gallery-title"><?php echo vgarco_heading( __( "Từng góc nhìn.\n<em>Một câu chuyện.</em>", 'vgarco' ) ); ?></h2>
 		</div>
 		<?php if ( $many ) : ?>
 			<p class="gallery-head-meta" aria-hidden="true"><span data-gallery-current>01</span><small>/ <?php echo esc_html( vgarco_pad( $total ) ); ?></small></p>
@@ -42,7 +30,7 @@ $label = static fn( array $item ): string => '' !== $item['caption'] ? $item['ca
 			<figure class="gallery-slide<?php echo 0 === $i ? ' is-active' : ''; ?>" data-gallery-slide<?php echo 0 === $i ? '' : ' hidden'; ?>
 				data-full="<?php echo esc_url( vgarco_image_url( $item['image'] ) ); ?>" data-label="<?php echo esc_attr( $label( $item ) ); ?>">
 				<?php
-				echo vgarco_image( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- markup ảnh của WordPress.
+				echo vgarco_image(
 					$item['image'],
 					array(
 						'size'  => 'vg-1600',
@@ -61,22 +49,22 @@ $label = static fn( array $item ): string => '' !== $item['caption'] ? $item['ca
 		<?php endforeach; ?>
 
 		<button type="button" class="gallery-expand" data-gallery-open aria-label="<?php esc_attr_e( 'Xem ảnh lớn', 'vgarco' ); ?>" hidden>
-			<?php echo vgarco_icon( 'expand' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+			<?php echo vgarco_icon( 'expand' ); ?>
 		</button>
 
 		<?php if ( $many ) : ?>
-			<?php // Nút tạm dừng/tiếp tục tự chạy (WCAG 2.2.2). Ẩn tới khi JS sẵn sàng; nhãn dùng lại hai chuỗi của nút dừng chuyển động ở trang chủ. ?>
+			<?php ?>
 			<button type="button" class="gallery-toggle" data-gallery-toggle aria-pressed="false" hidden
 				aria-label="<?php esc_attr_e( 'Tạm dừng chuyển động', 'vgarco' ); ?>"
 				data-label-pause="<?php esc_attr_e( 'Tạm dừng chuyển động', 'vgarco' ); ?>"
 				data-label-play="<?php esc_attr_e( 'Tiếp tục chuyển động', 'vgarco' ); ?>">
-				<?php echo vgarco_icon( 'pause', 'icon-pause' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-				<?php echo vgarco_icon( 'play', 'icon-play' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<?php echo vgarco_icon( 'pause', 'icon-pause' ); ?>
+				<?php echo vgarco_icon( 'play', 'icon-play' ); ?>
 			</button>
 
 			<div class="project-gallery-controls" hidden data-gallery-controls>
 				<button type="button" class="gallery-nav" data-gallery-prev aria-label="<?php esc_attr_e( 'Ảnh trước', 'vgarco' ); ?>">
-					<?php echo vgarco_icon( 'arrow-left' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					<?php echo vgarco_icon( 'arrow-left' ); ?>
 				</button>
 				<div class="project-gallery-progress">
 					<?php foreach ( $gallery as $i => $item ) : ?>
@@ -85,7 +73,7 @@ $label = static fn( array $item ): string => '' !== $item['caption'] ? $item['ca
 					<?php endforeach; ?>
 				</div>
 				<button type="button" class="gallery-nav" data-gallery-next aria-label="<?php esc_attr_e( 'Ảnh tiếp theo', 'vgarco' ); ?>">
-					<?php echo vgarco_icon( 'arrow-right' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					<?php echo vgarco_icon( 'arrow-right' ); ?>
 				</button>
 			</div>
 		<?php endif; ?>
@@ -101,7 +89,7 @@ $label = static fn( array $item ): string => '' !== $item['caption'] ? $item['ca
 					<a href="<?php echo esc_url( vgarco_image_url( $item['image'] ) ); ?>" data-gallery-thumb="<?php echo esc_attr( (string) $i ); ?>"<?php echo 0 === $i ? ' class="is-active" aria-current="true"' : ''; ?>>
 						<span class="thumb-index" aria-hidden="true"><?php echo esc_html( vgarco_pad( $i + 1 ) ); ?></span>
 						<?php
-						echo vgarco_image( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- markup ảnh của WordPress.
+						echo vgarco_image(
 							$item['image'],
 							array(
 								'size'  => 'vg-480',
@@ -119,15 +107,15 @@ $label = static fn( array $item ): string => '' !== $item['caption'] ? $item['ca
 
 	<dialog class="gallery-lightbox on-dark" data-gallery-lightbox aria-label="<?php esc_attr_e( 'Xem ảnh lớn', 'vgarco' ); ?>">
 		<form method="dialog">
-			<button class="lightbox-close" aria-label="<?php esc_attr_e( 'Đóng', 'vgarco' ); ?>"><?php echo vgarco_icon( 'close' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></button>
+			<button class="lightbox-close" aria-label="<?php esc_attr_e( 'Đóng', 'vgarco' ); ?>"><?php echo vgarco_icon( 'close' ); ?></button>
 		</form>
 		<figure>
 			<img alt="" data-lightbox-image>
 			<figcaption data-lightbox-caption></figcaption>
 		</figure>
 		<?php if ( $many ) : ?>
-			<button type="button" class="gallery-nav lightbox-prev" data-lightbox-prev aria-label="<?php esc_attr_e( 'Ảnh trước', 'vgarco' ); ?>"><?php echo vgarco_icon( 'arrow-left' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></button>
-			<button type="button" class="gallery-nav lightbox-next" data-lightbox-next aria-label="<?php esc_attr_e( 'Ảnh tiếp theo', 'vgarco' ); ?>"><?php echo vgarco_icon( 'arrow-right' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></button>
+			<button type="button" class="gallery-nav lightbox-prev" data-lightbox-prev aria-label="<?php esc_attr_e( 'Ảnh trước', 'vgarco' ); ?>"><?php echo vgarco_icon( 'arrow-left' ); ?></button>
+			<button type="button" class="gallery-nav lightbox-next" data-lightbox-next aria-label="<?php esc_attr_e( 'Ảnh tiếp theo', 'vgarco' ); ?>"><?php echo vgarco_icon( 'arrow-right' ); ?></button>
 		<?php endif; ?>
 	</dialog>
 </section>

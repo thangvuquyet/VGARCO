@@ -1,13 +1,4 @@
 <?php
-/**
- * Kiểm tra ĐỘC LẬP rằng tệp .mo do scripts/i18n/po.mjs biên dịch đọc được bằng libintl (bộ đọc gettext của hệ điều hành,
- * nguồn gốc của định dạng .mo) — không phải bằng chính mã đã ghi ra nó. Đọc từng mục của .po và so với dgettext()/dngettext().
- *
- *   php -d extension=gettext tests/php/gettext.php <domain> <tệp .mo> <tệp JSON các mục>
- *
- * JSON: [ { "id": "...", "plural": null|"...", "str": ["..."] }, ... ] — chỉ các mục đã dịch, không fuzzy.
- * Môi trường không có libintl hoặc không có locale đức thì BỎ QUA (thoát 0, ghi rõ) thay vì báo sai.
- */
 
 [ , $domain, $mo_file, $json_file ] = $argv + array( null, null, null, null );
 if ( ! function_exists( 'dgettext' ) ) {
@@ -34,7 +25,6 @@ setlocale( LC_ALL, 'de_DE.UTF-8', 'de_DE', 'German_Germany.1252', 'de' );
 bindtextdomain( $domain, $dir );
 bind_textdomain_codeset( $domain, 'UTF-8' );
 
-// Mẫu dò: nếu hệ điều hành không có locale đức thì libintl không dịch gì cả — bỏ qua thay vì báo lỗi oan.
 $probe = null;
 foreach ( $entries as $e ) {
 	if ( null === $e['plural'] && '' !== $e['str'][0] && $e['id'] !== $e['str'][0] ) {

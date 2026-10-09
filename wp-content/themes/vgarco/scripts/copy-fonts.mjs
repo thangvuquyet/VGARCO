@@ -1,13 +1,3 @@
-// Chép phông chữ tự host từ gói Fontsource vào src/fonts/ và sinh src/scss/_fonts.scss.
-//   npm run fonts
-//
-// Chỉ lấy ba tập con cần cho tiếng Việt và tiếng Đức. Mỗi tập là một tệp WOFF2 riêng kèm unicode-range,
-// nên trình duyệt chỉ tải tập mà trang thực sự dùng (trang tiếng Việt: latin + vietnamese).
-//   latin       — chữ Latin cơ bản, ä ö ü Ä Ö Ü ß, dấu câu
-//   vietnamese  — chữ có dấu tiếng Việt (ă â ê ô ơ ư đ và thanh điệu), dấu kết hợp
-//   latin-ext   — ký tự Latin mở rộng (tên riêng nước ngoài)
-//
-// Phông đặt trên máy chủ website, không tải từ dịch vụ bên thứ ba (yêu cầu 5.3.5).
 import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -16,11 +6,9 @@ const root = join( dirname( fileURLToPath( import.meta.url ) ), '..' );
 const modules = join( root, 'node_modules', '@fontsource' );
 const outFonts = join( root, 'src', 'fonts' );
 
-const SUBSETS = [ 'vietnamese', 'latin-ext', 'latin' ]; // thứ tự nguồn của Fontsource: tập đứng sau thắng khi trùng dải mã
+const SUBSETS = [ 'vietnamese', 'latin-ext', 'latin' ];
 const FACES = [
-	// Chữ nghiêng Lora: chỉ dùng cho cụm từ nhấn trong tiêu đề (đặc tả bảng 6.3).
 	{ pkg: 'lora', css: '400-italic.css', weight: '400', style: 'italic', family: 'Lora' },
-	// Open Sans làm phông dự phòng cho macOS/iOS/Android (Segoe UI chỉ có sẵn trên Windows) — đặc tả mục 6.2.
 	{ pkg: 'open-sans', css: '400.css', weight: '400', style: 'normal', family: 'VG Sans' },
 	{ pkg: 'open-sans', css: '600.css', weight: '600', style: 'normal', family: 'VG Sans' },
 ];
@@ -67,7 +55,6 @@ for ( const face of FACES ) {
 	}
 }
 
-// Giấy phép phông (SIL OFL / Apache) đi kèm tệp phông.
 for ( const pkg of [ ...new Set( FACES.map( ( f ) => f.pkg ) ) ] ) {
 	const license = join( modules, pkg, 'LICENSE' );
 	if ( existsSync( license ) ) {

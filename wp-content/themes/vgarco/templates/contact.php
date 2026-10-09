@@ -1,12 +1,6 @@
 <?php
 /**
  * Template Name: Liên hệ
- *
- * Trang Liên hệ (UC-11). Biểu mẫu KHÔNG gửi dữ liệu về máy chủ: JS soạn sẵn một email (mailto:) để người dùng xem lại và gửi
- * từ ứng dụng email của họ (yêu cầu 28–30). Không có JS: biểu mẫu vẫn mở được ứng dụng email qua action="mailto:".
- * Kênh liên hệ lấy từ Cấu hình VGARCO; kênh chưa có địa chỉ hiển thị "Đang cập nhật" (yêu cầu 29).
- *
- * @package vgarco
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -34,7 +28,7 @@ vgarco_breadcrumb(
 	<div class="wrap contact-layout">
 		<div class="contact-intro">
 			<p class="eyebrow"><?php echo esc_html( vgarco_field_text( 'hero_nhan', __( 'Bắt đầu một dự án', 'vgarco' ), $id ) ); ?></p>
-			<h1 id="contact-title"><?php echo vgarco_field_heading( 'hero_tieu_de', __( "Một cuộc\ntrò chuyện.\n<em>Một khởi đầu.</em>", 'vgarco' ), $id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- đã lọc trong vgarco_heading(). ?></h1>
+			<h1 id="contact-title"><?php echo vgarco_field_heading( 'hero_tieu_de', __( "Một cuộc\ntrò chuyện.\n<em>Một khởi đầu.</em>", 'vgarco' ), $id ); ?></h1>
 			<?php if ( '' !== $tel ) : ?>
 				<a class="contact-phone" href="<?php echo esc_url( 'tel:' . $tel ); ?>"><?php echo esc_html( $phone ); ?></a>
 			<?php endif; ?>
@@ -45,7 +39,7 @@ vgarco_breadcrumb(
 			<div class="contact-channels" role="group" aria-label="<?php esc_attr_e( 'Kênh liên hệ VGARCO', 'vgarco' ); ?>">
 				<?php if ( '' !== $tel ) : ?>
 					<a class="contact-channel" href="<?php echo esc_url( 'tel:' . $tel ); ?>" aria-label="<?php echo esc_attr( sprintf( /* translators: %s: số điện thoại */ __( 'Gọi VGARCO qua số %s', 'vgarco' ), $phone ) ); ?>">
-						<span class="channel-icon" aria-hidden="true"><?php echo vgarco_icon( 'phone' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
+						<span class="channel-icon" aria-hidden="true"><?php echo vgarco_icon( 'phone' ); ?></span>
 						<span><strong><?php esc_html_e( 'Điện thoại', 'vgarco' ); ?></strong><small><?php esc_html_e( 'Gọi trực tiếp', 'vgarco' ); ?></small></span>
 					</a>
 				<?php endif; ?>
@@ -109,7 +103,7 @@ vgarco_breadcrumb(
 
 				<button class="button-light" type="submit">
 					<span><?php esc_html_e( 'Soạn email tư vấn', 'vgarco' ); ?></span>
-					<?php echo vgarco_icon( 'arrow-up-right' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					<?php echo vgarco_icon( 'arrow-up-right' ); ?>
 				</button>
 				<p class="form-hint"><?php esc_html_e( 'Mở ứng dụng email với nội dung bạn đã nhập. Bạn xem lại và gửi email tại đó.', 'vgarco' ); ?></p>
 

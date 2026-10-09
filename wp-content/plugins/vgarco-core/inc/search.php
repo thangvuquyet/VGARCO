@@ -1,19 +1,7 @@
 <?php
-/**
- * Tìm kiếm dự án (UC-09, mục 8.1): chỉ mục theo ngôn ngữ và đường REST GET /wp-json/vgarco/v1/search.
- * Logic so khớp nằm ở search-lib.php.
- *
- * @package vgarco-core
- */
 
 defined( 'ABSPATH' ) || exit;
 
-/**
- * Chỉ mục của một ngôn ngữ: mọi dự án đã xuất bản, theo thứ tự "Thứ tự" rồi tên. Lưu trong transient (dùng object cache nếu có,
- * ví dụ Redis; không thì bảng options) và bị xóa khi dự án hay loại công trình thay đổi.
- *
- * @return array[]
- */
 function vgarco_search_index( string $lang ): array {
 	$lang = 'de' === $lang ? 'de' : 'vi';
 	$key  = 'vgarco_search_' . $lang;
@@ -67,7 +55,6 @@ function vgarco_search_flush(): void {
 	delete_transient( 'vgarco_search_de' );
 }
 
-// Đổi dự án hay loại công trình là chỉ mục cũ. ACF ghi trường sau save_post nên bắt thêm acf/save_post ở mức ưu tiên sau.
 add_action( 'save_post_du_an', 'vgarco_search_flush' );
 add_action( 'acf/save_post', 'vgarco_search_flush', 20 );
 add_action( 'trashed_post', 'vgarco_search_flush' );
@@ -126,7 +113,6 @@ add_action(
 							'results' => vgarco_search_rank( vgarco_search_index( $lang ), $query ),
 						)
 					);
-					// Cloudflare cache 5 phút theo đầy đủ chuỗi truy vấn (mục 8.1).
 					$response->header( 'Cache-Control', 'public, max-age=300' );
 					return $response;
 				},

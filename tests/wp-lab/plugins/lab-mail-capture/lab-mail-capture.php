@@ -2,7 +2,6 @@
 /**
  * Plugin Name: LAB — bắt thư và gọi Cloudflare giả
  * Description: CHỈ DÙNG TRONG MÔI TRƯỜNG THỬ. Không gửi thư thật: ghi mọi thư của wp_mail() vào mail.log (option lab_mail_fail = 1 giả lập SMTP hỏng).
- *              Không gọi Cloudflare thật: ghi yêu cầu vào http.log và trả kết quả giả (option lab_cf_fail = 1 giả lập lỗi 403).
  */
 
 defined( 'ABSPATH' ) || exit;

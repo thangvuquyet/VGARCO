@@ -1,24 +1,7 @@
 <?php
-/**
- * Menu: đọc menu WordPress (WPML đồng bộ hai bản ngôn ngữ) thành cây dữ liệu, rồi in ra HTML kiểu "disclosure".
- *
- * Nhãn của bảng menu con lấy từ trường "Mô tả" của mục cha (bật ở Tùy chọn màn hình → Mô tả).
- * Chưa gán menu cho vị trí thì dùng menu mặc định trong mã, để local/staging chạy được ngay.
- *
- * @package vgarco
- */
 
 defined( 'ABSPATH' ) || exit;
 
-/**
- * Một nút của cây menu.
- *
- * @param string $title    Nhãn.
- * @param string $url      Địa chỉ.
- * @param bool   $current  Đang xem mục này hoặc mục con của nó.
- * @param string $label    Nhãn của bảng menu con (chỉ mục cha).
- * @param array  $children Các nút con.
- */
 function vgarco_menu_node( string $title, string $url, bool $current = false, string $label = '', array $children = array() ): array {
 	return array(
 		'title'    => $title,
@@ -29,9 +12,6 @@ function vgarco_menu_node( string $title, string $url, bool $current = false, st
 	);
 }
 
-/**
- * Các nút con lấy từ một phân loại (mỗi thuật ngữ một liên kết).
- */
 function vgarco_taxonomy_menu_children( string $taxonomy ): array {
 	$terms = get_terms(
 		array(
@@ -54,10 +34,6 @@ function vgarco_taxonomy_menu_children( string $taxonomy ): array {
 	return $nodes;
 }
 
-/**
- * Menu mặc định theo vị trí.
- * Địa chỉ trang tĩnh viết theo tiếng Việt; bản tiếng Đức dùng menu WordPress do WPML đồng bộ.
- */
 function vgarco_default_menu( string $location ): array {
 	$archive = static function ( string $post_type, string $fallback ): string {
 		$url = get_post_type_archive_link( $post_type );
@@ -109,12 +85,6 @@ function vgarco_default_menu( string $location ): array {
 	);
 }
 
-/**
- * Mục menu WordPress này có phải trang đang xem không.
- * Chỉ xử lý các dạng website dùng: trang/bài viết, phân loại, trang lưu trữ của kiểu nội dung.
- *
- * @param WP_Post $item Mục menu.
- */
 function vgarco_menu_item_is_current( $item ): bool {
 	switch ( $item->type ) {
 		case 'post_type':
@@ -122,18 +92,11 @@ function vgarco_menu_item_is_current( $item ): bool {
 		case 'taxonomy':
 			return is_tax() && (int) get_queried_object_id() === (int) $item->object_id;
 		case 'post_type_archive':
-			// Trang chi tiết của cùng kiểu nội dung cũng tô sáng mục này (ví dụ đang xem một dự án → "Dự án").
 			return is_post_type_archive( $item->object ) || is_singular( $item->object );
 	}
 	return false;
 }
 
-/**
- * Cây menu của một vị trí.
- *
- * @param string $location Vị trí đăng ký ở inc/setup.php.
- * @return array[] Danh sách nút (xem vgarco_menu_node).
- */
 function vgarco_menu_tree( string $location ): array {
 	$menu_id = (int) ( get_nav_menu_locations()[ $location ] ?? 0 );
 	$items   = $menu_id ? wp_get_nav_menu_items( $menu_id ) : false;
@@ -160,9 +123,6 @@ function vgarco_menu_tree( string $location ): array {
 	return $build( 0 );
 }
 
-/**
- * In một liên kết của menu.
- */
 function vgarco_render_menu_link( array $node ): void {
 	printf(
 		'<a href="%1$s"%2$s>%3$s</a>',
@@ -172,12 +132,6 @@ function vgarco_render_menu_link( array $node ): void {
 	);
 }
 
-/**
- * In menu chính: mục có mục con thành một nút mở bảng, mục không có con là liên kết thường.
- * Nút và bảng liên kết bằng aria-controls; bảng ẩn mặc định bằng thuộc tính hidden, JS (modules/nav.js) mở/đóng.
- *
- * @param array[] $tree Cây menu.
- */
 function vgarco_render_primary_nav( array $tree ): void {
 	$index = 0;
 

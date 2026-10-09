@@ -1,8 +1,5 @@
 @use '../mixins' as *;
 
-// Menu chính. Dưới 1181 px là danh sách thả dọc mở bằng nút menu; từ 1181 px là hàng ngang,
-// mục có con mở thành một bảng rộng hết chiều ngang dưới thanh đầu trang.
-
 .nav {
   display: flex;
   flex-direction: column;
@@ -18,8 +15,6 @@
   border-bottom: 1px solid var(--c-line);
   box-shadow: var(--shadow-panel);
 
-  // Đóng: nằm ngoài màn hình bên phải và visibility:hidden (không vào thứ tự Tab, không được đọc) — thay cho display:none để có chuyển động.
-  // visibility chỉ đổi sau khi trượt xong (0,25 s) nên lúc đóng menu vẫn nhìn thấy nó trượt đi.
   visibility: hidden;
   transform: translateX(100%);
   transition:
@@ -42,7 +37,7 @@
   gap: 0.5rem;
   width: 100%;
   padding: 0.9375rem 0;
-  font-size: 1.0625rem; // 17
+  font-size: 1.0625rem;
   font-weight: 550;
   line-height: 1.5;
   letter-spacing: -0.01em;
@@ -68,9 +63,6 @@
   transform: rotate(225deg) translate(-2px, -1px);
 }
 
-// --- Bảng menu con ---
-// Hiện ra bằng cách bỏ thuộc tính hidden (nav.js) nên chuyển động chỉ có khi MỞ: mờ dần và nhích lên 6 px trong 0,16 s như bản đầu của theme.
-// Cố ý không làm chuyển động khi đóng để không giữ lại thứ đã bị ẩn khỏi trình đọc màn hình và bàn phím.
 @keyframes nav-panel-in {
   from {
     opacity: 0;
@@ -91,7 +83,7 @@
   align-items: center;
   gap: 1rem;
   margin-bottom: 1.125rem;
-  font-size: 0.6875rem; // 11
+  font-size: 0.6875rem;
   letter-spacing: 0.06em;
   color: var(--c-ink-muted);
 
@@ -132,7 +124,6 @@
   }
 }
 
-// --- Từ 1181 px: menu ngang ---
 @include up($bp-nav) {
   .nav {
     position: static;
@@ -153,18 +144,17 @@
   }
 
   .nav-group {
-    position: static; // bảng định vị theo thanh đầu trang, không theo mục cha
+    position: static;
   }
 
   .nav > a,
   .nav-trigger {
     width: auto;
-    padding: 2.3125rem 0; // 37
-    font-size: 1.0625rem; // 17
+    padding: 2.3125rem 0;
+    font-size: 1.0625rem;
     white-space: nowrap;
     border-bottom: 0;
 
-    // Gạch chân đỏ: mục đang xem hoặc đang mở.
     &::after {
       content: '';
       position: absolute;
@@ -183,8 +173,6 @@
     }
   }
 
-  // Liên kết thường (không có menu con): gạch chân đỏ chạy ra khi rê chuột hoặc lấy tiêu điểm — như bản thiết kế (".nav > a:hover::after { width: 100% }").
-  // Mục có menu con (nút) chỉ gạch khi đang mở.
   .nav > a:hover::after,
   .nav > a:focus-visible::after {
     transform: scaleX(1);
@@ -203,7 +191,7 @@
   }
 
   .nav-panel-label {
-    font-size: 0.875rem; // 14
+    font-size: 0.875rem;
     letter-spacing: 0.13em;
   }
 
@@ -213,7 +201,6 @@
     max-width: 86.25rem;
     margin-inline: auto;
 
-    // Bảng có từ 5 mục trở lên (menu Dự án: 7 loại công trình) chia 4 cột.
     &:has(> :nth-child(5)) {
       grid-template-columns: repeat(4, minmax(0, 1fr));
     }
@@ -232,7 +219,7 @@
 
   .nav > a,
   .nav-trigger {
-    padding-block: 2.5rem; // 40
-    font-size: 1.125rem; // 18
+    padding-block: 2.5rem;
+    font-size: 1.125rem;
   }
 }

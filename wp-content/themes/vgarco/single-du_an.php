@@ -1,11 +1,4 @@
 <?php
-/**
- * Chi tiết dự án (UC-05): ảnh bìa, thông tin, mô tả, thư viện ảnh, dự án tiếp theo.
- * Dự án không có mã bài viết (xóa, nháp) do WordPress trả 404 trước khi tới mẫu này.
- * Trường trống tự ẩn: dòng thông tin rỗng, thư viện rỗng, khối phạm vi rỗng (UC-05 4a).
- *
- * @package vgarco
- */
 
 defined( 'ABSPATH' ) || exit;
 
@@ -55,13 +48,13 @@ vgarco_breadcrumb(
 		<?php if ( $cover > 0 ) : ?>
 			<figure class="project-detail-cover">
 				<?php
-				echo vgarco_image( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- markup ảnh của WordPress.
+				echo vgarco_image(
 					$cover,
 					array(
 						'size'     => 'vg-1600',
 						'sizes'    => '100vw',
 						'alt'      => $project['kind_label'] . ' — ' . $project['title'],
-						'priority' => true, // ảnh lớn nhất trên màn hình đầu (LCP)
+						'priority' => true,
 					)
 				);
 				?>
@@ -93,9 +86,9 @@ vgarco_breadcrumb(
 
 			<div class="project-detail-copy">
 				<p class="project-kicker"><?php esc_html_e( 'Một công trình trong hồ sơ VGARCO', 'vgarco' ); ?></p>
-				<h2><?php echo vgarco_heading( __( "Từ bối cảnh,\n<em>đến một giải pháp riêng.</em>", 'vgarco' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- đã lọc trong vgarco_heading(). ?></h2>
+				<h2><?php echo vgarco_heading( __( "Từ bối cảnh,\n<em>đến một giải pháp riêng.</em>", 'vgarco' ) ); ?></h2>
 				<?php if ( '' !== $content ) : ?>
-					<div class="entry-content"><?php echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- nội dung biên tập, đã qua the_content. ?></div>
+					<div class="entry-content"><?php echo $content; ?></div>
 				<?php endif; ?>
 				<?php if ( '' !== $project['scope'] ) : ?>
 					<div class="project-scope">
@@ -117,7 +110,7 @@ vgarco_breadcrumb(
 				<p class="eyebrow" id="project-next-title"><?php esc_html_e( 'Dự án tiếp theo', 'vgarco' ); ?></p>
 				<a class="project-next-link" href="<?php echo esc_url( $next['url'] ); ?>">
 					<span><?php echo esc_html( $next['title'] ); ?></span>
-					<span class="project-next-arrow" aria-hidden="true"><?php echo vgarco_icon( 'arrow-up-right' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
+					<span class="project-next-arrow" aria-hidden="true"><?php echo vgarco_icon( 'arrow-up-right' ); ?></span>
 				</a>
 				<div class="project-next-meta">
 					<span><?php echo esc_html( $next['types'][0]['name'] ?? '' ); ?></span>

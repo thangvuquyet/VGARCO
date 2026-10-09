@@ -1,13 +1,6 @@
 <?php
 /**
  * Template Name: Ứng tuyển
- *
- * Trang nộp hồ sơ (UC-08), địa chỉ /ung-tuyen/?id=<ID vị trí>. Không lập chỉ mục (noindex).
- * Biểu mẫu KHÔNG gửi bằng submit thông thường: JS lấy mã bảo mật từ API rồi gửi hồ sơ bằng fetch tới
- * /wp-json/vgarco/v1/apply. Mọi kiểm tra ở trình duyệt chỉ để người dùng sửa nhanh; máy chủ kiểm tra lại toàn bộ (mục 8.3).
- * Vị trí không tồn tại, chưa xuất bản, quá hạn hoặc đã đóng: hiện thông báo, không hiện biểu mẫu.
- *
- * @package vgarco
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -16,7 +9,7 @@ add_filter( 'wp_robots', 'wp_robots_no_robots' );
 
 get_header();
 
-$job_id = isset( $_GET['id'] ) ? absint( wp_unslash( (string) $_GET['id'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- tham số công khai, chỉ đọc.
+$job_id = isset( $_GET['id'] ) ? absint( wp_unslash( (string) $_GET['id'] ) ) : 0;
 $job    = ( $job_id > 0 && 'vi_tri' === get_post_type( $job_id ) && 'publish' === get_post_status( $job_id ) ) ? vgarco_job( $job_id ) : null;
 $careers = vgarco_page_url( 'careers' );
 $lang    = function_exists( 'apply_filters' ) ? (string) apply_filters( 'wpml_current_language', 'vi' ) : 'vi';
@@ -37,7 +30,7 @@ vgarco_breadcrumb( $trail );
 		<p class="eyebrow"><?php esc_html_e( 'Ứng tuyển', 'vgarco' ); ?></p>
 		<h1><?php echo esc_html( $job ? __( 'Vị trí này đã ngừng nhận hồ sơ', 'vgarco' ) : __( 'Không tìm thấy vị trí', 'vgarco' ) ); ?></h1>
 		<p><?php echo esc_html( $job ? $job['title'] : __( 'Đường dẫn ứng tuyển chưa đúng hoặc vị trí không còn tồn tại.', 'vgarco' ) ); ?></p>
-		<a class="text-link" href="<?php echo esc_url( $careers ); ?>"><?php esc_html_e( 'Xem các vị trí đang tuyển', 'vgarco' ); ?> <?php echo vgarco_icon( 'arrow-up-right' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></a>
+		<a class="text-link" href="<?php echo esc_url( $careers ); ?>"><?php esc_html_e( 'Xem các vị trí đang tuyển', 'vgarco' ); ?> <?php echo vgarco_icon( 'arrow-up-right' ); ?></a>
 	</section>
 <?php else : ?>
 	<section class="wrap job-apply-head">
@@ -73,7 +66,7 @@ vgarco_breadcrumb( $trail );
 			<input type="hidden" name="lang" value="<?php echo esc_attr( $lang ); ?>">
 			<input type="hidden" name="token" value="" data-token>
 
-			<?php // Trường bẫy: người dùng không thấy, không tab tới; máy gửi tự động thường điền vào (bước 5 mục 8.3). ?>
+			<?php ?>
 			<div class="field-trap" aria-hidden="true">
 				<label for="website-url">Website</label>
 				<input id="website-url" type="text" name="website" tabindex="-1" autocomplete="off">
@@ -139,7 +132,7 @@ vgarco_breadcrumb( $trail );
 			<button class="job-submit" type="submit"><?php esc_html_e( 'Nộp đơn ứng tuyển', 'vgarco' ); ?></button>
 		</form>
 
-		<?php // Không có JS thì không nộp được (cần mã bảo mật từ API): chỉ đường thay thế thay vì để biểu mẫu chết. ?>
+		<?php ?>
 		<noscript>
 			<div class="job-apply-noscript">
 				<p><?php esc_html_e( 'Để nộp hồ sơ trực tuyến, bạn cần bật JavaScript. Hoặc gửi CV tới địa chỉ email tuyển dụng dưới đây.', 'vgarco' ); ?></p>
@@ -164,7 +157,7 @@ vgarco_breadcrumb( $trail );
 					<div><dt><?php esc_html_e( 'Phòng ban', 'vgarco' ); ?></dt><dd><?php echo esc_html( $job['department']['name'] ); ?></dd></div>
 				<?php endif; ?>
 			</dl>
-			<a href="<?php echo esc_url( $job['url'] ); ?>"><?php esc_html_e( 'Xem lại mô tả công việc', 'vgarco' ); ?> <?php echo vgarco_icon( 'arrow-up-right' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></a>
+			<a href="<?php echo esc_url( $job['url'] ); ?>"><?php esc_html_e( 'Xem lại mô tả công việc', 'vgarco' ); ?> <?php echo vgarco_icon( 'arrow-up-right' ); ?></a>
 		</aside>
 	</section>
 <?php endif; ?>

@@ -1,12 +1,4 @@
 <?php
-/**
- * Kiểm thử luồng nộp hồ sơ ứng tuyển (mã bảo mật, kiểm tra tệp thật, điều phối, xuất .xlsx, thời hạn lưu trữ).
- * Dùng TỆP THẬT (PDF, DOCX, exe đổi đuôi, DOCX có macro...) chứ không giả lập kết quả kiểm tra.
- *
- *   php -d extension_dir=<ext> -d extension=mbstring -d extension=gd -d extension=fileinfo -d extension=zip tests/php/apply.php
- *
- * KHÔNG thay cho chạy thử trên WordPress thật (REST, transient, wp_mail, quyền, quản trị).
- */
 
 define( 'ABSPATH', __DIR__ . '/' );
 define( 'ROOT', dirname( __DIR__, 2 ) );
@@ -31,8 +23,6 @@ function check( string $label, bool $condition ): void {
 function same( string $label, $expected, $actual ): void {
 	check( $label . ' — mong đợi ' . var_export( $expected, true ) . ', nhận ' . var_export( $actual, true ), $expected === $actual );
 }
-
-/* ---------- Tệp thật để thử ---------- */
 
 $tmp = sys_get_temp_dir() . '/vgarco-apply-test-' . getmypid();
 @mkdir( $tmp, 0777, true );
@@ -64,7 +54,6 @@ function make_zip( string $name, array $entries ): string {
 	return $path;
 }
 
-/** Cấu trúc $_FILES cho một tệp đã tạo. */
 function upload( string $path, string $client_name, int $error = UPLOAD_ERR_OK ): array {
 	return array(
 		'name'     => $client_name,
@@ -96,8 +85,6 @@ $handle    = fopen( $exact, 'r+' );
 ftruncate( $handle, VGARCO_CV_MAX_BYTES );
 fclose( $handle );
 
-/* ========== 1. Mã bảo mật ========== */
-
 $codes = array();
 for ( $i = 0; $i < 200; $i++ ) {
 	$codes[] = vgarco_captcha_code();
@@ -122,8 +109,6 @@ check( 'captcha: mã không nằm dạng chữ trong ảnh PNG', false !== $png 
 check( 'captcha: mỗi lần vẽ một ảnh khác', vgarco_captcha_image( 'AB7K9' ) !== $image );
 check( 'captcha: SVG dự phòng là SVG hợp lệ', str_starts_with( vgarco_captcha_svg( 'AB7K9' ), 'data:image/svg+xml;base64,' ) );
 
-/* ========== 2. Trường văn bản ========== */
-
 $valid = array( 'name' => 'Nguyễn Văn An', 'email' => 'an.nguyen@example.com', 'phone' => '0988 961 666', 'consent' => '1' );
 same( 'trường: hợp lệ → không lỗi', array(), vgarco_apply_validate_fields( $valid ) );
 same( 'trường: rỗng hết → 3 lỗi bắt buộc + đồng ý', array( 'name' => 'required', 'email' => 'required', 'phone' => 'required', 'consent' => 'consent' ), vgarco_apply_validate_fields( array() ) );
@@ -143,8 +128,6 @@ foreach ( array( '', '0', 'on', 'true' ) as $bad ) {
 	same( 'đồng ý không đúng "1": ' . json_encode( $bad ), array( 'consent' => 'consent' ), vgarco_apply_validate_fields( array_merge( $valid, array( 'consent' => $bad ) ) ) );
 }
 
-/* ========== 3. Tên tệp ========== */
-
 same( 'tên tệp: bỏ đường dẫn kiểu Unix', 'passwd.pdf', vgarco_apply_clean_filename( '../../etc/passwd.pdf' ) );
 same( 'tên tệp: bỏ đường dẫn kiểu Windows', 'CV.pdf', vgarco_apply_clean_filename( 'C:\\Users\\x\\CV.pdf' ) );
 same( 'tên tệp: bỏ ký tự điều khiển và ký tự nguy hiểm', 'ab.pdf', vgarco_apply_clean_filename( "a\x00<b>\x1F.pdf" ) );
@@ -153,8 +136,6 @@ same( 'tên tệp: chỉ toàn dấu chấm → cv', 'cv', vgarco_apply_clean_fi
 same( 'tên tệp: rỗng → cv', 'cv', vgarco_apply_clean_filename( '' ) );
 $long = vgarco_apply_clean_filename( str_repeat( 'a', 300 ) . '.docx' );
 check( 'tên tệp: tên dài bị cắt nhưng giữ đuôi', mb_strlen( $long ) <= 120 && str_ends_with( $long, '.docx' ) );
-
-/* ========== 4. Kiểm tra tệp CV bằng tệp thật ========== */
 
 $cases = array(
 	array( 'PDF thật', $pdf, 'ok.pdf', true, 'application/pdf' ),
@@ -199,13 +180,6 @@ $clean = vgarco_apply_validate_cv( upload( $pdf, '../../x/CV Nguyễn.pdf' ) );
 same( 'tệp CV: tên gốc được làm sạch', 'CV Nguyễn.pdf', $clean['name'] );
 same( 'tệp CV: trả dung lượng thật', filesize( $pdf ), $clean['size'] );
 
-/* ========== 5. Điều phối: phụ thuộc giả ========== */
-
-/**
- * Môi trường giả: bộ nhớ token, bộ đếm, tệp đã lưu, bản ghi, thư — tất cả nằm trong $state để kiểm tra sau khi chạy.
- *
- * @param array $over Ghi đè hành vi: rate_attempts, rate_submissions, job_open, save_fail, insert_fail, mail (callable), consume_lost.
- */
 function fake( array $over = array() ): array {
 	global $tmp;
 	static $n = 0;
@@ -220,7 +194,6 @@ function fake( array $over = array() ): array {
 		'issued'   => 0,
 		'consumed' => array(),
 	);
-	// Token hợp lệ, cấp lúc t=1000; mã đúng là "AB7K9".
 	$state->tokens['tok1'] = array( 'issued' => 1000, 'hash' => vgarco_captcha_hash( 'AB7K9', 'salt' ) );
 
 	$deps = array(
@@ -310,7 +283,6 @@ function context( array $over = array() ): array {
 
 $files_ok = array( 'cv' => upload( $pdf, 'CV An.pdf' ) );
 
-// --- Thành công ---
 [ $st, $deps ] = fake();
 $r = vgarco_apply_process( request(), $files_ok, context(), $deps );
 same( 'nhận hồ sơ: 200', 200, $r['status'] );
@@ -328,23 +300,19 @@ same( 'nhận hồ sơ: gửi thư một lần cho hồ sơ vừa tạo', array(
 same( 'nhận hồ sơ: tính một lần thử và một hồ sơ nhận được', array( 'attempt', 'accepted' ), $st->rates );
 same( 'nhận hồ sơ: không xóa tệp', array(), $st->deleted );
 
-// Dùng lại token đã tiêu thụ (gửi lại đúng yêu cầu cũ) → không nhận lần hai.
 $r2 = vgarco_apply_process( request(), $files_ok, context(), $deps );
 same( 'phát lại: 400 captcha', array( 400, 'validation', 'captcha' ), array( $r2['status'], $r2['body']['code'], $r2['body']['errors']['captcha'] ?? '' ) );
 same( 'phát lại: không ghi thêm bản ghi', 1, count( $st->records ) );
 check( 'phát lại: có mã bảo mật mới', isset( $r2['body']['captcha']['token'], $r2['body']['captcha']['image'] ) );
 
-// Câu trả lời mã bảo mật: không phân biệt hoa thường/khoảng trắng.
 [ $st, $deps ] = fake();
 $r = vgarco_apply_process( request( array( 'captcha' => ' a B 7 k9 ' ) ), $files_ok, context(), $deps );
 same( 'mã bảo mật: hoa thường và khoảng trắng được bỏ qua', 200, $r['status'] );
 
-// Ngôn ngữ lạ → vi
 [ $st, $deps ] = fake();
 vgarco_apply_process( request( array( 'lang' => 'fr' ) ), $files_ok, context(), $deps );
 same( 'ngôn ngữ ngoài vi/de → vi', 'vi', $st->records[0]['lang'] ?? '' );
 
-// --- 403: phương thức và nguồn gốc ---
 $origins = array(
 	'GET không được'                     => array( array( 'method' => 'GET' ), 403 ),
 	'Origin lạ'                          => array( array( 'origin' => 'https://evil.example' ), 403 ),
@@ -366,7 +334,6 @@ foreach ( $origins as $label => [ $ctx, $status ] ) {
 	}
 }
 
-// --- 429: tần suất ---
 [ $st, $deps ] = fake( array( 'rate_attempts' => false ) );
 $r = vgarco_apply_process( request(), $files_ok, context(), $deps );
 same( 'tần suất: quá số lần thử → 429', array( 429, 'rate_limited', 0 ), array( $r['status'], $r['body']['code'], count( $st->records ) ) );
@@ -375,7 +342,6 @@ $r = vgarco_apply_process( request(), $files_ok, context(), $deps );
 same( 'tần suất: quá số hồ sơ → 429', array( 429, 0 ), array( $r['status'], count( $st->records ) ) );
 same( 'tần suất: yêu cầu bị chặn không tiêu thụ token', array(), $st->consumed );
 
-// --- 400 rejected: bẫy và thời gian ---
 [ $st, $deps ] = fake();
 $r = vgarco_apply_process( request( array( 'website' => 'http://spam.example' ) ), $files_ok, context(), $deps );
 same( 'bẫy: trường website có chữ → 400 rejected', array( 400, 'rejected' ), array( $r['status'], $r['body']['code'] ) );
@@ -394,7 +360,6 @@ foreach ( array( 3 => 'rejected', 4 => 'ok', 7200 => 'ok', 7201 => 'rejected' ) 
 	}
 }
 
-// --- 400 captcha ---
 [ $st, $deps ] = fake();
 $r = vgarco_apply_process( request( array( 'captcha' => 'ZZZZZ' ) ), $files_ok, context(), $deps );
 same( 'mã bảo mật sai: 400 validation.captcha', array( 400, 'validation', 'captcha' ), array( $r['status'], $r['body']['code'], $r['body']['errors']['captcha'] ?? '' ) );
@@ -410,7 +375,6 @@ same( 'thiếu token: 400 captcha', array( 400, 'captcha' ), array( $r['status']
 $r = vgarco_apply_process( request( array( 'captcha' => '' ) ), $files_ok, context(), $deps );
 same( 'mã bảo mật rỗng: 400 captcha', array( 400, 'captcha' ), array( $r['status'], $r['body']['errors']['captcha'] ?? '' ) );
 
-// --- 409: vị trí đã đóng ---
 [ $st, $deps ] = fake( array( 'job_open' => false ) );
 $r = vgarco_apply_process( request(), $files_ok, context(), $deps );
 same( 'vị trí đã đóng: 409 closed, không lưu', array( 409, 'closed', 0 ), array( $r['status'], $r['body']['code'], count( $st->records ) ) );
@@ -421,7 +385,6 @@ same( 'vị trí không xác định: 409', 409, $r['status'] );
 $r = vgarco_apply_process( request( array( 'job_id' => '999' ) ), $files_ok, context(), $deps );
 same( 'vị trí không tồn tại/không mở: 409', 409, $r['status'] );
 
-// --- 400: trường + tệp; mã bảo mật được giữ ---
 [ $st, $deps ] = fake();
 $r = vgarco_apply_process( request( array( 'name' => '', 'email' => 'sai', 'consent' => '' ) ), array( 'cv' => upload( $exe, 'virus.pdf' ) ), context(), $deps );
 same( 'lỗi trường và tệp: 400 validation', array( 400, 'validation' ), array( $r['status'], $r['body']['code'] ) );
@@ -433,18 +396,15 @@ check( 'lỗi trường và tệp: không kèm mã bảo mật mới (vẫn dùn
 $r = vgarco_apply_process( request(), array(), context(), $deps );
 same( 'thiếu tệp: cv=file_required', array( 400, 'file_required' ), array( $r['status'], $r['body']['errors']['cv'] ?? '' ) );
 
-// Sau khi sửa lỗi, cùng token nộp lại được.
 [ $st, $deps ] = fake();
 vgarco_apply_process( request( array( 'email' => 'sai' ) ), $files_ok, context(), $deps );
 $r = vgarco_apply_process( request(), $files_ok, context(), $deps );
 same( 'sửa lỗi rồi nộp lại bằng cùng token: 200', 200, $r['status'] );
 
-// --- Tranh chấp token ---
 [ $st, $deps ] = fake( array( 'consume_lost' => true ) );
 $r = vgarco_apply_process( request(), $files_ok, context(), $deps );
 same( 'hai yêu cầu song song cùng token: bên thua bị từ chối, không lưu', array( 400, 'rejected', 0, 0 ), array( $r['status'], $r['body']['code'], count( $st->records ), count( $st->saved ) ) );
 
-// --- Lỗi máy chủ ---
 [ $st, $deps ] = fake( array( 'save_fail' => true ) );
 $r = vgarco_apply_process( request(), $files_ok, context(), $deps );
 same( 'không lưu được tệp: 500 server, không ghi bản ghi, không gửi thư', array( 500, 'server', 0, array() ), array( $r['status'], $r['body']['code'], count( $st->records ), $st->mails ) );
@@ -455,7 +415,6 @@ $r = vgarco_apply_process( request(), $files_ok, context(), $deps );
 same( 'không ghi được bản ghi: 500 và xóa tệp vừa lưu (không để tệp mồ côi)', array( 500, 1, $st->saved[0]['path'] ?? '' ), array( $r['status'], count( $st->deleted ), $st->deleted[0] ?? '' ) );
 same( 'không ghi được bản ghi: không gửi thư', array(), $st->mails );
 
-// --- Lỗi thư không làm mất hồ sơ ---
 [ $st, $deps ] = fake( array( 'mail' => fn() => throw new RuntimeException( 'SMTP hỏng' ) ) );
 $r = vgarco_apply_process( request(), $files_ok, context(), $deps );
 same( 'thư ném lỗi: vẫn 200 và giữ hồ sơ', array( 200, 1, array() ), array( $r['status'], count( $st->records ), $st->deleted ) );
@@ -463,8 +422,6 @@ same( 'thư ném lỗi: báo cả hai thư chưa gửi', array( 'hr' => false, '
 [ $st, $deps ] = fake( array( 'mail' => fn() => array( 'hr' => true, 'candidate' => false ) ) );
 $r = vgarco_apply_process( request(), $files_ok, context(), $deps );
 same( 'thư ứng viên lỗi: vẫn 200, ghi nhận kết quả từng thư', array( 200, array( 'hr' => true, 'candidate' => false ) ), array( $r['status'], $r['body']['mail'] ) );
-
-/* ========== 6. Quyền, thời hạn lưu trữ, đường dẫn, thư ========== */
 
 $caps = vgarco_recruit_caps();
 $cap_names = array_keys( $caps );
@@ -507,8 +464,6 @@ check( 'thư: chống chèn header qua họ tên', ! preg_match( '/[\r\n]/', vga
 same( 'thư: thay chỗ điền', 'Chào An, vị trí Kỹ sư', vgarco_apply_fill( 'Chào {ten}, vị trí {vi_tri}', array( 'ten' => 'An', 'vi_tri' => 'Kỹ sư' ) ) );
 same( 'thư: chỗ điền lạ được giữ nguyên', 'Chào {khong_co}', vgarco_apply_fill( 'Chào {khong_co}', array( 'ten' => 'An' ) ) );
 same( 'thư: giá trị chứa chỗ điền khác không bị thay lần hai', 'Chào {vi_tri} / Kỹ sư', vgarco_apply_fill( 'Chào {ten} / {vi_tri}', array( 'ten' => '{vi_tri}', 'vi_tri' => 'Kỹ sư' ) ) );
-
-/* ========== 7. Xuất .xlsx ========== */
 
 same( 'xlsx: tên cột', array( 'A', 'B', 'Z', 'AA', 'AB', 'AZ', 'BA', 'ZZ', 'AAA' ), array_map( 'vgarco_xlsx_col', array( 0, 1, 25, 26, 27, 51, 52, 701, 702 ) ) );
 
@@ -573,8 +528,6 @@ $sheet_name = static function ( string $name ) use ( $tmp ): string {
 };
 same( 'xlsx: tên trang tính bị làm sạch ký tự cấm', 'Sheet  1   a b', rtrim( $sheet_name( 'Sheet [1]: a/b*?\\' ) ) );
 same( 'xlsx: tên trang tính tối đa 31 ký tự', 31, strlen( $sheet_name( str_repeat( 'a', 50 ) ) ) );
-
-/* ---------- Kết quả ---------- */
 
 if ( $fail ) {
 	foreach ( $fail as $line ) {

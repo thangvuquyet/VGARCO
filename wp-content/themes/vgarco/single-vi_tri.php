@@ -1,11 +1,4 @@
 <?php
-/**
- * Chi tiết vị trí tuyển dụng (UC-07 7a). Vị trí quá hạn hoặc đã đóng vẫn xem được nhưng hiện "Đã ngừng nhận hồ sơ" và ẩn
- * nút "Ứng tuyển ngay". Trạng thái tính lại mỗi lần máy chủ dựng trang; vì HTML có thể nằm trong cache biên, cron 00:10
- * hằng ngày xóa cache để trạng thái quá hạn hiện đúng ngày, và API nộp hồ sơ luôn kiểm tra lại (phương án mục 8.3).
- *
- * @package vgarco
- */
 
 defined( 'ABSPATH' ) || exit;
 
@@ -44,7 +37,7 @@ vgarco_breadcrumb(
 		<?php if ( $job['open'] ) : ?>
 			<a class="job-apply-primary" href="<?php echo esc_url( $job['apply_url'] ); ?>">
 				<span><?php esc_html_e( 'Ứng tuyển ngay', 'vgarco' ); ?></span>
-				<?php echo vgarco_icon( 'arrow-up-right' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<?php echo vgarco_icon( 'arrow-up-right' ); ?>
 			</a>
 		<?php else : ?>
 			<p class="job-closed" role="status"><?php esc_html_e( 'Đã ngừng nhận hồ sơ', 'vgarco' ); ?></p>

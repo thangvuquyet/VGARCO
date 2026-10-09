@@ -1,9 +1,5 @@
 @use '../mixins' as *;
 
-// Danh mục dự án (UC-04). Số đo lấy từ bản thiết kế ở 1440 / 1280 / 1000 / 800 / 390 px.
-// Bản thiết kế đổi bố cục ở 601 px (lưới), 701 px (dải tiêu đề), 1000 px và 1181 px (khoảng cách, cỡ chữ).
-
-// ===================================================================== DẢI TIÊU ĐỀ
 .project-catalogue-head {
   position: relative;
   display: grid;
@@ -18,7 +14,6 @@
   background: linear-gradient(135deg, #f7f8f5 0%, #eef1ec 68%, #e7ebe4 100%);
   border-block: 1px solid #e2e5df;
 
-  // Ánh đỏ nhạt ở góc trên bên phải và một đường chéo mảnh: trang trí, không mang thông tin.
   &::before {
     content: '';
     position: absolute;
@@ -36,7 +31,7 @@
   h1 {
     grid-area: title;
     max-width: 56.25rem;
-    font-size: clamp(2.5rem, 4.6vw, 4.1rem); // 4,6 vw ở 1280 px; trần 65,6 px như bản thiết kế
+    font-size: clamp(2.5rem, 4.6vw, 4.1rem);
     font-weight: 450;
     line-height: 1.02;
     letter-spacing: -0.055em;
@@ -69,7 +64,6 @@
   }
 }
 
-// Di động: nhãn và số lượng xếp dọc; từ 701 px nằm cùng một hàng, số lượng bên phải.
 .project-head-meta {
   grid-area: meta;
   display: grid;
@@ -110,7 +104,6 @@
   }
 }
 
-// ===================================================================== LƯỚI DỰ ÁN
 .projects-section.catalogue {
   padding-block: 1.875rem 3rem;
 }
@@ -121,9 +114,8 @@
   gap: 2.0625rem 1.875rem;
   margin-top: 2.1875rem;
 
-  // Thẻ trong danh mục: khoảng cách chữ khác trang chủ, mũi tên tròn ở góc ảnh.
   .project-card h3 {
-    font-size: 1.25rem; // 20
+    font-size: 1.25rem;
     line-height: 1.35;
 
     @include up($bp-tablet) {
@@ -139,9 +131,8 @@
     aspect-ratio: 1.25 / 1;
   }
 
-  // Di động: thẻ thứ ba (trước các dòng danh sách) có tên lớn hơn một chút.
   &:not(.is-filtered) > .project-card:nth-child(3) h3 {
-    font-size: 1.375rem; // 22
+    font-size: 1.375rem;
     line-height: 1.35;
   }
 }
@@ -179,16 +170,13 @@
   }
 }
 
-// Rê chuột vào thẻ: vòng mũi tên đổi nền đỏ, mũi tên trắng (bản thiết kế).
 .project-card a:hover .circle-arrow,
 .project-card a:focus-visible .circle-arrow {
   color: #fff;
   background: var(--c-brand);
 }
 
-// --- Bố cục biên tập (tất cả dự án): hai thẻ đầu lệch nhau, thẻ thứ ba tràn hàng, còn lại là danh sách ---
 .catalogue-grid:not(.is-filtered) {
-  // Từ thẻ thứ tư: một hàng gồm ảnh nhỏ, tên và thông tin. Di động: ảnh vuông bên trái, chữ bên phải.
   > .project-card:nth-child(n + 4) {
     border-top: 1px solid var(--c-line);
 
@@ -211,7 +199,7 @@
     h3 {
       grid-area: title;
       max-width: none;
-      font-size: 1.125rem; // 18
+      font-size: 1.125rem;
       line-height: 1.3;
       letter-spacing: -0.025em;
     }
@@ -238,7 +226,6 @@
     grid-template-columns: 1.3fr 1fr;
     gap: 1.75rem 1.875rem;
 
-    // Thẻ thứ hai thấp hơn thẻ đầu một khoảng — nhịp so le của trang.
     > .project-card:nth-child(2) {
       padding-top: 5rem;
 
@@ -251,7 +238,6 @@
       aspect-ratio: 1.22 / 1;
     }
 
-    // Thẻ thứ ba: ảnh rộng cả hàng; thông tin bên trái, tên bên phải.
     > .project-card:nth-child(3) {
       grid-column: 1 / -1;
       margin-top: 1.25rem;
@@ -278,7 +264,7 @@
         justify-self: end;
         max-width: 30rem;
         margin: 1.25rem 0 0;
-        font-size: 1.4375rem; // 23
+        font-size: 1.4375rem;
         line-height: 1.3;
         letter-spacing: -0.025em;
         text-align: right;
@@ -303,11 +289,11 @@
       }
 
       h3 {
-        font-size: 1.25rem; // 20
+        font-size: 1.25rem;
       }
 
       .project-meta {
-        text-align: right; // giữ lề trên/dưới của thẻ thường: bản thiết kế cũng vậy nên chữ thấp hơn tâm ảnh vài px
+        text-align: right;
       }
     }
   }
@@ -320,7 +306,7 @@
     }
 
     > .project-card:nth-child(3) h3 {
-      font-size: 1.625rem; // 26
+      font-size: 1.625rem;
     }
 
     > .project-card:nth-child(n + 4) {
@@ -329,7 +315,7 @@
       }
 
       h3 {
-        font-size: 1.375rem; // 22
+        font-size: 1.375rem;
       }
     }
   }
@@ -342,16 +328,15 @@
     }
 
     > .project-card:nth-child(3) h3 {
-      font-size: 1.875rem; // 30
+      font-size: 1.875rem;
     }
 
     > .project-card:nth-child(n + 4) h3 {
-      font-size: 1.5625rem; // 25
+      font-size: 1.5625rem;
     }
   }
 }
 
-// --- Lọc theo loại công trình: lưới đều hai cột ---
 .catalogue-grid.is-filtered {
   @include up($bp-tablet) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -362,7 +347,7 @@
     }
 
     .project-card h3 {
-      font-size: 1.5rem; // 24
+      font-size: 1.5rem;
       line-height: 1.3;
     }
   }
@@ -377,7 +362,6 @@
   color: var(--c-ink-muted);
 }
 
-// ===================================================================== CÂU CHUYỆN MỘT CÔNG TRÌNH
 .project-story {
   display: flex;
   flex-direction: column;
@@ -404,7 +388,7 @@
   .eyebrow {
     margin-bottom: 1.75rem;
     letter-spacing: 0.055em;
-    color: rgb(255 255 255 / 90%); // 0,74 chỉ đạt 3,8 : 1 trên nền đỏ
+    color: rgb(255 255 255 / 90%);
   }
 
   h2 {
@@ -418,7 +402,7 @@
   }
 
   h2 em {
-    color: #fff; // chữ nhấn màu đỏ thương hiệu sẽ biến mất trên nền đỏ
+    color: #fff;
   }
 
   > p:not(.eyebrow) {
@@ -454,7 +438,7 @@
 .story-link {
   display: flex;
   gap: 2.5rem;
-  padding-bottom: 1.0875rem; // 9 px dưới chữ + phần cao thêm của mũi tên ở bản thiết kế
+  padding-bottom: 1.0875rem;
   border-bottom: 1px solid rgb(255 255 255 / 50%);
 
   svg {

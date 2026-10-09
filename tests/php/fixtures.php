@@ -1,10 +1,4 @@
 <?php
-/**
- * Dữ liệu giả và hàm giả của WordPress cho tests/php/render.php.
- * Dữ liệu lấy từ hồ sơ năng lực thật (tên dự án, địa điểm, năm, vai trò) để bố cục được thử với độ dài chữ thật.
- *
- * Ảnh: tệp trong bản thiết kế HTML, phục vụ dưới /img/ bởi tests/serve.mjs (chỉ dùng khi phát triển).
- */
 
 $GLOBALS['fx'] = array(
 	'images'  => array(),
@@ -15,12 +9,10 @@ $GLOBALS['fx'] = array(
 	'urls'    => array(),
 );
 
-// VG_FX_EMPTY=1: website mới cài, chưa có nội dung nào — để thử các trạng thái rỗng (khối tự ẩn, không lỗi).
 $fx_empty = (bool) getenv( 'VG_FX_EMPTY' );
 
 $img_dir = getenv( 'VG_IMG_DIR' ) ?: 'C:/Users/ThangVq/OneDrive - Mobifone/Documents/ChatGPT/Project1/vgarco-preview/assets';
 
-/** Đăng ký một ảnh giả, trả về ID. Kích thước đọc từ tệp thật nếu có. */
 function fx_image( string $file ): int {
 	global $img_dir;
 	static $next = 900;
@@ -29,7 +21,6 @@ function fx_image( string $file ): int {
 	return $next;
 }
 
-/** Đăng ký một bài viết giả. */
 function fx_post( int $id, string $type, string $title, array $fields = array(), array $extra = array() ): void {
 	$GLOBALS['fx']['posts'][ $id ]  = array_merge(
 		array(
@@ -54,12 +45,9 @@ $types = array(
 	'van-hoa'    => 'Văn hóa & di tích',
 	'ha-tang'    => 'Công nghiệp & hạ tầng',
 	'nha-o'      => 'Nhà ở & công trình dân dụng',
-	'y-te'       => 'Y tế', // chưa có dự án nào: thử trạng thái danh mục rỗng (UC-04 5b)
+	'y-te'       => 'Y tế',
 );
 
-/* --- Dự án: 19 dự án trong hồ sơ (tests/php/data/projects.json, lấy từ bản thiết kế HTML) ---
- * Bảy dự án đầu giữ ID và cờ nổi bật/tiêu biểu mà các phép kiểm tra trang chủ dựa vào.
- * VG_FX_ORDER=proto: sắp theo thứ tự của bản thiết kế (để so sánh bố cục danh mục với bản thiết kế). */
 $category_slug = array(
 	'diplomatic'     => 'ngoai-giao',
 	'security'       => 'quoc-phong',
@@ -68,7 +56,6 @@ $category_slug = array(
 	'infrastructure' => 'ha-tang',
 	'residential'    => 'nha-o',
 );
-// key => [ID, ảnh đại diện, loại ảnh, nổi bật, tiêu biểu]
 $pinned = array(
 	'ambassador'    => array( 101, 'project-images/ambassador-05.jpg', 'thiet_ke', true, false ),
 	'savannakhet'   => array( 102, 'project-images/savannakhet-pctt.jpg', 'thiet_ke', true, false ),
@@ -87,19 +74,16 @@ foreach ( $fx_empty ? array() : json_decode( (string) file_get_contents( __DIR__
 	$image    = fx_image( $pin ? $pin[1] : $row['image'] );
 	$kind     = $pin ? $pin[2] : $row['kind'];
 	$featured = $pin ? $pin[3] : false;
-	// VG_FX_ONE_FEATURED=1: chỉ một dự án nổi bật (trình chiếu một ảnh: không có chấm chọn ảnh).
 	if ( getenv( 'VG_FX_ONE_FEATURED' ) && 101 !== $id ) {
 		$featured = false;
 	}
 	$showcase = $pin ? $pin[4] : false;
 
-	// VG_FX_BLANK=<ID>: dự án chưa có ảnh riêng (để trống có chủ ý): trang phải hiển thị tử tế, không treo nhãn loại ảnh trên ô trống.
 	if ( (string) $id === (string) getenv( 'VG_FX_BLANK' ) ) {
 		$image          = 0;
 		$row['gallery'] = array();
 	}
 
-	// Thư viện = các ảnh ngoài ảnh đầu trang. Bản thiết kế bỏ ảnh đầu của mảng gallery vì nó là ảnh bìa.
 	$library = array();
 	foreach ( array_slice( $row['gallery'], 1 ) as $i => $file ) {
 		$label     = $row['labels'][ $i + 1 ] ?? 'Phối cảnh thiết kế';
@@ -140,9 +124,6 @@ foreach ( $fx_empty ? array() : json_decode( (string) file_get_contents( __DIR__
 	$GLOBALS['fx']['terms'][ $id ] = array( 'loai_cong_trinh' => array( $category_slug[ $row['category'] ] ) );
 }
 
-/* --- Lĩnh vực --- */
-// id, tiêu đề, neo, tóm tắt trang chủ (rỗng = không hiện ở trang chủ), thứ tự, dự án tham khảo (ID), mô tả.
-// Thứ tự và mô tả theo bản thiết kế. Trang chủ lấy 3 nhóm đầu có tóm tắt: kiến trúc, lập dự án, giám sát.
 foreach ( $fx_empty ? array() : array(
 	array( 201, 'Tư vấn thiết kế kiến trúc', 'thiet-ke-kien-truc', 'Ý tưởng · Hồ sơ', 1, 107, 'Thiết kế quy hoạch, kiến trúc công trình, nội ngoại thất; phát triển phương án từ ý tưởng đến hồ sơ thiết kế.' ),
 	array( 204, 'Thiết kế kết cấu', 'thiet-ke-ket-cau', '', 2, 104, 'Giải pháp kết cấu cho công trình dân dụng và công nghiệp, phối hợp với kiến trúc và các bộ môn kỹ thuật.' ),
@@ -165,13 +146,10 @@ foreach ( $fx_empty ? array() : array(
 	);
 }
 
-/* --- Vị trí tuyển dụng --- */
-// VG_FX_NO_JOBS=1: chưa có vị trí nào. Hạn nộp tính theo ngày chạy kiểm thử để kết quả không phụ thuộc lịch.
 $today    = date( 'Ymd' );
 $in_month = date( 'Ymd', strtotime( '+30 days' ) );
 $yesterday = date( 'Ymd', strtotime( '-1 day' ) );
 foreach ( ( $fx_empty || getenv( 'VG_FX_NO_JOBS' ) ) ? array() : array(
-	// id, tiêu đề, nơi làm việc, phòng ban, loại hình, trạng thái, hạn nộp
 	array( 401, 'Kiến trúc sư thiết kế', 'ha-noi', 'kien-truc', 'toan_thoi_gian', 'dang_nhan', $in_month ),
 	array( 402, 'Kỹ sư kết cấu', 'ha-noi', 'xay-dung-dan-dung', 'toan_thoi_gian', 'dang_nhan', '' ),
 	array( 403, 'Kỹ sư giám sát', 'nghe-an', 'giam-sat-thi-cong', 'toan_thoi_gian', 'dang_nhan', $today ),
@@ -199,7 +177,6 @@ foreach ( ( $fx_empty || getenv( 'VG_FX_NO_JOBS' ) ) ? array() : array(
 fx_post( 506, 'page', 'Tuyển dụng', array(), array( 'url' => '/tuyen-dung/' ) );
 fx_post( 507, 'page', 'Ứng tuyển', array(), array( 'url' => '/ung-tuyen/' ) );
 
-/* --- Tin tức --- */
 foreach ( $fx_empty ? array() : array(
 	array( 301, 'Từ ý tưởng đến một công trình có thể vận hành', 'Một quy trình rõ ràng giúp kiến trúc, kỹ thuật và triển khai cùng đi theo một mục tiêu.', 'tower.jpg', 'Góc nhìn chuyên môn', 'tin-tuc-cong-ty' ),
 	array( 302, 'Dấu ấn hợp tác trong các dự án quốc tế', 'Thông tin về hoạt động hợp tác và các dự án của VGARCO.', 'museum-render.jpg', 'Thông tin báo chí', 'thong-tin-bao-chi' ),
@@ -220,7 +197,6 @@ foreach ( $fx_empty ? array() : array(
 	);
 	$GLOBALS['fx']['terms'][ $n[0] ] = array( 'chuyen_muc' => array( $n[5] ) );
 }
-// VG_FX_NEWS_MANY=1: thêm 20 bài cũ hơn (tổng 23 bài = 3 trang) để thử phân trang.
 if ( getenv( 'VG_FX_NEWS_MANY' ) && ! $fx_empty ) {
 	$cats = array( 'tin-tuc-cong-ty', 'thong-tin-bao-chi', 'su-kien' );
 	for ( $i = 0; $i < 20; $i++ ) {
@@ -230,8 +206,6 @@ if ( getenv( 'VG_FX_NEWS_MANY' ) && ! $fx_empty ) {
 	}
 }
 
-/* --- Trang tĩnh --- */
-// VG_FX_PAGE_FULL=1: biên tập viên đã chọn ảnh (bìa, cách làm việc, sự ghi nhận). VG_FX_PAGE_OVERRIDE=1: đã nhập chữ ghi đè bản mặc định.
 $page_full     = (bool) getenv( 'VG_FX_PAGE_FULL' );
 $page_override = (bool) getenv( 'VG_FX_PAGE_OVERRIDE' );
 
@@ -254,12 +228,11 @@ fx_post(
 			'ghi_nhan_bai_viet'  => getenv( 'VG_FX_NO_AWARD_POST' ) ? 0 : 301,
 		) : array(),
 		$page_override ? array(
-			// Nội dung độc hại: mọi trường phải được lọc hoặc thoát trước khi in.
 			'hero_tieu_de'   => "Tiêu đề do biên tập viên nhập.<img src=x onerror=alert(1)>\n<em>Ghi đè bản mặc định.</em>",
 			'hero_mo_ta_1'   => '<b>đậm</b><script>alert(1)</script>Dòng ngắn',
 			'hanh_trinh_moc' => array(
 				array( 'nam' => '2013', 'dong_phu' => '19.08.2013', 'tieu_de' => 'Mốc duy nhất', 'mo_ta' => 'Chỉ nhập một mốc.' ),
-				array( 'nam' => '', 'dong_phu' => '', 'tieu_de' => '', 'mo_ta' => '' ), // dòng trống hoàn toàn: phải bị bỏ
+				array( 'nam' => '', 'dong_phu' => '', 'tieu_de' => '', 'mo_ta' => '' ),
 			),
 			'pham_vi_quoc_gia' => "Việt Nam\n\nLào\n  \nĐức\nÁo",
 		) : array()
@@ -267,7 +240,6 @@ fx_post(
 	array( 'url' => '/gioi-thieu/' )
 );
 
-// Trang chủ (500): VG_FX_PAGE_OVERRIDE=1 → đã nhập chữ ghi đè (có nội dung độc hại để kiểm tra việc lọc/thoát).
 fx_post(
 	500,
 	'page',
@@ -290,7 +262,6 @@ fx_post(
 	array( 'url' => '/' )
 );
 
-// Ban lãnh đạo (502), Phòng ban (503), Lĩnh vực (504), Liên hệ (505). VG_FX_PAGE_OVERRIDE=1: đã nhập chữ ghi đè / thành viên.
 fx_post(
 	502,
 	'page',
@@ -322,7 +293,6 @@ fx_post(
 fx_post( 504, 'page', 'Lĩnh vực hoạt động', array(), array( 'url' => '/linh-vuc-hoat-dong/' ) );
 fx_post( 505, 'page', 'Liên hệ', array(), array( 'url' => '/lien-he/' ) );
 
-/* --- Cấu hình (ACF Options) --- */
 $GLOBALS['fx']['options'] = $fx_empty ? array() : array(
 	'doi_tac'           => array(
 		array( 'ten' => 'AVITYCO', 'viet_tat' => 'AV', 'mo_ta' => 'Kiến trúc & Xây dựng' ),
@@ -338,7 +308,7 @@ $GLOBALS['fx']['options'] = $fx_empty ? array() : array(
 <em>Viết tiếp giá trị.</em>",
 		'mo_ta'        => 'Cải tạo Bảo tàng Lịch sử Quân đội nhân dân Lào. Một hành trình từ phương án thiết kế đến hình hài công trình thực tế.',
 		'anh_thiet_ke' => fx_image( 'museum-render.jpg' ),
-		'anh_thuc_te'  => getenv( 'VG_FX_NO_BUILT' ) ? 0 : fx_image( 'museum-built.jpg' ), // VG_FX_NO_BUILT=1: chưa có ảnh công trình (UC-04 6b)
+		'anh_thuc_te'  => getenv( 'VG_FX_NO_BUILT' ) ? 0 : fx_image( 'museum-built.jpg' ),
 	),
 );
 
@@ -353,8 +323,6 @@ $GLOBALS['fx']['term_names'] = $types + array(
 	'su-kien'           => 'Sự kiện',
 );
 
-/* ========== Hàm giả ========== */
-
 function get_field( $name, $post_id = false ) {
 	if ( 'option' === $post_id ) {
 		return $GLOBALS['fx']['options'][ $name ] ?? null;
@@ -364,20 +332,20 @@ function get_field( $name, $post_id = false ) {
 
 function get_post_status( $id ) {
 	if ( getenv( 'VG_FX_STORY_DRAFT' ) && 106 === $id ) {
-		return 'draft'; // dự án của khối câu chuyện đã bị gỡ về bản nháp
+		return 'draft';
 	}
 	if ( getenv( 'VG_FX_AWARD_DRAFT' ) && 301 === $id ) {
-		return 'draft'; // bài tư liệu ở khối "Sự ghi nhận" chưa xuất bản
+		return 'draft';
 	}
 	if ( getenv( 'VG_FX_REF_DRAFT' ) && 107 === $id ) {
-		return 'draft'; // dự án tham khảo của nhóm lĩnh vực đầu tiên chưa xuất bản
+		return 'draft';
 	}
 	return isset( $GLOBALS['fx']['posts'][ $id ] ) ? 'publish' : false;
 }
 
 function get_the_title( $id = 0 ) {
 	if ( 0 === $id && isset( $GLOBALS['posts'][ $GLOBALS['vg_loop'] ] ) ) {
-		return $GLOBALS['posts'][ $GLOBALS['vg_loop'] ]->title; // trong vòng lặp, như WordPress
+		return $GLOBALS['posts'][ $GLOBALS['vg_loop'] ]->title;
 	}
 	return $GLOBALS['fx']['posts'][ $id ]['title'] ?? '';
 }
@@ -419,7 +387,6 @@ function get_the_terms( $id, $taxonomy ) {
 	);
 }
 
-/** get_posts giả: lọc theo kiểu, cờ meta, sắp theo menu_order/ngày, cắt theo posts_per_page. */
 function get_posts( $args = array() ) {
 	$type  = $args['post_type'] ?? 'post';
 	$posts = array_filter( $GLOBALS['fx']['posts'], static fn( $p ) => $p['type'] === $type );
@@ -432,7 +399,7 @@ function get_posts( $args = array() ) {
 		);
 	}
 	if ( 'page' === $type ) {
-		return array(); // trang tĩnh: dùng địa chỉ dự phòng
+		return array();
 	}
 	if ( ! empty( $args['tax_query'] ) ) {
 		foreach ( $args['tax_query'] as $clause ) {

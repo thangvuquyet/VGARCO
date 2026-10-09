@@ -1,11 +1,6 @@
 <?php
 /**
  * Template Name: Ban lãnh đạo
- *
- * Trang Ban lãnh đạo (UC-02). Thành viên hiển thị theo đúng thứ tự trong trường lặp (4a). Chưa nhập thì dùng
- * thành viên mặc định trong hồ sơ. Thành viên không có ảnh hiển thị chữ cái đầu của họ tên.
- *
- * @package vgarco
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -54,7 +49,6 @@ $principles = vgarco_field_rows(
 	$id
 );
 
-/** Chữ cái đầu của họ và của tên ("Vũ Duy Hùng" → "VH"), dùng làm hình đại diện khi chưa có ảnh. */
 $initials = static function ( string $name ): string {
 	$words = preg_split( '/\s+/u', trim( $name ) ) ?: array();
 	$words = count( $words ) > 1 ? array( $words[0], end( $words ) ) : $words;
@@ -80,7 +74,7 @@ vgarco_breadcrumb(
 		<?php if ( $photo > 0 ) : ?>
 			<figure class="leader-photo">
 				<?php
-				echo vgarco_image( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- markup ảnh của WordPress.
+				echo vgarco_image(
 					$photo,
 					array(
 						'size'  => 'vg-1200',

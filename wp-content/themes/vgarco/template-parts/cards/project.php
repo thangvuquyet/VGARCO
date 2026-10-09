@@ -1,13 +1,4 @@
 <?php
-/**
- * Thẻ dự án (dùng ở trang chủ, danh mục dự án, dự án liên quan).
- * Trường thiếu tự ẩn: dự án chưa có địa điểm hoặc năm thì thẻ chỉ hiện loại công trình (UC-04 3a).
- *
- * @var array $args['project'] Dự án (xem vgarco_project()).
- * @var bool  $args['arrow']   Có vòng tròn mũi tên ở góc ảnh (danh mục dự án).
- *
- * @package vgarco
- */
 
 defined( 'ABSPATH' ) || exit;
 
@@ -23,7 +14,7 @@ $image_id   = (int) ( $project['card_image'] ?: $project['hero_image'] );
 	<a href="<?php echo esc_url( $project['url'] ); ?>">
 		<div class="project-photo">
 			<?php
-			echo vgarco_image( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- markup ảnh của WordPress.
+			echo vgarco_image(
 				$image_id,
 				array(
 					'size'  => 'vg-1200',
@@ -34,11 +25,11 @@ $image_id   = (int) ( $project['card_image'] ?: $project['hero_image'] );
 				)
 			);
 			?>
-			<?php if ( $image_id > 0 ) : // Dự án chưa có ảnh: ô trống không mang nhãn "Phối cảnh thiết kế" / "Ảnh công trình". ?>
+			<?php if ( $image_id > 0 ) : ?>
 				<span class="image-label"><?php echo esc_html( $project['kind_label'] ); ?></span>
 			<?php endif; ?>
 			<?php if ( ! empty( $args['arrow'] ) ) : ?>
-				<span class="circle-arrow" aria-hidden="true"><?php echo vgarco_icon( 'arrow-up-right' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
+				<span class="circle-arrow" aria-hidden="true"><?php echo vgarco_icon( 'arrow-up-right' ); ?></span>
 			<?php endif; ?>
 		</div>
 		<?php if ( '' !== $project['location'] || '' !== $meta_right ) : ?>

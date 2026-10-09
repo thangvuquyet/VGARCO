@@ -1,10 +1,9 @@
 <?php
-// WP-CLI giả: đủ cho VGARCO_CLI_Command (log, warning, error, success, format_items).
 namespace {
 	define( 'WP_CLI', true );
 	class WP_CLI {
 		public static array $lines  = array();
-		public static array $tables = array(); // các bảng đã in qua format_items (để kiểm nội dung)
+		public static array $tables = array();
 		public static function add_command( $name, $class ) {}
 		public static function log( $m ) { self::$lines[] = (string) $m; }
 		public static function success( $m ) { self::$lines[] = 'OK: ' . $m; }

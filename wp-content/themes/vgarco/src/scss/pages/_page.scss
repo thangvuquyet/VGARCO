@@ -1,8 +1,5 @@
 @use '../mixins' as *;
 
-// Trang nội dung chung (trang pháp lý...) và trang lỗi 404. Không có trong 13 màn hình của bản thiết kế HTML:
-// dùng lại token, nhãn và đường kẻ của các trang khác cho đồng bộ.
-
 .page-basic {
   padding-block: 1.625rem 3.5rem;
 
@@ -11,7 +8,7 @@
   }
 
   .entry-content {
-    max-width: 46rem; // ~ 75 ký tự mỗi dòng: dễ đọc văn bản dài
+    max-width: 46rem;
     font-size: var(--fs-body);
     line-height: 1.7;
   }
@@ -30,7 +27,6 @@
   }
 }
 
-// --- Trang 404 ---
 .error-page {
   padding-block: 2.5rem 4rem;
 

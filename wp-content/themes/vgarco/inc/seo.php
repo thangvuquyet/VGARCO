@@ -1,28 +1,14 @@
 <?php
-/**
- * SEO cơ bản trong theme, không dùng plugin (mục 8.9): tiêu đề theo mẫu, mô tả, canonical, Open Graph, JSON-LD
- * (Organization ở trang chủ, BreadcrumbList, JobPosting cho vị trí đang nhận hồ sơ) và noindex cho trang không nên lập chỉ mục.
- * hreflang do WPML sinh; sơ đồ trang là sơ đồ lõi của WordPress. Phần dựng thẻ nằm ở seo-lib.php (có kiểm thử).
- *
- * @package vgarco
- */
 
 defined( 'ABSPATH' ) || exit;
 
 require_once get_theme_file_path( 'inc/seo-lib.php' );
-
-/* -------------------------------------------------------------------------
- * Tiêu đề
- * ---------------------------------------------------------------------- */
 
 add_filter(
 	'document_title_separator',
 	static fn(): string => '—'
 );
 
-/**
- * Tiêu đề: "Tên trang — Mục — VGARCO" (dự án, tin, tuyển dụng có mục); trang chủ "VGARCO — Khẩu hiệu".
- */
 add_filter(
 	'document_title_parts',
 	static function ( array $parts ): array {
@@ -47,28 +33,19 @@ add_filter(
 			$section = __( 'Tuyển dụng', 'vgarco' );
 		}
 
-		// Trang danh mục có tên trùng tên mục thì không lặp ("Dự án — Dự án — VGARCO").
 		$title = trim( (string) ( $parts['title'] ?? '' ) );
 		$out   = array( 'title' => $title );
 		if ( '' !== $section && $section !== $title ) {
 			$out['section'] = $section;
 		}
 		if ( isset( $parts['page'] ) ) {
-			$out['page'] = $parts['page']; // "Trang 2" của trang có phân trang
+			$out['page'] = $parts['page'];
 		}
 		$out['site'] = $site;
 		return $out;
 	}
 );
 
-/* -------------------------------------------------------------------------
- * Robots
- * ---------------------------------------------------------------------- */
-
-/**
- * Không lập chỉ mục: trang 404, kết quả tìm kiếm, trang Ứng tuyển (mục 8.9) và TOÀN BỘ môi trường không phải production
- * (staging không bao giờ được xuất hiện trên Google).
- */
 function vgarco_seo_noindex(): bool {
 	if ( is_404() || is_search() || 'apply' === vgarco_page_key() ) {
 		return true;
@@ -81,24 +58,15 @@ add_filter(
 	static function ( array $robots ): array {
 		if ( vgarco_seo_noindex() ) {
 			$robots['noindex']  = true;
-			$robots['nofollow'] = 'production' !== wp_get_environment_type(); // trang 404/ứng tuyển vẫn cho đi theo liên kết
+			$robots['nofollow'] = 'production' !== wp_get_environment_type();
 			unset( $robots['max-image-preview'] );
 		}
 		return $robots;
 	}
 );
 
-// WordPress tự in rel=canonical cho trang đơn: thay bằng bản của theme (có cả trang danh mục, loại, chuyên mục).
 remove_action( 'wp_head', 'rel_canonical' );
 
-/* -------------------------------------------------------------------------
- * Dữ liệu của trang
- * ---------------------------------------------------------------------- */
-
-/**
- * Địa chỉ tuyệt đối: WordPress luôn trả địa chỉ tuyệt đối nên thường không đổi gì; địa chỉ bắt đầu bằng "/" (plugin hoặc bộ lọc
- * trả đường dẫn tương đối) được nối với địa chỉ gốc của website, vì thẻ canonical/OG và JSON-LD bắt buộc dùng địa chỉ tuyệt đối.
- */
 function vgarco_seo_absolute( string $url ): string {
 	if ( str_starts_with( $url, '/' ) && ! str_starts_with( $url, '//' ) ) {
 		$base = (string) wp_parse_url( home_url( '/' ), PHP_URL_SCHEME ) . '://' . (string) wp_parse_url( home_url( '/' ), PHP_URL_HOST );
@@ -107,16 +75,10 @@ function vgarco_seo_absolute( string $url ): string {
 	return $url;
 }
 
-/** Mô tả mặc định của website, dùng khi trang không có mô tả riêng. */
 function vgarco_seo_default_description(): string {
 	return __( 'Tư vấn thiết kế, giám sát và quản lý dự án xây dựng: công trình ngoại giao, quân sự, giáo dục, văn hóa, y tế và hạ tầng tại Việt Nam, Lào và CHLB Đức.', 'vgarco' );
 }
 
-/**
- * Ảnh chia sẻ: địa chỉ, kích thước, mô tả. Rỗng nếu chưa có ảnh.
- *
- * @return array{url:string,width:int,height:int}
- */
 function vgarco_seo_image( int $attachment_id ): array {
 	if ( $attachment_id <= 0 ) {
 		return array( 'url' => '', 'width' => 0, 'height' => 0 );
@@ -125,14 +87,10 @@ function vgarco_seo_image( int $attachment_id ): array {
 	return is_array( $src ) ? array( 'url' => (string) $src[0], 'width' => (int) $src[1], 'height' => (int) $src[2] ) : array( 'url' => '', 'width' => 0, 'height' => 0 );
 }
 
-/**
- * Địa chỉ chuẩn (canonical) của trang hiện tại; rỗng với trang không nên có (404).
- */
 function vgarco_seo_canonical(): string {
 	return vgarco_seo_absolute( vgarco_seo_canonical_raw() );
 }
 
-/** Địa chỉ chuẩn như WordPress trả (chưa chuẩn hóa thành tuyệt đối). */
 function vgarco_seo_canonical_raw(): string {
 	$paged = (int) get_query_var( 'paged' );
 
@@ -158,11 +116,6 @@ function vgarco_seo_canonical_raw(): string {
 	return $paged > 1 ? (string) get_pagenum_link( $paged ) : $url;
 }
 
-/**
- * Toàn bộ thẻ cần in cho trang hiện tại.
- *
- * @return array Xem vgarco_seo_tags().
- */
 function vgarco_seo_context(): array {
 	$id          = (int) get_queried_object_id();
 	$locale      = str_starts_with( (string) determine_locale(), 'de' ) ? 'de_DE' : 'vi_VN';
@@ -217,7 +170,6 @@ function vgarco_seo_context(): array {
 	);
 }
 
-/** Dữ liệu tổ chức lấy từ trang Cấu hình. */
 function vgarco_seo_org_data(): array {
 	return array(
 		'name'    => (string) vgarco_option( 'phap_nhan.ten' ),
@@ -231,22 +183,18 @@ function vgarco_seo_org_data(): array {
 	);
 }
 
-/* -------------------------------------------------------------------------
- * Đầu ra
- * ---------------------------------------------------------------------- */
-
 add_action(
 	'wp_head',
 	static function (): void {
-		echo vgarco_seo_tags( vgarco_seo_context() ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- đã thoát trong vgarco_seo_tags().
+		echo vgarco_seo_tags( vgarco_seo_context() );
 
 		if ( is_front_page() ) {
-			echo vgarco_seo_jsonld( vgarco_seo_org( vgarco_seo_org_data() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON đã mã hóa an toàn.
+			echo vgarco_seo_jsonld( vgarco_seo_org( vgarco_seo_org_data() ) );
 		}
 
 		if ( is_singular( 'vi_tri' ) ) {
 			$job = vgarco_job( (int) get_queried_object_id() );
-			echo vgarco_seo_jsonld( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON đã mã hóa an toàn.
+			echo vgarco_seo_jsonld(
 				vgarco_seo_job(
 					array(
 						'open'             => $job['open'],
@@ -273,13 +221,12 @@ add_action(
 	1
 );
 
-// BreadcrumbList nằm cuối trang: đường dẫn vị trí được dựng trong mẫu (vgarco_breadcrumb) sau khi <head> đã in xong.
 add_action(
 	'wp_footer',
 	static function (): void {
 		$trail = vgarco_breadcrumb_trail();
 		if ( $trail ) {
-			echo vgarco_seo_jsonld( vgarco_seo_breadcrumbs( array_map( static fn( array $c ): array => isset( $c[1] ) ? array( $c[0], vgarco_seo_absolute( (string) $c[1] ) ) : array( $c[0] ), $trail ), vgarco_seo_canonical() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON đã mã hóa an toàn.
+			echo vgarco_seo_jsonld( vgarco_seo_breadcrumbs( array_map( static fn( array $c ): array => isset( $c[1] ) ? array( $c[0], vgarco_seo_absolute( (string) $c[1] ) ) : array( $c[0] ), $trail ), vgarco_seo_canonical() ) );
 		}
 	},
 	1

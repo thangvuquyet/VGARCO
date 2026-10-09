@@ -1,26 +1,9 @@
 <?php
-/**
- * Phần thuần (không gọi WordPress) của quản lý hồ sơ ứng tuyển: quyền, thời hạn lưu trữ, thư, đường dẫn riêng tư và
- * xuất .xlsx. Tách riêng để kiểm thử bằng tệp thật (tests/php/apply.php).
- *
- * @package vgarco-core
- */
 
 defined( 'ABSPATH' ) || exit;
 
-/** Hồ sơ giữ 12 tháng rồi tự xóa cả bản ghi lẫn tệp CV (mục 6.4, 10.4). */
 const VGARCO_APPLY_RETENTION_MONTHS = 12;
 
-/* -------------------------------------------------------------------------
- * Quyền
- * ---------------------------------------------------------------------- */
-
-/**
- * Quyền riêng của hồ sơ ứng tuyển. Vai trò Biên tập viên KHÔNG có các quyền này: CV chứa dữ liệu cá nhân nên chỉ nhân sự
- * tuyển dụng và quản trị viên được xem (mục 6.4).
- *
- * @return array<string,bool>
- */
 function vgarco_recruit_caps(): array {
 	return array(
 		'vg_view_applications'   => true,
@@ -30,13 +13,6 @@ function vgarco_recruit_caps(): array {
 	);
 }
 
-/* -------------------------------------------------------------------------
- * Thời hạn lưu trữ
- * ---------------------------------------------------------------------- */
-
-/**
- * Mốc cắt: hồ sơ nộp trước mốc này là quá hạn. Tính theo lịch (trừ 12 tháng), không phải 365 ngày, để "12 tháng" đúng nghĩa.
- */
 function vgarco_apply_retention_cutoff( int $now, int $months = VGARCO_APPLY_RETENTION_MONTHS ): int {
 	$date = ( new DateTimeImmutable( '@' . $now ) )->setTimezone( new DateTimeZone( 'UTC' ) );
 	return $date->modify( '-' . $months . ' months' )->getTimestamp();
@@ -46,29 +22,21 @@ function vgarco_apply_is_expired( int $submitted_at, int $now, int $months = VGA
 	return $submitted_at < vgarco_apply_retention_cutoff( $now, $months );
 }
 
-/* -------------------------------------------------------------------------
- * Đường dẫn riêng tư
- * ---------------------------------------------------------------------- */
-
-/** Chuẩn hóa để so sánh đường dẫn: dấu gạch xuôi, bỏ gạch cuối, không phân biệt hoa thường trên Windows. */
 function vgarco_path_normalize( string $path ): string {
 	$path = rtrim( str_replace( '\\', '/', $path ), '/' );
 	return '\\' === DIRECTORY_SEPARATOR ? strtolower( $path ) : $path;
 }
 
-/** $path nằm trong (hoặc trùng) $root. */
 function vgarco_path_inside( string $path, string $root ): bool {
 	$path = vgarco_path_normalize( $path );
 	$root = vgarco_path_normalize( $root );
 	return '' !== $root && ( $path === $root || str_starts_with( $path, $root . '/' ) );
 }
 
-/** Đường dẫn tương đối của CV hợp lệ: cv/YYYY/MM/<32 hex>, không "..". Dùng trước khi mở hay xóa tệp. */
 function vgarco_apply_cv_path_valid( string $relative ): bool {
 	return 1 === preg_match( '#^cv/\d{4}/\d{2}/[a-f0-9]{32}$#', $relative );
 }
 
-/** Đuôi tệp theo loại đã xác nhận khi nhận hồ sơ. */
 function vgarco_cv_ext_for_mime( string $mime ): string {
 	$map = array(
 		'application/pdf'    => 'pdf',
@@ -78,30 +46,18 @@ function vgarco_cv_ext_for_mime( string $mime ): string {
 	return $map[ $mime ] ?? 'bin';
 }
 
-/* -------------------------------------------------------------------------
- * Thư
- * ---------------------------------------------------------------------- */
-
-/** Một dòng thuần cho tiêu đề và giá trị chèn vào thư: bỏ thẻ và mọi ký tự xuống dòng (chống chèn header thư). */
 function vgarco_mail_line( string $text ): string {
 	return trim( (string) preg_replace( '/[\r\n\t]+/', ' ', strip_tags( $text ) ) );
 }
 
-/** Thay {chỗ điền} trong mẫu thư. Chỗ điền không có giá trị được giữ nguyên để người soạn mẫu thấy lỗi. */
 function vgarco_apply_fill( string $template, array $values ): string {
 	$pairs = array();
 	foreach ( $values as $key => $value ) {
 		$pairs[ '{' . $key . '}' ] = (string) $value;
 	}
-	// strtr thay một lượt, không quét lại phần đã thay: họ tên "{lien_ket}" của ứng viên không bị biến thành liên kết thật.
 	return strtr( $template, $pairs );
 }
 
-/* -------------------------------------------------------------------------
- * Xuất .xlsx
- * ---------------------------------------------------------------------- */
-
-/** Số thứ tự cột (từ 0) → chữ cột: 0 → A, 25 → Z, 26 → AA. */
 function vgarco_xlsx_col( int $index ): string {
 	$name = '';
 	for ( $n = $index + 1; $n > 0; $n = intdiv( $n - 1, 26 ) ) {
@@ -110,25 +66,11 @@ function vgarco_xlsx_col( int $index ): string {
 	return $name;
 }
 
-/** Bỏ ký tự không hợp lệ trong XML 1.0 (điều khiển, ký tự thay thế lẻ), cắt theo giới hạn 32 767 ký tự mỗi ô của Excel. */
 function vgarco_xlsx_clean( string $text ): string {
 	$text = preg_replace( '/[^\x{9}\x{A}\x{D}\x{20}-\x{D7FF}\x{E000}-\x{FFFD}\x{10000}-\x{10FFFF}]/u', '', $text ) ?? '';
 	return mb_substr( $text, 0, 32000 );
 }
 
-/**
- * Dựng tệp .xlsx (một trang tính) từ tiêu đề cột và các dòng.
- *
- * Văn bản luôn ghi dạng chuỗi nội tuyến, KHÔNG BAO GIỜ dạng công thức: một ứng viên đặt họ tên là "=HYPERLINK(...)" hay
- * "@SUM(...)" chỉ hiện ra như chữ, Excel không tính (chống chèn công thức khi HR mở tệp xuất).
- * Số điện thoại vì vậy cũng giữ nguyên số 0 đầu.
- *
- * @param string[]                  $headers Tiêu đề các cột.
- * @param array<int,array<int,mixed>> $rows   Các dòng; mỗi ô là chuỗi, int hoặc float.
- * @param int[]                      $widths  Độ rộng cột (ký tự), tùy chọn.
- * @return string Nội dung nhị phân của tệp .xlsx.
- * @throws RuntimeException Khi không có ZipArchive hoặc không ghi được tệp tạm.
- */
 function vgarco_xlsx_build( array $headers, array $rows, array $widths = array(), string $sheet = 'Ho so ung tuyen' ): string {
 	if ( ! class_exists( 'ZipArchive' ) ) {
 		throw new RuntimeException( 'Thiếu phần mở rộng zip của PHP.' );
@@ -210,7 +152,7 @@ function vgarco_xlsx_build( array $headers, array $rows, array $widths = array()
 	}
 	$zip = new ZipArchive();
 	if ( true !== $zip->open( $tmp, ZipArchive::CREATE | ZipArchive::OVERWRITE ) ) {
-		@unlink( $tmp ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+		@unlink( $tmp );
 		throw new RuntimeException( 'Không mở được tệp nén.' );
 	}
 	foreach ( $files as $name => $xml ) {
@@ -219,6 +161,6 @@ function vgarco_xlsx_build( array $headers, array $rows, array $widths = array()
 	$zip->close();
 
 	$binary = (string) file_get_contents( $tmp );
-	@unlink( $tmp ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+	@unlink( $tmp );
 	return $binary;
 }

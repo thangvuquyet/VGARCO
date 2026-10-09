@@ -1,18 +1,7 @@
 <?php
-/**
- * Cảnh báo hệ thống cho người vận hành (mục 10.6): lưu vài cảnh báo gần nhất, hiện ở trang quản trị cho Quản trị viên, tùy chọn gửi Telegram
- * và email. Dùng bởi hồ sơ ứng tuyển (thư lỗi, không lưu được CV), xóa cache Cloudflare, và các phần khác cần báo lỗi mà người dùng cuối không thấy.
- *
- * @package vgarco-core
- */
 
 defined( 'ABSPATH' ) || exit;
 
-/**
- * Ghi cảnh báo để quản trị viên thấy ở trang quản trị và, nếu đã cấu hình, gửi Telegram (mục 10.6).
- *
- * @param bool $urgent Gửi cả email cho quản trị viên.
- */
 function vgarco_alert( string $message, bool $urgent = false ): void {
 	$alerts   = (array) get_option( 'vgarco_alerts', array() );
 	$alerts[] = array( 'time' => time(), 'message' => $message );

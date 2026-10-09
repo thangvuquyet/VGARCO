@@ -1,11 +1,6 @@
 <?php
 /**
  * Template Name: Về công ty
- *
- * Trang Về công ty (UC-02). Chữ mặc định lấy từ hồ sơ năng lực (chuỗi gettext); biên tập viên ghi đè bằng trường ACF của trang.
- * Ảnh bìa, khối "Sự ghi nhận" không có mặc định: chưa nhập thì ẩn (UC-02 2c).
- *
- * @package vgarco
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -70,7 +65,6 @@ $principles   = vgarco_field_rows(
 $countries    = vgarco_split_lines( $t( 'pham_vi_quoc_gia', implode( "\n", array( __( 'Việt Nam', 'vgarco' ), __( 'Lào', 'vgarco' ), __( 'CHLB Đức', 'vgarco' ) ) ) ) );
 $approach_img = vgarco_field_image( 'cach_lam_anh', $id );
 
-// Sự ghi nhận: hiện khi có ảnh hoặc tiêu đề. Liên kết chỉ hiện khi bài viết đã xuất bản.
 $award_image = vgarco_field_image( 'ghi_nhan_anh', $id );
 $award_title = vgarco_field_text( 'ghi_nhan_tieu_de', '', $id );
 $award_post  = function_exists( 'get_field' ) ? (int) get_field( 'ghi_nhan_bai_viet', $id ) : 0;
@@ -86,18 +80,18 @@ vgarco_breadcrumb(
 
 <section class="wrap about-masthead">
 	<p class="eyebrow"><?php echo esc_html( $t( 'hero_nhan', __( 'Về công ty / Est. 2013', 'vgarco' ) ) ); ?></p>
-	<h1><?php echo vgarco_field_heading( 'hero_tieu_de', __( "Từ những ý tưởng.\n<em>Đến giá trị dài lâu.</em>", 'vgarco' ), $id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- đã lọc trong vgarco_heading(). ?></h1>
+	<h1><?php echo vgarco_field_heading( 'hero_tieu_de', __( "Từ những ý tưởng.\n<em>Đến giá trị dài lâu.</em>", 'vgarco' ), $id ); ?></h1>
 	<div class="masthead-bottom">
 		<p><?php echo esc_html( $t( 'hero_mo_ta_1', __( 'VGARCO — Tư vấn thiết kế & xây dựng', 'vgarco' ) ) ); ?></p>
 		<p><?php echo esc_html( $t( 'hero_mo_ta_2', __( 'Chúng tôi kết nối tư duy kiến trúc với nền tảng kỹ thuật, để mỗi công trình tìm thấy lời giải của riêng mình.', 'vgarco' ) ) ); ?></p>
-		<a href="#cau-chuyen-cong-ty" class="about-scroll" aria-label="<?php esc_attr_e( 'Khám phá câu chuyện VGARCO', 'vgarco' ); ?>"><?php echo vgarco_icon( 'arrow-down' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></a>
+		<a href="#cau-chuyen-cong-ty" class="about-scroll" aria-label="<?php esc_attr_e( 'Khám phá câu chuyện VGARCO', 'vgarco' ); ?>"><?php echo vgarco_icon( 'arrow-down' ); ?></a>
 	</div>
 </section>
 
 <?php if ( $cover > 0 ) : ?>
 	<figure class="about-cover">
 		<?php
-		echo vgarco_image( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- markup ảnh của WordPress.
+		echo vgarco_image(
 			$cover,
 			array(
 				'size'     => 'vg-2560',
@@ -123,10 +117,10 @@ vgarco_breadcrumb(
 <section class="wrap about-story" id="cau-chuyen-cong-ty">
 	<div>
 		<p class="eyebrow"><?php esc_html_e( 'Chúng tôi là ai', 'vgarco' ); ?></p>
-		<p class="margin-note"><?php echo vgarco_field_lines( 'cau_chuyen_ghi_chu', __( "Kiến trúc. Kỹ thuật.\nMột tư duy xuyên suốt.", 'vgarco' ), $id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- đã thoát trong vgarco_lines(). ?></p>
+		<p class="margin-note"><?php echo vgarco_field_lines( 'cau_chuyen_ghi_chu', __( "Kiến trúc. Kỹ thuật.\nMột tư duy xuyên suốt.", 'vgarco' ), $id ); ?></p>
 	</div>
 	<div>
-		<h2><?php echo vgarco_field_heading( 'cau_chuyen_tieu_de', __( "Mỗi bối cảnh khác nhau.\n<em>Cùng một sự tận tâm.</em>", 'vgarco' ), $id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></h2>
+		<h2><?php echo vgarco_field_heading( 'cau_chuyen_tieu_de', __( "Mỗi bối cảnh khác nhau.\n<em>Cùng một sự tận tâm.</em>", 'vgarco' ), $id ); ?></h2>
 		<div class="story-columns">
 			<p><?php echo esc_html( $t( 'cau_chuyen_doan_1', __( 'Công ty TNHH Tư vấn Xây dựng VGARCO được thành lập ngày 19/08/2013 với tên gọi 3SEVEN. Từ ngày 05/12/2023, công ty chính thức mang tên VGARCO.', 'vgarco' ) ) ); ?></p>
 			<p><?php echo esc_html( $t( 'cau_chuyen_doan_2', __( 'Hoạt động trong tư vấn thiết kế, giám sát và quản lý dự án, VGARCO kết nối các chuyên môn kiến trúc, kết cấu và kỹ thuật để phát triển giải pháp phù hợp với từng công trình.', 'vgarco' ) ) ); ?></p>
@@ -139,7 +133,7 @@ vgarco_breadcrumb(
 	<section class="wrap about-metrics" aria-label="<?php esc_attr_e( 'VGARCO qua những con số', 'vgarco' ); ?>">
 		<?php foreach ( $facts as $fact ) : ?>
 			<div>
-				<strong><?php echo esc_html( $fact['so'] ); ?><?php echo '' !== ( $fact['hau_to'] ?? '' ) ? '<span>' . esc_html( $fact['hau_to'] ) . '</span>' : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></strong>
+				<strong><?php echo esc_html( $fact['so'] ); ?><?php echo '' !== ( $fact['hau_to'] ?? '' ) ? '<span>' . esc_html( $fact['hau_to'] ) . '</span>' : ''; ?></strong>
 				<p><?php echo esc_html( $fact['nhan'] ); ?></p>
 			</div>
 		<?php endforeach; ?>
@@ -152,7 +146,7 @@ vgarco_breadcrumb(
 		<div class="timeline-head">
 			<div>
 				<p class="eyebrow"><?php esc_html_e( 'Hành trình', 'vgarco' ); ?></p>
-				<h2 id="timeline-title"><?php echo vgarco_field_heading( 'hanh_trinh_tieu_de', __( "Một nền tảng.\n<em>Nhiều dấu mốc.</em>", 'vgarco' ), $id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></h2>
+				<h2 id="timeline-title"><?php echo vgarco_field_heading( 'hanh_trinh_tieu_de', __( "Một nền tảng.\n<em>Nhiều dấu mốc.</em>", 'vgarco' ), $id ); ?></h2>
 			</div>
 			<p><?php echo esc_html( $t( 'hanh_trinh_mo_ta', __( 'Từng bước phát triển, qua những công trình và những lần cộng tác.', 'vgarco' ) ) ); ?></p>
 		</div>
@@ -180,11 +174,11 @@ vgarco_breadcrumb(
 <section class="wrap about-approach">
 	<div>
 		<p class="eyebrow"><?php esc_html_e( 'Cách chúng tôi làm việc', 'vgarco' ); ?></p>
-		<h2><?php echo vgarco_field_heading( 'cach_lam_tieu_de', __( "Nhìn tổng thể.\n<em>Làm đến chi tiết.</em>", 'vgarco' ), $id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></h2>
+		<h2><?php echo vgarco_field_heading( 'cach_lam_tieu_de', __( "Nhìn tổng thể.\n<em>Làm đến chi tiết.</em>", 'vgarco' ), $id ); ?></h2>
 		<?php if ( $approach_img > 0 ) : ?>
 			<figure>
 				<?php
-				echo vgarco_image( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- markup ảnh của WordPress.
+				echo vgarco_image(
 					$approach_img,
 					array(
 						'size'  => 'vg-1200',
@@ -213,7 +207,7 @@ vgarco_breadcrumb(
 <section class="wrap about-reach">
 	<div>
 		<p class="eyebrow"><?php esc_html_e( 'Không giới hạn bởi biên giới', 'vgarco' ); ?></p>
-		<h2><?php echo vgarco_field_heading( 'pham_vi_tieu_de', __( "Từ Việt Nam.\n<em>Vươn ra thế giới.</em>", 'vgarco' ), $id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></h2>
+		<h2><?php echo vgarco_field_heading( 'pham_vi_tieu_de', __( "Từ Việt Nam.\n<em>Vươn ra thế giới.</em>", 'vgarco' ), $id ); ?></h2>
 	</div>
 	<div>
 		<p><?php echo esc_html( $t( 'pham_vi_mo_ta', __( 'Những bối cảnh văn hóa và kỹ thuật khác nhau mở rộng cách nhìn của chúng tôi về kiến trúc và xây dựng.', 'vgarco' ) ) ); ?></p>
@@ -232,7 +226,7 @@ vgarco_breadcrumb(
 		<?php if ( $award_image > 0 ) : ?>
 			<div class="award-image">
 				<?php
-				echo vgarco_image( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- markup ảnh của WordPress.
+				echo vgarco_image(
 					$award_image,
 					array(
 						'size'  => 'vg-1200',
@@ -246,7 +240,7 @@ vgarco_breadcrumb(
 		<div>
 			<p class="eyebrow"><?php esc_html_e( 'Sự ghi nhận', 'vgarco' ); ?></p>
 			<?php if ( '' !== $award_title ) : ?>
-				<h2 id="recognition-title"><?php echo vgarco_heading( $award_title ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></h2>
+				<h2 id="recognition-title"><?php echo vgarco_heading( $award_title ); ?></h2>
 			<?php endif; ?>
 			<?php if ( '' !== $t( 'ghi_nhan_mo_ta', '' ) ) : ?>
 				<p><?php echo esc_html( $t( 'ghi_nhan_mo_ta', '' ) ); ?></p>
@@ -255,7 +249,7 @@ vgarco_breadcrumb(
 				<p class="muted small"><?php echo esc_html( $t( 'ghi_nhan_chu_thich', '' ) ); ?></p>
 			<?php endif; ?>
 			<?php if ( '' !== $award_url ) : ?>
-				<a class="text-link" href="<?php echo esc_url( $award_url ); ?>"><?php esc_html_e( 'Xem tư liệu ghi nhận', 'vgarco' ); ?> <?php echo vgarco_icon( 'arrow-up-right' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></a>
+				<a class="text-link" href="<?php echo esc_url( $award_url ); ?>"><?php esc_html_e( 'Xem tư liệu ghi nhận', 'vgarco' ); ?> <?php echo vgarco_icon( 'arrow-up-right' ); ?></a>
 			<?php endif; ?>
 		</div>
 	</section>

@@ -1,13 +1,4 @@
 <?php
-/**
- * Trường của kiểu nội dung "Vị trí tuyển dụng" (mục 6.4 của phương án, UC-07).
- * Nơi làm việc và Phòng ban là hai phân loại riêng (hộp bên phải).
- *
- * Ba danh sách (công việc, yêu cầu, quyền lợi) nhập mỗi dòng một mục: dễ nhập hàng loạt từ bảng tính
- * và không phát sinh trường lặp cần đồng bộ giữa hai ngôn ngữ.
- *
- * @package vgarco-core
- */
 
 defined( 'ABSPATH' ) || exit;
 

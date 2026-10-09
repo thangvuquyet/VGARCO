@@ -1,5 +1,3 @@
-// Chi tiết tin tức: nút sao chép liên kết (UC-06 6a). Nút ẩn khi không có JS — chia sẻ Facebook là liên kết thật (6b).
-
 export default function initArticle() {
 	const button = document.querySelector( '[data-copy-link]' );
 	if ( ! button ) {
@@ -9,7 +7,6 @@ export default function initArticle() {
 	const status = document.querySelector( '[data-copy-status]' );
 	let timer = null;
 
-	// Trình duyệt không có Clipboard API (hoặc trang không an toàn): không hiện nút thay vì hiện nút không chạy.
 	if ( ! navigator.clipboard?.writeText ) {
 		return;
 	}

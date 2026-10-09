@@ -2,13 +2,11 @@
 /**
  * Plugin Name: VGARCO Core
  * Description: Dữ liệu và nghiệp vụ của website VGARCO: kiểu nội dung, phân loại, trường dữ liệu, cấu hình chung. Độc lập với giao diện — đổi theme không mất dữ liệu (yêu cầu 5.7.1).
- * Version:     0.1.0
+ * Version: 0.1.0
  * Requires at least: 6.6
  * Requires PHP: 8.3
  * Text Domain: vgarco-core
  * Domain Path: /languages
- *
- * @package vgarco-core
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -43,16 +41,10 @@ require_once VGARCO_CORE_DIR . 'inc/media-lib.php';
 require_once VGARCO_CORE_DIR . 'inc/media.php';
 require_once VGARCO_CORE_DIR . 'inc/editor.php';
 
-/**
- * Kích hoạt: đăng ký kiểu nội dung, tạo sẵn các phân loại cố định, làm mới đường dẫn.
- * Chỉ làm mới đường dẫn ở đây — làm mỗi lần tải trang sẽ làm chậm toàn site.
- */
 function vgarco_core_activate(): void {
-	vgarco_register_taxonomies(); // trước kiểu nội dung, cùng thứ tự với lúc chạy thường (xem taxonomies.php)
+	vgarco_register_taxonomies();
 	vgarco_register_post_types();
 	vgarco_seed_terms();
-	// Vai trò "Nhân sự tuyển dụng" cũng phải có ngay sau khi kích hoạt: nếu chỉ tạo ở admin_init thì cài mới bằng WP-CLI chưa có vai trò
-	// cho tới khi có người mở trang quản trị (tạo tài khoản nhân sự bằng `wp user create --role=vg_tuyen_dung` sẽ lỗi).
 	vgarco_apply_ensure_roles();
 	flush_rewrite_rules();
 }

@@ -1,9 +1,5 @@
-// Menu chính: bảng menu con (disclosure) và menu di động.
-// Markup do inc/menus.php sinh ra: mỗi mục có con là một nút .nav-trigger điều khiển một .nav-panel (aria-controls).
-
 const DESKTOP = window.matchMedia( '(min-width: 1181px)' );
 
-// Đổ bóng thanh đầu trang khi đã cuộn khỏi đầu trang (lớp is-stuck, kiểu dáng ở components/_header.scss).
 function initHeaderShadow( header ) {
 	let stuck = null;
 	const update = () => {
@@ -57,7 +53,6 @@ export function initNav() {
 	function setMenu( open ) {
 		nav.classList.toggle( 'open', open );
 		toggle.setAttribute( 'aria-expanded', String( open ) );
-		// Nhãn nút lấy từ thuộc tính data do PHP sinh (đã dịch), không viết cứng trong JS.
 		toggle.setAttribute( 'aria-label', open ? toggle.dataset.labelClose : toggle.dataset.labelOpen );
 		if ( ! open ) {
 			closePanels();
@@ -71,7 +66,6 @@ export function initNav() {
 	for ( const trigger of triggers ) {
 		trigger.addEventListener( 'click', () => ( isExpanded( trigger ) ? closePanels() : openPanel( trigger ) ) );
 
-		// Mũi tên xuống: mở bảng và đưa tiêu điểm vào liên kết đầu tiên.
 		trigger.addEventListener( 'keydown', ( event ) => {
 			if ( event.key !== 'ArrowDown' ) {
 				return;
@@ -116,14 +110,12 @@ export function initNav() {
 		}
 	} );
 
-	// Tiêu điểm rời khỏi thanh đầu trang (Tab đi tiếp): đóng bảng.
 	header.addEventListener( 'focusout', ( event ) => {
 		if ( event.relatedTarget && ! header.contains( event.relatedTarget ) ) {
 			closePanels();
 		}
 	} );
 
-	// Đổi độ rộng qua điểm gãy: về trạng thái đóng, tránh menu di động "kẹt" mở khi xoay màn hình.
 	DESKTOP.addEventListener( 'change', () => {
 		setMenu( false );
 		closePanels();

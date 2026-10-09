@@ -1,17 +1,11 @@
 <?php
-/**
- * Dựng ảnh thử có siêu dữ liệu: JPEG và PNG do GD sinh ra, chèn thêm EXIF có tọa độ GPS giả, XMP, IPTC, MPF, ghi chú, hồ sơ màu ICC.
- * Dùng chung cho tests/php/media.php (hàm thuần) và tests/wp-lab/it_media.php (WordPress thật). Cần phần mở rộng gd.
- */
 
 const GPS_NEEDLE = 'KINH-DO-GPS-10.762622N-106.660172E';
 
-/** Một đoạn JPEG: 0xFF, mã đánh dấu, độ dài (gồm 2 byte độ dài), nội dung. */
 function seg( int $marker, string $payload ): string {
 	return "\xFF" . chr( $marker ) . pack( 'n', strlen( $payload ) + 2 ) . $payload;
 }
 
-/** APP1 EXIF: Make (chứa chuỗi cần tìm) và Orientation, theo thứ tự byte $order (MM hoặc II). */
 function exif_payload( int $orientation, string $order = 'MM', string $needle = GPS_NEEDLE, bool $with_orientation = true ): string {
 	$p16     = static fn( int $v ): string => pack( 'MM' === $order ? 'n' : 'v', $v );
 	$p32     = static fn( int $v ): string => pack( 'MM' === $order ? 'N' : 'V', $v );
@@ -26,10 +20,6 @@ function exif_payload( int $orientation, string $order = 'MM', string $needle = 
 	return "Exif\0\0" . $tiff . $p32( 0 ) . $make;
 }
 
-/**
- * JPEG do GD sinh ra. Với $marker = true, góc trên trái ($w/4 × $h/4 điểm đầu tiên) tô đỏ thuần, còn lại là màu xanh dương nhạt:
- * dùng để kiểm tra ảnh đã được xoay đúng chiều.
- */
 function base_jpeg( int $w = 120, int $h = 60, bool $marker = false ): string {
 	$im = imagecreatetruecolor( $w, $h );
 	if ( $marker ) {
@@ -47,7 +37,6 @@ function base_jpeg( int $w = 120, int $h = 60, bool $marker = false ): string {
 	return (string) ob_get_clean();
 }
 
-/** Chèn các đoạn $segments ngay sau APP0 (JFIF) của ảnh GD. */
 function with_segments( string $jpeg, string $segments ): string {
 	if ( "\xFF\xD8\xFF\xE0" !== substr( $jpeg, 0, 4 ) || 'JFIF' !== substr( $jpeg, 6, 4 ) ) {
 		throw new RuntimeException( 'ảnh GD không bắt đầu bằng JFIF như mong đợi' );
@@ -56,12 +45,10 @@ function with_segments( string $jpeg, string $segments ): string {
 	return substr( $jpeg, 0, 2 + $app0_len ) . $segments . substr( $jpeg, 2 + $app0_len );
 }
 
-/** Một khối PNG (độ dài, loại, dữ liệu, CRC). */
 function png_chunk( string $type, string $data ): string {
 	return pack( 'N', strlen( $data ) ) . $type . $data . pack( 'N', crc32( $type . $data ) );
 }
 
-/** PNG do GD sinh ra (có góc trên trái đỏ thuần nếu $marker). */
 function base_png( int $w = 40, int $h = 30 ): string {
 	$im = imagecreatetruecolor( $w, $h );
 	imagefill( $im, 0, 0, imagecolorallocate( $im, 200, 60, 30 ) );
@@ -70,7 +57,6 @@ function base_png( int $w = 40, int $h = 30 ): string {
 	return (string) ob_get_clean();
 }
 
-/** Chèn các khối siêu dữ liệu vào PNG ngay trước IDAT: tEXt (tọa độ), eXIf, iTXt (XMP), tIME, zTXt. */
 function png_with_metadata( string $png ): string {
 	$at   = strpos( $png, 'IDAT' ) - 4;
 	$meta = png_chunk( 'tEXt', "Comment\0" . GPS_NEEDLE )

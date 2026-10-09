@@ -1,9 +1,3 @@
-// Sinh content/projects.csv (bản nháp nhập liệu) từ dữ liệu 19 dự án của bản thiết kế HTML (tests/php/data/projects.json).
-//   node scripts/content/make-projects-csv.mjs
-//
-// Đây là điểm khởi đầu để nhà thầu/chủ đầu tư rà và bổ sung (tên tiếng Đức, địa điểm, năm còn thiếu, xác nhận công bố chủ đầu tư).
-// QUAN TRỌNG: cong_bo_chu_dau_tu luôn 0 — chỉ bật khi chủ đầu tư đồng ý công bố (phương án mục 3.2 #8). Chủ đầu tư/đối tác vẫn được ghi
-// vào cột để khi được phép chỉ cần đổi cờ.
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -20,8 +14,8 @@ const TERM = {
 	infrastructure: 'cong-nghiep-ha-tang',
 	residential: 'nha-o-dan-dung',
 };
-const FEATURED = [ 'ambassador', 'savannakhet', 'specialforces' ]; // trình chiếu trang chủ
-const SHOWCASE = [ 'tower', 'academy', 'museum' ]; // khối "Dự án tiêu biểu"
+const FEATURED = [ 'ambassador', 'savannakhet', 'specialforces' ];
+const SHOWCASE = [ 'tower', 'academy', 'museum' ];
 
 const slug = ( text ) =>
 	text

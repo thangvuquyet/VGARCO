@@ -1,5 +1,4 @@
 <?php
-/** Luồng nộp hồ sơ ứng tuyển trên WordPress thật: REST, transient, lưu CV, bản ghi, thư, thử lại, giới hạn tần suất. */
 require __DIR__ . '/lib.php';
 
 $jobs = get_option( 'lab_job_ids' );
@@ -17,7 +16,7 @@ $tmp = LAB . '/tmp-apply';
 $pdf = $tmp . '/cv.pdf';
 file_put_contents( $pdf, "%PDF-1.4\n1 0 obj<<>>endobj\ntrailer<<>>\n%%EOF\n" . str_repeat( 'x', 2000 ) );
 $records = static function (): array {
-	wp_cache_flush(); // máy chủ thử ghi ở tiến trình khác: bỏ bộ nhớ đệm đối tượng của tiến trình này
+	wp_cache_flush();
 	return get_posts( array( 'post_type' => 'ho_so_ut', 'post_status' => 'any', 'posts_per_page' => -1, 'orderby' => 'ID', 'order' => 'ASC' ) );
 };
 $base = static fn( int $job, string $token, array $over = array() ): array => array_merge(
@@ -25,7 +24,6 @@ $base = static fn( int $job, string $token, array $over = array() ): array => ar
 	$over
 );
 
-/* ---- 1. Cấp mã bảo mật ---- */
 $t1 = http( 'GET', '/wp-json/vgarco/v1/apply/token', array( 'headers' => array( 'CF-Connecting-IP: 198.51.100.200' ) ) );
 same( 'token: 200', 200, $t1['status'] );
 check( 'token: có token 32 hex và ảnh PNG', preg_match( '/^[a-f0-9]{32}$/', (string) ( $t1['json']['token'] ?? '' ) ) && str_starts_with( (string) ( $t1['json']['image'] ?? '' ), 'data:image/png;base64,' ) );
@@ -40,7 +38,6 @@ check( 'token: mỗi lần một token và ảnh khác', ( $t2['json']['token'] 
 $wp_ttl = (int) get_option( '_transient_timeout_vg_apply_' . $t1['json']['token'] ) - time();
 check( 'token: sống khoảng 10 phút', $wp_ttl > 540 && $wp_ttl <= 600 );
 
-/* ---- 2. Nộp hồ sơ hợp lệ ---- */
 $ip = 'CF-Connecting-IP: 198.51.100.50';
 $r  = lab_apply( $base( $jobs['kts'], lab_token() ), $pdf, 'CV An.pdf', array( $ip ) );
 same( 'nộp: 200 ok', array( 200, true ), array( $r['status'], $r['json']['ok'] ?? null ) );
@@ -69,7 +66,6 @@ same( 'thư ứng viên: gửi tới email ứng viên', 'an.nguyen@example.com'
 check( 'thư ứng viên: chào đúng tên, nêu vị trí', str_contains( (string) $ca['message'], 'Chào Nguyễn Văn An' ) && str_contains( (string) $ca['message'], 'Kiến trúc sư thiết kế' ) );
 same( 'trạng thái thư: cả hai đã gửi', array( 'da_gui', 'da_gui' ), array( get_post_meta( $id, 'thu_hr', true ), get_post_meta( $id, 'thu_ung_vien', true ) ) );
 
-/* ---- 3. Dùng lại token, mã sai ---- */
 $old_token = $base( $jobs['kts'], 'x' )['token'];
 $tk        = lab_token();
 $ok        = lab_apply( $base( $jobs['kts'], $tk, array( 'name' => 'Người Thứ Hai' ) ), $pdf, 'cv.pdf', array( 'CF-Connecting-IP: 198.51.100.51' ) );
@@ -80,7 +76,6 @@ same( 'token dùng lại không tạo bản ghi thứ hai', 2, count( $records()
 $wrong = lab_apply( $base( $jobs['kts'], lab_token(), array( 'captcha' => 'ZZZZZ' ) ), $pdf, 'cv.pdf', array( 'CF-Connecting-IP: 198.51.100.52' ) );
 same( 'mã sai: 400 captcha', array( 400, 'captcha' ), array( $wrong['status'], $wrong['json']['errors']['captcha'] ?? '' ) );
 
-/* ---- 4. Nguồn gốc, bẫy, thời gian ---- */
 $h = array( 'CF-Connecting-IP: 198.51.100.53' );
 $foreign = http( 'POST', '/wp-json/vgarco/v1/apply', array( 'body' => array_merge( $base( $jobs['kts'], lab_token() ), array( 'cv' => new CURLFile( $pdf, 'application/pdf', 'cv.pdf' ) ) ), 'headers' => array( 'Origin: https://evil.example', 'CF-Connecting-IP: 198.51.100.53' ) ) );
 same( 'Origin lạ: 403', 403, $foreign['status'] );
@@ -94,7 +89,6 @@ $fast = lab_apply( $base( $jobs['kts'], lab_token( 'AB7K9', 1 ) ), $pdf, 'cv.pdf
 same( 'điền quá nhanh (1 giây): 400 rejected', array( 400, 'rejected' ), array( $fast['status'], $fast['json']['code'] ?? '' ) );
 $before = count( $records() );
 
-/* ---- 5. Vị trí ---- */
 foreach ( array( 'dong' => 'đã đóng', 'cu' => 'quá hạn' ) as $k => $why ) {
 	$c = lab_apply( $base( $jobs[ $k ], lab_token() ), $pdf, 'cv.pdf', $h );
 	same( "vị trí {$why}: 409 closed", array( 409, 'closed' ), array( $c['status'], $c['json']['code'] ?? '' ) );
@@ -104,7 +98,6 @@ same( 'vị trí không tồn tại: 409', 409, $n['status'] );
 $gone = lab_apply( $base( (int) get_option( 'page_on_front' ), lab_token() ), $pdf, 'cv.pdf', $h );
 same( 'ID không phải vị trí tuyển dụng (một trang): 409', 409, $gone['status'] );
 
-/* ---- 6. Trường sai ---- */
 $e = lab_apply( $base( $jobs['kts'], $tk2 = lab_token(), array( 'name' => '', 'email' => 'sai', 'phone' => 'abc', 'consent' => '' ) ), $pdf, 'cv.pdf', $h );
 same( 'trường sai: 400, đủ 4 lỗi', array( 400, array( 'name' => 'required', 'email' => 'email', 'phone' => 'phone', 'consent' => 'consent' ) ), array( $e['status'], $e['json']['errors'] ?? array() ) );
 wp_cache_flush();
@@ -113,7 +106,6 @@ $fixed = lab_apply( $base( $jobs['kts'], $tk2, array( 'name' => 'Đã Sửa Lỗ
 same( 'sửa lỗi rồi nộp lại bằng cùng token: 200', 200, $fixed['status'] );
 $before = count( $records() );
 
-/* ---- 7. Tệp xấu (tệp thật) ---- */
 $files = array();
 $files['exe_doi_duoi'] = array( 'virus.pdf', "MZ\x90\x00\x03\x00\x00\x00" . str_repeat( "\0", 300 ) . 'This program cannot be run in DOS mode.', 'file_invalid' );
 $files['html_pdf']     = array( 'page.pdf', '<html><script>alert(1)</script></html>' . str_repeat( ' ', 40 ), 'file_invalid' );
@@ -158,7 +150,6 @@ foreach ( new RecursiveIteratorIterator( new RecursiveDirectoryIterator( LAB . '
 }
 same( 'không để lại tệp mồ côi: số tệp CV = số bản ghi', count( $records() ), count( $stray ) );
 
-/* ---- 8. Tiếng Đức ---- */
 lab_clear_mail();
 $de = lab_apply( $base( $jobs['kts'], lab_token(), array( 'lang' => 'de', 'name' => 'Hans Müller', 'email' => 'hans@example.de' ) ), $pdf, 'Lebenslauf.pdf', array( 'CF-Connecting-IP: 198.51.100.61' ) );
 same( 'nộp bằng tiếng Đức: 200', 200, $de['status'] );
@@ -169,7 +160,6 @@ check( 'thư xác nhận gửi ứng viên Đức bằng TIẾNG ĐỨC', str_co
 $hr_de = array_values( array_filter( $mails, static fn( $m ) => 'vgarco.cc@gmail.com' === $m['to'] ) )[0] ?? array();
 check( 'thư báo nhân sự vẫn bằng tiếng Việt', str_contains( (string) ( $hr_de['message'] ?? '' ), 'Có hồ sơ ứng tuyển mới' ) );
 
-/* ---- 9. Lỗi thư: hồ sơ vẫn lưu, thử lại ---- */
 update_option( 'lab_mail_fail', 1 );
 lab_clear_mail();
 $mf = lab_apply( $base( $jobs['kts'], lab_token(), array( 'name' => 'Thư Hỏng', 'email' => 'hong@example.com' ) ), $pdf, 'cv.pdf', array( 'CF-Connecting-IP: 198.51.100.62' ) );
@@ -191,7 +181,6 @@ lab_clear_mail();
 vgarco_apply_retry_mails();
 same( 'chạy thử lại lần nữa khi mọi thư đã gửi: không gửi thêm', 0, count( lab_mails() ) );
 
-/* ---- 10. Một thư lỗi, một thư đã gửi: không gửi lại thư đã gửi ---- */
 update_post_meta( $bad->ID, 'thu_hr', 'da_gui' );
 update_post_meta( $bad->ID, 'thu_ung_vien', 'loi' );
 update_post_meta( $bad->ID, 'thu_thu_lai', 0 );
@@ -205,7 +194,6 @@ lab_clear_mail();
 vgarco_apply_retry_mails();
 same( 'đã thử 3 lần: ngừng thử', 0, count( lab_mails() ) );
 
-/* ---- 11. Giới hạn tần suất: 5 hồ sơ/giờ theo IP ---- */
 $rl = 'CF-Connecting-IP: 198.51.100.99';
 $st = array();
 for ( $i = 1; $i <= 6; $i++ ) {
@@ -215,7 +203,6 @@ same( 'giới hạn: 5 hồ sơ đầu 200, hồ sơ thứ 6 từ cùng IP → 4
 $other = lab_apply( $base( $jobs['kts'], lab_token(), array( 'name' => 'IP Khác' ) ), $pdf, 'cv.pdf', array( 'CF-Connecting-IP: 198.51.100.98' ) );
 same( 'giới hạn: IP khác không bị ảnh hưởng', 200, $other['status'] );
 
-/* ---- 12. Chặn khai thác ---- */
 same( 'GET vào đường nộp hồ sơ không phải 200', true, 200 !== http( 'GET', '/wp-json/vgarco/v1/apply' )['status'] );
 same( 'kiểu hồ sơ ứng tuyển không lộ qua REST mặc định', true, in_array( http( 'GET', '/wp-json/wp/v2/ho_so_ut' )['status'], array( 404, 401, 403 ), true ) );
 $sitemap = http( 'GET', '/wp-sitemap.xml' );

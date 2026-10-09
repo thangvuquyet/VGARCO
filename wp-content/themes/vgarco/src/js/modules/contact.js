@@ -1,8 +1,3 @@
-// Trang Liên hệ (UC-11): kiểm tra biểu mẫu rồi soạn sẵn một email (mailto:). KHÔNG gửi dữ liệu về máy chủ.
-//
-// Sau khi soạn, luôn hiện phương án dự phòng (địa chỉ email + nội dung + nút sao chép), vì trình duyệt không cho biết
-// ứng dụng email có thật sự mở hay không (UC-11 7a). Nội dung giới hạn 1.500 ký tự để đường dẫn mailto không quá dài.
-
 export default function initContact() {
 	const form = document.querySelector( '#contact-form' );
 	if ( ! form ) {
@@ -70,7 +65,6 @@ export default function initContact() {
 		return { subject: subject.replace( '%s', value( fields.name ) ), text };
 	}
 
-	// Xóa lỗi của một ô ngay khi người dùng sửa ô đó.
 	Object.values( fields ).forEach( ( field ) => {
 		field.addEventListener( 'input', () => setError( field, '' ) );
 		field.addEventListener( 'change', () => setError( field, '' ) );
@@ -90,7 +84,6 @@ export default function initContact() {
 		draft.value = `${ title }\n\n${ text }`;
 		fallback.hidden = false;
 
-		// encodeURIComponent giữ nguyên tiếng Việt có dấu; xuống dòng thành %0A (CRLF theo RFC 6068 do ứng dụng email tự xử lý).
 		window.location.href = `mailto:${ to }?subject=${ encodeURIComponent( title ) }&body=${ encodeURIComponent( text ) }`;
 	} );
 

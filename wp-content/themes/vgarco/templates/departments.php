@@ -1,10 +1,6 @@
 <?php
 /**
  * Template Name: Phòng ban
- *
- * Trang Phòng ban (UC-02): mở đầu, 4 nhãn, 6 bộ môn. Chữ mặc định lấy từ hồ sơ; ACF ghi đè.
- *
- * @package vgarco
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -64,7 +60,7 @@ vgarco_breadcrumb(
 <section class="wrap department-editorial">
 	<div class="department-intro">
 		<p class="eyebrow"><?php echo esc_html( vgarco_field_text( 'hero_nhan', __( 'Hệ chuyên môn', 'vgarco' ), $id ) ); ?></p>
-		<h1><?php echo vgarco_field_heading( 'hero_tieu_de', __( "Nhiều chuyên môn.\n<em>Một giải pháp thống nhất.</em>", 'vgarco' ), $id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- đã lọc trong vgarco_heading(). ?></h1>
+		<h1><?php echo vgarco_field_heading( 'hero_tieu_de', __( "Nhiều chuyên môn.\n<em>Một giải pháp thống nhất.</em>", 'vgarco' ), $id ); ?></h1>
 		<p><?php echo esc_html( vgarco_field_text( 'hero_mo_ta', __( 'VGARCO tổ chức công việc theo mô hình phối hợp đa chuyên môn. Mỗi bộ môn giữ một vai trò riêng nhưng cùng tham gia vào một dòng thông tin thống nhất từ ý tưởng đến triển khai.', 'vgarco' ), $id ) ); ?></p>
 		<?php if ( $tags ) : ?>
 			<ul class="department-tags">
