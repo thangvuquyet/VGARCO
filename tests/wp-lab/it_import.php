@@ -24,34 +24,38 @@ $runs = static function ( array $args, array $assoc ) use ( $cli ): array {
 $count = static fn( string $status = 'any' ): int => count( get_posts( array( 'post_type' => 'du_an', 'post_status' => $status, 'posts_per_page' => -1, 'fields' => 'ids' ) ) );
 
 $r = $runs( array( 'projects', $csv ), array( 'dry-run' => true ) );
-same( 'dry-run: báo 19 dự án mới', true, str_contains( implode( "\n", $r['lines'] ), 'Xem trước: 19 tạo mới, 0 cập nhật, 0 không đổi' ) );
+same( 'dry-run: báo 23 dự án mới', true, str_contains( implode( "\n", $r['lines'] ), 'Xem trước: 23 tạo mới, 0 cập nhật, 0 không đổi' ) );
 same( 'dry-run: không có bài nào được tạo', 0, $count() );
 
 $r = $runs( array( 'projects', $csv ), array() );
 same( 'nhập: không lỗi', '', $r['error'] );
-same( 'nhập: 19 bài, trạng thái nháp', array( 19, 19 ), array( $count(), $count( 'draft' ) ) );
+same( 'nhập: 23 bài, trạng thái nháp', array( 23, 23 ), array( $count(), $count( 'draft' ) ) );
 $museum = get_posts( array( 'post_type' => 'du_an', 'post_status' => 'any', 'meta_key' => 'ma', 'meta_value' => 'bao-tang-lich-su-quan-doi-nhan-dan-lao', 'fields' => 'ids' ) );
 same( 'nhập: tìm được dự án theo ma', 1, count( $museum ) );
 $id = (int) ( $museum[0] ?? 0 );
 $p  = get_post( $id );
 same( 'nhập: tên, thứ tự, nội dung', array( 'Bảo tàng Lịch sử Quân đội nhân dân Lào', 0, true ), array( $p->post_title, (int) $p->menu_order, str_starts_with( $p->post_content, '<p>Cải tạo Bảo tàng' ) ) );
-same( 'nhập: siêu dữ liệu', array( 'Viêng Chăn, Lào', '2019–2020', 'la', 'thiet_ke' ), array( get_field( 'dia_diem', $id ), get_field( 'thoi_gian', $id ), get_field( 'quoc_gia', $id ), get_field( 'loai_anh_dai_dien', $id ) ) );
-same( 'nhập: cờ tiêu biểu bật, nổi bật tắt, công bố chủ đầu tư tắt', array( true, false, false ), array( (bool) get_field( 'tieu_bieu', $id ), (bool) get_field( 'noi_bat', $id ), (bool) get_field( 'cong_bo_chu_dau_tu', $id ) ) );
+same( 'nhập: siêu dữ liệu', array( 'Thành phố Viêng Chăn, Lào', '2019–2020', 'la', 'thiet_ke' ), array( get_field( 'dia_diem', $id ), get_field( 'thoi_gian', $id ), get_field( 'quoc_gia', $id ), get_field( 'loai_anh_dai_dien', $id ) ) );
+same( 'nhập: cờ tiêu biểu bật, nổi bật tắt, công bố chủ đầu tư bật', array( true, false, true ), array( (bool) get_field( 'tieu_bieu', $id ), (bool) get_field( 'noi_bat', $id ), (bool) get_field( 'cong_bo_chu_dau_tu', $id ) ) );
 same( 'nhập: loại công trình gắn đúng', array( 'van-hoa-di-tich' ), wp_get_object_terms( $id, 'loai_cong_trinh', array( 'fields' => 'slugs' ) ) );
+$tc = get_posts( array( 'post_type' => 'du_an', 'post_status' => 'any', 'meta_key' => 'ma', 'meta_value' => 'cong-trinh-to-ngoc-van', 'posts_per_page' => 1 ) );
+same( 'nhập: tiêu đề có dấu & giữ nguyên (không thành &amp;)', 'Tòa nhà văn phòng T&C', $tc ? $tc[0]->post_title : '' );
+$two = get_posts( array( 'post_type' => 'du_an', 'post_status' => 'any', 'meta_key' => 'ma', 'meta_value' => 'truong-bien-phong-quan-doi-nhan-dan-lao-giai-doan-2', 'posts_per_page' => 1 ) );
+same( 'nhập: dự án có hai loại công trình gắn đủ hai loại', array( 'giao-duc-dao-tao', 'quan-su-an-ninh' ), $two ? wp_get_object_terms( $two[0]->ID, 'loai_cong_trinh', array( 'fields' => 'slugs', 'orderby' => 'slug' ) ) : array() );
 
 $r = $runs( array( 'projects', $csv ), array() );
-same( 'chạy lại: 0 tạo mới, 0 cập nhật, 19 không đổi', true, str_contains( implode( "\n", $r['lines'] ), 'Xong: 0 tạo mới, 0 cập nhật, 19 không đổi' ) );
-same( 'chạy lại: vẫn 19 bài', 19, $count() );
+same( 'chạy lại: 0 tạo mới, 0 cập nhật, 23 không đổi', true, str_contains( implode( "\n", $r['lines'] ), 'Xong: 0 tạo mới, 0 cập nhật, 23 không đổi' ) );
+same( 'chạy lại: vẫn 23 bài', 23, $count() );
 
 $text = (string) file_get_contents( $csv );
 $mod  = str_replace( 'Bảo tàng Lịch sử Quân đội nhân dân Lào;;van-hoa-di-tich', 'Bảo tàng Lịch sử QĐND Lào;;van-hoa-di-tich', $text );
 file_put_contents( $tmp . '/mod.csv', $mod );
 update_field( 'vai_tro', 'Vai trò nhập tay trong trang quản trị', $id );
 $r = $runs( array( 'projects', $tmp . '/mod.csv' ), array() );
-same( 'sửa tên: đúng 1 cập nhật', true, str_contains( implode( "\n", $r['lines'] ), '0 tạo mới, 1 cập nhật, 18 không đổi' ) );
+same( 'sửa tên: đúng 1 cập nhật', true, str_contains( implode( "\n", $r['lines'] ), '0 tạo mới, 1 cập nhật, 22 không đổi' ) );
 same( 'sửa tên: bài đổi tên', 'Bảo tàng Lịch sử QĐND Lào', get_post( $id )->post_title );
-same( 'sửa tay + bảng có giá trị: bảng thắng', 'Tư vấn thiết kế cải tạo', get_field( 'vai_tro', $id ) );
-$blank = preg_replace( '/;Tư vấn thiết kế cải tạo;/u', ';;', $mod, 1 );
+same( 'sửa tay + bảng có giá trị: bảng thắng', 'Thiết kế concept · Thiết kế bản vẽ thi công', get_field( 'vai_tro', $id ) );
+$blank = preg_replace( '/;Thiết kế concept · Thiết kế bản vẽ thi công;/u', ';;', $mod, 1 );
 file_put_contents( $tmp . '/blank.csv', $blank );
 update_field( 'vai_tro', 'Vai trò nhập tay lần hai', $id );
 $runs( array( 'projects', $tmp . '/blank.csv' ), array() );
@@ -96,7 +100,7 @@ same( 'ảnh thiếu tệp: báo lỗi và dừng', true, str_contains( $r['erro
 foreach ( get_posts( array( 'post_type' => 'du_an', 'post_status' => 'draft', 'posts_per_page' => -1, 'fields' => 'ids' ) ) as $pid ) {
 	wp_update_post( array( 'ID' => $pid, 'post_status' => 'publish' ) );
 }
-same( 'sau khi xuất bản: 19 bài công khai', 19, $count( 'publish' ) );
+same( 'sau khi xuất bản: 23 bài công khai', 23, $count( 'publish' ) );
 
 try {
 	$cli->report( array( 'translations' ), array( 'lang' => 'de' ) );

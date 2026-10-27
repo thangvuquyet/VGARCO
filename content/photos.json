@@ -1,0 +1,672 @@
+{
+	"bao-tang-lich-su-quan-doi-nhan-dan-lao": {
+		"thu_muc": "BAO TANG/ANH BAO TANG LICH SU QDND LAO",
+		"hero": {
+			"tep": "04.jpg",
+			"cat": "4845x2076+0+222"
+		},
+		"slide": {
+			"tep": "04.jpg",
+			"cat": "4480x2520+152+0"
+		},
+		"the": {
+			"tep": "05.jpg",
+			"cat": "3491x2618+564+0"
+		},
+		"thu_vien": [
+			{
+				"tep": "09.JPG",
+				"loai": "cong_trinh",
+				"vi": "Mặt chính công trình ngoài thực tế, tượng đài phía trước sảnh"
+			},
+			{
+				"tep": "05.jpg",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh mặt chính công trình"
+			},
+			{
+				"tep": "10.JPG",
+				"loai": "cong_trinh",
+				"vi": "Công trình ngoài thực tế nhìn từ bên hông, hàng cột trắng dưới mái chính"
+			},
+			{
+				"tep": "02.jpg",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh tổng mặt bằng nhìn từ trên cao"
+			},
+			{
+				"tep": "11.JPG",
+				"loai": "cong_trinh",
+				"vi": "Công trình trong giai đoạn thi công, khung mái đang dựng"
+			},
+			{
+				"tep": "08.jpg",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh mái che khu trưng bày hiện vật ngoài trời"
+			}
+		]
+	},
+	"truong-thcs-chat-luong-cao-bac-tu-liem": {
+		"thu_muc": "TRUONG CHAT LUONG CAO",
+		"hero": {
+			"tep": "04.jpg",
+			"cx": 0.5,
+			"cy": 0.57,
+			"w": 1
+		},
+		"slide": {
+			"tep": "00.jpg",
+			"cat": "3840x2160+0+0"
+		},
+		"the": {
+			"tep": "03.jpg",
+			"cat": "2880x2160+400+0"
+		},
+		"thu_vien": [
+			{
+				"tep": "12.JPG",
+				"loai": "cong_trinh",
+				"vi": "Không gian tầng trệt ngoài thực tế, cột tròn và lan can cong"
+			},
+			{
+				"tep": "03.jpg",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh khối nhà học nhìn từ sân cỏ"
+			},
+			{
+				"tep": "04.jpg",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh trục không gian giữa các khối nhà học"
+			},
+			{
+				"tep": "05.jpg",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh sân vườn và lối đi dạo giữa các khối nhà"
+			},
+			{
+				"tep": "06.jpg",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh hành lang rộng và mái sảnh tầng trệt"
+			},
+			{
+				"tep": "07.jpg",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh sân giữa các dãy lớp học, mặt đứng có mảng cây xanh"
+			}
+		]
+	},
+	"du-an-ban-con": {
+		"thu_muc": "BAN CON",
+		"hero": {
+			"tep": "06.png",
+			"cat": "3840x1646+0+381"
+		},
+		"slide": {
+			"tep": "06.png",
+			"cat": "3840x2160+0+167"
+		},
+		"the": {
+			"tep": "10.png",
+			"cat": "3413x2560+214+0"
+		},
+		"thu_vien": [
+			{
+				"tep": "10.png",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh tổng mặt bằng khu công trình nhìn từ trên cao"
+			},
+			{
+				"tep": "01.png",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh nhà chòi mái truyền thống giữa khuôn viên cây xanh"
+			},
+			{
+				"tep": "02.png",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh nhà chòi và bia đá trong khuôn viên"
+			},
+			{
+				"tep": "03.png",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh bia đá xanh với các nhà chòi phía sau"
+			},
+			{
+				"tep": "04.png",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh dãy nhà chòi và lối đi trong vườn"
+			},
+			{
+				"tep": "08.png",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh tổng mặt bằng nhìn chéo từ trên cao"
+			}
+		]
+	},
+	"khu-nghi-duong-hidumi-hoang-mai": {
+		"thu_muc": "KHU NGHI DUONG HIDUMI",
+		"hero": {
+			"tep": "01.JPG",
+			"cat": "1334x572+0+289"
+		},
+		"slide": {
+			"tep": "01.JPG",
+			"cat": "1334x750+0+85"
+		},
+		"the": {
+			"tep": "02.JPG",
+			"cat": "1201x901+67+0"
+		},
+		"thu_vien": [
+			{
+				"tep": "02.JPG",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh dãy nhà nghỉ mái dốc nhìn từ bên cạnh"
+			},
+			{
+				"tep": "03.JPG",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh các dãy nhà nghỉ mái dốc nhìn từ phía trước"
+			}
+		]
+	},
+	"cong-trinh-cuc-bien-phong": {
+		"thu_muc": "CUC BIEN PHONG",
+		"hero": {
+			"tep": "1.jpg",
+			"cat": "3840x1646+0+300"
+		},
+		"slide": {
+			"tep": "1.jpg",
+			"cat": "3840x2160+0+0"
+		},
+		"the": {
+			"tep": "2.jpg",
+			"cat": "2520x1890+135+0"
+		},
+		"thu_vien": [
+			{
+				"tep": "2.jpg",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh tổng thể khu công trình nhìn từ trên cao"
+			},
+			{
+				"tep": "4.jpg",
+				"loai": "cong_trinh",
+				"vi": "Mặt bằng khu đất khi bắt đầu san gạt để thi công"
+			},
+			{
+				"tep": "5.jpg",
+				"loai": "cong_trinh",
+				"vi": "Cốt thép nền móng đang thi công"
+			},
+			{
+				"tep": "3.jpg",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh mặt chính tòa nhà làm việc"
+			},
+			{
+				"tep": "6.jpg",
+				"loai": "cong_trinh",
+				"vi": "Khối nhà chính đang thi công ngoài hiện trường"
+			}
+		]
+	},
+	"cuc-thi-hanh-an-dan-su-binh-chanh": {
+		"thu_muc": "CUC THI HANH AN DAN SU BINH CHANH",
+		"hero": {
+			"tep": "01.png",
+			"cat": "2895x1241+0+163"
+		},
+		"slide": {
+			"tep": "01.png",
+			"cat": "2895x1628+0+2"
+		},
+		"the": {
+			"tep": "02.png",
+			"cat": "2177x1633+296+0"
+		},
+		"thu_vien": [
+			{
+				"tep": "02.png",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh tòa nhà nhìn từ trên cao, mái đỏ và sân đường nội bộ"
+			}
+		]
+	},
+	"cong-trinh-dac-cong": {
+		"thu_muc": "DAC CONG",
+		"hero": {
+			"tep": "06.jpg",
+			"cx": 0.5,
+			"cy": 0.5,
+			"w": 1
+		},
+		"slide": {
+			"tep": "06.jpg",
+			"cx": 0.5,
+			"cy": 0.5,
+			"w": 1
+		},
+		"the": {
+			"tep": "06.jpg",
+			"cx": 0.5,
+			"cy": 0.5,
+			"w": 1
+		},
+		"thu_vien": [
+			{
+				"tep": "00.jpg",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh khối nhà mái dốc có cổng vòm"
+			},
+			{
+				"tep": "02.jpg",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh tổng mặt bằng khu công trình nhìn từ trên cao"
+			},
+			{
+				"tep": "05.jpg",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh tổng thể, sân bóng và các khối nhà mái ngói"
+			},
+			{
+				"tep": "06.jpg",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh khối nhà mái ngói có hàng hiên cột"
+			},
+			{
+				"tep": "03.jpg",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh tổng thể, sân bãi ở phía trên"
+			},
+			{
+				"tep": "04.jpg",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh tổng mặt bằng nhìn chéo"
+			}
+		]
+	},
+	"don-bien-phong-214": {
+		"thu_muc": "DON BP 214",
+		"hero": {
+			"tep": "1.jpg",
+			"cat": "3619x1551+0+305"
+		},
+		"slide": {
+			"tep": "1.jpg",
+			"cat": "3619x2036+0+52"
+		},
+		"the": {
+			"tep": "3.jpg",
+			"cat": "2880x2160+228+0"
+		},
+		"thu_vien": [
+			{
+				"tep": "3.jpg",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh khuôn viên nhìn từ trên cao, sân tập giữa các nhà mái xanh"
+			},
+			{
+				"tep": "2.jpg",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh các dãy nhà và sân giữa rừng cây"
+			},
+			{
+				"tep": "4.jpg",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh khuôn viên nhìn từ trên cao theo sườn đồi"
+			},
+			{
+				"tep": "5.jpg",
+				"loai": "cong_trinh",
+				"vi": "Hiện trường san ủi mặt bằng, máy đào đang làm việc"
+			},
+			{
+				"tep": "6.jpg",
+				"loai": "cong_trinh",
+				"vi": "Hiện trường thi công khung công trình trên nền đất đã san gạt"
+			},
+			{
+				"tep": "7.jpg",
+				"loai": "cong_trinh",
+				"vi": "Ảnh chụp từ trên cao khu đất đang thi công"
+			}
+		]
+	},
+	"truong-mam-non-xuan-dinh": {
+		"thu_muc": "MAM NON XD",
+		"hero": {
+			"tep": "02.jpg",
+			"cat": "3222x1381+0+170"
+		},
+		"slide": {
+			"tep": "02.jpg",
+			"cat": "3179x1788+18+0"
+		},
+		"the": {
+			"tep": "04.jpg",
+			"cat": "2216x1662+147+0"
+		},
+		"thu_vien": [
+			{
+				"tep": "01.jpg",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh khu trường nhìn từ trên cao, sân trước và khuôn viên"
+			},
+			{
+				"tep": "04.jpg",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh khối nhà ôm sân trong có thảm cỏ"
+			},
+			{
+				"tep": "03.jpg",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh mặt đứng nhiều màu của khối nhà chính"
+			}
+		]
+	},
+	"nha-dai-su": {
+		"thu_muc": "NHA DAI SU",
+		"hero": {
+			"tep": "5.jpg",
+			"cat": "5415x2321+0+692"
+		},
+		"slide": {
+			"tep": "5.jpg",
+			"cat": "5415x3046+0+192"
+		},
+		"the": {
+			"tep": "5.jpg",
+			"cx": 0.5,
+			"cy": 0.5,
+			"w": 1
+		},
+		"thu_vien": [
+			{
+				"tep": "IMG_1278.JPG",
+				"loai": "cong_trinh",
+				"vi": "Công trình đang thi công phần thô, giàn giáo bao quanh"
+			},
+			{
+				"tep": "PHONGKHACHLON.jpg",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh phòng khách lớn"
+			},
+			{
+				"tep": "IMG_2653.JPG",
+				"loai": "cong_trinh",
+				"vi": "Công trình hoàn thiện nhìn từ khuôn viên, hàng cọ phía trước"
+			},
+			{
+				"tep": "PHONGKHACHNHO.jpg",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh phòng khách nhỏ"
+			},
+			{
+				"tep": "IMG_2661.JPG",
+				"loai": "cong_trinh",
+				"vi": "Mặt chính công trình hoàn thiện, mái ngói đỏ"
+			},
+			{
+				"tep": "SANHCHINH.jpg",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh sảnh chính, hai bên treo tranh lớn"
+			}
+		]
+	},
+	"truong-tieu-hoc-co-nhue-2b": {
+		"thu_muc": "TH CO NHUE 2B",
+		"hero": {
+			"tep": "00.jpg",
+			"cat": "3840x1646+0+214"
+		},
+		"slide": {
+			"tep": "00.jpg",
+			"cat": "3840x2160+0+0"
+		},
+		"the": {
+			"tep": "01.jpg",
+			"cat": "1440x1080+200+0"
+		},
+		"thu_vien": [
+			{
+				"tep": "05.jpg",
+				"loai": "cong_trinh",
+				"vi": "Khối nhà học ngoài thực tế, sân trước có thảm cây"
+			},
+			{
+				"tep": "01.jpg",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh cổng trường và cổng vòm mang tên trường"
+			},
+			{
+				"tep": "02.jpg",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh mặt đứng khối nhà học có mảng màu vàng"
+			},
+			{
+				"tep": "03.jpg",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh sân trong giữa các khối nhà"
+			},
+			{
+				"tep": "04.jpg",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh tổng thể khu trường nhìn từ trên cao"
+			}
+		]
+	},
+	"truong-thcs-tay-tuu": {
+		"thu_muc": "THCS TAY TUU",
+		"hero": {
+			"tep": "05.jpg",
+			"cat": "2560x1097+0+169"
+		},
+		"slide": {
+			"tep": "05.jpg",
+			"cat": "2549x1434+5+0"
+		},
+		"the": {
+			"tep": "01.jpg",
+			"cat": "1440x1080+240+0"
+		},
+		"thu_vien": [
+			{
+				"tep": "06.jpg",
+				"loai": "cong_trinh",
+				"vi": "Hành lang tầng trệt ngoài thực tế, cột và lan can sơn trắng"
+			},
+			{
+				"tep": "01.jpg",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh khối nhà học và sân cỏ"
+			},
+			{
+				"tep": "02.jpg",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh tổng thể nhìn từ trên cao"
+			},
+			{
+				"tep": "03.jpg",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh tổng thể nhìn từ trên cao, góc chéo"
+			},
+			{
+				"tep": "04.jpg",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh sân trong giữa các khối nhà"
+			}
+		]
+	},
+	"tong-lanh-su-quan-viet-nam-tai-savannakhet": {
+		"thu_muc": "TLS SAVANAKHET",
+		"hero": {
+			"tep": "REAL/PCTT PAHD.jpg",
+			"cat": "6440x2760+0+821"
+		},
+		"slide": {
+			"tep": "REAL/PCTT PAHD.jpg",
+			"cat": "6440x3623+0+325"
+		},
+		"the": {
+			"tep": "REAL/PCG.jpg",
+			"cx": 0.62,
+			"cy": 0.4715,
+			"w": 0.615
+		},
+		"thu_vien": [
+			{
+				"tep": "REAL/IMG_0327.JPG",
+				"loai": "cong_trinh",
+				"vi": "Khối nhà đang xây phần thô tại hiện trường"
+			},
+			{
+				"tep": "REAL/PCG.jpg",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh mặt chính khối nhà làm việc",
+				"cat": [
+					0,
+					0.157,
+					1,
+					0.787
+				]
+			},
+			{
+				"tep": "REAL/IMG_0334.JPG",
+				"loai": "cong_trinh",
+				"vi": "Khối nhà hai tầng đang thi công khung mái"
+			},
+			{
+				"tep": "REAL/PCTT.jpg",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh tổng thể khuôn viên nhìn từ trên cao",
+				"cat": [
+					0,
+					0,
+					1,
+					0.89
+				]
+			},
+			{
+				"tep": "REAL/IMG_0349.JPG",
+				"loai": "cong_trinh",
+				"vi": "Khối nhà đang thi công phần mái, cốt thép sàn ở phía trước"
+			},
+			{
+				"tep": "REAL/IMG_0351.JPG",
+				"loai": "cong_trinh",
+				"vi": "Hai khối nhà đã xây xong phần tường"
+			}
+		]
+	},
+	"cong-trinh-to-ngoc-van": {
+		"thu_muc": "TO NGOC VAN",
+		"hero": {
+			"tep": "02.jpg",
+			"cat": "2966x1271+0+1091"
+		},
+		"slide": {
+			"tep": "02.jpg",
+			"cat": "2966x1668+0+620"
+		},
+		"the": {
+			"tep": "01.jpg",
+			"cat": "2230x1673+0+1387"
+		},
+		"thu_vien": [
+			{
+				"tep": "01.jpg",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh mặt đứng tòa nhà nhìn từ góc đường"
+			},
+			{
+				"tep": "03.jpg",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh mặt chính tòa nhà văn phòng nhiều tầng"
+			},
+			{
+				"tep": "04.jpg",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh tòa nhà nhìn từ trên cao, cây xanh trên sân thượng"
+			}
+		]
+	},
+	"truong-ly-luan-chinh-tri-quan-doi-nhan-dan-lao": {
+		"thu_muc": "TRUONG CHINH TRI",
+		"hero": {
+			"tep": "TRUONG LY LUAN CHINH TRI QĐND LAO/01.jpg",
+			"cat": "4678x2005+0+494"
+		},
+		"slide": {
+			"tep": "TRUONG LY LUAN CHINH TRI QĐND LAO/01.jpg",
+			"cat": "4678x2631+0+92"
+		},
+		"the": {
+			"tep": "TRUONG LY LUAN CHINH TRI QĐND LAO/02.jpg",
+			"cat": "4077x3058+348+0"
+		},
+		"thu_vien": [
+			{
+				"tep": "TRUONG LY LUAN CHINH TRI QĐND LAO/04.JPG",
+				"loai": "cong_trinh",
+				"vi": "Công trình đang thi công, phần khung và mái đã dựng"
+			},
+			{
+				"tep": "TRUONG LY LUAN CHINH TRI QĐND LAO/02.jpg",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh mặt chính công trình với mái ngói kiểu Lào"
+			},
+			{
+				"tep": "TRUONG LY LUAN CHINH TRI QĐND LAO/03.jpg",
+				"loai": "thiet_ke",
+				"vi": "Bản trình bày phối cảnh tổng thể và các góc nhìn khuôn viên"
+			},
+			{
+				"tep": "TRUONG LY LUAN CHINH TRI QĐND LAO/05.jpg",
+				"loai": "cong_trinh",
+				"vi": "Công trình hoàn thiện, dãy nhà hai tầng mái ngói"
+			},
+			{
+				"tep": "TRUONG LY LUAN CHINH TRI QĐND LAO/06.jpg",
+				"loai": "cong_trinh",
+				"vi": "Lễ cắt băng tại bậc thềm công trình, có cờ Lào và cờ Việt Nam"
+			}
+		]
+	},
+	"trung-tam-boi-duong-chinh-tri": {
+		"thu_muc": "TT BOI DUONG CTRI",
+		"hero": {
+			"tep": "TRUONG CHINH TRI/01.jpg",
+			"cx": 0.5,
+			"cy": 0.598,
+			"w": 1
+		},
+		"slide": {
+			"tep": "TRUONG CHINH TRI/01.jpg",
+			"cat": "4605x2590+0+69"
+		},
+		"the": {
+			"tep": "TRUONG CHINH TRI/01.jpg",
+			"cx": 0.48,
+			"cy": 0.5,
+			"w": 1
+		},
+		"thu_vien": [
+			{
+				"tep": "TRUONG CHINH TRI/02.jpg",
+				"loai": "thiet_ke",
+				"vi": "Phối cảnh tổng thể tòa nhà và đường nội bộ"
+			},
+			{
+				"tep": "TRUONG CHINH TRI/03.jpg",
+				"loai": "cong_trinh",
+				"vi": "Công trình đang thi công phần khung bê tông cốt thép"
+			},
+			{
+				"tep": "TRUONG CHINH TRI/04.jpg",
+				"loai": "cong_trinh",
+				"vi": "Khung công trình nhìn từ đường nội bộ"
+			}
+		]
+	}
+}

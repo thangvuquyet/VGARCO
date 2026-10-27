@@ -61,8 +61,14 @@ $j = $ld( $x );
 same( 'dự án: BreadcrumbList 3 mục có địa chỉ tuyệt đối', array( 3, true ), array( count( $j['BreadcrumbList']['itemListElement'] ?? array() ), str_starts_with( (string) ( $j['BreadcrumbList']['itemListElement'][2]['item'] ?? '' ), $base ) ) );
 check( 'dự án: ảnh dùng srcset do WordPress sinh', 0 < $x->query( '//img[@srcset]' )->length );
 check( 'dự án: thư viện có chú thích thật', str_contains( $page['body'], 'Phối cảnh mặt đứng' ) );
-check( 'dự án: KHÔNG hiện chủ đầu tư/đối tác khi chưa được phép công bố', ! preg_match( '/Chủ đầu tư/u', $x->query( '//dl' )->length ? $x->document->saveHTML( $x->query( '//dl' )->item( 0 ) ) : '' ) );
-same( 'dự án: danh mục dự án 200 và có 19 thẻ', array( 200, 19 ), array( http( 'GET', '/du-an/' )['status'], $dom( http( 'GET', '/du-an/' )['body'] )->query( '//*[contains(@class,"catalogue-grid")]/article | //*[contains(@class,"catalogue-grid")]/a' )->length ) );
+$parties = static fn( DOMXPath $d ): string => $d->query( '//dl' )->length ? $d->document->saveHTML( $d->query( '//dl' )->item( 0 ) ) : '';
+check( 'dự án: hiện chủ đầu tư và đối tác khi đã được phép công bố', 1 === preg_match( '/Chủ đầu tư/u', $parties( $x ) ) && str_contains( $parties( $x ), 'Lavinaco 36' ) );
+update_field( 'cong_bo_chu_dau_tu', false, $p->ID );
+wp_cache_flush();
+check( 'dự án: KHÔNG hiện chủ đầu tư/đối tác khi chưa được phép công bố', ! preg_match( '/Chủ đầu tư|Đối tác/u', $parties( $dom( http( 'GET', $path )['body'] ) ) ) );
+update_field( 'cong_bo_chu_dau_tu', true, $p->ID );
+wp_cache_flush();
+same( 'dự án: danh mục dự án 200 và có 23 thẻ', array( 200, 23 ), array( http( 'GET', '/du-an/' )['status'], $dom( http( 'GET', '/du-an/' )['body'] )->query( '//*[contains(@class,"catalogue-grid")]/article | //*[contains(@class,"catalogue-grid")]/a' )->length ) );
 $tax = http( 'GET', '/du-an/loai/quan-su-an-ninh/' );
 same( 'loại công trình: trang lọc 200 và có dự án', array( 200, true ), array( $tax['status'], 0 < $dom( $tax['body'] )->query( '//article' )->length ) );
 

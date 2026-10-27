@@ -6,13 +6,21 @@ error_reporting( E_ALL & ~E_DEPRECATED );
 $args  = array_slice( $argv, 1 );
 $paths = array_values( array_filter( $args, fn( $a ) => ! str_starts_with( $a, '--' ) ) );
 $only  = null;
+$manual = null;
 foreach ( $args as $a ) {
 	if ( str_starts_with( $a, '--only=' ) ) {
 		$only = substr( $a, 7 );
 	}
+	if ( str_starts_with( $a, '--manual=' ) ) {
+		$manual = json_decode( (string) file_get_contents( substr( $a, 9 ) ), true );
+		if ( ! is_array( $manual ) ) {
+			fwrite( STDERR, "Không đọc được kế hoạch ảnh: " . substr( $a, 9 ) . "\n" );
+			exit( 2 );
+		}
+	}
 }
 if ( 2 !== count( $paths ) ) {
-	fwrite( STDERR, "Cách dùng: php prepare-photos.php <thư-mục-ảnh-gốc> <thư-mục-ra> [--only=<ma>]\n" );
+	fwrite( STDERR, "Cách dùng: php prepare-photos.php <thư-mục-ảnh-gốc> <thư-mục-ra> [--only=<ma>] [--manual=<content/photos.json>]\n" );
 	exit( 2 );
 }
 [ $root, $out ] = $paths;
@@ -38,6 +46,9 @@ $MAP = array(
 	'truong-ly-luan-chinh-tri-quan-doi-nhan-dan-lao' => array( 'TRUONG CHINH TRI', null ),
 	'trung-tam-boi-duong-chinh-tri'              => array( 'TT BOI DUONG CTRI', null ),
 );
+if ( $manual ) {
+	$MAP = array_map( fn( $plan ) => array( $plan['thu_muc'], null ), $manual );
+}
 const GALLERY_MAX      = 6;
 const GALLERY_LONG     = 1800;
 const UPSCALE_BELOW    = 1500;
@@ -221,15 +232,33 @@ foreach ( $MAP as $ma => [ $dir, $exclude ] ) {
 	}
 	$entry = array( 'ma' => $ma, 'thu_muc' => $dir, 'tong_anh_goc' => count( $files ), 'vai_tro' => array(), 'thu_vien' => array() );
 
-	$do_role = function ( string $role, array $src, string $dest, ?float $ratio, ?array $frame ) use ( &$entry ): void {
+	$do_role = function ( string $role, array $src, string $dest, ?float $ratio, ?array $frame, ?array $spec = null ) use ( &$entry ): void {
 		$img = load_image( $src['path'] );
 		if ( ! $img ) {
 			p( "  ! không đọc được {$src['path']}" );
 			return;
 		}
 		[ $im, $w, $h ] = $img;
+		if ( null === $ratio && isset( $spec['cat'] ) ) {
+			[ $fx0, $fy0, $fx1, $fy1 ] = $spec['cat'];
+			$trim = imagecrop( $im, array( 'x' => (int) round( $fx0 * $w ), 'y' => (int) round( $fy0 * $h ), 'width' => (int) round( ( $fx1 - $fx0 ) * $w ), 'height' => (int) round( ( $fy1 - $fy0 ) * $h ) ) );
+			imagedestroy( $im );
+			$im = $trim;
+			$w  = imagesx( $im );
+			$h  = imagesy( $im );
+		}
 		if ( null !== $ratio ) {
-			[ $x, $y, $cw, $ch ] = saliency_crop( $im, $ratio );
+			if ( isset( $spec['cat'] ) && preg_match( '/^(\d+)x(\d+)\+(\d+)\+(\d+)$/', $spec['cat'], $m ) ) {
+				[ , $cw, $ch, $x, $y ] = array_map( 'intval', $m );
+			} elseif ( isset( $spec['cx'] ) ) {
+				$max = min( $w, (int) round( $h * $ratio ) );
+				$cw  = (int) round( $max * (float) ( $spec['w'] ?? 1 ) );
+				$ch  = (int) round( $cw / $ratio );
+				$x   = max( 0, min( $w - $cw, (int) round( $spec['cx'] * $w - $cw / 2 ) ) );
+				$y   = max( 0, min( $h - $ch, (int) round( $spec['cy'] * $h - $ch / 2 ) ) );
+			} else {
+				[ $x, $y, $cw, $ch ] = saliency_crop( $im, $ratio );
+			}
 			$crop = imagecrop( $im, array( 'x' => $x, 'y' => $y, 'width' => $cw, 'height' => $ch ) );
 			$need = $frame[0] / $cw;
 			$up   = $need > 1.05;
@@ -254,7 +283,7 @@ foreach ( $MAP as $ma => [ $dir, $exclude ] ) {
 			}
 		} else {
 			$long  = max( $w, $h );
-			$info  = array( 'tep_goc' => $src['name'], 'goc' => "{$w}x{$h}", 'loai' => $src['camera'] ? 'cong_trinh' : 'thiet_ke' );
+			$info  = array( 'tep_goc' => $src['name'], 'goc' => "{$w}x{$h}", 'loai' => $spec['loai'] ?? ( $src['camera'] ? 'cong_trinh' : 'thiet_ke' ), 'chu_thich_vi' => $spec['vi'] ?? null );
 			if ( $long < UPSCALE_BELOW ) {
 				$scale = min( GALLERY_LONG / $long, MAX_UPSCALE, 2.0 );
 				$tw    = (int) round( $w * $scale );
@@ -279,11 +308,23 @@ foreach ( $MAP as $ma => [ $dir, $exclude ] ) {
 		}
 	};
 
-	$do_role( 'hero', $lead, "$out/staging/$ma-hero.jpg", 21 / 9, $ROLES['hero'] );
-	$do_role( 'slide', $lead, "$out/staging/$ma-slide.jpg", 16 / 9, $ROLES['slide'] );
-	$do_role( 'the', $card, "$out/staging/$ma-the.jpg", 4 / 3, $ROLES['the'] );
-	foreach ( $gal as $i => $g ) {
-		$do_role( 'tv', $g, sprintf( '%s/staging/%s-tv-%02d.jpg', $out, $ma, $i + 1 ), null, null );
+	if ( $manual ) {
+		$plan = $manual[ $ma ];
+		$gal  = $plan['thu_vien'];
+		$pick = static fn( string $tep ): array => array( 'path' => "$base/$tep", 'name' => $tep, 'camera' => false );
+		$do_role( 'hero', $pick( $plan['hero']['tep'] ), "$out/staging/$ma-hero.jpg", 21 / 9, $ROLES['hero'], $plan['hero'] );
+		$do_role( 'slide', $pick( $plan['slide']['tep'] ), "$out/staging/$ma-slide.jpg", 16 / 9, $ROLES['slide'], $plan['slide'] );
+		$do_role( 'the', $pick( $plan['the']['tep'] ), "$out/staging/$ma-the.jpg", 4 / 3, $ROLES['the'], $plan['the'] );
+		foreach ( $gal as $i => $g ) {
+			$do_role( 'tv', $pick( $g['tep'] ), sprintf( '%s/staging/%s-tv-%02d.jpg', $out, $ma, $i + 1 ), null, null, $g );
+		}
+	} else {
+		$do_role( 'hero', $lead, "$out/staging/$ma-hero.jpg", 21 / 9, $ROLES['hero'] );
+		$do_role( 'slide', $lead, "$out/staging/$ma-slide.jpg", 16 / 9, $ROLES['slide'] );
+		$do_role( 'the', $card, "$out/staging/$ma-the.jpg", 4 / 3, $ROLES['the'] );
+		foreach ( $gal as $i => $g ) {
+			$do_role( 'tv', $g, sprintf( '%s/staging/%s-tv-%02d.jpg', $out, $ma, $i + 1 ), null, null );
+		}
 	}
 	$ups = count( array_filter( array_merge( $entry['vai_tro'], $entry['thu_vien'] ), fn( $r ) => isset( $r['phong_to'] ) ) );
 	p( sprintf( '[%s] %d ảnh gốc → hero/slide/thẻ + %d ảnh thư viện; phóng to: %d', $ma, count( $files ), count( $gal ), $ups ) );
@@ -312,7 +353,7 @@ foreach ( $rows as $r ) {
 	if ( 'tv' === $row['vai_tro'] && isset( $report[ $row['ma'] ]['thu_vien'][ (int) $row['thu_tu'] - 1 ] ) ) {
 		$info                = $report[ $row['ma'] ]['thu_vien'][ (int) $row['thu_tu'] - 1 ];
 		$row['loai_anh']     = $info['loai'];
-		$row['chu_thich_vi'] = 'cong_trinh' === $info['loai'] ? 'Ảnh công trình' : 'Phối cảnh thiết kế';
+		$row['chu_thich_vi'] = $info['chu_thich_vi'] ?? ( 'cong_trinh' === $info['loai'] ? 'Ảnh công trình' : 'Phối cảnh thiết kế' );
 	}
 	fputcsv( $fh, array_values( $row ), ';' );
 }

@@ -349,7 +349,9 @@ function vgarco_import_flatten( array $plan, string $lang ): array {
 	foreach ( $plan['shared'] as $key => $value ) {
 		$flat[ 'meta.' . $key ] = $value;
 	}
-	$flat['terms.loai_cong_trinh'] = implode( ',', $plan['terms'] );
+	$terms = $plan['terms'];
+	sort( $terms );
+	$flat['terms.loai_cong_trinh'] = implode( ',', $terms );
 	return $flat;
 }
 

@@ -844,6 +844,7 @@ for (const [name, file, from, to, suite = 'smoke'] of M.filter(([n]) => !only ||
   mkdirSync(join(work, 'tests'), { recursive: true });
   cpSync(join(src, 'wp-content'), join(work, 'wp-content'), { recursive: true, filter: (from) => !/[\\/](node_modules|dist)([\\/]|$)/.test(from) });
   cpSync(join(src, 'tests', 'php'), join(work, 'tests', 'php'), { recursive: true });
+  cpSync(join(src, 'content'), join(work, 'content'), { recursive: true });
   if (suite === 'export-images') cpSync(join(src, 'scripts'), join(work, 'scripts'), { recursive: true });
   if (suite === 'i18n') {
     cpSync(join(src, 'scripts'), join(work, 'scripts'), { recursive: true });

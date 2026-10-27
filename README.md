@@ -16,7 +16,7 @@ wp-content/
 └── themes/vgarco/                 TRÌNH BÀY: mẫu trang, SCSS, JS, chuỗi giao diện, SEO cơ bản
 content/                           Bảng tính nhập liệu (xem content/README.md)
 scripts/i18n/                      Công cụ dịch: trích .pot, gộp bản dịch .po, biên dịch .mo (Node, không cần gettext)
-scripts/content/                   Công cụ nội dung: sinh projects.csv (Node), xuất ảnh master theo quy cách 9.2 (PHP + gd; xem content/README.md)
+scripts/content/                   Công cụ nội dung: xuất ảnh master theo quy cách 9.2 (PHP + gd; xem content/README.md)
 scripts/ops/smoke.mjs              Kiểm nhanh một website đang chạy (trang chính, 404, REST, bề mặt tấn công, header, noindex)
 docs/                              Hồ sơ kỹ thuật bàn giao: kiến trúc, cấu hình, vận hành, triển khai, sao lưu, sự cố, sổ tài khoản
 tests/                             Kiểm thử tự động không cần WordPress (xem bên dưới)

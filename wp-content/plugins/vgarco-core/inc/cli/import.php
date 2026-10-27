@@ -34,6 +34,7 @@ class VGARCO_CLI_Command {
 		}
 
 		$counts = array( 'created' => 0, 'updated' => 0, 'unchanged' => 0 );
+		kses_remove_filters();
 		foreach ( $result['plans'] as $plan ) {
 			$vi_id = $this->find( $plan['ma'], 'vi' );
 
@@ -180,7 +181,9 @@ class VGARCO_CLI_Command {
 			$is_flag                = in_array( $key, array( 'cong_bo_chu_dau_tu', 'noi_bat', 'tieu_bieu' ), true );
 			$flat[ 'meta.' . $key ] = $is_flag ? ( $value && '0' !== $value ? '1' : '0' ) : (string) $value;
 		}
-		$flat['terms.loai_cong_trinh'] = implode( ',', wp_get_object_terms( $post_id, 'loai_cong_trinh', array( 'fields' => 'slugs' ) ) );
+		$slugs = wp_get_object_terms( $post_id, 'loai_cong_trinh', array( 'fields' => 'slugs' ) );
+		sort( $slugs );
+		$flat['terms.loai_cong_trinh'] = implode( ',', $slugs );
 		return $flat;
 	}
 

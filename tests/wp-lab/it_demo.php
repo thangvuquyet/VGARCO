@@ -26,10 +26,10 @@ try {
 }
 same( 'nhập dự án kèm ảnh: không lỗi', '', $import_error );
 $projects = get_posts( array( 'post_type' => 'du_an', 'post_status' => 'publish', 'posts_per_page' => -1, 'fields' => 'ids' ) );
-same( 'nhập dự án kèm ảnh: 19 dự án đã công bố', 19, count( $projects ) );
+same( 'nhập dự án kèm ảnh: 23 dự án đã công bố', 23, count( $projects ) );
 $with_images = array_filter( $projects, static fn( $id ) => (int) get_field( 'anh_the', $id ) > 0 );
-same( 'nhập dự án kèm ảnh: 16 dự án có ảnh, 3 dự án để trống có chủ ý', 16, count( $with_images ) );
-foreach ( array( 'dai-kiem-soat-khong-luu-dong-hoi', 'hoc-vien-ky-thuat-va-cong-nghe-an-ninh', 'biet-thu-tai-niedernhausen' ) as $ma ) {
+same( 'nhập dự án kèm ảnh: 16 dự án có ảnh, 7 dự án để trống có chủ ý', 16, count( $with_images ) );
+foreach ( array( 'dai-kiem-soat-khong-luu-dong-hoi', 'hoc-vien-ky-thuat-va-cong-nghe-an-ninh', 'biet-thu-tai-niedernhausen', 'truong-bien-phong-quan-doi-nhan-dan-lao-giai-doan-2', 'truong-thcs-ngo-quyen', 'nha-may-nhua-grand-plastic', 'dai-phat-thanh-truyen-hinh-hua-phan' ) as $ma ) {
 	same( "dự án chưa có ảnh riêng ({$ma}) để trống, không dùng ảnh của dự án khác", 0, (int) get_field( 'anh_the', $by_ma( $ma ) ) );
 }
 
@@ -120,8 +120,8 @@ update_field(
 $home = http( 'GET', '/' );
 same( 'trang chủ: 200', 200, $home['status'] );
 $html = $home['body'];
-same( 'trang chủ: 3 ảnh trình chiếu, mỗi ảnh có liên kết dự án (3 dự án nổi bật có ảnh)', array( 3, 3 ), array( preg_match_all( '/class="showcase-image[ "]/', $html ), substr_count( $html, 'class="hero-project-link"' ) ) );
-same( 'trang chủ: 3 chấm chuyển trang trình chiếu', 3, substr_count( $html, 'class="showcase-dot"' ) );
+same( 'trang chủ: 5 ảnh trình chiếu, mỗi ảnh có liên kết dự án (5 dự án nổi bật đều có ảnh)', array( 5, 5 ), array( preg_match_all( '/class="showcase-image[ "]/', $html ), substr_count( $html, 'class="hero-project-link"' ) ) );
+same( 'trang chủ: 5 chấm chuyển trang trình chiếu', 5, substr_count( $html, 'class="showcase-dot"' ) );
 same( 'trang chủ: 3 lĩnh vực có tóm tắt hiện ở trang chủ', 3, substr_count( $html, 'class="service-num"' ) );
 same( 'trang chủ: dải đối tác có 5 đối tác (mỗi đối tác hai lần để chạy vòng)', 10, substr_count( $html, 'class="partner-logo"' ) );
 check( 'trang chủ: có bộ chuyển ngôn ngữ VI/DE', str_contains( $html, 'class="language-switch"' ) && str_contains( $html, 'lab_lang=de' ) );
@@ -130,10 +130,13 @@ $services_page = http( 'GET', '/linh-vuc-hoat-dong/' );
 same( 'trang lĩnh vực: 200, đủ 6 lĩnh vực', array( 200, 6 ), array( $services_page['status'], substr_count( $services_page['body'], 'class="service-item"' ) ) );
 $catalogue = http( 'GET', '/du-an/' );
 same( 'danh mục dự án: 200', 200, $catalogue['status'] );
-same( 'danh mục dự án: 19 thẻ dự án', 19, substr_count( $catalogue['body'], 'class="project-card"' ) );
+same( 'danh mục dự án: 23 thẻ dự án', 23, substr_count( $catalogue['body'], 'class="project-card"' ) );
 check( 'danh mục dự án: có khối câu chuyện công trình', str_contains( $catalogue['body'], 'Giữ lại ký ức' ) );
 $detail = http( 'GET', '/du-an/' . get_post( $museum )->post_name . '/' );
 same( 'chi tiết dự án có ảnh: 200, thư viện 6 ảnh', array( 200, 6 ), array( $detail['status'], preg_match_all( '/class="gallery-slide[ "]/', $detail['body'] ) ) );
+check( 'chi tiết dự án đã công bố bên liên quan: hiện chủ đầu tư và đối tác theo dữ liệu khách cung cấp', str_contains( $detail['body'], 'Tổng cục Chính trị Quân đội nhân dân Lào' ) && str_contains( $detail['body'], 'Lavinaco 36' ) );
+$unpublished = http( 'GET', '/du-an/' . get_post( $by_ma( 'nha-dai-su' ) )->post_name . '/' );
+check( 'chi tiết dự án chưa có dữ liệu bên liên quan: không hiện hàng Chủ đầu tư/Đối tác', 200 === $unpublished['status'] && ! str_contains( $unpublished['body'], 'Chủ đầu tư' ) && ! str_contains( $unpublished['body'], 'Đối tác' ) );
 $blank = http( 'GET', '/du-an/' . get_post( $by_ma( 'biet-thu-tai-niedernhausen' ) )->post_name . '/' );
 same( 'chi tiết dự án chưa có ảnh: 200, không lỗi PHP', array( 200, false ), array( $blank['status'], str_contains( $blank['body'], 'Fatal error' ) || str_contains( $blank['body'], 'Warning:' ) ) );
 

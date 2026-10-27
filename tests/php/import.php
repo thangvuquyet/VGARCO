@@ -135,7 +135,7 @@ check( 'tệp: tên cột có thể viết hoa (Ma, TEN_VI)', array() === vgarco
 
 $flat = vgarco_import_flatten( $plan, 'vi' );
 same( 'flatten: khóa cơ bản và siêu dữ liệu', true, isset( $flat['post_title'], $flat['post_name'], $flat['post_content'], $flat['menu_order'], $flat['meta.dia_diem'], $flat['meta.thoi_gian'], $flat['meta.quoc_gia'], $flat['terms.loai_cong_trinh'] ) );
-same( 'flatten: loại công trình nối bằng dấu phẩy', 'van-hoa-di-tich,giao-duc-dao-tao', $flat['terms.loai_cong_trinh'] );
+same( 'flatten: loại công trình nối bằng dấu phẩy, xếp theo chữ cái (so sánh không phụ thuộc thứ tự trong bảng)', 'giao-duc-dao-tao,van-hoa-di-tich', $flat['terms.loai_cong_trinh'] );
 same( 'flatten: ngôn ngữ không có → rỗng', array(), vgarco_import_flatten( $min['plan'], 'de' ) );
 
 same( 'diff: bài chưa có → mọi trường có giá trị đều là thay đổi', true, isset( vgarco_import_diff( array(), $flat )['post_title'] ) && ! isset( vgarco_import_diff( array(), $flat )['meta.doi_tac_khong_co'] ) );
@@ -208,12 +208,29 @@ $seed_terms = array(
 );
 $repo = vgarco_import_projects( (string) file_get_contents( ROOT . '/content/projects.csv' ), array( 'terms' => $seed_terms ) );
 same( 'content/projects.csv: nhập được, không lỗi', array(), $repo['errors'] );
-same( 'content/projects.csv: 19 dự án, mã không trùng', array( 19, 19 ), array( count( $repo['plans'] ), count( array_unique( array_column( $repo['plans'], 'ma' ) ) ) ) );
-same( 'content/projects.csv: KHÔNG dự án nào bật công bố chủ đầu tư (cần chủ đầu tư đồng ý, mục 3.2 #8)', array(), array_keys( array_filter( array_column( $repo['plans'], 'shared' ), static fn( $s ) => '1' === $s['cong_bo_chu_dau_tu'] ) ) );
-same( 'content/projects.csv: 3 nổi bật, 3 tiêu biểu', array( 3, 3 ), array( count( array_filter( array_column( $repo['plans'], 'shared' ), static fn( $s ) => '1' === $s['noi_bat'] ) ), count( array_filter( array_column( $repo['plans'], 'shared' ), static fn( $s ) => '1' === $s['tieu_bieu'] ) ) ) );
+same( 'content/projects.csv: 23 dự án, mã không trùng', array( 23, 23 ), array( count( $repo['plans'] ), count( array_unique( array_column( $repo['plans'], 'ma' ) ) ) ) );
+same(
+	'content/projects.csv: công bố chủ đầu tư/đối tác đúng với dự án khách đã cung cấp thông tin (bật khi có, tắt khi không)',
+	array(),
+	array_keys( array_filter( $repo['plans'], static fn( $p ) => ( '1' === $p['shared']['cong_bo_chu_dau_tu'] ) !== ( '' !== $p['vi']['meta']['chu_dau_tu'] || '' !== $p['vi']['meta']['doi_tac'] ) ) )
+);
+same( 'content/projects.csv: 5 nổi bật, 3 tiêu biểu', array( 5, 3 ), array( count( array_filter( array_column( $repo['plans'], 'shared' ), static fn( $s ) => '1' === $s['noi_bat'] ) ), count( array_filter( array_column( $repo['plans'], 'shared' ), static fn( $s ) => '1' === $s['tieu_bieu'] ) ) ) );
 same( 'content/projects.csv: mọi dự án có ít nhất một loại công trình', 0, count( array_filter( array_column( $repo['plans'], 'terms' ), static fn( $t ) => ! $t ) ) );
 $repo_images = vgarco_import_images( (string) file_get_contents( ROOT . '/content/images.example.csv' ), array_column( $repo['plans'], 'ma' ) );
 same( 'content/images.example.csv: hợp lệ với projects.csv', array( array(), true ), array( $repo_images['errors'], isset( $repo_images['images']['bao-tang-lich-su-quan-doi-nhan-dan-lao']['tv'][1] ) ) );
+$real_images = vgarco_import_images( (string) file_get_contents( ROOT . '/content/images.csv' ), array_column( $repo['plans'], 'ma' ) );
+same(
+	'content/images.csv: hợp lệ, 16 dự án có ảnh, 74 ảnh thư viện, mọi ảnh thư viện có chú thích riêng',
+	array( array(), 16, 74, 0 ),
+	array(
+		$real_images['errors'],
+		count( $real_images['images'] ),
+		array_sum( array_map( static fn( $i ) => count( $i['tv'] ), $real_images['images'] ) ),
+		count( array_filter( array_merge( ...array_values( array_map( static fn( $i ) => $i['tv'], $real_images['images'] ) ) ), static fn( $t ) => in_array( $t['caption_vi'], array( '', 'Ảnh công trình', 'Phối cảnh thiết kế' ), true ) ) )
+	)
+);
+$photo_plan = json_decode( (string) file_get_contents( ROOT . '/content/photos.json' ), true );
+same( 'content/photos.json: cùng 16 dự án với images.csv, mọi mã đều có trong projects.csv', array( array(), array(), array() ), array( array_values( array_diff( array_keys( $photo_plan ), array_keys( $real_images['images'] ) ) ), array_values( array_diff( array_keys( $real_images['images'] ), array_keys( $photo_plan ) ) ), array_values( array_diff( array_keys( $photo_plan ), array_column( $repo['plans'], 'ma' ) ) ) ) );
 
 if ( $fail ) {
 	foreach ( $fail as $line ) {
