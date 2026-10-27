@@ -533,6 +533,13 @@ check( 'tuyển dụng: biểu mẫu tìm là GET, có role=search, mọi ô có
 same( 'tuyển dụng: chưa lọc thì nút "Xóa bộ lọc" và thông báo rỗng đều ẩn', array( 1, 1 ), array( q( $j, '//a[@data-job-reset and ' . cls( 'job-reset' ) . ' and @hidden]' )->length, q( $j, '//div[@data-job-empty and @hidden]' )->length ) );
 check( 'tuyển dụng: khối "Chưa thấy vị trí phù hợp?" có liên kết mailto tới email chung', 1 === q( $j, '//section[' . cls( 'career-connect' ) . ']//a[@href="mailto:vgarco.cc@gmail.com"]' )->length );
 
+same( 'tuyển dụng: chưa chọn ảnh nền thì khối đầu trang không có ảnh (nền tối, chữ vẫn đọc được)', 0, q( $j, '//section[' . cls( 'career-intro' ) . ']//img' )->length );
+$jp  = render( 'templates/careers', false, 'vi', array( 'VG_FX_ID' => '506', 'VG_FX_PAGE_FULL' => '1' ) );
+$jbg = q( $jp, '//section[' . cls( 'career-intro' ) . ']/img[' . cls( 'career-intro-bg' ) . ']' )->item( 0 );
+common_checks( $jp, 'tuyển dụng có ảnh nền' );
+check( 'tuyển dụng: ảnh nền nằm đầu khối đầu trang (trước khối chữ), là ảnh trang trí alt rỗng và là ảnh LCP (eager + fetchpriority=high)', null !== $jbg && '' === $jbg->getAttribute( 'alt' ) && 'eager' === $jbg->getAttribute( 'loading' ) && 'high' === $jbg->getAttribute( 'fetchpriority' ) && 1 === q( $jp, '//section[' . cls( 'career-intro' ) . ']/img[' . cls( 'career-intro-bg' ) . ']/following-sibling::div[' . cls( 'career-intro-inner' ) . ']' )->length );
+same( 'tuyển dụng có ảnh nền: tiêu đề và câu góc phải vẫn đủ', array( 1, 1 ), array( q( $jp, '//section[' . cls( 'career-intro' ) . ']//h1[count(br)=1 and count(em)=1]' )->length, q( $jp, '//section[' . cls( 'career-intro' ) . ']//div[' . cls( 'career-intro-caption' ) . ']/strong[count(br)=1]' )->length ) );
+
 $jf = render( 'templates/careers', false, 'vi', array( 'VG_FX_ID' => '506', 'VG_FX_GET' => 'q=kien+truc&noi-lam-viec=ha-noi' ) );
 same( 'lọc: "kien truc" (không dấu) + Hà Nội → chỉ Kiến trúc sư', array( 'Kiến trúc sư thiết kế' ), $card_titles( $jf ) );
 same( 'lọc: số lượng cập nhật "01", số thứ tự tính lại, ô nhập giữ giá trị, nơi làm việc được chọn', array( '01', 'kien truc', 'ha-noi' ), array( trim( q( $jf, '//p[@data-job-count]/strong' )->item( 0 )->textContent ), q( $jf, '//input[@name="q"]' )->item( 0 )->getAttribute( 'value' ), q( $jf, '//select[@name="noi-lam-viec"]/option[@selected]' )->item( 0 )->getAttribute( 'value' ) ) );
@@ -652,6 +659,10 @@ $contact_scss = (string) file_get_contents( ROOT . '/wp-content/themes/vgarco/sr
 $careers_scss = (string) file_get_contents( ROOT . '/wp-content/themes/vgarco/src/scss/pages/_careers.scss' );
 check( 'SCSS: chữ trắng của ô đồng ý chỉ áp dụng trong biểu mẫu liên hệ (nền tối), không toàn cục — nếu không ô đồng ý ở biểu mẫu ứng tuyển (nền sáng) thành chữ trắng trên nền trắng', 1 === preg_match( '/^\.contact-form \.consent-label \{/m', $contact_scss ) && 0 === preg_match( '/^\.consent-label \{/m', $contact_scss ) );
 check( 'SCSS: ô đồng ý ở biểu mẫu ứng tuyển có màu chữ tối tường minh', 1 === preg_match( '/\.job-apply-form \.consent-label \{[^}]*color: var\(--c-ink\);/s', $careers_scss ) );
+check( 'SCSS: nền khối đầu trang Tuyển dụng — lớp phủ tối dần từ trái sang phải đúng bản thiết kế (82% → 66% → 28% → 16%)', str_contains( $careers_scss, 'linear-gradient(90deg, rgb(10 15 12 / 82%) 0%, rgb(10 15 12 / 66%) 42%, rgb(10 15 12 / 28%) 72%, rgb(10 15 12 / 16%) 100%)' ) );
+check( 'SCSS: ảnh nền Tuyển dụng lấy tâm 46% theo chiều dọc ở màn rộng, giữa ảnh ở máy tính bảng, lệch 58% ở điện thoại (bản thiết kế)', 1 === preg_match( '/object-position: 58% center;\s*@include up\(\$bp-tablet\) \{\s*object-position: center;\s*\}\s*@include up\(\$bp-job\) \{\s*object-position: center 46%;/', $careers_scss ) );
+check( 'SCSS: khối chữ đầu trang Tuyển dụng căn theo cột nội dung chung (.wrap), không ép sát mép màn hình', 1 === preg_match( '/\.career-intro-inner \{\s*position: relative;\s*z-index: 2;\s*\.eyebrow \{/', $careers_scss ) && 1 === preg_match( '/\.career-intro \{[^}]*padding-block: 1\.875rem 1\.5rem;/s', $careers_scss ) );
+check( 'SCSS: chữ đầu trang Tuyển dụng có bóng chữ nhẹ để đọc được trên ảnh (tiêu đề 18%, câu góc phải 35%)', str_contains( $careers_scss, 'text-shadow: 0 2px 18px rgb(0 0 0 / 18%);' ) && str_contains( $careers_scss, 'text-shadow: 0 1px 12px rgb(0 0 0 / 35%);' ) );
 
 $scss_dir = ROOT . '/wp-content/themes/vgarco/src/scss/';
 $reset    = (string) file_get_contents( $scss_dir . '_reset.scss' );

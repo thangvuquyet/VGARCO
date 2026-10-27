@@ -117,6 +117,21 @@ update_field(
 	'option'
 );
 
+$careers_page = get_page_by_path( 'tuyen-dung' );
+$career_hero  = $photos . '/pages/tuyen-dung.jpg';
+if ( $careers_page && is_file( $career_hero ) ) {
+	require_once ABSPATH . 'wp-admin/includes/file.php';
+	require_once ABSPATH . 'wp-admin/includes/media.php';
+	require_once ABSPATH . 'wp-admin/includes/image.php';
+	$career_tmp = wp_tempnam( 'tuyen-dung.jpg' );
+	copy( $career_hero, $career_tmp );
+	$career_att = media_handle_sideload( array( 'name' => 'tuyen-dung-anh-nen.jpg', 'tmp_name' => $career_tmp ), $careers_page->ID );
+	check( 'trang Tuyển dụng: nạp được ảnh nền đầu trang', ! is_wp_error( $career_att ) );
+	if ( ! is_wp_error( $career_att ) ) {
+		update_field( 'hero_anh', (int) $career_att, $careers_page->ID );
+	}
+}
+
 $home = http( 'GET', '/' );
 same( 'trang chủ: 200', 200, $home['status'] );
 $html = $home['body'];
@@ -139,5 +154,8 @@ $unpublished = http( 'GET', '/du-an/' . get_post( $by_ma( 'nha-dai-su' ) )->post
 check( 'chi tiết dự án chưa có dữ liệu bên liên quan: không hiện hàng Chủ đầu tư/Đối tác', 200 === $unpublished['status'] && ! str_contains( $unpublished['body'], 'Chủ đầu tư' ) && ! str_contains( $unpublished['body'], 'Đối tác' ) );
 $blank = http( 'GET', '/du-an/' . get_post( $by_ma( 'biet-thu-tai-niedernhausen' ) )->post_name . '/' );
 same( 'chi tiết dự án chưa có ảnh: 200, không lỗi PHP', array( 200, false ), array( $blank['status'], str_contains( $blank['body'], 'Fatal error' ) || str_contains( $blank['body'], 'Warning:' ) ) );
+$careers = http( 'GET', '/tuyen-dung/' );
+$career_img = 1 === preg_match( '/<section class="career-intro on-dark">\s*(<img[^>]+>)/', $careers['body'], $career_match ) ? $career_match[1] : '';
+check( 'trang Tuyển dụng: đầu trang có ảnh nền thật (ảnh đứng trước khối chữ, ảnh trang trí alt rỗng)', 200 === $careers['status'] && str_contains( $career_img, 'class="career-intro-bg"' ) && str_contains( $career_img, 'tuyen-dung-anh-nen' ) && str_contains( $career_img, 'alt=""' ) );
 
 finish();

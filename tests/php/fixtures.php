@@ -174,7 +174,7 @@ foreach ( ( $fx_empty || getenv( 'VG_FX_NO_JOBS' ) ) ? array() : array(
 	);
 	$GLOBALS['fx']['terms'][ $j[0] ] = array( 'noi_lam_viec' => array( $j[2] ), 'phong_ban' => array( $j[3] ) );
 }
-fx_post( 506, 'page', 'Tuyển dụng', array(), array( 'url' => '/tuyen-dung/' ) );
+fx_post( 506, 'page', 'Tuyển dụng', getenv( 'VG_FX_PAGE_FULL' ) ? array( 'hero_anh' => fx_image( 'german-villa.jpg' ) ) : array(), array( 'url' => '/tuyen-dung/' ) );
 fx_post( 507, 'page', 'Ứng tuyển', array(), array( 'url' => '/ung-tuyen/' ) );
 
 foreach ( $fx_empty ? array() : array(
