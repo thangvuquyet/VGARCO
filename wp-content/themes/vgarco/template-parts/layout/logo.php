@@ -2,4 +2,4 @@
 
 defined( 'ABSPATH' ) || exit;
 ?>
-<svg class="brand-mark" viewBox="0 0 200 200" aria-hidden="true" focusable="false"><circle cx="100" cy="100" r="99" fill="#c30000"/><path d="M100 10 188 96H12ZM100 190 188 104H12Z" fill="#fff"/><circle cx="100" cy="100" r="48" fill="#c30000"/><circle cx="100" cy="100" r="38" fill="#fff"/></svg>
+<svg class="brand-mark" viewBox="0 0 1000 1000" aria-hidden="true" focusable="false"><path fill="#c30000" d="M0 500A500 500 0 1 1 1000 500A500 500 0 1 1 0 500ZM500 40L66.4 473.6H227.44A273.84 273.84 0 0 1 772.56 473.6H933.6ZM500 960L933.6 526.4H772.56A273.84 273.84 0 0 1 227.44 526.4H66.4ZM291.92 500A208.08 208.08 0 1 0 708.08 500A208.08 208.08 0 1 0 291.92 500Z"/></svg>
