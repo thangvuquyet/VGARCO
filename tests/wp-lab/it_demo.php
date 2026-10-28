@@ -95,7 +95,7 @@ foreach ( (array) get_field( 'thu_vien', $museum ) as $row ) {
 }
 $partners = array(
 	array( 'ten' => 'AVITYCO', 'viet_tat' => 'AV', 'mo_ta' => 'Kiến trúc & Xây dựng' ),
-	array( 'ten' => 'Kiến trúc Việt', 'viet_tat' => 'KV', 'mo_ta' => 'Tư vấn kiến trúc' ),
+	array( 'ten' => 'Kiến trúc Việt', 'viet_tat' => 'KV', 'mo_ta' => 'Tư vấn kiến trúc', 'tep_logo' => 'kien-truc-viet.png' ),
 	array( 'ten' => 'FBN Studio', 'viet_tat' => 'FBN', 'mo_ta' => 'Ferri Nguyen GbR', 'tep_logo' => 'fbn-studio.png' ),
 	array( 'ten' => 'Quản lý bay miền Bắc', 'viet_tat' => 'QLB', 'mo_ta' => 'Hạ tầng hàng không', 'tep_logo' => 'quan-ly-bay-mien-bac.png' ),
 	array( 'ten' => 'Học viện Kỹ thuật & Công nghệ An ninh', 'viet_tat' => 'HA', 'mo_ta' => 'Đào tạo chuyên ngành', 'tep_logo' => 'hoc-vien-ky-thuat-cong-nghe-an-ninh.png' ),
