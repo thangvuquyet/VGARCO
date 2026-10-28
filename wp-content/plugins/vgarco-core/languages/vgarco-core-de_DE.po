@@ -12,7 +12,7 @@ msgstr ""
 
 #: wp-content/plugins/vgarco-core/inc/careers/apply-wp.php
 msgid "[VGARCO] Hồ sơ ứng tuyển: {vi_tri} — {ten}"
-msgstr ""
+msgstr "[VGARCO] Bewerbung: {vi_tri} — {ten}"
 
 #: wp-content/plugins/vgarco-core/inc/careers/jobs.php
 msgid "Bán thời gian"
@@ -53,6 +53,18 @@ msgid ""
 "\n"
 "Bấm \"Trả lời\" để trả lời thẳng ứng viên."
 msgstr ""
+"Es ist eine neue Bewerbung eingegangen.\n"
+"\n"
+"Stelle: {vi_tri}\n"
+"Name: {ten}\n"
+"E-Mail: {email}\n"
+"Telefon: {dien_thoai}\n"
+"Zeitpunkt: {thoi_diem}\n"
+"Sprache: {ngon_ngu}\n"
+"\n"
+"Bewerbung ansehen und Lebenslauf herunterladen (Anmeldung erforderlich): {lien_ket}\n"
+"\n"
+"Mit „Antworten“ schreiben Sie direkt an die bewerbende Person."
 
 #: wp-content/plugins/vgarco-core/inc/helpers.php
 msgid "Dự án trong hồ sơ năng lực"
@@ -62,13 +74,13 @@ msgstr "Projekte im Unternehmensportfolio"
 #: wp-content/plugins/vgarco-core/inc/careers/apply-wp.php
 #, php-format
 msgid "Hồ sơ #%1$d (%2$s) đã lưu nhưng thư chưa gửi được. Hệ thống sẽ tự thử lại mỗi giờ (tối đa 3 lần)."
-msgstr ""
+msgstr "Bewerbung #%1$d (%2$s) wurde gespeichert, die E-Mail konnte jedoch nicht versendet werden. Das System versucht es stündlich erneut (maximal 3 Versuche)."
 
 #. translators: %d: ID hồ sơ
 #: wp-content/plugins/vgarco-core/inc/careers/apply-wp.php
 #, php-format
 msgid "Hồ sơ #%d: thư vẫn chưa gửi được sau 3 lần thử. Cần kiểm tra cấu hình thư (FluentSMTP/Brevo) và liên hệ ứng viên thủ công."
-msgstr ""
+msgstr "Bewerbung #%d: Die E-Mail konnte auch nach 3 Versuchen nicht versendet werden. Bitte die E-Mail-Konfiguration (FluentSMTP/Brevo) prüfen und die bewerbende Person manuell kontaktieren."
 
 #: wp-content/plugins/vgarco-core/inc/helpers.php
 msgid "Năm hình thành và phát triển"

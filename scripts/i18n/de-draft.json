@@ -197,5 +197,9 @@
 	"Thiết kế tốt bắt đầu\ntừ việc <em>thấu hiểu.</em>": "Gute Planung beginnt\nmit <em>Verstehen.</em>",
 	"Từ bối cảnh,\n<em>đến một giải pháp riêng.</em>": "Vom Kontext\n<em>zur eigenen Lösung.</em>",
 	"Từng góc nhìn.\n<em>Một câu chuyện.</em>": "Jede Perspektive.\n<em>Eine Geschichte.</em>",
-	"Nội dung này đang được dịch. Trong lúc chờ, mời bạn xem mục tương ứng.": "Dieser Inhalt wird derzeit übersetzt. In der Zwischenzeit finden Sie hier den passenden Bereich."
+	"Nội dung này đang được dịch. Trong lúc chờ, mời bạn xem mục tương ứng.": "Dieser Inhalt wird derzeit übersetzt. In der Zwischenzeit finden Sie hier den passenden Bereich.",
+	"[VGARCO] Hồ sơ ứng tuyển: {vi_tri} — {ten}": "[VGARCO] Bewerbung: {vi_tri} — {ten}",
+	"Có hồ sơ ứng tuyển mới.\n\nVị trí: {vi_tri}\nHọ tên: {ten}\nEmail: {email}\nĐiện thoại: {dien_thoai}\nThời điểm: {thoi_diem}\nNgôn ngữ: {ngon_ngu}\n\nXem hồ sơ và tải CV (cần đăng nhập): {lien_ket}\n\nBấm \"Trả lời\" để trả lời thẳng ứng viên.": "Es ist eine neue Bewerbung eingegangen.\n\nStelle: {vi_tri}\nName: {ten}\nE-Mail: {email}\nTelefon: {dien_thoai}\nZeitpunkt: {thoi_diem}\nSprache: {ngon_ngu}\n\nBewerbung ansehen und Lebenslauf herunterladen (Anmeldung erforderlich): {lien_ket}\n\nMit „Antworten“ schreiben Sie direkt an die bewerbende Person.",
+	"Hồ sơ #%1$d (%2$s) đã lưu nhưng thư chưa gửi được. Hệ thống sẽ tự thử lại mỗi giờ (tối đa 3 lần).": "Bewerbung #%1$d (%2$s) wurde gespeichert, die E-Mail konnte jedoch nicht versendet werden. Das System versucht es stündlich erneut (maximal 3 Versuche).",
+	"Hồ sơ #%d: thư vẫn chưa gửi được sau 3 lần thử. Cần kiểm tra cấu hình thư (FluentSMTP/Brevo) và liên hệ ứng viên thủ công.": "Bewerbung #%d: Die E-Mail konnte auch nach 3 Versuchen nicht versendet werden. Bitte die E-Mail-Konfiguration (FluentSMTP/Brevo) prüfen und die bewerbende Person manuell kontaktieren."
 }

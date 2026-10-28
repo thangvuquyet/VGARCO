@@ -167,12 +167,6 @@ const errs = validate( [ newEntry( '' ), newEntry( 'A %s' ), newEntry( 'B' ) ], 
 same( 'validate: phát hiện mục thiếu, mục thừa và ký hiệu lệch', 3, errs.length );
 check( 'validate: .mo lệch so với .po bị phát hiện', validate( [ newEntry( '' ) ], [ newEntry( '' ) ], Buffer.from( 'sai' ) ).some( ( e ) => e.includes( '.mo không khớp' ) ) );
 
-const VIETNAMESE_ONLY = [
-	'[VGARCO] Hồ sơ ứng tuyển: {vi_tri} — {ten}',
-	'Có hồ sơ ứng tuyển mới.',
-	'Hồ sơ #%1$d (%2$s) đã lưu nhưng thư chưa gửi được.',
-	'Hồ sơ #%d: thư vẫn chưa gửi được sau 3 lần thử.',
-];
 for ( const t of extractAll() ) {
 	const potPath = join( root, t.out );
 	const base = t.domain === 'vgarco' ? 'de_DE' : `${ t.domain }-de_DE`;
@@ -196,7 +190,7 @@ for ( const t of extractAll() ) {
 		same( 'theme: mọi chuỗi giao diện đều có bản dịch tiếng Đức (chạy scripts/i18n/sync.mjs, thêm bản nháp vào de-draft.json)', [], untranslated );
 		same( 'theme: không còn mục fuzzy (fuzzy không vào .mo nên trang vẫn hiện tiếng Việt)', [], po.filter( ( e ) => e.flags.includes( 'fuzzy' ) ).map( ( e ) => e.id ) );
 	} else {
-		same( 'plugin: chỉ các chuỗi dành cho nhân sự/quản trị được phép để tiếng Việt', [], untranslated.filter( ( id ) => ! VIETNAMESE_ONLY.some( ( p ) => id.startsWith( p ) ) ) );
+		same( 'plugin: mọi chuỗi (kể cả thư và thông báo nội bộ) đều có bản dịch tiếng Đức', [], untranslated );
 	}
 	const mo = parseMo( readFileSync( moPath ) );
 	check( `${ t.domain }: .mo có header tiếng Đức`, ( mo.get( '' ) ?? '' ).includes( 'Language: de' ) && ( mo.get( '' ) ?? '' ).includes( 'nplurals=2' ) );
