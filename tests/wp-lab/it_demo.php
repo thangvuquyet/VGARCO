@@ -93,17 +93,28 @@ foreach ( (array) get_field( 'thu_vien', $museum ) as $row ) {
 		$kinds[ $row['loai_anh'] ] = (int) $row['anh'];
 	}
 }
-update_field(
-	'doi_tac',
-	array(
-		array( 'ten' => 'AVITYCO', 'viet_tat' => 'AV', 'mo_ta' => 'Kiến trúc & Xây dựng' ),
-		array( 'ten' => 'Kiến trúc Việt', 'viet_tat' => 'KV', 'mo_ta' => 'Tư vấn kiến trúc' ),
-		array( 'ten' => 'FBN Studio', 'viet_tat' => 'FBN', 'mo_ta' => 'Ferri Nguyen GbR' ),
-		array( 'ten' => 'Quản lý bay miền Bắc', 'viet_tat' => 'QLB', 'mo_ta' => 'Hạ tầng hàng không' ),
-		array( 'ten' => 'Học viện Kỹ thuật & Công nghệ An ninh', 'viet_tat' => 'HA', 'mo_ta' => 'Đào tạo chuyên ngành' ),
-	),
-	'option'
+$partners = array(
+	array( 'ten' => 'AVITYCO', 'viet_tat' => 'AV', 'mo_ta' => 'Kiến trúc & Xây dựng' ),
+	array( 'ten' => 'Kiến trúc Việt', 'viet_tat' => 'KV', 'mo_ta' => 'Tư vấn kiến trúc' ),
+	array( 'ten' => 'FBN Studio', 'viet_tat' => 'FBN', 'mo_ta' => 'Ferri Nguyen GbR', 'tep_logo' => 'fbn-studio.png' ),
+	array( 'ten' => 'Quản lý bay miền Bắc', 'viet_tat' => 'QLB', 'mo_ta' => 'Hạ tầng hàng không', 'tep_logo' => 'quan-ly-bay-mien-bac.png' ),
+	array( 'ten' => 'Học viện Kỹ thuật & Công nghệ An ninh', 'viet_tat' => 'HA', 'mo_ta' => 'Đào tạo chuyên ngành', 'tep_logo' => 'hoc-vien-ky-thuat-cong-nghe-an-ninh.png' ),
 );
+$partner_logos = 0;
+foreach ( $partners as $i => $partner ) {
+	$logo_file = $photos . '/partners/' . ( $partner['tep_logo'] ?? '' );
+	unset( $partners[ $i ]['tep_logo'] );
+	if ( '' !== ( $partner['tep_logo'] ?? '' ) && is_file( $logo_file ) ) {
+		$logo_tmp = wp_tempnam( $partner['tep_logo'] );
+		copy( $logo_file, $logo_tmp );
+		$logo_att = media_handle_sideload( array( 'name' => $partner['tep_logo'], 'tmp_name' => $logo_tmp ), 0 );
+		if ( ! is_wp_error( $logo_att ) ) {
+			$partners[ $i ]['logo'] = (int) $logo_att;
+			++$partner_logos;
+		}
+	}
+}
+update_field( 'doi_tac', $partners, 'option' );
 update_field( 'anh_hero_mac_dinh', (int) get_field( 'anh_dau_trang', $by_ma( 'tong-lanh-su-quan-viet-nam-tai-savannakhet' ) ), 'option' );
 update_field(
 	'cau_chuyen',
@@ -138,7 +149,7 @@ $html = $home['body'];
 same( 'trang chủ: 5 ảnh trình chiếu, mỗi ảnh có liên kết dự án (5 dự án nổi bật đều có ảnh)', array( 5, 5 ), array( preg_match_all( '/class="showcase-image[ "]/', $html ), substr_count( $html, 'class="hero-project-link"' ) ) );
 same( 'trang chủ: 5 chấm chuyển trang trình chiếu', 5, substr_count( $html, 'class="showcase-dot"' ) );
 same( 'trang chủ: 3 lĩnh vực có tóm tắt hiện ở trang chủ', 3, substr_count( $html, 'class="service-num"' ) );
-same( 'trang chủ: dải đối tác có 5 đối tác (mỗi đối tác hai lần để chạy vòng)', 10, substr_count( $html, 'class="partner-logo"' ) );
+same( 'trang chủ: dải đối tác có 5 đối tác (mỗi đối tác hai lần để chạy vòng)', 10, preg_match_all( '/class="partner-logo(?: has-logo)?"/', $html ) );
 check( 'trang chủ: có bộ chuyển ngôn ngữ VI/DE', str_contains( $html, 'class="language-switch"' ) && str_contains( $html, 'lab_lang=de' ) );
 check( 'trang chủ: không có thẻ ảnh với src rỗng', ! str_contains( $html, 'src=""' ) );
 $services_page = http( 'GET', '/linh-vuc-hoat-dong/' );
@@ -154,6 +165,10 @@ $unpublished = http( 'GET', '/du-an/' . get_post( $by_ma( 'nha-dai-su' ) )->post
 check( 'chi tiết dự án chưa có dữ liệu bên liên quan: không hiện hàng Chủ đầu tư/Đối tác', 200 === $unpublished['status'] && ! str_contains( $unpublished['body'], 'Chủ đầu tư' ) && ! str_contains( $unpublished['body'], 'Đối tác' ) );
 $blank = http( 'GET', '/du-an/' . get_post( $by_ma( 'biet-thu-tai-niedernhausen' ) )->post_name . '/' );
 same( 'chi tiết dự án chưa có ảnh: 200, không lỗi PHP', array( 200, false ), array( $blank['status'], str_contains( $blank['body'], 'Fatal error' ) || str_contains( $blank['body'], 'Warning:' ) ) );
+$home_partners = http( 'GET', '/' );
+$partner_imgs = preg_match_all( '/<img[^>]*class="partner-logo-img"[^>]*>/', $home_partners['body'], $partner_match );
+check( 'trang chủ: dải đối tác hiện logo thật của các đơn vị đã có logo (mỗi logo hai lần vì dải lặp), còn lại là vòng tròn viết tắt', 2 * $partner_logos === $partner_imgs && substr_count( $home_partners['body'], 'class="partner-monogram"' ) === 2 * ( 5 - $partner_logos ) );
+check( 'trang chủ: ảnh logo đối tác có mô tả là tên đơn vị', 0 === $partner_imgs || str_contains( implode( '', $partner_match[0] ), 'alt="FBN Studio"' ) );
 $careers = http( 'GET', '/tuyen-dung/' );
 $career_img = 1 === preg_match( '/<section class="career-intro on-dark">\s*(<img[^>]+>)/', $careers['body'], $career_match ) ? $career_match[1] : '';
 check( 'trang Tuyển dụng: đầu trang có ảnh nền thật (ảnh đứng trước khối chữ, ảnh trang trí alt rỗng)', 200 === $careers['status'] && str_contains( $career_img, 'class="career-intro-bg"' ) && str_contains( $career_img, 'tuyen-dung-anh-nen' ) && str_contains( $career_img, 'alt=""' ) );
