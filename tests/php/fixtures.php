@@ -301,7 +301,7 @@ $GLOBALS['fx']['options'] = $fx_empty ? array() : array(
 		array( 'ten' => 'Quản lý bay miền Bắc', 'viet_tat' => 'QLB', 'mo_ta' => 'Hạ tầng hàng không' ),
 		array( 'ten' => 'Học viện Kỹ thuật & Công nghệ An ninh', 'viet_tat' => 'HA', 'mo_ta' => 'Đào tạo chuyên ngành' ),
 	),
-	'anh_hero_mac_dinh' => fx_image( 'project-images/ambassador-05.jpg' ),
+	'anh_hero_mac_dinh' => getenv( 'VG_FX_NO_HERO' ) ? 0 : fx_image( 'project-images/ambassador-05.jpg' ),
 	'cau_chuyen'       => array(
 		'du_an'        => 106,
 		'tieu_de'      => "Giữ lại ký ức.

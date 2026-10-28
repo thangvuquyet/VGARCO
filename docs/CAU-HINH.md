@@ -52,6 +52,7 @@ Kiểm tra môi trường đang chạy: `wp eval 'echo wp_get_environment_type()
 - **Đường dẫn cố định:** `/%postname%/`.
 - **Múi giờ:** `Asia/Ho_Chi_Minh` (lịch xóa cache hằng ngày lúc 00:10 và hạn nộp hồ sơ tính theo múi giờ này).
 - **Địa chỉ email quản trị (`admin_email`):** hộp thư người vận hành đọc hằng ngày — nhận **cảnh báo khẩn, thư báo khóa tài khoản và thư báo có quản trị viên mới**.
+- **Biểu tượng trang web (favicon):** mặc định dùng bộ của theme theo logo VGARCO (`favicon.svg`, 32/192/512 px, `apple-touch-icon.png`; `/favicon.ico` chuyển về ảnh 32 px). Muốn đổi: *Giao diện → Tùy biến → Nhận dạng trang web → Biểu tượng trang web* (ảnh vuông từ 512 px); đã chọn thì theme không chèn bộ của mình.
 - **Trang chủ tĩnh:** trang "Trang chủ"; các trang tĩnh dùng mẫu tương ứng (Về công ty, Ban lãnh đạo, Phòng ban, Lĩnh vực hoạt động, Tuyển dụng, Ứng tuyển, Liên hệ).
 
 ## 5. Trang *Cấu hình VGARCO*
@@ -61,7 +62,7 @@ Ba nhóm: **Pháp nhân và liên hệ**, **Trang chủ và giới thiệu**, **
 Các giá trị cần chú ý:
 - `email_chung` (mặc định tạm `vgarco.cc@gmail.com`, đổi sang hộp thư công ty khi có) và `email_tuyen_dung`: **thư báo hồ sơ ứng tuyển** gửi tới `email_tuyen_dung`, **để trống thì gửi tới `email_chung`**.
 - `zalo`, `facebook`: để trống thì trang Liên hệ ghi "Đang cập nhật" (không phải liên kết).
-- Ảnh hero mặc định của trang chủ: dùng khi chưa có dự án nào được đánh dấu nổi bật.
+- Ảnh hero mặc định của trang chủ: dùng khi chưa có dự án nào được đánh dấu nổi bật; cũng là ảnh chia sẻ (`og:image`) của trang không có ảnh riêng. Chưa chọn thì dùng thẻ thương hiệu 1200×630 có sẵn trong theme (`assets/images/share-default-vi.png`, bản Đức `share-default-de.png`).
 - Mẫu thư ứng tuyển: **thư báo nhân sự luôn bằng tiếng Việt và không đính kèm CV** (xem và tải CV trong trang quản trị, có nhật ký); **thư xác nhận cho ứng viên** theo ngôn ngữ ứng viên đã nộp hồ sơ. Để trống thì dùng mẫu mặc định trong mã.
 
 Việc **công bố chủ đầu tư và đối tác** của từng dự án nằm ở trường `cong_bo_chu_dau_tu` của dự án (mặc định **tắt**), không ở trang Cấu hình.

@@ -26,6 +26,20 @@ function vgarco_seo_url( string $url ): string {
 	return false !== filter_var( $url, FILTER_VALIDATE_URL ) ? $url : '';
 }
 
+function vgarco_site_icon_file( int $size ): string {
+	if ( $size <= 32 ) {
+		return 'favicon-32.png';
+	}
+	if ( $size <= 180 ) {
+		return 'apple-touch-icon.png';
+	}
+	return $size <= 192 ? 'icon-192.png' : 'icon-512.png';
+}
+
+function vgarco_share_image_file( string $locale ): string {
+	return str_starts_with( $locale, 'de' ) ? 'share-default-de.png' : 'share-default-vi.png';
+}
+
 function vgarco_seo_attr( string $value ): string {
 	return htmlspecialchars( $value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8' );
 }

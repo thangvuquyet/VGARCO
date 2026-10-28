@@ -107,6 +107,21 @@ function wp_get_environment_type() {
 function is_search() {
 	return false;
 }
+function get_option( $name, $default = false ) {
+	return 'site_icon' === $name && getenv( 'VG_FX_SITE_ICON' ) ? 77 : $default;
+}
+function get_site_icon_url( $size = 512 ) {
+	return apply_filters( 'get_site_icon_url', getenv( 'VG_FX_SITE_ICON' ) ? '/uploads/icon-rieng.png' : '', $size, 0 );
+}
+function wp_site_icon() {
+	if ( '' === get_site_icon_url() ) {
+		return;
+	}
+	printf( "<link rel=\"icon\" href=\"%s\" sizes=\"32x32\" />\n", esc_url( get_site_icon_url( 32 ) ) );
+	printf( "<link rel=\"icon\" href=\"%s\" sizes=\"192x192\" />\n", esc_url( get_site_icon_url( 192 ) ) );
+	printf( "<link rel=\"apple-touch-icon\" href=\"%s\" />\n", esc_url( get_site_icon_url( 180 ) ) );
+	printf( "<meta name=\"msapplication-TileImage\" content=\"%s\" />\n", esc_url( get_site_icon_url( 270 ) ) );
+}
 function wp_get_attachment_image_src( $id, $size = 'thumbnail' ) {
 	$url = wp_get_attachment_image_url( $id, $size );
 	return $url ? array( 'https://vgarco.test' . $url, 1200, 800 ) : false;
@@ -129,6 +144,7 @@ function wp_head() {
 	echo "<meta name='robots' content='" . esc_attr( implode( ', ', $out ) ) . "'>\n";
 	do_action( 'wp_enqueue_scripts' );
 	do_action( 'wp_head' );
+	wp_site_icon();
 	foreach ( $GLOBALS['styles'] as $src ) {
 		printf( "<link rel=\"stylesheet\" href=\"%s\">\n", esc_url( $src ) );
 	}

@@ -803,6 +803,42 @@ $org = $ld( $h, 'Organization' );
 same( 'SEO trang chủ: JSON-LD Organization có tên, điện thoại, địa chỉ, logo', array( 'Công ty TNHH Tư vấn Xây dựng VGARCO', '+84988961666', 'PostalAddress', 'https://vgarco.test/assets/images/logo.svg' ), array( $org['name'] ?? '', $org['telephone'] ?? '', $org['address']['@type'] ?? '', $org['logo'] ?? '' ) );
 same( 'SEO trang chủ: không có BreadcrumbList', array(), $ld( $h, 'BreadcrumbList' ) );
 
+$images = ROOT . '/wp-content/themes/vgarco/assets/images/';
+foreach ( array( 'favicon-32.png' => array( 32, 32 ), 'apple-touch-icon.png' => array( 180, 180 ), 'icon-192.png' => array( 192, 192 ), 'icon-512.png' => array( 512, 512 ), 'share-default-vi.png' => array( 1200, 630 ), 'share-default-de.png' => array( 1200, 630 ) ) as $file => $dim ) {
+	$info = is_file( $images . $file ) ? getimagesize( $images . $file ) : false;
+	same( "biểu tượng/ảnh chia sẻ: {$file} là PNG {$dim[0]}×{$dim[1]}", array( $dim[0], $dim[1], IMAGETYPE_PNG ), $info ? array( $info[0], $info[1], $info[2] ) : array() );
+}
+$svg_path = static fn( string $f ): string => preg_match( '/<path fill="#c30000" d="([^"]+)"/', (string) @file_get_contents( $images . $f ), $m ) ? $m[1] : '';
+check( 'favicon.svg: cùng đường nét với logo.svg, viewBox 1000, không chứa ảnh/script', '' !== $svg_path( 'favicon.svg' ) && $svg_path( 'favicon.svg' ) === $svg_path( 'logo.svg' ) && str_contains( (string) file_get_contents( $images . 'favicon.svg' ), 'viewBox="0 0 1000 1000"' ) && ! preg_match( '/<(image|script|style|text)\b/', (string) file_get_contents( $images . 'favicon.svg' ) ) );
+
+$link_icons = static function ( DOMXPath $n ): array {
+	$out = array();
+	foreach ( $n->query( '//link[@rel="icon" or @rel="apple-touch-icon"]' ) as $l ) {
+		$out[] = $l->getAttribute( 'rel' ) . '|' . $l->getAttribute( 'sizes' ) . '|' . $l->getAttribute( 'href' );
+	}
+	return $out;
+};
+same(
+	'favicon: chưa chọn biểu tượng trang web thì dùng bộ của theme (SVG, 32, 192, apple-touch)',
+	array( 'icon|any|/assets/images/favicon.svg', 'icon|32x32|/assets/images/favicon-32.png', 'icon|192x192|/assets/images/icon-192.png', 'apple-touch-icon||/assets/images/apple-touch-icon.png' ),
+	$link_icons( $h )
+);
+same( 'favicon: SVG khai báo type image/svg+xml', 'image/svg+xml', (string) q( $h, '//link[@rel="icon" and @sizes="any"]' )->item( 0 )->getAttribute( 'type' ) );
+$own_icon = render( 'front-page', false, 'vi', array_merge( $abs, array( 'VG_FX_SITE_ICON' => '1' ) ) );
+same( 'favicon: quản trị đã chọn biểu tượng riêng thì giữ nguyên, theme không chèn SVG hay ghi đè', array( 'icon|32x32|/uploads/icon-rieng.png', 'icon|192x192|/uploads/icon-rieng.png', 'apple-touch-icon||/uploads/icon-rieng.png' ), $link_icons( $own_icon ) );
+
+check( 'ảnh chia sẻ: có ảnh mặc định trong Cấu hình thì og:image lấy ảnh đó', str_contains( $meta( $h, '//meta[@property="og:image"]' ), 'ambassador-05' ) );
+$no_hero = render( 'front-page', false, 'vi', array_merge( $abs, array( 'VG_FX_NO_HERO' => '1' ) ) );
+same(
+	'ảnh chia sẻ: chưa chọn ảnh mặc định thì dùng thẻ thương hiệu của theme (VI) 1200×630',
+	array( 'https://vgarco.test/assets/images/share-default-vi.png', '1200', '630', 'VGARCO', 'summary_large_image' ),
+	array( $meta( $no_hero, '//meta[@property="og:image"]' ), $meta( $no_hero, '//meta[@property="og:image:width"]' ), $meta( $no_hero, '//meta[@property="og:image:height"]' ), $meta( $no_hero, '//meta[@property="og:image:alt"]' ), $meta( $no_hero, '//meta[@name="twitter:card"]' ) )
+);
+$no_hero_de = render( 'front-page', false, 'de', array_merge( $abs, array( 'VG_FX_NO_HERO' => '1' ) ) );
+same( 'ảnh chia sẻ: bản tiếng Đức dùng thẻ tiếng Đức', 'https://vgarco.test/assets/images/share-default-de.png', $meta( $no_hero_de, '//meta[@property="og:image"]' ) );
+$no_hero_job = render( 'single-vi_tri', false, 'vi', array_merge( $abs, array( 'VG_FX_ID' => '401', 'VG_FX_NO_HERO' => '1' ) ) );
+same( 'ảnh chia sẻ: trang không có ảnh riêng (vị trí tuyển dụng) cũng có thẻ mặc định, mô tả ảnh là VGARCO', array( 'https://vgarco.test/assets/images/share-default-vi.png', 'VGARCO' ), array( $meta( $no_hero_job, '//meta[@property="og:image"]' ), $meta( $no_hero_job, '//meta[@property="og:image:alt"]' ) ) );
+
 $pd = render( 'single-du_an', false, 'vi', array_merge( $abs, array( 'VG_FX_ID' => '104' ) ) );
 same( 'SEO dự án: tiêu đề "Tên — Dự án — VGARCO"', 'Đài kiểm soát không lưu Đồng Hới — Dự án — VGARCO', trim( q( $pd, '//title' )->item( 0 )->textContent ) );
 check( 'SEO dự án: không có mo_ta_seo thì mô tả lấy từ nội dung', str_starts_with( $meta( $pd, '//meta[@name="description"]' ), 'Dự án đài kiểm soát không lưu' ) );

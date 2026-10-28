@@ -87,6 +87,14 @@ function vgarco_seo_image( int $attachment_id ): array {
 	return is_array( $src ) ? array( 'url' => (string) $src[0], 'width' => (int) $src[1], 'height' => (int) $src[2] ) : array( 'url' => '', 'width' => 0, 'height' => 0 );
 }
 
+function vgarco_seo_default_image( string $locale ): array {
+	return array(
+		'url'    => vgarco_seo_absolute( get_theme_file_uri( 'assets/images/' . vgarco_share_image_file( $locale ) ) ),
+		'width'  => 1200,
+		'height' => 630,
+	);
+}
+
 function vgarco_seo_canonical(): string {
 	return vgarco_seo_absolute( vgarco_seo_canonical_raw() );
 }
@@ -145,6 +153,11 @@ function vgarco_seo_context(): array {
 		$image_id = (int) vgarco_option( 'anh_hero_mac_dinh' );
 	}
 	$image = vgarco_seo_image( $image_id );
+	$alt   = is_singular() ? get_the_title( $id ) : 'VGARCO';
+	if ( '' === $image['url'] ) {
+		$image = vgarco_seo_default_image( $locale );
+		$alt   = 'VGARCO';
+	}
 
 	$alts  = array();
 	$langs = apply_filters( 'wpml_active_languages', null, array( 'skip_missing' => 0 ) );
@@ -162,7 +175,7 @@ function vgarco_seo_context(): array {
 		'image'       => $image['url'],
 		'image_width' => $image['width'],
 		'image_height' => $image['height'],
-		'image_alt'   => '' !== $image['url'] ? ( is_singular() ? get_the_title( $id ) : 'VGARCO' ) : '',
+		'image_alt'   => $alt,
 		'locale'      => $locale,
 		'alternates'  => array_values( array_unique( $alts ) ),
 		'site_name'   => 'VGARCO',
@@ -182,6 +195,23 @@ function vgarco_seo_org_data(): array {
 		'same_as' => array( (string) vgarco_option( 'mang_xa_hoi.zalo' ), (string) vgarco_option( 'mang_xa_hoi.facebook' ) ),
 	);
 }
+
+add_filter(
+	'get_site_icon_url',
+	static fn( $url, $size = 512 ): string => (int) get_option( 'site_icon' ) > 0 ? (string) $url : get_theme_file_uri( 'assets/images/' . vgarco_site_icon_file( (int) $size ) ),
+	10,
+	2
+);
+
+add_action(
+	'wp_head',
+	static function (): void {
+		if ( (int) get_option( 'site_icon' ) <= 0 ) {
+			printf( '<link rel="icon" href="%s" type="image/svg+xml" sizes="any">' . "\n", esc_url( get_theme_file_uri( 'assets/images/favicon.svg' ) ) );
+		}
+	},
+	98
+);
 
 add_action(
 	'wp_head',

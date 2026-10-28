@@ -157,6 +157,11 @@ check( 'job: không hạn nộp thì không có validThrough', ! isset( vgarco_s
 check( 'job: hạn nộp sai định dạng hoặc ngày không có thật bị bỏ', ! isset( vgarco_seo_job( array_merge( $job_in, array( 'deadline' => '20261340' ) ) )['validThrough'] ) && ! isset( vgarco_seo_job( array_merge( $job_in, array( 'deadline' => '31/10/2026' ) ) )['validThrough'] ) && ! isset( vgarco_seo_job( array_merge( $job_in, array( 'deadline' => '20260231' ) ) )['validThrough'] ) );
 check( 'job: không có nơi làm việc thì không có jobLocation', ! isset( vgarco_seo_job( array_merge( $job_in, array( 'location' => '' ) ) )['jobLocation'] ) );
 
+same( 'biểu tượng: kích thước nhỏ dùng favicon 32 px', array( 'favicon-32.png', 'favicon-32.png' ), array( vgarco_site_icon_file( 16 ), vgarco_site_icon_file( 32 ) ) );
+same( 'biểu tượng: 180 px là apple-touch-icon', array( 'apple-touch-icon.png', 'apple-touch-icon.png' ), array( vgarco_site_icon_file( 33 ), vgarco_site_icon_file( 180 ) ) );
+same( 'biểu tượng: 192 px và ô vuông 270/512 px', array( 'icon-192.png', 'icon-192.png', 'icon-512.png', 'icon-512.png', 'icon-512.png' ), array( vgarco_site_icon_file( 181 ), vgarco_site_icon_file( 192 ), vgarco_site_icon_file( 193 ), vgarco_site_icon_file( 270 ), vgarco_site_icon_file( 512 ) ) );
+same( 'ảnh chia sẻ: de_DE dùng thẻ tiếng Đức, còn lại dùng thẻ tiếng Việt', array( 'share-default-de.png', 'share-default-vi.png', 'share-default-vi.png' ), array( vgarco_share_image_file( 'de_DE' ), vgarco_share_image_file( 'vi_VN' ), vgarco_share_image_file( '' ) ) );
+
 $html_desc = vgarco_seo_job_html( 'Tóm tắt <b>', array( array( 'Công việc', array( 'Thiết kế', '', '  ', 'Giám sát <script>' ) ), array( 'Yêu cầu', array() ), array( 'Quyền lợi', array( 'Bảo hiểm' ) ) ) );
 same( 'job_html: tóm tắt và các phần có dòng; bỏ phần rỗng; thoát HTML', '<p>Tóm tắt &lt;b&gt;</p><h3>Công việc</h3><ul><li>Thiết kế</li><li>Giám sát &lt;script&gt;</li></ul><h3>Quyền lợi</h3><ul><li>Bảo hiểm</li></ul>', $html_desc );
 same( 'job_html: không có gì → rỗng', '', vgarco_seo_job_html( '', array( array( 'Công việc', array() ) ) ) );

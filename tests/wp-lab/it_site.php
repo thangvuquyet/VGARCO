@@ -47,6 +47,18 @@ $dx      = $dom( $de_home['body'] );
 same( 'trang chủ bản Đức (giả lập): <html lang="de-DE">, chỉ preload tập latin, DE đang chọn', array( 'de-DE', 1, 'de' ), array( $attr( $dx, '//html', 'lang' ), $dx->query( '//link[@rel="preload" and @as="font"]' )->length, $attr( $dx, '//div[contains(@class,"language-switch")]/a[@aria-current="true"]', 'hreflang' ) ) );
 check( 'không có phông/script từ miền ngoài (Google Fonts…)', ! preg_match( '#(fonts\.googleapis|fonts\.gstatic|google-analytics|googletagmanager)#', $home['body'] ) );
 
+$icon_hrefs = array();
+foreach ( $x->query( '//link[@rel="icon" or @rel="apple-touch-icon"]' ) as $l ) {
+	$icon_hrefs[] = basename( wp_parse_url( $l->getAttribute( 'href' ), PHP_URL_PATH ) );
+}
+same( 'favicon: WordPress in đủ bộ biểu tượng của theme (SVG, 32, 192, apple-touch)', array( 'favicon.svg', 'favicon-32.png', 'icon-192.png', 'apple-touch-icon.png' ), $icon_hrefs );
+check( 'favicon: mọi tệp biểu tượng tải được (200) đúng loại ảnh', 5 === count( array_filter( array( 'favicon.svg' => 'image/svg+xml', 'favicon-32.png' => 'image/png', 'icon-192.png' => 'image/png', 'icon-512.png' => 'image/png', 'apple-touch-icon.png' => 'image/png' ), static function ( $type, $file ) { $r = http( 'GET', '/wp-content/themes/vgarco/assets/images/' . $file ); return 200 === $r['status'] && str_contains( strtolower( $r['headers'] ), 'content-type: ' . $type ); }, ARRAY_FILTER_USE_BOTH ) ) );
+$ico = http( 'GET', '/favicon.ico' );
+check( '/favicon.ico chuyển về biểu tượng của theme, không phải logo WordPress', 302 === $ico['status'] && str_contains( $ico['headers'], 'assets/images/favicon-32.png' ) && ! str_contains( $ico['headers'], 'w-logo' ) );
+same( 'ảnh chia sẻ: chưa chọn ảnh mặc định thì og:image là thẻ thương hiệu của theme (VI)', 'share-default-vi.png', basename( wp_parse_url( $attr( $x, '//meta[@property="og:image"]' ), PHP_URL_PATH ) ) );
+same( 'ảnh chia sẻ: bản Đức dùng thẻ tiếng Đức, 1200×630, mô tả VGARCO', array( 'share-default-de.png', '1200', '630', 'VGARCO' ), array( basename( wp_parse_url( $attr( $dx, '//meta[@property="og:image"]' ), PHP_URL_PATH ) ), $attr( $dx, '//meta[@property="og:image:width"]' ), $attr( $dx, '//meta[@property="og:image:height"]' ), $attr( $dx, '//meta[@property="og:image:alt"]' ) ) );
+check( 'ảnh chia sẻ: thẻ thương hiệu tải được (200, PNG)', 200 === http( 'GET', wp_parse_url( $attr( $x, '//meta[@property="og:image"]' ), PHP_URL_PATH ) )['status'] );
+
 wp_cache_flush();
 $p     = get_posts( array( 'post_type' => 'du_an', 'meta_key' => 'ma', 'meta_value' => 'bao-tang-lich-su-quan-doi-nhan-dan-lao', 'posts_per_page' => 1 ) )[0];
 $url   = get_permalink( $p );
