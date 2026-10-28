@@ -128,7 +128,7 @@ vgarco_breadcrumb(
 							<p><?php echo esc_html( $job['summary'] ); ?></p>
 						<?php endif; ?>
 					</div>
-					<a class="job-detail-button" href="<?php echo esc_url( $job['url'] ); ?>" aria-label="<?php echo esc_attr( sprintf( /* translators: %s: tên vị trí */ __( 'Xem chi tiết: %s', 'vgarco' ), $job['title'] ) ); ?>">
+					<a class="job-detail-button" href="<?php echo esc_url( $job['url'] ); ?>" aria-label="<?php echo esc_attr( sprintf( __( 'Xem chi tiết: %s', 'vgarco' ), $job['title'] ) ); ?>">
 						<span><?php esc_html_e( 'Xem chi tiết', 'vgarco' ); ?></span>
 						<span class="job-detail-arrow" aria-hidden="true"><?php echo vgarco_icon( 'arrow-up-right' ); ?></span>
 					</a>

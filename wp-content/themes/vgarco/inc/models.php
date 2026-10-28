@@ -232,7 +232,6 @@ function vgarco_catalogue( $term = null ): array {
 		'count'    => count( $projects ),
 		'title'    => $term ? $name : __( 'Tất cả dự án', 'vgarco' ),
 		'note'     => $term
-			/* translators: %s: tên loại công trình, viết thường. */
 			? sprintf( __( 'Các dự án thuộc nhóm %s.', 'vgarco' ), mb_strtolower( $name ) )
 			: __( 'Các công trình trong hồ sơ VGARCO.', 'vgarco' ),
 	);

@@ -38,7 +38,7 @@ vgarco_breadcrumb(
 
 			<div class="contact-channels" role="group" aria-label="<?php esc_attr_e( 'Kênh liên hệ VGARCO', 'vgarco' ); ?>">
 				<?php if ( '' !== $tel ) : ?>
-					<a class="contact-channel" href="<?php echo esc_url( 'tel:' . $tel ); ?>" aria-label="<?php echo esc_attr( sprintf( /* translators: %s: số điện thoại */ __( 'Gọi VGARCO qua số %s', 'vgarco' ), $phone ) ); ?>">
+					<a class="contact-channel" href="<?php echo esc_url( 'tel:' . $tel ); ?>" aria-label="<?php echo esc_attr( sprintf( __( 'Gọi VGARCO qua số %s', 'vgarco' ), $phone ) ); ?>">
 						<span class="channel-icon" aria-hidden="true"><?php echo vgarco_icon( 'phone' ); ?></span>
 						<span><strong><?php esc_html_e( 'Điện thoại', 'vgarco' ); ?></strong><small><?php esc_html_e( 'Gọi trực tiếp', 'vgarco' ); ?></small></span>
 					</a>
@@ -110,7 +110,6 @@ vgarco_breadcrumb(
 				<div class="form-fallback" data-fallback hidden>
 					<p>
 						<?php
-						/* translators: %s: địa chỉ email của VGARCO. */
 						echo wp_kses( sprintf( __( 'Nếu ứng dụng email không mở, hãy gửi nội dung dưới đây tới <a href="mailto:%1$s">%1$s</a>.', 'vgarco' ), esc_html( $email ) ), array( 'a' => array( 'href' => array() ) ) );
 						?>
 					</p>

@@ -14,7 +14,7 @@ $many  = $total > 1;
 $label = static fn( array $item ): string => '' !== $item['caption'] ? $item['caption'] : $item['kind_label'];
 ?>
 <section class="project-detail-gallery" aria-labelledby="gallery-title" data-gallery data-total="<?php echo esc_attr( (string) $total ); ?>"
-	data-status="<?php /* translators: 1: số thứ tự ảnh, 2: tổng số ảnh, 3: chú thích. */ echo esc_attr( __( 'Ảnh %1$d / %2$d: %3$s', 'vgarco' ) ); ?>">
+	data-status="<?php echo esc_attr( __( 'Ảnh %1$d / %2$d: %3$s', 'vgarco' ) ); ?>">
 	<div class="wrap gallery-head">
 		<div>
 			<p class="eyebrow"><?php esc_html_e( 'Hình ảnh dự án', 'vgarco' ); ?></p>
@@ -69,7 +69,7 @@ $label = static fn( array $item ): string => '' !== $item['caption'] ? $item['ca
 				<div class="project-gallery-progress">
 					<?php foreach ( $gallery as $i => $item ) : ?>
 						<button type="button" data-gallery-dot="<?php echo esc_attr( (string) $i ); ?>"<?php echo 0 === $i ? ' class="is-active" aria-pressed="true"' : ' aria-pressed="false"'; ?>
-							aria-label="<?php /* translators: %d: số thứ tự ảnh. */ echo esc_attr( sprintf( __( 'Xem ảnh %d', 'vgarco' ), $i + 1 ) ); ?>"><span></span></button>
+							aria-label="<?php echo esc_attr( sprintf( __( 'Xem ảnh %d', 'vgarco' ), $i + 1 ) ); ?>"><span></span></button>
 					<?php endforeach; ?>
 				</div>
 				<button type="button" class="gallery-nav" data-gallery-next aria-label="<?php esc_attr_e( 'Ảnh tiếp theo', 'vgarco' ); ?>">

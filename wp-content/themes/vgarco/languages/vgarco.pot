@@ -464,7 +464,6 @@ msgstr ""
 msgid "Góc nhìn từ <em>VGARCO.</em>"
 msgstr ""
 
-#. translators: %s: số điện thoại
 #: wp-content/themes/vgarco/footer.php
 #, php-format
 msgid "Gọi %s"
@@ -474,7 +473,6 @@ msgstr ""
 msgid "Gọi trực tiếp"
 msgstr ""
 
-#. translators: %s: số điện thoại
 #: wp-content/themes/vgarco/templates/contact.php
 #, php-format
 msgid "Gọi VGARCO qua số %s"
@@ -1070,7 +1068,6 @@ msgstr ""
 msgid "Tổ chức tiếp cận, mặt bằng ngoài nhà và các kết nối kỹ thuật của khu đất."
 msgstr ""
 
-#. translators: %s: liên kết tới chính sách bảo vệ dữ liệu
 #: wp-content/themes/vgarco/templates/apply.php
 #, php-format
 msgid "Tôi đồng ý để VGARCO lưu và xử lý hồ sơ này cho mục đích tuyển dụng trong 12 tháng, theo %s."
@@ -1343,7 +1340,6 @@ msgstr ""
 msgid "Xem chi tiết"
 msgstr ""
 
-#. translators: %s: tên vị trí
 #: wp-content/themes/vgarco/templates/careers.php
 #, php-format
 msgid "Xem chi tiết: %s"

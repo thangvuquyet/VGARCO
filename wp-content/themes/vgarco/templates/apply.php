@@ -116,7 +116,6 @@ vgarco_breadcrumb( $trail );
 						<?php
 						echo wp_kses(
 							sprintf(
-								/* translators: %s: liên kết tới chính sách bảo vệ dữ liệu */
 								__( 'Tôi đồng ý để VGARCO lưu và xử lý hồ sơ này cho mục đích tuyển dụng trong 12 tháng, theo %s.', 'vgarco' ),
 								'<a href="' . esc_url( vgarco_page_url( 'privacy' ) ) . '" target="_blank" rel="noopener">' . esc_html__( 'chính sách bảo vệ dữ liệu', 'vgarco' ) . '</a>'
 							),

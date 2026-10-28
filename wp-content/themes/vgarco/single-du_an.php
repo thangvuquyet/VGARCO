@@ -35,7 +35,6 @@ vgarco_breadcrumb(
 				<p class="project-detail-index">
 					<span class="sr-only">
 						<?php
-						/* translators: 1: số thứ tự dự án, 2: tổng số dự án. */
 						echo esc_html( sprintf( __( 'Dự án thứ %1$d trong %2$d dự án', 'vgarco' ), $detail['index'], $detail['total'] ) );
 						?>
 					</span>

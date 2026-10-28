@@ -50,13 +50,11 @@ msgstr ""
 msgid "Dự án trong hồ sơ năng lực"
 msgstr ""
 
-#. translators: 1: ID hồ sơ, 2: tên ứng viên
 #: wp-content/plugins/vgarco-core/inc/careers/apply-wp.php
 #, php-format
 msgid "Hồ sơ #%1$d (%2$s) đã lưu nhưng thư chưa gửi được. Hệ thống sẽ tự thử lại mỗi giờ (tối đa 3 lần)."
 msgstr ""
 
-#. translators: %d: ID hồ sơ
 #: wp-content/plugins/vgarco-core/inc/careers/apply-wp.php
 #, php-format
 msgid "Hồ sơ #%d: thư vẫn chưa gửi được sau 3 lần thử. Cần kiểm tra cấu hình thư (FluentSMTP/Brevo) và liên hệ ứng viên thủ công."

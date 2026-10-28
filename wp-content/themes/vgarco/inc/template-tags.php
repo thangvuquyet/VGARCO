@@ -182,7 +182,6 @@ function vgarco_social_item( string $label, string $url, string $glyph ): void {
 
 	printf(
 		'<span title="%1$s" role="img" aria-label="%1$s">%2$s</span>',
-		/* translators: %s: tên kênh mạng xã hội, ví dụ Zalo. */
 		esc_attr( sprintf( __( '%s — đang cập nhật', 'vgarco' ), $label ) ),
 		esc_html( $glyph )
 	);

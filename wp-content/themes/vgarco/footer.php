@@ -45,7 +45,7 @@ $facebook = (string) vgarco_option( 'mang_xa_hoi.facebook' );
 			<span class="footer-title"><?php esc_html_e( 'KẾT NỐI', 'vgarco' ); ?></span>
 			<div class="footer-social">
 				<?php if ( '' !== $tel ) : ?>
-					<a href="<?php echo esc_url( 'tel:' . $tel ); ?>" aria-label="<?php echo esc_attr( sprintf( /* translators: %s: số điện thoại */ __( 'Gọi %s', 'vgarco' ), $phone ) ); ?>">
+					<a href="<?php echo esc_url( 'tel:' . $tel ); ?>" aria-label="<?php echo esc_attr( sprintf( __( 'Gọi %s', 'vgarco' ), $phone ) ); ?>">
 						<?php echo vgarco_icon( 'phone' ); ?>
 					</a>
 				<?php endif; ?>

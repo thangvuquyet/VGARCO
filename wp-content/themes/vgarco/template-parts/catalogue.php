@@ -24,7 +24,6 @@ vgarco_breadcrumb( $trail );
 		<?php if ( $catalogue['count'] > 0 ) : ?>
 			<span>
 				<?php
-				/* translators: %s: số dự án, có chữ số 0 đứng đầu khi dưới 10. */
 				echo esc_html( sprintf( _n( '%s dự án', '%s dự án', $catalogue['count'], 'vgarco' ), vgarco_pad( $catalogue['count'] ) ) );
 				?>
 			</span>
@@ -48,7 +47,6 @@ vgarco_breadcrumb( $trail );
 			echo esc_html(
 				1 === $catalogue['count']
 					? __( 'Đang hiển thị 1 dự án.', 'vgarco' )
-					/* translators: %d: số dự án đang hiển thị. */
 					: sprintf( __( 'Đang hiển thị %d dự án.', 'vgarco' ), $catalogue['count'] )
 			);
 			?>

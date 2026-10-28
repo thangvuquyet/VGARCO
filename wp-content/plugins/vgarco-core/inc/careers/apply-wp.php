@@ -234,7 +234,6 @@ function vgarco_apply_mail( int $record_id ): array {
 	if ( ! $result['hr'] || ! $result['candidate'] ) {
 		vgarco_alert(
 			sprintf(
-				/* translators: 1: ID hồ sơ, 2: tên ứng viên */
 				__( 'Hồ sơ #%1$d (%2$s) đã lưu nhưng thư chưa gửi được. Hệ thống sẽ tự thử lại mỗi giờ (tối đa 3 lần).', 'vgarco-core' ),
 				$record_id,
 				$values['ten']
@@ -278,7 +277,6 @@ function vgarco_apply_retry_mails(): void {
 		if ( ( ! $result['hr'] || ! $result['candidate'] ) && $tries + 1 >= 3 ) {
 			vgarco_alert(
 				sprintf(
-					/* translators: %d: ID hồ sơ */
 					__( 'Hồ sơ #%d: thư vẫn chưa gửi được sau 3 lần thử. Cần kiểm tra cấu hình thư (FluentSMTP/Brevo) và liên hệ ứng viên thủ công.', 'vgarco-core' ),
 					(int) $id
 				),

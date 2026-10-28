@@ -87,7 +87,7 @@ $methods = array_slice(
 					<div class="showcase-dots on-dark" data-hero-dots role="group" aria-label="<?php esc_attr_e( 'Chọn ảnh trình chiếu', 'vgarco' ); ?>" hidden>
 						<?php foreach ( $slides as $i => $slide ) : ?>
 							<button type="button" class="showcase-dot" data-hero-dot<?php echo 0 === $i ? ' aria-current="true"' : ''; ?>
-								aria-label="<?php /* translators: 1: số thứ tự ảnh, 2: tổng số ảnh, 3: tên dự án. */ echo esc_attr( sprintf( __( 'Ảnh %1$d / %2$d: %3$s', 'vgarco' ), $i + 1, count( $slides ), $slide['title'] ) ); ?>"></button>
+								aria-label="<?php echo esc_attr( sprintf( __( 'Ảnh %1$d / %2$d: %3$s', 'vgarco' ), $i + 1, count( $slides ), $slide['title'] ) ); ?>"></button>
 						<?php endforeach; ?>
 					</div>
 				<?php endif; ?>

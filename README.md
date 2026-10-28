@@ -104,7 +104,7 @@ Chuỗi mới phải có bản dịch (thêm vào `de-draft.json` hoặc sửa t
 
 ## Quy ước
 
-- **Không viết chú thích trong mã** (quyết định của người điều hành, 09/10/2026): ý nghĩa nằm ở tên hàm, kiểm thử và thư mục `docs/`. Chỉ giữ chú thích mà công cụ đọc: tiêu đề tệp WordPress (`Template Name`, `Plugin Name`, `Theme Name`), `translators:` (`scripts/i18n/extract.mjs` đưa vào `.pot`), `#!` của script shell. Mã mới viết theo cùng cách.
+- **Không viết chú thích trong mã** (quyết định của người điều hành, 09/10/2026): ý nghĩa nằm ở tên hàm, kiểm thử và thư mục `docs/`. Chỉ giữ chú thích mà công cụ đọc: tiêu đề tệp WordPress (`Template Name`, `Plugin Name`, `Theme Name`), `#!` của script shell. Chuỗi gettext có `%s`/`%d` không kèm chú thích `translators:` (đã gỡ ngày 28/10/2026). Mã mới viết theo cùng cách.
 - **Mọi chuỗi hiển thị** bọc gettext, text domain `vgarco` (theme) hoặc `vgarco-core` (plugin); chuỗi gốc bằng tiếng Việt.
 - **Không viết cứng** số điện thoại, địa chỉ, email vào mẫu trang: đọc qua `vgarco_option()` từ trang *Cấu hình VGARCO*.
 - **Không thêm `!important`.** Độ ưu tiên CSS quản lý bằng `@layer` (`reset, tokens, base, components, pages, utilities`).
