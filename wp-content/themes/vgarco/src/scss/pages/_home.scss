@@ -876,21 +876,25 @@
 }
 
 .partner-marquee {
+  --partner-fade: 9%;
+
   overflow: hidden;
   background: var(--c-surface);
   border-block: 1px solid var(--c-line);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 var(--partner-fade), #000 calc(100% - var(--partner-fade)), transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 var(--partner-fade), #000 calc(100% - var(--partner-fade)), transparent);
 }
 
 .partner-group {
-  --partner-min: 220px;
+  --partner-slot: 216px;
 
-  display: grid;
+  display: flex;
   flex: 0 0 auto;
-  grid-template-columns: repeat(var(--n, 5), minmax(0, 1fr));
-  width: max(100vw, calc(var(--n, 5) * var(--partner-min)));
+  align-items: center;
+  width: max(100vw, calc(var(--n, 5) * var(--partner-slot)));
 
   @include up($bp-md) {
-    --partner-min: 276px;
+    --partner-slot: 268px;
   }
 }
 
@@ -900,43 +904,54 @@
 
 .partner-logo {
   display: flex;
-  flex-direction: column;
+  flex: 1 1 0;
+  align-items: center;
   justify-content: center;
-  min-height: 7.75rem;
-  padding: 1.125rem 1rem;
-  border-left: 1px solid var(--c-line);
-  transition:
-    background-color 0.2s,
-    color 0.2s;
+  min-width: 0;
+  gap: 0.875rem;
+  min-height: 6.5rem;
+  padding: 1.25rem 1.25rem;
+  color: var(--c-ink-soft);
 
-  &:hover {
-    color: var(--c-label);
-    background: #f2f3ef;
+  @include up($bp-md) {
+    min-height: 8rem;
+    padding: 1.5rem 1.75rem;
   }
 
   strong {
-    font-size: 0.9375rem;
+    font-size: 0.875rem;
     font-weight: 700;
     line-height: 1.25;
-    letter-spacing: 0.035em;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
+    transition: color 0.25s;
 
     @include up($bp-md) {
-      font-size: clamp(0.9375rem, 1.15vw, 1.0625rem);
+      font-size: clamp(0.875rem, 1.05vw, 1rem);
     }
   }
 
   small {
-    margin-top: 0.4375rem;
+    display: block;
+    margin-top: 0.3125rem;
     font-size: 0.75rem;
-    line-height: 1.45;
-    letter-spacing: 0.035em;
+    line-height: 1.4;
+    letter-spacing: 0.03em;
     color: var(--c-ink-muted);
   }
 
-  @include up($bp-md) {
-    min-height: 9.125rem;
-    padding: 1.5rem 1.375rem;
+  &:hover strong {
+    color: var(--c-label);
+  }
+
+  &:hover .partner-monogram {
+    color: #fff;
+    background: var(--c-brand);
+  }
+
+  &:hover .partner-logo-img {
+    opacity: 1;
+    filter: none;
   }
 }
 
@@ -944,14 +959,65 @@
   display: grid;
   flex-shrink: 0;
   place-items: center;
-  width: 42px;
-  height: 42px;
-  margin-bottom: 1.125rem;
+  width: 3.25rem;
+  height: 3.25rem;
   font-size: var(--fs-caption);
   font-weight: 750;
   letter-spacing: 0.02em;
-  border: 1px solid var(--c-ink);
+  color: var(--c-ink);
+  background: var(--c-surface-warm);
   border-radius: 50%;
+  transition:
+    background-color 0.25s,
+    color 0.25s;
+}
+
+.partner-name {
+  min-width: 0;
+}
+
+.partner-logo-img {
+  display: block;
+  width: auto;
+  max-width: 9.5rem;
+  height: auto;
+  max-height: 2.75rem;
+  object-fit: contain;
+  opacity: 0.6;
+  filter: grayscale(1);
+  transition:
+    opacity 0.25s,
+    filter 0.25s;
+
+  @include up($bp-md) {
+    max-width: 11rem;
+    max-height: 3.25rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .partner-marquee {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .partner-track {
+    width: 100%;
+  }
+
+  .partner-group {
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+
+    &[aria-hidden='true'] {
+      display: none;
+    }
+  }
+
+  .partner-logo {
+    flex: 0 1 16rem;
+  }
 }
 
 .home-news {

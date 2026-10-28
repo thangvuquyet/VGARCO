@@ -216,11 +216,18 @@ $methods = array_slice(
 				<?php foreach ( array( false, true ) as $duplicate ) : ?>
 					<div class="partner-group" style="--n: <?php echo (int) count( $partners ); ?>"<?php echo $duplicate ? ' aria-hidden="true"' : ''; ?>>
 						<?php foreach ( $partners as $partner ) : ?>
-							<div class="partner-logo">
-								<span class="partner-monogram" aria-hidden="true"><?php echo esc_html( $partner['viet_tat'] ?? '' ); ?></span>
-								<strong><?php echo esc_html( $partner['ten'] ); ?></strong>
-								<?php if ( ! empty( $partner['mo_ta'] ) ) : ?>
-									<small><?php echo esc_html( $partner['mo_ta'] ); ?></small>
+							<?php $partner_logo = vgarco_image( (int) ( $partner['logo'] ?? 0 ), array( 'sizes' => '176px', 'alt' => $partner['ten'], 'class' => 'partner-logo-img' ) ); ?>
+							<div class="partner-logo<?php echo '' !== $partner_logo ? ' has-logo' : ''; ?>">
+								<?php if ( '' !== $partner_logo ) : ?>
+									<?php echo $partner_logo; ?>
+								<?php else : ?>
+									<span class="partner-monogram" aria-hidden="true"><?php echo esc_html( $partner['viet_tat'] ?? '' ); ?></span>
+									<span class="partner-name">
+										<strong><?php echo esc_html( $partner['ten'] ); ?></strong>
+										<?php if ( ! empty( $partner['mo_ta'] ) ) : ?>
+											<small><?php echo esc_html( $partner['mo_ta'] ); ?></small>
+										<?php endif; ?>
+									</span>
 								<?php endif; ?>
 							</div>
 						<?php endforeach; ?>
