@@ -1,14 +1,31 @@
 <?php
 /**
  * Plugin Name: LAB — giả lập ngôn ngữ của WPML (?lab_lang=de)
- * Description: CHỈ DÙNG TRONG MÔI TRƯỜNG THỬ. Phòng thử không có WPML, nên plugin này giả lập vừa đủ để xem giao diện: (1) locale của giao diện công khai là tiếng Việt (WPML đặt locale theo ngôn ngữ),
+ * Description: CHỈ DÙNG TRONG MÔI TRƯỜNG THỬ. Phòng thử không có WPML, nên plugin này giả lập vừa đủ để xem giao diện: (1) locale của giao diện công khai theo ngôn ngữ đang chọn (vi hoặc de_DE); (2) bộ chuyển ngôn ngữ ?lab_lang=de|vi, nhớ lựa chọn bằng cookie phiên để chuyển trang không bị về tiếng Việt như WPML thật (có tiền tố /de/ trong mọi liên kết).
  */
 
 defined( 'ABSPATH' ) || exit;
 
-function lab_lang_is_de(): bool {
-	return isset( $_GET['lab_lang'] ) && 'de' === $_GET['lab_lang'] && ! is_admin();
+function lab_lang_requested(): string {
+	$value = $_GET['lab_lang'] ?? $_COOKIE['lab_lang'] ?? '';
+	return 'de' === $value ? 'de' : 'vi';
 }
+
+function lab_lang_is_de(): bool {
+	return 'de' === lab_lang_requested() && ! is_admin();
+}
+
+add_action(
+	'init',
+	static function (): void {
+		if ( isset( $_GET['lab_lang'] ) && ! is_admin() && ! headers_sent() ) {
+			$value = lab_lang_requested();
+			setcookie( 'lab_lang', $value, 0, '/' );
+			$_COOKIE['lab_lang'] = $value;
+		}
+	},
+	1
+);
 
 add_filter(
 	'locale',
@@ -17,6 +34,13 @@ add_filter(
 			return $locale;
 		}
 		return lab_lang_is_de() ? 'de_DE' : 'vi';
+	}
+);
+
+add_filter(
+	'wpml_current_language',
+	static function ( $language ) {
+		return is_admin() ? $language : lab_lang_requested();
 	}
 );
 
@@ -30,7 +54,7 @@ add_filter(
 		$path = (string) strtok( $uri, '?' );
 		parse_str( (string) wp_parse_url( $uri, PHP_URL_QUERY ), $query );
 		unset( $query['lab_lang'] );
-		$vi_url = home_url( $path ) . ( $query ? '?' . http_build_query( $query ) : '' );
+		$vi_url = home_url( $path ) . '?' . http_build_query( $query + array( 'lab_lang' => 'vi' ) );
 		$de_url = home_url( $path ) . '?' . http_build_query( $query + array( 'lab_lang' => 'de' ) );
 		$de     = lab_lang_is_de();
 		return array(
