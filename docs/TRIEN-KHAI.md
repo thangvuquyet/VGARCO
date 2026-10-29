@@ -1,7 +1,6 @@
 # Triển khai
 
-> **Trạng thái: thiết kế, mới chạy thử một phần.** `scripts/ops/provision.sh` (dựng máy chủ) đã chạy thật cả 9 bước trên một VM Ubuntu 24.04 thử ngày 29/10/2026 (7 bước `packages users php mariadb redis nginx cron`, rồi `firewall` và `ssh`; mỗi nhóm chạy lại để kiểm tính chạy lại được). `scripts/ops/deploy.sh` (đưa mã lên, tự hoàn tác khi kiểm khói hỏng) vẫn là **bản thiết kế**: mới kiểm được cú pháp (`bash -n`),
-> chế độ `--dry-run` (in kế hoạch) và các chốt chặn tham số, nên còn những chỗ phải kiểm lần đầu (đã ghi trong tiêu đề mỗi tệp). Tên miền và máy chủ chính thức được hoãn theo yêu cầu.
+> **Trạng thái: thiết kế, mới chạy thử một phần.** `scripts/ops/provision.sh` (dựng máy chủ) đã chạy thật cả 9 bước trên một VM Ubuntu 24.04 thử ngày 29/10/2026 (7 bước `packages users php mariadb redis nginx cron`, rồi `firewall` và `ssh`; mỗi nhóm chạy lại để kiểm tính chạy lại được). `scripts/ops/deploy.sh` (đưa mã lên, tự hoàn tác khi kiểm khói hỏng) đã chạy thật trên VM đó cùng ngày: lần đầu, lần cập nhật, đường thành công đủ kiểm thử và kiểm khói, và tự hoàn tác khi cố tình đưa lên một bản hỏng (xem cuối mục 4); chưa chạy với `--env=production`. Tên miền và máy chủ chính thức được hoãn theo yêu cầu.
 > Những gì **đã chạy được và kiểm chứng**: dựng website trên WordPress 7.1 thật bằng phòng thử (`tests/wp-lab`), build theme, bộ kiểm thử, và script kiểm nhanh `scripts/ops/smoke.mjs` (chạy với bất kỳ địa chỉ nào).
 > Tài liệu này ghi quy trình để khi có máy chủ chỉ còn việc *chạy*, không phải *nghĩ lại*.
 
@@ -107,7 +106,7 @@ Trước khi đưa lên production: **sao lưu** (xem `SAO-LUU-PHUC-HOI.md`) và
 
 **Hoàn tác:** chạy lại các bước trên với commit trước đó (`git checkout <commit-trước>`, build, rsync, reload). Thay đổi **dữ liệu** (nhập liệu) không hoàn tác bằng mã: khôi phục từ sao lưu.
 
-**Bản tự động: `scripts/ops/deploy.sh`** (bản thiết kế, chưa chạy thật) làm đúng chuỗi trên và thêm các chốt chặn:
+**Bản tự động: `scripts/ops/deploy.sh`** (đã chạy thật trên staging thử, xem cuối mục này) làm đúng chuỗi trên và thêm các chốt chặn:
 
 ```bash
 scripts/ops/deploy.sh --env=staging --host=deploy@<máy> --domain=<tên-miền-staging> --dry-run   # xem kế hoạch
@@ -116,7 +115,7 @@ scripts/ops/deploy.sh --env=production --host=deploy@<máy> --domain=<tên-miề
 scripts/ops/deploy.sh --env=production --host=deploy@<máy> --domain=<tên-miền> --rollback-to=<tên-gói>   # hoàn tác tay
 ```
 
-Kho Git phải sạch (triển khai từ commit đã có); chạy toàn bộ kiểm thử; build theme; **nén bản đang chạy thành gói hoàn tác** (`/var/www/<site>/rollback/<thời-gian>-<commit>.tar.zst`, giữ 5 gói); rsync với `--delay-updates`; reload PHP-FPM;
+Kho Git phải sạch (triển khai từ commit đã có); chạy toàn bộ kiểm thử; build theme; **nén bản đang chạy thành gói hoàn tác** (`/var/www/<site>/rollback/<thời-gian>-<commit>.tar.zst`, giữ 5 gói); rsync với `--delay-updates` (máy không có `rsync`, như máy Windows của người vận hành, thì gửi bằng `tar` qua ssh: mỗi thư mục dựng ở `.new` rồi đổi tên); reload PHP-FPM;
 xóa cache đối tượng và Cloudflare; chạy `smoke.mjs`; **nếu kiểm khói hỏng thì tự giải gói hoàn tác**, reload, xóa cache và thoát mã 1. Người dùng ssh phải là `deploy` (quyền sudo của `deploy` chỉ gồm `systemctl reload php8.3-fpm`, do `provision.sh` cấp).
 Chọn rsync + gói hoàn tác thay cho `releases/<commit>` + liên kết `current` vì WordPress xử lý plugin/theme/mu-plugin qua liên kết tượng trưng nhiều chỗ chưa kiểm chứng (đường dẫn thật của plugin, `plugins_url`); đổi sang liên kết chỉ sau khi thử trên staging.
 
@@ -157,13 +156,13 @@ Chưa kiểm: đăng nhập `deploy` bằng khóa (khóa riêng có passphrase, 
 Kiểm sâu sau khi bật `firewall` và `ssh` (cùng ngày): chạy lại toàn bộ bộ kiểm của 7 bước (yêu cầu thật qua Nginx → PHP-FPM, nối CSDL và Redis từ FPM, quyền ghi hai chiều, giới hạn tải lên 17/18 MB, `Host` lạ, chứng chỉ, chạy lại không đổi gì) đều đạt. Cổng nghe chỉ có 22 và 443 (MariaDB, Redis chỉ localhost); danh sách Cloudflare trong Nginx và `ufw` khớp danh sách hiện hành; dấu vân khóa của người vận hành trên `deploy` trùng khóa trên máy họ; `deploy` bị khóa mật khẩu nhưng `UsePAM yes` nên vẫn vào được bằng khóa. Tìm thêm (hai điểm đầu đã sửa và chạy lại `firewall`, `ssh` thật cùng ngày, hẹn giờ tự hoàn tác như lần trước; bộ kiểm lớn chạy lại không có khác biệt ngoài thời gian và bộ đếm):
 - `rsyslog` không tạo được `/var/log/ufw.log` vì `/var/log` trên ảnh VM này là 755 `root:syslog` (bản chuẩn 775): nhật ký `ufw` chỉ có trong `journalctl -k`. Đã sửa: bước `firewall` tạo sẵn tệp (`syslog:adm`, 0640) rồi khởi động lại `rsyslog` khi tệp chưa có, như đã làm với nhật ký PHP (gói `ufw` đã kèm `logrotate`); thử bằng cách thăm dò cổng 443/80 từ ngoài, các dòng `[UFW BLOCK]` vào tệp.
 - `sshd` còn `X11Forwarding yes` và `LoginGraceTime 120` (mặc định của Ubuntu). Đã sửa: `10-vgarco.conf` có thêm `X11Forwarding no` và `LoginGraceTime 30` (`sshd -T` xác nhận; đăng nhập bằng khóa ở kết nối mới vẫn vào được).
-- Kiểm khói của `deploy.sh` chạy từ máy vận hành tới `https://<tên miền>`; vì `ufw` chỉ cho Cloudflare vào 443, ở phòng thử máy vận hành không tới được. Cần đường hầm SSH (`ssh -L`) hoặc kiểm khói qua Cloudflare khi đã có tên miền thật.
+- Kiểm khói của `deploy.sh` chạy từ máy vận hành tới `https://<tên miền>`; vì `ufw` chỉ cho Cloudflare vào 443, ở phòng thử máy vận hành không tới được. Ở phòng thử đã dùng đường hầm SSH (`ssh -L`, xem cuối mục 4); khi có tên miền thật thì kiểm khói qua Cloudflare.
 - Cập nhật gói rồi khởi động lại (cùng ngày): 43 gói đổi, 0 gói bị gỡ, không có gói nào của nginx, PHP, MariaDB, Redis, OpenSSH, fail2ban, `ufw`; chạy bằng `systemd-run` (sống sót khi mất SSH), `dpkg --audit` sạch. Sau khởi động lại (kernel 6.8.0-136 → 147, lên lại sau khoảng 1 phút), bản chụp trạng thái giống hệt trước đó trừ dòng kernel: dịch vụ chạy và bật, 24 quy tắc `ufw`, cổng nghe, cấu hình `sshd`, mã băm các tệp cấu hình, `vm.overcommit_memory = 1`, khóa SSH, đăng nhập CSDL của ứng dụng, jail fail2ban; bộ kiểm lớn chạy lại đều đạt. Hai điều rút ra: cập nhật gói đổi `/var/log` từ 755 thành 775 (cách tạo sẵn `ufw.log` vẫn cần cho ảnh chưa cập nhật); `logrotate -d` chạy riêng một tệp trong `/etc/logrotate.d` báo "thư mục cha không an toàn", đó là do thiếu `su root adm` của cấu hình chính, kiểm đúng cách là `logrotate -d /etc/logrotate.conf` (0 lỗi).
 
 *WP-CLI và WordPress trên VM thử (29/10/2026)*. Bước `packages` nay tự cài WP-CLI bản ghim (2.12.0, mã SHA-512 lấy từ trang phát hành chính thức của dự án, ghim trong script; không khớp thì dừng, không để lại tệp): thử cả đường sai mã băm (thoát mã 1, không cài gì) lẫn đường đúng, chạy lại không đổi gì; `wp` chạy được dưới `deploy`. WordPress 7.1.4 (bản vá của nhánh 7.1 đã kiểm thử, `vi`) cài bằng `wp core download` (WP-CLI tự kiểm băm, `verify-checksums` đạt), `wp-config.php` đọc mật khẩu CSDL, Redis và khóa từ `/etc/vgarco/*.php` (chủ `deploy`, nhóm người dùng PHP, 0640; PHP không ghi được), salt sinh bằng `wp config shuffle-salts`, tiền tố bảng `vgx_`, `wp core install` với tài khoản quản trị không phải `admin` (mật khẩu cất ở `/home/deploy/.wp-admin-initial-password`, quyền 600, không in ra). Yêu cầu thật qua Nginx → PHP-FPM → MariaDB: trang đăng nhập tiếng Việt, REST có phản hồi, `xmlrpc.php`, `readme.html`, `.git`, `debug.log` bị chặn. Lỗi tìm được và đã sửa:
 - Mẫu `secrets.php` của script dùng tên `VGARCO_CF_API_TOKEN`, `VGARCO_CF_ZONE_ID`, `VGARCO_TELEGRAM_CHAT_ID` còn mã đọc `VGARCO_CF_TOKEN`, `VGARCO_CF_ZONE`, `VGARCO_TELEGRAM_CHAT`: ai điền theo mẫu sẽ làm xóa cache Cloudflare và cảnh báo Telegram im lặng không chạy. Nay mẫu dùng đúng tên và để các dòng đó ở dạng chú thích, vì mã Cloudflare chỉ kiểm `defined()` (khai báo rỗng là bật tính năng với khóa rỗng); bỏ `VGARCO_IP_SALT` vì mã dùng `wp_salt('auth')`.
 - `/wp-config.php` trả 200 (trang trắng, chạy cả WordPress): nay khối Nginx chặn 403.
-Chưa làm: cài plugin bên thứ ba (cần tải thêm; ACF PRO và WPML cần giấy phép), cài theme và mã tự viết (việc của `deploy.sh`), tạo trang theo bảng mục 3.
+Chưa làm ở bước dựng máy chủ: cài plugin bên thứ ba (cần tải thêm; ACF PRO và WPML cần giấy phép). Theme, mã tự viết và trang: xem phần chạy thật `deploy.sh` cuối mục 4.
 
 Còn mở (không thuộc bước dựng máy chủ, cần quyết định hoặc việc của vận hành):
 - Tài khoản `backup` đã có sẵn trong Ubuntu (không đăng nhập được), nên script không tạo tài khoản `backup` dùng shell; cần chọn tên khác khi viết phần sao lưu.
@@ -171,6 +170,15 @@ Còn mở (không thuộc bước dựng máy chủ, cần quyết định hoặ
 - Máy giữ múi giờ UTC (đúng thiết kế: lịch của mã chạy theo UTC, xem `KIEN-TRUC.md`; cron sao lưu 02:30 sẽ là 09:30 giờ Việt Nam), chưa có swap, Nginx chưa nghe IPv6 ở cổng 443 (Cloudflare nối bằng IPv4 khi bản ghi gốc chỉ có A), VM thử đã cập nhật hết và khởi động lại ngày 29/10/2026 (xem phần kiểm sâu); `unattended-upgrades` đã bật nên sẽ tự cập nhật bản vá bảo mật.
 - Hai dòng cảnh báo vô hại: Redis ghi `overcommit_memory` ở lần khởi động đầu lúc cài gói (trước khi bước `redis` đặt tham số), MariaDB ghi "unset environment variable" của đơn vị systemd Ubuntu.
 - Cổng 443 chỉ nhận từ Cloudflare nên tên miền thật phải đi qua Cloudflare (proxy bật) trước khi mở site ra ngoài; chưa có IP công cộng ánh xạ về VM thử.
+
+*Chạy thật `deploy.sh` trên VM thử (29/10/2026).* Máy vận hành (Windows, Git Bash) không có `rsync` nên dùng đường `tar` qua ssh; khóa SSH riêng truyền qua biến `DEPLOY_SSH_OPTS` (ví dụ `-i <khóa> -o IdentitiesOnly=yes`); build theme chạy `npm ci` ở chế độ offline (`npm_config_offline=true`) khi bộ nhớ đệm npm đã đủ (đã chứng minh `npm ci --offline` trên một bản sao tạm trước khi chạy). Vì `ufw` chỉ cho Cloudflare vào 443, kiểm khói đi qua đường hầm `ssh -N -L 127.0.0.1:443:127.0.0.1:443 <tài-khoản-quản-trị>@<máy>`, kèm tệp tiền nạp cho `node` ánh xạ tên miền thử về `127.0.0.1` (không sửa tệp `hosts`) và `NODE_TLS_REJECT_UNAUTHORIZED=0` vì chứng chỉ tự ký. Các lần chạy:
+1. Lần đầu (site chưa có trang): kiểm thử đạt, mã lên đúng quyền (`deploy:deploy`, thư mục 755, không mang theo `node_modules`/`src`), kiểm khói hỏng đúng dự kiến; `deploy.sh` báo "lần triển khai đầu, không có bản cũ để hoàn tác" thay vì hoàn tác vào một gói không tồn tại (kẽ hở đã sửa).
+2. Kích hoạt plugin khi theme đang chạy gây `Fatal error: Cannot redeclare vgarco_option()`: theme khai báo hai hàm dự phòng khi plugin chưa nạp, plugin khai báo lại. Nghĩa là plugin lỡ bị tắt thì bật lại sẽ lỗi, trong khi thông báo của theme bảo bật lại. Đã sửa (bọc hai hàm bằng `function_exists`), có `tests/php/coexist.php` và 2 phép đột biến; kiểm lại trên WordPress thật: kích hoạt được, vai trò Nhân sự và 4 đường REST có đủ.
+3. Tạo 9 trang theo bảng mục 3 rồi kiểm khói: 26/26 đạt.
+4. Chạy đầy đủ (mọi kiểm thử, build, tar, kiểm khói 26/26): gói hoàn tác đặt tên theo mã commit đang chạy, `.deployed-ref` được ghi.
+5. Tự hoàn tác: một nhánh tạm có `throw` ở đầu `functions.php` làm mọi trang trả 500; kiểm khói hỏng 13 phép; `deploy.sh` giải gói cũ, reload, kiểm khói lại 26/26 và thoát mã 1; `.deployed-ref` giữ nguyên, không còn mã hỏng trên máy chủ; nhánh tạm đã xóa.
+
+Lần cài đầu nên chạy `deploy.sh --no-smoke`, kích hoạt plugin rồi theme, tạo trang (mục 3), rồi chạy lại có kiểm khói. Kiểm khói 26/26 là trên chồng phần mềm thật nhưng **chưa có ACF PRO, WPML và nội dung thật** (theme dùng giá trị mặc định trong mã), nên chưa chứng minh được trang có dữ liệu thật; đó là việc của staging thật.
 
 ## 5. Kiểm tra sau triển khai
 

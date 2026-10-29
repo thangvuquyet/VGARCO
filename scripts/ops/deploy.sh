@@ -4,7 +4,7 @@ set -euo pipefail
 
 usage() {
   cat <<'USAGE'
-deploy.sh — đưa mã tự viết lên máy chủ, kiểm khói, tự hoàn tác khi kiểm khói hỏng (BẢN THIẾT KẾ, chưa chạy trên máy chủ thật)
+deploy.sh — đưa mã tự viết lên máy chủ, kiểm khói, tự hoàn tác khi kiểm khói hỏng (đã chạy thật trên staging thử 29/10/2026; chưa chạy production)
 
   scripts/ops/deploy.sh --env=staging|production --host=deploy@<máy> --domain=<tên miền> [--skip-tests] [--no-smoke] [--yes-production] [--dry-run]
   scripts/ops/deploy.sh --env=... --host=... --domain=... --rollback-to=<tên-gói>

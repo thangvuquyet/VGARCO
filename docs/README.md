@@ -8,7 +8,7 @@ các tài liệu dưới đây dành cho người kỹ thuật.
 | [`KIEN-TRUC.md`](KIEN-TRUC.md) | Các lớp mã, mô hình dữ liệu, đường dẫn, REST, tác vụ định kỳ, bộ nhớ đệm, biện pháp bảo mật trong mã | **Đã kiểm chứng** trên WordPress 7.1 thật (`tests/wp-lab`) |
 | [`CAU-HINH.md`](CAU-HINH.md) | Hằng số trong `wp-config.php`, nơi cất khóa bí mật, trang Cấu hình, khác biệt giữa môi trường | Hằng số và trang Cấu hình đã kiểm chứng; mẫu `wp-config.php` production là **thiết kế** |
 | [`VAN-HANH.md`](VAN-HANH.md) | Việc hằng tháng, cập nhật nội dung bằng bảng tính, quản lý tài khoản, tác vụ định kỳ | Lệnh nhập liệu và tài khoản đã kiểm chứng; việc cập nhật plugin/lõi là **thiết kế** |
-| [`TRIEN-KHAI.md`](TRIEN-KHAI.md) | Quy trình đưa mã lên máy chủ, kiểm tra sau triển khai, hoàn tác | **Thiết kế, mới chạy thử một phần** (`provision.sh`: 9/9 bước đã chạy thật trên VM thử 29/10/2026; `deploy.sh` mới chạy `--dry-run`) |
+| [`TRIEN-KHAI.md`](TRIEN-KHAI.md) | Quy trình đưa mã lên máy chủ, kiểm tra sau triển khai, hoàn tác | **Thiết kế, mới chạy thử một phần** (`provision.sh`: 9/9 bước đã chạy thật trên VM thử 29/10/2026; `deploy.sh`: đã chạy thật trên staging thử cùng ngày, gồm tự hoàn tác; chưa chạy production) |
 | [`SAO-LUU-PHUC-HOI.md`](SAO-LUU-PHUC-HOI.md) | Cái gì phải sao lưu, lịch, khôi phục từng bước, mẫu biên bản diễn tập | **Thiết kế, chưa chạy thật**; biên bản diễn tập còn trống |
 | [`SU-CO.md`](SU-CO.md) | Sổ tay xử lý sự cố: triệu chứng → kiểm tra → khắc phục | Các lệnh WordPress đã chạy thử trên WordPress thật; phần máy chủ là **thiết kế** |
 | [`SO-TAI-KHOAN.md`](SO-TAI-KHOAN.md) | Sổ tài khoản dịch vụ (mẫu để điền) và danh sách rút quyền khi kết thúc hợp tác | **Mẫu trống** — điền khi mở tài khoản |
