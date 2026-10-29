@@ -4,14 +4,14 @@ set -euo pipefail
 
 usage() {
   cat <<'USAGE'
-provision.sh — dựng máy chủ gốc VGARCO từ Ubuntu 24.04 sạch (7/9 bước đã chạy thật trên VM thử 29/10/2026; ssh và firewall chưa)
+provision.sh — dựng máy chủ gốc VGARCO từ Ubuntu 24.04 sạch (9/9 bước đã chạy thật trên VM thử 29/10/2026)
 
   sudo ./provision.sh --env=staging|production --domain=<tên miền> [--ssh-port=<số>] [--finalize-ssh] [--phase=a,b,...] [--dry-run]
 
   --env            môi trường (người dùng PHP, pool, CSDL, thư mục, khối Nginx riêng cho từng môi trường)
   --domain         tên miền của khối Nginx
   --ssh-port       cổng SSH mới (mặc định 22); cổng 22 chỉ đóng khi chạy lại với --finalize-ssh
-  --finalize-ssh   đóng cổng 22 sau khi đã đăng nhập thử thành công bằng cổng mới ở cửa sổ khác
+  --finalize-ssh   đóng cổng 22 sau khi đã đăng nhập thử thành công bằng cổng mới ở cửa sổ khác (chỉ dùng cùng --ssh-port khác 22)
   --phase          chỉ chạy các bước: packages users ssh firewall php mariadb redis nginx cron
   --dry-run        chỉ in kế hoạch, không đổi gì
 USAGE
@@ -41,6 +41,7 @@ done
 [[ "$ENV_NAME" == "staging" || "$ENV_NAME" == "production" ]] || { echo "Cần --env=staging|production" >&2; exit 2; }
 [[ "$DOMAIN" =~ ^[a-z0-9]([a-z0-9.-]*[a-z0-9])?$ ]] || { echo "Cần --domain=<tên miền hợp lệ, chữ thường>" >&2; exit 2; }
 [[ "$SSH_PORT" =~ ^[0-9]+$ ]] && (( SSH_PORT >= 22 && SSH_PORT <= 65535 )) || { echo "--ssh-port phải là số 22–65535" >&2; exit 2; }
+(( FINALIZE_SSH && SSH_PORT == 22 )) && { echo "--finalize-ssh chỉ dùng cùng --ssh-port khác 22: với cổng 22 nó sẽ xóa luôn quy tắc SSH và khóa chính mình." >&2; exit 2; }
 
 if [[ "$ENV_NAME" == "production" ]]; then
   PHP_USER="vgarco"; SITE="vgarco"
@@ -180,11 +181,17 @@ phase_on ssh && {
     (( SSH_PORT != 22 )) && run systemctl disable --now ssh.socket || true
     run systemctl enable ssh
     run systemctl reload ssh || run systemctl restart ssh
-    note "Mở cửa sổ SSH MỚI và đăng nhập thử bằng cổng ${SSH_PORT} TRƯỚC khi đóng cửa sổ này. Xong thì chạy lại với --finalize-ssh."
+    if (( SSH_PORT != 22 )); then
+      note "Mở cửa sổ SSH MỚI và đăng nhập thử bằng cổng ${SSH_PORT} TRƯỚC khi đóng cửa sổ này. Xong thì chạy lại với --finalize-ssh."
+    else
+      note "Mở cửa sổ SSH MỚI và đăng nhập thử bằng khóa TRƯỚC khi đóng cửa sổ này."
+    fi
   fi
   ghi_tep /etc/fail2ban/jail.d/vgarco.local 0644 root:root <<EOF && run systemctl restart fail2ban || true
 [sshd]
 enabled = true
+backend = systemd
+journalmatch = _SYSTEMD_UNIT=ssh.service + _COMM=sshd
 port = ${SSH_PORT}
 maxretry = 4
 bantime = 1h

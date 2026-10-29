@@ -1,6 +1,6 @@
 # Triển khai
 
-> **Trạng thái: thiết kế, mới chạy thử một phần.** `scripts/ops/provision.sh` (dựng máy chủ) đã chạy thật 7/9 bước (`packages users php mariadb redis nginx cron`, hai lần liên tiếp để kiểm tính chạy lại được) trên một VM Ubuntu 24.04 thử ngày 29/10/2026; hai bước `ssh` và `firewall` **chưa chạy thật** vì dễ tự khóa mình. `scripts/ops/deploy.sh` (đưa mã lên, tự hoàn tác khi kiểm khói hỏng) vẫn là **bản thiết kế**: mới kiểm được cú pháp (`bash -n`),
+> **Trạng thái: thiết kế, mới chạy thử một phần.** `scripts/ops/provision.sh` (dựng máy chủ) đã chạy thật cả 9 bước trên một VM Ubuntu 24.04 thử ngày 29/10/2026 (7 bước `packages users php mariadb redis nginx cron`, rồi `firewall` và `ssh`; mỗi nhóm chạy lại để kiểm tính chạy lại được). `scripts/ops/deploy.sh` (đưa mã lên, tự hoàn tác khi kiểm khói hỏng) vẫn là **bản thiết kế**: mới kiểm được cú pháp (`bash -n`),
 > chế độ `--dry-run` (in kế hoạch) và các chốt chặn tham số, nên còn những chỗ phải kiểm lần đầu (đã ghi trong tiêu đề mỗi tệp). Tên miền và máy chủ chính thức được hoãn theo yêu cầu.
 > Những gì **đã chạy được và kiểm chứng**: dựng website trên WordPress 7.1 thật bằng phòng thử (`tests/wp-lab`), build theme, bộ kiểm thử, và script kiểm nhanh `scripts/ops/smoke.mjs` (chạy với bất kỳ địa chỉ nào).
 > Tài liệu này ghi quy trình để khi có máy chủ chỉ còn việc *chạy*, không phải *nghĩ lại*.
@@ -120,9 +120,9 @@ Kho Git phải sạch (triển khai từ commit đã có); chạy toàn bộ ki�
 xóa cache đối tượng và Cloudflare; chạy `smoke.mjs`; **nếu kiểm khói hỏng thì tự giải gói hoàn tác**, reload, xóa cache và thoát mã 1. Người dùng ssh phải là `deploy` (quyền sudo của `deploy` chỉ gồm `systemctl reload php8.3-fpm`, do `provision.sh` cấp).
 Chọn rsync + gói hoàn tác thay cho `releases/<commit>` + liên kết `current` vì WordPress xử lý plugin/theme/mu-plugin qua liên kết tượng trưng nhiều chỗ chưa kiểm chứng (đường dẫn thật của plugin, `plugins_url`); đổi sang liên kết chỉ sau khi thử trên staging.
 
-**Dựng máy chủ: `scripts/ops/provision.sh`** (7/9 bước đã chạy thật trên VM thử, xem cuối mục): Ubuntu 24.04 sạch → người dùng (`deploy`, người dùng PHP không shell, `backup`), SSH chỉ khóa, `ufw` (443 chỉ cho Cloudflare, không mở 80), pool PHP-FPM riêng từng môi trường, MariaDB và Redis chỉ localhost
+**Dựng máy chủ: `scripts/ops/provision.sh`** (9/9 bước đã chạy thật trên VM thử, xem cuối mục): Ubuntu 24.04 sạch → người dùng (`deploy`, người dùng PHP không shell, `backup`), SSH chỉ khóa, `ufw` (443 chỉ cho Cloudflare, không mở 80), pool PHP-FPM riêng từng môi trường, MariaDB và Redis chỉ localhost
 (mật khẩu sinh ngẫu nhiên, chỉ nằm trong `/etc/vgarco/*.php` quyền 0640), Nginx (khối `default_server` từ chối, khối của tên miền, chặn tệp nhạy cảm, Authenticated Origin Pulls khi đã có CA), cron. Chạy lại được (chỉ ghi tệp khi nội dung đổi, giữ bản `.bak`).
-**Rủi ro lớn nhất là tự khóa mình ngoài máy chủ** (SSH, tường lửa): bước `ssh` từ chối chạy nếu `deploy` hoặc tài khoản quản trị đang chạy `sudo` chưa có khóa công khai (`AllowUsers deploy <quản trị>`; `deploy` không có quyền root nên không để lại tài khoản quản trị thì sau bước này không ai chạy lại được kịch bản), giữ cổng 22 tới khi chạy lại với `--finalize-ssh`, và mở cổng SSH trước khi bật `ufw`.
+**Rủi ro lớn nhất là tự khóa mình ngoài máy chủ** (SSH, tường lửa): bước `ssh` từ chối chạy nếu `deploy` hoặc tài khoản quản trị đang chạy `sudo` chưa có khóa công khai (`AllowUsers deploy <quản trị>`; `deploy` không có quyền root nên không để lại tài khoản quản trị thì sau bước này không ai chạy lại được kịch bản), giữ cổng 22 tới khi chạy lại với `--finalize-ssh` (chỉ khi đổi cổng bằng `--ssh-port`; với cổng 22 tham số này bị từ chối vì nó sẽ xóa luôn quy tắc SSH), và mở cổng SSH trước khi bật `ufw`.
 Chưa có trong script: sao lưu restic, Telegram, cấp chứng chỉ Let's Encrypt lần đầu, tiêu đề bảo mật (HSTS/CSP) của Nginx — vẫn là tài liệu.
 
 *Chạy thử 29/10/2026* (VM Ubuntu 24.04.4, 8 CPU/8 GB, tên miền thử `staging.vgarco.test`, môi trường `staging`; chạy lần lượt từng bước rồi chạy lại cả 7 bước: không tệp nào đổi, không có `.bak`, không dịch vụ nào bị khởi động lại, mật khẩu giữ nguyên). Lỗi tìm được và đã sửa: `http2 on;` chỉ nginx ≥ 1.25.1 hiểu, Ubuntu 24.04 có 1.24.0 nên đổi thành `listen 443 ssl http2`; tập lệnh làm mới IP Cloudflare trước đây chỉ được tạo ở bước `firewall` nên bước `nginx` chạy riêng bị hỏng, nay cả hai bước cùng gọi `cf_helper`.
@@ -145,13 +145,22 @@ Vòng kiểm thứ ba (cùng ngày) tìm và sửa thêm:
 
 Cách kiểm cuối cùng: dọn máy thử về trạng thái sạch (gỡ đúng các gói do script cài, xóa thư mục, tài khoản, quy tắc `ufw` do script tạo), dựng lại bằng từng bước một (`packages users php mariadb redis nginx cron`, mỗi bước một lần gọi riêng), kiểm từng bước và toàn bộ (yêu cầu thật qua Nginx → PHP-FPM, quyền ghi hai chiều giữa `deploy` và người dùng PHP, giới hạn tải lên 17/18 MB, `Host` lạ, chứng chỉ, nhật ký), rồi chạy lại cả 7 bước: không tệp nào đổi, không có `.bak`, không dịch vụ nào bị khởi động lại, mật khẩu giữ nguyên.
 
-Còn mở (không thuộc 7 bước, cần quyết định hoặc việc của vận hành):
+*Chạy thật `firewall` rồi `ssh` (29/10/2026, cùng VM)*. Chuẩn bị: `--dry-run` trước; hẹn giờ tự hoàn tác bằng `systemd-run` (4 phút tắt `ufw`; 5 phút gỡ `10-vgarco.conf` và nạp lại `ssh`), hủy sau khi kiểm xong; khóa công khai của người vận hành thêm vào `ubuntu` và `deploy` trước khi chạy `ssh`.
+- `firewall`: `ufw` bật, chặn vào và cho ra mặc định, `22/tcp` (IPv4 và IPv6) cùng 22 quy tắc cổng 443 cho Cloudflare; kết nối SSH mới vẫn vào được, 443 từ máy ngoài Cloudflare bị chặn, 80 đóng, Nginx tải lại bình thường.
+- `ssh`: `sshd -T` cho kết quả đúng (không mật khẩu, không `root`, `AllowUsers deploy ubuntu`, `MaxAuthTries 3`); thử đăng nhập bằng mật khẩu và bằng `root` đều bị từ chối, đăng nhập bằng khóa ở kết nối mới vẫn vào được; `ssh.service` được bật, `ssh.socket` vẫn chạy.
+- Chạy lại cả hai bước: tập quy tắc `ufw` (24 = 22 Cloudflare + 2 SSH), mã băm các tệp cấu hình và tiến trình `sshd`, fail2ban, Nginx không đổi, không có `.bak` mới (đường xóa rồi thêm lại 22 quy tắc Cloudflare lúc `ufw` đang bật, cũng là đường tác vụ làm mới IP định kỳ dùng, chạy đúng).
+Lỗi tìm được và đã sửa:
+- Jail `sshd` của fail2ban chỉ đọc nhật ký của `sshd.service`, nhưng Ubuntu 24.04 ghi vào `ssh.service` (221 dòng so với 1), nên fail2ban không thấy lần đăng nhập sai nào: nay jail có `backend = systemd` và `journalmatch = _SYSTEMD_UNIT=ssh.service + _COMM=sshd`; bộ lọc khớp dòng thật và hành động cấm (qua `nftables`) đã thử bằng địa chỉ TEST-NET rồi gỡ.
+- `--finalize-ssh` ở cổng 22 chạy `ufw allow 22/tcp` rồi `ufw delete allow 22/tcp`, tức tự đóng SSH; ghi chú sau bước `ssh` cũng nhắc chạy lại với tham số này kể cả ở cổng 22. Nay tham số bị từ chối (mã 2, không đổi gì) và ghi chú chỉ nhắc khi đổi cổng.
+Chưa kiểm: đăng nhập `deploy` bằng khóa (khóa riêng có passphrase, người vận hành tự thử); cấm thật sau 4 lần sai (không thử, vì ở phòng thử mọi SSH tới VM đi qua máy chuyển tiếp mạng nên có địa chỉ nguồn `172.20.127.229`, bị cấm thì cả mạng này mất SSH tới VM trong 1 giờ; máy thật thấy IP thật).
+
+Còn mở (không thuộc bước dựng máy chủ, cần quyết định hoặc việc của vận hành):
 - Tài khoản `backup` đã có sẵn trong Ubuntu (không đăng nhập được), nên script không tạo tài khoản `backup` dùng shell; cần chọn tên khác khi viết phần sao lưu.
 - Staging và production chung một máy: `redis.php` và `secrets.php` chỉ được tạo một lần với nhóm của môi trường chạy trước, người dùng PHP của môi trường sau sẽ không đọc được; cần tách theo môi trường (không dùng một nhóm chung, vì staging sẽ đọc được khóa production) trước khi dựng môi trường thứ hai trên cùng máy.
 - WP-CLI chưa cài (cron `wp cron event run` sẽ lỗi tới khi cài).
 - Máy giữ múi giờ UTC (đúng thiết kế: lịch của mã chạy theo UTC, xem `KIEN-TRUC.md`; cron sao lưu 02:30 sẽ là 09:30 giờ Việt Nam), chưa có swap, Nginx chưa nghe IPv6 ở cổng 443 (Cloudflare nối bằng IPv4 khi bản ghi gốc chỉ có A), VM thử còn 43 gói chờ cập nhật và đang chờ khởi động lại (kernel, libc6); `unattended-upgrades` đã bật nên sẽ tự cập nhật bản vá bảo mật.
 - Hai dòng cảnh báo vô hại: Redis ghi `overcommit_memory` ở lần khởi động đầu lúc cài gói (trước khi bước `redis` đặt tham số), MariaDB ghi "unset environment variable" của đơn vị systemd Ubuntu.
-- `ssh` và `firewall` chưa chạy thật (hai bước dễ tự khóa mình; chốt chặn của bước `ssh` đã thử ở chế độ thật và dừng đúng trước khi ghi gì).
+- Cổng 443 chỉ nhận từ Cloudflare nên tên miền thật phải đi qua Cloudflare (proxy bật) trước khi mở site ra ngoài; chưa có IP công cộng ánh xạ về VM thử.
 
 ## 5. Kiểm tra sau triển khai
 
