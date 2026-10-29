@@ -54,6 +54,8 @@ DB_NAME="${SITE//-/_}"
 DB_USER="${SITE//-/_}"
 FPM_SOCK="/run/php/php8.3-fpm-${SITE}.sock"
 SECRETS_DIR="/etc/vgarco"
+WPCLI_VERSION="2.12.0"
+WPCLI_SHA512="be928f6b8ca1e8dfb9d2f4b75a13aa4aee0896f8a9a0a1c45cd5d2c98605e6172e6d014dda2e27f88c98befc16c040cbb2bd1bfa121510ea5cdf5f6a30fe8832"
 
 log() { printf '\n== %s\n' "$*"; }
 note() { printf '   %s\n' "$*"; }
@@ -114,8 +116,15 @@ phase_on packages && {
   run env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends "${PKGS[@]}"
   note "Kiểm khi chạy thật: php -m | grep -i -E 'gd|zip|fileinfo|mbstring|intl' và php -r 'var_dump(count(Imagick::queryFormats(\"AVIF\")) > 0);' (GD của Ubuntu không có AVIF, mã hóa AVIF đi qua Imagick; docs/TRIEN-KHAI.md mục 2)."
   if ! have wp; then
-    note "WP-CLI chưa có. Cài bản ghim phiên bản + kiểm băm (điền WPCLI_VERSION và WPCLI_SHA512 từ trang phát hành chính thức), KHÔNG tải 'bản mới nhất':"
-    note "curl -fsSL -o /usr/local/bin/wp https://github.com/wp-cli/wp-cli/releases/download/v\${WPCLI_VERSION}/wp-cli-\${WPCLI_VERSION}.phar && echo \"\${WPCLI_SHA512}  /usr/local/bin/wp\" | sha512sum -c - && chmod 0755 /usr/local/bin/wp"
+    WPCLI_TMP="/usr/local/bin/.wp.new"
+    run curl -fsSL --max-time 180 -o "$WPCLI_TMP" "https://github.com/wp-cli/wp-cli/releases/download/v${WPCLI_VERSION}/wp-cli-${WPCLI_VERSION}.phar"
+    if (( ! DRY )) && ! echo "${WPCLI_SHA512}  ${WPCLI_TMP}" | sha512sum -c - >/dev/null 2>&1; then
+      rm -f "$WPCLI_TMP"
+      echo "DỪNG: mã băm SHA-512 của WP-CLI ${WPCLI_VERSION} không khớp mã ghim trong kịch bản; không cài." >&2
+      exit 1
+    fi
+    run chmod 0755 "$WPCLI_TMP"
+    run mv "$WPCLI_TMP" /usr/local/bin/wp
   fi
   run systemctl enable --now unattended-upgrades
 }
@@ -139,13 +148,12 @@ EOF
     ghi_tep "$SECRETS_DIR/secrets.php" 0640 "root:${PHP_USER}" <<'EOF' || true
 <?php
 // Khóa bí mật của VGARCO. Quyền 0640 root:<người dùng PHP>. KHÔNG đưa vào Git, KHÔNG gửi qua chat/email.
-// Điền giá trị khi cài đặt; để rỗng thì tính năng tương ứng tự tắt hoặc báo thiếu cấu hình.
-define( 'ACF_PRO_LICENSE', '' );
-define( 'VGARCO_CF_API_TOKEN', '' );   // token Cloudflare chỉ có quyền Cache Purge của đúng zone
-define( 'VGARCO_CF_ZONE_ID', '' );
-define( 'VGARCO_TELEGRAM_TOKEN', '' );
-define( 'VGARCO_TELEGRAM_CHAT_ID', '' );
-define( 'VGARCO_IP_SALT', '' );        // muối băm IP (sinh ngẫu nhiên, dài ≥ 32 ký tự)
+// Bỏ // ở đầu dòng và điền giá trị khi đã có. KHÔNG khai báo hằng số với giá trị rỗng: mã Cloudflare chỉ kiểm defined(), khai báo rỗng là bật tính năng với khóa rỗng.
+// define( 'ACF_PRO_LICENSE', '' );
+// define( 'VGARCO_CF_ZONE', '' );
+// define( 'VGARCO_CF_TOKEN', '' );   // token Cloudflare chỉ có quyền Cache Purge của đúng zone
+// define( 'VGARCO_TELEGRAM_TOKEN', '' );
+// define( 'VGARCO_TELEGRAM_CHAT', '' );
 EOF
   fi
 }
@@ -364,6 +372,7 @@ server {
 
     location ~* ^/wp-content/uploads/.*\.(php\d?|phtml|phar)\$ { deny all; }
     location = /xmlrpc.php                                     { deny all; }
+    location = /wp-config.php                                  { deny all; }
     location ~* ^/(readme\.html|license\.txt)\$               { deny all; }
     location ~ /\.(?!well-known)                               { deny all; }
     location ~* \.(sql|bak|log|ini|sh|lock)\$                  { deny all; }
