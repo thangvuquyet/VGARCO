@@ -3,7 +3,7 @@
 ## 1. Nguyên tắc
 
 - **Khóa bí mật không nằm trong Git, không nằm trong CSDL, không nằm trong tài liệu.** Trên máy chủ cất ở `/etc/vgarco/secrets.php` (quyền `0640`, chủ `root`, nhóm `vgarco`), `wp-config.php` nạp tệp đó.
-  Bản gốc cất trong **kho mật khẩu đứng tên chủ đầu tư**. (Thiết kế; chưa dựng máy chủ thật.)
+  Bản gốc cất trong **kho mật khẩu đứng tên chủ đầu tư**. (Đã dựng thử trên máy chủ thử ngày 29/10/2026, xem `TRIEN-KHAI.md`; chưa dựng trên máy chủ thật của VGARCO.)
 - `wp-config.php` và `*.zip` giấy phép bị `.gitignore` chặn.
 - Cấu hình thay đổi theo môi trường nằm ở `wp-config.php`; nội dung công ty (số điện thoại, địa chỉ, chỉ số...) nằm ở trang **Cấu hình VGARCO** trong trang quản trị.
 

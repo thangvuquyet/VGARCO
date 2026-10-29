@@ -1,6 +1,6 @@
 # Sổ tay xử lý sự cố
 
-Cách đọc: mỗi mục có **triệu chứng → kiểm tra → khắc phục**. Lệnh `wp` chạy dưới tài khoản `deploy` ở thư mục WordPress. Các đoạn `wp eval` đã được **chạy thử trên WordPress 7.1 thật** (phòng thử `tests/wp-lab`); lệnh WP-CLI chuẩn và phần máy chủ (Nginx, restic) là thiết kế, chưa chạy trên máy chủ thật.
+Cách đọc: mỗi mục có **triệu chứng → kiểm tra → khắc phục**. Lệnh `wp` chạy dưới tài khoản `deploy` ở thư mục WordPress. Các đoạn `wp eval` đã được **chạy thử trên WordPress 7.1 thật** (phòng thử `tests/wp-lab`); cấu hình Nginx, cách hoàn tác bằng `deploy.sh` và các lệnh `wp` cơ bản đã chạy trên máy chủ thử (29/10/2026); phần sao lưu (restic) là thiết kế, chưa chạy.
 
 Mức xử lý theo bảo hành (đặc tả 9.1): **nghiêm trọng** (website không truy cập được, lộ dữ liệu, giao diện bị thay đổi trái phép) — phản hồi ≤ 24 giờ làm việc, khắc phục ≤ 8 giờ làm việc; **thường** — phản hồi ≤ 24 giờ, khắc phục ≤ 3 ngày làm việc.
 Mỗi sự cố ghi một dòng vào sổ theo dõi: ngày nhận, mức, người xử lý, ngày đóng.

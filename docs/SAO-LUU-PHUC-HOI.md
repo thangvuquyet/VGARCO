@@ -1,6 +1,6 @@
 # Sao lưu và phục hồi
 
-> **Trạng thái: thiết kế, chưa chạy trên máy chủ thật.** Chưa có `vgarco-backup` hay kho restic; **biên bản diễn tập khôi phục (đặc tả 5.5 #3) chưa có** — mục 5 là mẫu để điền khi diễn tập.
+> **Trạng thái: thiết kế; phần sao lưu chưa chạy trên máy chủ nào** (máy chủ thử đã dựng bằng `provision.sh`, nhưng chưa có sao lưu). Chưa có `vgarco-backup` hay kho restic; **biên bản diễn tập khôi phục (đặc tả 5.5 #3) chưa có** — mục 5 là mẫu để điền khi diễn tập.
 
 ## 1. Cái gì phải sao lưu
 
@@ -28,7 +28,7 @@ Hệ quả cho dữ liệu cá nhân: CV bị xóa khỏi hệ thống (tự xó
 ## 3. Khôi phục toàn bộ vào máy chủ mới hoặc staging
 
 ```bash
-# 0. Máy chủ dựng bằng scripts/ops/provision.sh (bản thiết kế, chưa chạy thật): người dùng, Nginx, PHP-FPM, MariaDB, quyền tệp — xem TRIEN-KHAI.md mục 2
+# 0. Máy chủ dựng bằng scripts/ops/provision.sh (đã chạy thật trên máy chủ thử 29/10/2026): người dùng, Nginx, PHP-FPM, MariaDB, quyền tệp — xem TRIEN-KHAI.md mục 2
 # 1. Lấy khóa và mật khẩu từ kho mật khẩu của chủ đầu tư, đặt /etc/vgarco/restic.env
 source /etc/vgarco/restic.env
 restic snapshots                                   # chọn mã snapshot (thường là bản mới nhất)
