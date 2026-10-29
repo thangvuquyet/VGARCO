@@ -154,6 +154,12 @@ Lỗi tìm được và đã sửa:
 - `--finalize-ssh` ở cổng 22 chạy `ufw allow 22/tcp` rồi `ufw delete allow 22/tcp`, tức tự đóng SSH; ghi chú sau bước `ssh` cũng nhắc chạy lại với tham số này kể cả ở cổng 22. Nay tham số bị từ chối (mã 2, không đổi gì) và ghi chú chỉ nhắc khi đổi cổng.
 Chưa kiểm: đăng nhập `deploy` bằng khóa (khóa riêng có passphrase, người vận hành tự thử); cấm thật sau 4 lần sai (không thử, vì ở phòng thử mọi SSH tới VM đi qua máy chuyển tiếp mạng nên có địa chỉ nguồn `172.20.127.229`, bị cấm thì cả mạng này mất SSH tới VM trong 1 giờ; máy thật thấy IP thật).
 
+Kiểm sâu sau khi bật `firewall` và `ssh` (cùng ngày): chạy lại toàn bộ bộ kiểm của 7 bước (yêu cầu thật qua Nginx → PHP-FPM, nối CSDL và Redis từ FPM, quyền ghi hai chiều, giới hạn tải lên 17/18 MB, `Host` lạ, chứng chỉ, chạy lại không đổi gì) đều đạt. Cổng nghe chỉ có 22 và 443 (MariaDB, Redis chỉ localhost); danh sách Cloudflare trong Nginx và `ufw` khớp danh sách hiện hành; dấu vân khóa của người vận hành trên `deploy` trùng khóa trên máy họ; `deploy` bị khóa mật khẩu nhưng `UsePAM yes` nên vẫn vào được bằng khóa. Tìm thêm, chưa sửa:
+- `rsyslog` không tạo được `/var/log/ufw.log` vì `/var/log` trên ảnh VM này là 755 `root:syslog` (bản chuẩn 775): nhật ký `ufw` vẫn có trong `journalctl -k`. Cách sửa: tạo sẵn tệp (`syslog:adm`, 0640) trước khi bật `ufw`, như đã làm với nhật ký PHP.
+- `sshd` còn `X11Forwarding yes` và `LoginGraceTime 120` (mặc định của Ubuntu): nên thêm `X11Forwarding no` và `LoginGraceTime 30` vào `10-vgarco.conf`.
+- Kiểm khói của `deploy.sh` chạy từ máy vận hành tới `https://<tên miền>`; vì `ufw` chỉ cho Cloudflare vào 443, ở phòng thử máy vận hành không tới được. Cần đường hầm SSH (`ssh -L`) hoặc kiểm khói qua Cloudflare khi đã có tên miền thật.
+- Chưa thử khởi động lại: `ssh.service` và `ssh.socket` cùng được bật, `ufw` bật khi khởi động; VM đang chờ khởi động lại sau cập nhật kernel nên đây là dịp thử.
+
 Còn mở (không thuộc bước dựng máy chủ, cần quyết định hoặc việc của vận hành):
 - Tài khoản `backup` đã có sẵn trong Ubuntu (không đăng nhập được), nên script không tạo tài khoản `backup` dùng shell; cần chọn tên khác khi viết phần sao lưu.
 - Staging và production chung một máy: `redis.php` và `secrets.php` chỉ được tạo một lần với nhóm của môi trường chạy trước, người dùng PHP của môi trường sau sẽ không đọc được; cần tách theo môi trường (không dùng một nhóm chung, vì staging sẽ đọc được khóa production) trước khi dựng môi trường thứ hai trên cùng máy.
