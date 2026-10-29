@@ -47,7 +47,8 @@ ROOT="${SITE_DIR}/public"
 ROLLBACK_DIR="${SITE_DIR}/rollback"
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 THEME="${REPO}/wp-content/themes/vgarco"
-SSH=(ssh -o BatchMode=yes -o ConnectTimeout=15 "$HOST")
+read -r -a SSH_EXTRA <<< "${DEPLOY_SSH_OPTS:-}"
+SSH=(ssh ${SSH_EXTRA[@]+"${SSH_EXTRA[@]}"} -o BatchMode=yes -o ConnectTimeout=15 "$HOST")
 
 step() { printf '\n== %s\n' "$*"; }
 run() { if (( DRY )); then printf '   $ %s\n' "$*"; else "$@"; fi; }
@@ -107,12 +108,34 @@ remote "set -euo pipefail; install -d -m 0750 '${ROLLBACK_DIR}'; cd '${ROOT}/wp-
   old=\$(ls -d themes/vgarco plugins/vgarco-core mu-plugins/vgarco-loader.php 2>/dev/null || true); \
   if [ -n \"\$old\" ]; then tar --zstd -cf '${ROLLBACK_DIR}/${BUNDLE}' \$old; else echo '   (chưa có mã cũ: không có gì để nén)'; fi"
 
-step "5/8 rsync (chỉ ba thứ này; thuộc deploy, PHP chỉ đọc)"
-RSYNC=(rsync -a --delay-updates --itemize-changes)
-run "${RSYNC[@]}" "${REPO}/wp-content/mu-plugins/vgarco-loader.php" "${HOST}:${ROOT}/wp-content/mu-plugins/"
-run "${RSYNC[@]}" --delete-delay "${REPO}/wp-content/plugins/vgarco-core/" "${HOST}:${ROOT}/wp-content/plugins/vgarco-core/"
-run "${RSYNC[@]}" --delete-delay --exclude node_modules --exclude src --exclude scripts --exclude package.json --exclude package-lock.json --exclude vite.config.js \
-  "${THEME}/" "${HOST}:${ROOT}/wp-content/themes/vgarco/"
+THEME_EXCLUDES=(node_modules src scripts package.json package-lock.json vite.config.js)
+
+push_dir() {
+  local src=$1 dst=$2
+  shift 2
+  local ex=() p
+  for p in "$@"; do ex+=("--exclude=$p"); done
+  tar -C "$src" ${ex[@]+"${ex[@]}"} --mode='u=rwX,go=rX' -cf - . |
+    "${SSH[@]}" "set -euo pipefail; rm -rf '${dst}.new' '${dst}.old'; install -d -m 0755 '${dst}.new'; tar -C '${dst}.new' --no-same-owner --no-same-permissions -xf -; [ ! -e '${dst}' ] || mv '${dst}' '${dst}.old'; mv '${dst}.new' '${dst}'; rm -rf '${dst}.old'"
+}
+
+push_loader() {
+  local dst="${ROOT}/wp-content/mu-plugins"
+  "${SSH[@]}" "set -euo pipefail; cat > '${dst}/.vgarco-loader.php.new'; chmod 0644 '${dst}/.vgarco-loader.php.new'; mv -f '${dst}/.vgarco-loader.php.new' '${dst}/vgarco-loader.php'" < "${REPO}/wp-content/mu-plugins/vgarco-loader.php"
+}
+
+if command -v rsync >/dev/null 2>&1; then
+  step "5/8 rsync (chỉ ba thứ này; thuộc deploy, PHP chỉ đọc)"
+  RSYNC=(rsync -a --delay-updates --itemize-changes -e "ssh ${DEPLOY_SSH_OPTS:-}")
+  run "${RSYNC[@]}" "${REPO}/wp-content/mu-plugins/vgarco-loader.php" "${HOST}:${ROOT}/wp-content/mu-plugins/"
+  run "${RSYNC[@]}" --delete-delay "${REPO}/wp-content/plugins/vgarco-core/" "${HOST}:${ROOT}/wp-content/plugins/vgarco-core/"
+  run "${RSYNC[@]}" --delete-delay $(printf -- '--exclude %s ' "${THEME_EXCLUDES[@]}") "${THEME}/" "${HOST}:${ROOT}/wp-content/themes/vgarco/"
+else
+  step "5/8 tar qua ssh (máy này không có rsync; chỉ ba thứ này; mỗi thư mục dựng ở .new rồi đổi tên)"
+  run push_loader
+  run push_dir "${REPO}/wp-content/plugins/vgarco-core" "${ROOT}/wp-content/plugins/vgarco-core"
+  run push_dir "${THEME}" "${ROOT}/wp-content/themes/vgarco" "${THEME_EXCLUDES[@]}"
+fi
 
 step "6/8 Reload PHP-FPM, xóa cache đối tượng và Cloudflare"
 remote "set -euo pipefail; sudo systemctl reload php8.3-fpm; cd '${ROOT}'; wp cache flush --quiet || true; \
