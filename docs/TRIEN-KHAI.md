@@ -1,7 +1,7 @@
 # Triển khai
 
-> **Trạng thái: thiết kế, chưa chạy trên máy chủ thật.** `scripts/ops/provision.sh` (dựng máy chủ) và `scripts/ops/deploy.sh` (đưa mã lên, tự hoàn tác khi kiểm khói hỏng) đã có **dưới dạng bản thiết kế**: mới kiểm được cú pháp (`bash -n`),
-> chế độ `--dry-run` (in kế hoạch) và các chốt chặn tham số; **chưa chạy trên Ubuntu hay máy chủ nào**, nên còn những chỗ phải kiểm lần đầu (đã ghi trong tiêu đề mỗi tệp). Tên miền và máy chủ được hoãn theo yêu cầu.
+> **Trạng thái: thiết kế, mới chạy thử một phần.** `scripts/ops/provision.sh` (dựng máy chủ) đã chạy thật 7/9 bước (`packages users php mariadb redis nginx cron`, hai lần liên tiếp để kiểm tính chạy lại được) trên một VM Ubuntu 24.04 thử ngày 29/10/2026; hai bước `ssh` và `firewall` **chưa chạy thật** vì dễ tự khóa mình. `scripts/ops/deploy.sh` (đưa mã lên, tự hoàn tác khi kiểm khói hỏng) vẫn là **bản thiết kế**: mới kiểm được cú pháp (`bash -n`),
+> chế độ `--dry-run` (in kế hoạch) và các chốt chặn tham số, nên còn những chỗ phải kiểm lần đầu (đã ghi trong tiêu đề mỗi tệp). Tên miền và máy chủ chính thức được hoãn theo yêu cầu.
 > Những gì **đã chạy được và kiểm chứng**: dựng website trên WordPress 7.1 thật bằng phòng thử (`tests/wp-lab`), build theme, bộ kiểm thử, và script kiểm nhanh `scripts/ops/smoke.mjs` (chạy với bất kỳ địa chỉ nào).
 > Tài liệu này ghi quy trình để khi có máy chủ chỉ còn việc *chạy*, không phải *nghĩ lại*.
 
@@ -120,10 +120,16 @@ Kho Git phải sạch (triển khai từ commit đã có); chạy toàn bộ ki�
 xóa cache đối tượng và Cloudflare; chạy `smoke.mjs`; **nếu kiểm khói hỏng thì tự giải gói hoàn tác**, reload, xóa cache và thoát mã 1. Người dùng ssh phải là `deploy` (quyền sudo của `deploy` chỉ gồm `systemctl reload php8.3-fpm`, do `provision.sh` cấp).
 Chọn rsync + gói hoàn tác thay cho `releases/<commit>` + liên kết `current` vì WordPress xử lý plugin/theme/mu-plugin qua liên kết tượng trưng nhiều chỗ chưa kiểm chứng (đường dẫn thật của plugin, `plugins_url`); đổi sang liên kết chỉ sau khi thử trên staging.
 
-**Dựng máy chủ: `scripts/ops/provision.sh`** (bản thiết kế, chưa chạy thật): Ubuntu 24.04 sạch → người dùng (`deploy`, người dùng PHP không shell, `backup`), SSH chỉ khóa, `ufw` (443 chỉ cho Cloudflare, không mở 80), pool PHP-FPM riêng từng môi trường, MariaDB và Redis chỉ localhost
+**Dựng máy chủ: `scripts/ops/provision.sh`** (7/9 bước đã chạy thật trên VM thử, xem cuối mục): Ubuntu 24.04 sạch → người dùng (`deploy`, người dùng PHP không shell, `backup`), SSH chỉ khóa, `ufw` (443 chỉ cho Cloudflare, không mở 80), pool PHP-FPM riêng từng môi trường, MariaDB và Redis chỉ localhost
 (mật khẩu sinh ngẫu nhiên, chỉ nằm trong `/etc/vgarco/*.php` quyền 0640), Nginx (khối `default_server` từ chối, khối của tên miền, chặn tệp nhạy cảm, Authenticated Origin Pulls khi đã có CA), cron. Chạy lại được (chỉ ghi tệp khi nội dung đổi, giữ bản `.bak`).
 **Rủi ro lớn nhất là tự khóa mình ngoài máy chủ** (SSH, tường lửa): bước `ssh` từ chối chạy nếu `deploy` chưa có khóa công khai, giữ cổng 22 tới khi chạy lại với `--finalize-ssh`, và mở cổng SSH trước khi bật `ufw`.
 Chưa có trong script: sao lưu restic, Telegram, cấp chứng chỉ Let's Encrypt lần đầu, tiêu đề bảo mật (HSTS/CSP) của Nginx — vẫn là tài liệu.
+
+*Chạy thử 29/10/2026* (VM Ubuntu 24.04.4, 8 CPU/8 GB, tên miền thử `staging.vgarco.test`, môi trường `staging`; chạy lần lượt từng bước rồi chạy lại cả 7 bước: không tệp nào đổi, không có `.bak`, không dịch vụ nào bị khởi động lại, mật khẩu giữ nguyên). Lỗi tìm được và đã sửa: `http2 on;` chỉ nginx ≥ 1.25.1 hiểu, Ubuntu 24.04 có 1.24.0 nên đổi thành `listen 443 ssl http2`; tập lệnh làm mới IP Cloudflare trước đây chỉ được tạo ở bước `firewall` nên bước `nginx` chạy riêng bị hỏng, nay cả hai bước cùng gọi `cf_helper`. Còn mở:
+- GD của PHP trên Ubuntu báo `AVIF Support=false`: việc nén AVIF phải dựa vào Imagick hoặc Modern Image Formats, kiểm lại khi cài plugin.
+- Nginx vẫn nghe cổng 80 bằng khối mặc định của gói (`sites-enabled/default`); `ufw` sẽ chặn khi bước `firewall` chạy, nhưng nên gỡ khối này.
+- Tài khoản `backup` đã có sẵn trong Ubuntu (không đăng nhập được), nên script không tạo tài khoản `backup` dùng shell; cần chọn tên khác khi viết phần sao lưu.
+- WP-CLI chưa cài (cron `wp cron event run` sẽ lỗi tới khi cài); `ssh` và `firewall` chưa chạy thật.
 
 ## 5. Kiểm tra sau triển khai
 

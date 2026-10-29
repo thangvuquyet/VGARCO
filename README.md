@@ -118,7 +118,7 @@ Chuỗi mới phải có bản dịch (thêm vào `de-draft.json` hoặc sửa t
 Đã viết và kiểm thử bằng máy: 13 màn hình + hộp thoại tìm kiếm + 404 + trang pháp lý, tuyển dụng (giao diện, nộp hồ sơ, quản trị hồ sơ, thư, xuất .xlsx, tự xóa 12 tháng),
 tìm kiếm dự án, SEO cơ bản, bản dịch tiếng Đức (nháp), bộ chuyển ngôn ngữ, khóa đăng nhập, xóa cache Cloudflare, nhập liệu bằng bảng tính, trợ năng (axe-core: 0 lỗi).
 
-Có bản thiết kế, chưa chạy trên máy chủ thật: `scripts/ops/provision.sh` (dựng máy chủ) và `scripts/ops/deploy.sh` (đưa mã lên, tự hoàn tác) — mới kiểm cú pháp và `--dry-run`.
+`scripts/ops/provision.sh` (dựng máy chủ): 7/9 bước đã chạy thật trên một VM Ubuntu 24.04 thử ngày 29/10/2026 (`ssh` và `firewall` chưa). `scripts/ops/deploy.sh` (đưa mã lên, tự hoàn tác) vẫn là bản thiết kế, mới kiểm cú pháp và `--dry-run`.
 Chưa làm: kho Git từ xa, tên miền/hosting, cấu hình Cloudflare/Brevo, sao lưu, tiêu đề bảo mật của Nginx.
 
 Đã chạy thử trên WordPress 7.1 thật (SQLite; `tests/wp-lab`): kích hoạt, kiểu nội dung và phân loại, nhập liệu bằng bảng tính (lõi `VGARCO_CLI_Command`, WP-CLI giả), REST nộp hồ sơ và tìm kiếm,

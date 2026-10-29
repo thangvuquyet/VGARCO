@@ -4,7 +4,7 @@ set -euo pipefail
 
 usage() {
   cat <<'USAGE'
-provision.sh — dựng máy chủ gốc VGARCO từ Ubuntu 24.04 sạch (BẢN THIẾT KẾ, chưa chạy trên máy chủ thật)
+provision.sh — dựng máy chủ gốc VGARCO từ Ubuntu 24.04 sạch (7/9 bước đã chạy thật trên VM thử 29/10/2026; ssh và firewall chưa)
 
   sudo ./provision.sh --env=staging|production --domain=<tên miền> [--ssh-port=<số>] [--finalize-ssh] [--phase=a,b,...] [--dry-run]
 
@@ -75,6 +75,26 @@ ghi_tep() {
 }
 
 phase_on() { [[ ",${SELECTED}," == *",$1,"* ]]; }
+
+cf_helper() {
+  ghi_tep /usr/local/sbin/vgarco-cloudflare-ips 0750 root:root <<'EOS' || true
+#!/usr/bin/env bash
+set -euo pipefail
+v4=$(curl -fsS --max-time 20 https://www.cloudflare.com/ips-v4)
+v6=$(curl -fsS --max-time 20 https://www.cloudflare.com/ips-v6)
+ranges=$(printf '%s\n%s\n' "$v4" "$v6" | grep -E '^([0-9]{1,3}\.){3}[0-9]{1,3}/[0-9]{1,2}$|^[0-9a-fA-F:]+/[0-9]{1,3}$')
+[[ $(wc -l <<<"$ranges") -ge 10 ]] || { echo "Danh sách IP Cloudflare bất thường, bỏ qua." >&2; exit 1; }
+{
+  echo "# Sinh bởi vgarco-cloudflare-ips — đừng sửa tay"
+  while read -r r; do echo "set_real_ip_from $r;"; done <<<"$ranges"
+  echo "real_ip_header CF-Connecting-IP;"
+} >/etc/nginx/conf.d/cloudflare-realip.inc.new
+mv /etc/nginx/conf.d/cloudflare-realip.inc.new /etc/nginx/conf.d/cloudflare-realip.inc
+while num=$(ufw status numbered | awk -F'[][]' '/cloudflare-443/ {gsub(/ /,"",$2); print $2}' | tail -n1) && [[ -n "$num" ]]; do ufw --force delete "$num" >/dev/null; done
+while read -r r; do ufw allow from "$r" to any port 443 proto tcp comment cloudflare-443 >/dev/null; done <<<"$ranges"
+nginx -t && systemctl reload nginx
+EOS
+}
 
 if (( ! DRY )); then
   [[ $EUID -eq 0 ]] || { echo "Cần chạy bằng root (sudo)." >&2; exit 1; }
@@ -169,23 +189,7 @@ phase_on firewall && {
   (( FINALIZE_SSH )) && run ufw delete allow 22/tcp || true
   run ufw default deny incoming
   run ufw default allow outgoing
-  ghi_tep /usr/local/sbin/vgarco-cloudflare-ips 0750 root:root <<'EOS' || true
-#!/usr/bin/env bash
-set -euo pipefail
-v4=$(curl -fsS --max-time 20 https://www.cloudflare.com/ips-v4)
-v6=$(curl -fsS --max-time 20 https://www.cloudflare.com/ips-v6)
-ranges=$(printf '%s\n%s\n' "$v4" "$v6" | grep -E '^([0-9]{1,3}\.){3}[0-9]{1,3}/[0-9]{1,2}$|^[0-9a-fA-F:]+/[0-9]{1,3}$')
-[[ $(wc -l <<<"$ranges") -ge 10 ]] || { echo "Danh sách IP Cloudflare bất thường, bỏ qua." >&2; exit 1; }
-{
-  echo "# Sinh bởi vgarco-cloudflare-ips — đừng sửa tay"
-  while read -r r; do echo "set_real_ip_from $r;"; done <<<"$ranges"
-  echo "real_ip_header CF-Connecting-IP;"
-} >/etc/nginx/conf.d/cloudflare-realip.inc.new
-mv /etc/nginx/conf.d/cloudflare-realip.inc.new /etc/nginx/conf.d/cloudflare-realip.inc
-while num=$(ufw status numbered | awk -F'[][]' '/cloudflare-443/ {gsub(/ /,"",$2); print $2}' | tail -n1) && [[ -n "$num" ]]; do ufw --force delete "$num" >/dev/null; done
-while read -r r; do ufw allow from "$r" to any port 443 proto tcp comment cloudflare-443 >/dev/null; done <<<"$ranges"
-nginx -t && systemctl reload nginx
-EOS
+  cf_helper
   run /usr/local/sbin/vgarco-cloudflare-ips
   run ufw --force enable
 }
@@ -296,16 +300,14 @@ phase_on nginx && {
   ghi_tep /etc/nginx/conf.d/00-default-reject.conf 0644 root:root <<'EOF' && NGX_CHANGED=1 || NGX_CHANGED=0
 # Truy cập bằng IP hoặc tên miền lạ không nhận được chứng chỉ (phương án 10.2).
 server {
-    listen 443 ssl default_server;
-    http2 on;
+    listen 443 ssl http2 default_server;
     ssl_reject_handshake on;
 }
 EOF
   ghi_tep "/etc/nginx/conf.d/${SITE}.conf" 0644 root:root <<EOF && NGX_CHANGED=1 || true
 # Sinh bởi provision.sh — ${ENV_NAME}. Khối này khớp phương án triển khai mục 10.2.
 server {
-    listen 443 ssl;
-    http2 on;
+    listen 443 ssl http2;
     server_name ${DOMAIN};
     root ${WEB_ROOT};
     index index.php;
@@ -342,6 +344,7 @@ server {
     }
 }
 EOF
+  cf_helper
   [[ -f /etc/nginx/conf.d/cloudflare-realip.inc ]] || run /usr/local/sbin/vgarco-cloudflare-ips
   if (( NGX_CHANGED )); then run nginx -t; run systemctl reload nginx; fi
   note "Tiêu đề bảo mật (HSTS, X-Content-Type-Options, Referrer-Policy, CSP) do Cloudflare/Nginx đặt theo yêu cầu 5.4.2 của phương án — CHƯA có trong khối này; smoke.mjs --env=production sẽ báo thiếu."
