@@ -43,7 +43,7 @@ const phpFiles = [ ...walk( join( root, 'wp-content' ), ( p ) => p.endsWith( '.p
 const bad = phpFiles.filter( ( f ) => run( php, [ ...phpArgs, '-l', f ] ).status !== 0 );
 report( `php -l (${ phpFiles.length } tệp)`, bad.length === 0, bad.join( ', ' ) );
 
-for ( const script of [ 'smoke.php', 'pages.php', 'apply.php', 'search.php', 'seo.php', 'security.php', 'import.php', 'media.php', 'export-images.php' ] ) {
+for ( const script of [ 'smoke.php', 'coexist.php', 'pages.php', 'apply.php', 'search.php', 'seo.php', 'security.php', 'import.php', 'media.php', 'export-images.php' ] ) {
 	const r = run( php, [ ...( [ 'apply.php', 'media.php', 'export-images.php' ].includes( script ) ? withApply : withMb ), join( 'tests', 'php', script ) ] );
 	const last = ( r.stdout + r.stderr ).trim().split( '\n' ).pop();
 	report( script, r.status === 0, last );

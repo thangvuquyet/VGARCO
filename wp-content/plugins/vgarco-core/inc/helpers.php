@@ -72,17 +72,19 @@ function vgarco_option_defaults(): array {
 	);
 }
 
-function vgarco_option( string $path, $fallback = '' ) {
-	$root  = explode( '.', $path )[0];
-	$saved = function_exists( 'get_field' ) ? get_field( $root, 'option' ) : null;
-	$value = vgarco_dot_get( array( $root => $saved ), $path );
+if ( ! function_exists( 'vgarco_option' ) ) {
+	function vgarco_option( string $path, $fallback = '' ) {
+		$root  = explode( '.', $path )[0];
+		$saved = function_exists( 'get_field' ) ? get_field( $root, 'option' ) : null;
+		$value = vgarco_dot_get( array( $root => $saved ), $path );
 
-	if ( null !== $value && '' !== $value && array() !== $value && false !== $value ) {
-		return $value;
+		if ( null !== $value && '' !== $value && array() !== $value && false !== $value ) {
+			return $value;
+		}
+
+		$default = vgarco_dot_get( vgarco_option_defaults(), $path );
+		return $default ?? $fallback;
 	}
-
-	$default = vgarco_dot_get( vgarco_option_defaults(), $path );
-	return $default ?? $fallback;
 }
 
 function vgarco_client_ip(): string {
@@ -128,11 +130,13 @@ function vgarco_with_language( string $lang, callable $fn ) {
 	}
 }
 
-function vgarco_directions_url(): string {
-	$custom = vgarco_option( 'chi_duong_url' );
-	if ( is_string( $custom ) && '' !== $custom ) {
-		return $custom;
+if ( ! function_exists( 'vgarco_directions_url' ) ) {
+	function vgarco_directions_url(): string {
+		$custom = vgarco_option( 'chi_duong_url' );
+		if ( is_string( $custom ) && '' !== $custom ) {
+			return $custom;
+		}
+		$address = trim( (string) preg_replace( '/\s+/u', ' ', (string) vgarco_option( 'phap_nhan.dia_chi_van_phong' ) ) );
+		return 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode( $address );
 	}
-	$address = trim( (string) preg_replace( '/\s+/u', ' ', (string) vgarco_option( 'phap_nhan.dia_chi_van_phong' ) ) );
-	return 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode( $address );
 }

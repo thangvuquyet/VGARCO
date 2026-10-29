@@ -877,6 +877,10 @@ const M = [
     "as=\"font\" type=\"font/woff2\" crossorigin>", "as=\"font\" type=\"font/woff2\">", 'pages'],
   ["thẻ dự án: nhãn loại ảnh hiện cả khi chưa có ảnh", "wp-content/themes/vgarco/template-parts/cards/project.php",
     "<?php if ( $image_id > 0 ) :", "<?php if ( true ) :", 'pages'],
+  ["cùng tồn tại: plugin khai báo lại vgarco_option của theme", "wp-content/plugins/vgarco-core/inc/helpers.php",
+    "if ( ! function_exists( 'vgarco_option' ) ) {", "if ( true ) {", 'coexist'],
+  ["cùng tồn tại: plugin khai báo lại vgarco_directions_url của theme", "wp-content/plugins/vgarco-core/inc/helpers.php",
+    "if ( ! function_exists( 'vgarco_directions_url' ) ) {", "if ( true ) {", 'coexist'],
 ];
 
 if (process.argv[2] === '--check') {
