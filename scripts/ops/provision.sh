@@ -123,6 +123,7 @@ phase_on users && {
   log "users: người dùng và thư mục"
   have id && id deploy >/dev/null 2>&1 || run useradd --create-home --shell /bin/bash deploy
   have id && id "$PHP_USER" >/dev/null 2>&1 || run useradd --system --no-create-home --shell /usr/sbin/nologin "$PHP_USER"
+  id -nG deploy 2>/dev/null | tr ' ' '\n' | grep -qx "$PHP_USER" || run usermod -aG "$PHP_USER" deploy
   have id && id backup >/dev/null 2>&1 || run useradd --create-home --shell /bin/bash backup
   run install -d -m 0700 -o deploy -g deploy /home/deploy/.ssh
   run install -d -m 0755 -o deploy -g deploy "$(dirname "$WEB_ROOT")" "$WEB_ROOT" "$WEB_ROOT/wp-content" "$WEB_ROOT/wp-content/mu-plugins" "$WEB_ROOT/wp-content/plugins" "$WEB_ROOT/wp-content/themes"
@@ -227,6 +228,19 @@ php_admin_value[error_log] = /var/log/php8.3-fpm-${SITE}.log
 php_admin_flag[log_errors] = on
 php_admin_flag[display_errors] = off
 EOF
+  PHP_LOG="/var/log/php8.3-fpm-${SITE}.log"
+  [[ -f "$PHP_LOG" ]] || run install -m 0640 -o "$PHP_USER" -g adm /dev/null "$PHP_LOG"
+  ghi_tep "/etc/logrotate.d/php8.3-fpm-${SITE}" 0644 root:root <<EOF || true
+${PHP_LOG} {
+    weekly
+    rotate 8
+    missingok
+    notifempty
+    compress
+    delaycompress
+    create 0640 ${PHP_USER} adm
+}
+EOF
   [[ -f /etc/php/8.3/fpm/pool.d/www.conf ]] && run mv /etc/php/8.3/fpm/pool.d/www.conf /etc/php/8.3/fpm/pool.d/www.conf.disabled || true
   if (( PHP_CHANGED || POOL_CHANGED )); then run php-fpm8.3 -t; run systemctl reload php8.3-fpm; fi
 }
@@ -236,6 +250,7 @@ phase_on mariadb && {
   ghi_tep /etc/mysql/mariadb.conf.d/99-vgarco.cnf 0644 root:root <<'EOF' && run systemctl restart mariadb || true
 [mysqld]
 bind-address = 127.0.0.1
+local_infile = 0
 innodb_buffer_pool_size = 1G
 character-set-server = utf8mb4
 collation-server = utf8mb4_unicode_520_ci
@@ -318,7 +333,7 @@ server {
     ${AOP}
 
     include /etc/nginx/conf.d/cloudflare-realip.inc;
-    client_max_body_size 16m;
+    client_max_body_size 18m;
     server_tokens off;
 
     location ^~ /.well-known/acme-challenge/ { root /var/www/${SITE}/acme; }
@@ -346,6 +361,7 @@ server {
 EOF
   cf_helper
   [[ -f /etc/nginx/conf.d/cloudflare-realip.inc ]] || run /usr/local/sbin/vgarco-cloudflare-ips
+  if [[ -e /etc/nginx/sites-enabled/default ]]; then run rm -f /etc/nginx/sites-enabled/default; NGX_CHANGED=1; fi
   if (( NGX_CHANGED )); then run nginx -t; run systemctl reload nginx; fi
   note "Tiêu đề bảo mật (HSTS, X-Content-Type-Options, Referrer-Policy, CSP) do Cloudflare/Nginx đặt theo yêu cầu 5.4.2 của phương án — CHƯA có trong khối này; smoke.mjs --env=production sẽ báo thiếu."
 }
@@ -354,6 +370,7 @@ phase_on cron && {
   log "cron: WP-Cron thật mỗi 5 phút, làm mới IP Cloudflare hằng tuần"
   ghi_tep "/etc/cron.d/${SITE}" 0644 root:root <<EOF || true
 # Sinh bởi provision.sh
+PATH=/usr/local/bin:/usr/bin:/bin
 */5 * * * * deploy cd ${WEB_ROOT} && wp cron event run --due-now --quiet
 EOF
   ghi_tep /etc/cron.d/vgarco-cloudflare-ips 0644 root:root <<'EOF' || true

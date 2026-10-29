@@ -125,11 +125,21 @@ Chọn rsync + gói hoàn tác thay cho `releases/<commit>` + liên kết `curre
 **Rủi ro lớn nhất là tự khóa mình ngoài máy chủ** (SSH, tường lửa): bước `ssh` từ chối chạy nếu `deploy` chưa có khóa công khai, giữ cổng 22 tới khi chạy lại với `--finalize-ssh`, và mở cổng SSH trước khi bật `ufw`.
 Chưa có trong script: sao lưu restic, Telegram, cấp chứng chỉ Let's Encrypt lần đầu, tiêu đề bảo mật (HSTS/CSP) của Nginx — vẫn là tài liệu.
 
-*Chạy thử 29/10/2026* (VM Ubuntu 24.04.4, 8 CPU/8 GB, tên miền thử `staging.vgarco.test`, môi trường `staging`; chạy lần lượt từng bước rồi chạy lại cả 7 bước: không tệp nào đổi, không có `.bak`, không dịch vụ nào bị khởi động lại, mật khẩu giữ nguyên). Lỗi tìm được và đã sửa: `http2 on;` chỉ nginx ≥ 1.25.1 hiểu, Ubuntu 24.04 có 1.24.0 nên đổi thành `listen 443 ssl http2`; tập lệnh làm mới IP Cloudflare trước đây chỉ được tạo ở bước `firewall` nên bước `nginx` chạy riêng bị hỏng, nay cả hai bước cùng gọi `cf_helper`. Còn mở:
-- GD của PHP trên Ubuntu báo `AVIF Support=false`: việc nén AVIF phải dựa vào Imagick hoặc Modern Image Formats, kiểm lại khi cài plugin.
-- Nginx vẫn nghe cổng 80 bằng khối mặc định của gói (`sites-enabled/default`); `ufw` sẽ chặn khi bước `firewall` chạy, nhưng nên gỡ khối này.
+*Chạy thử 29/10/2026* (VM Ubuntu 24.04.4, 8 CPU/8 GB, tên miền thử `staging.vgarco.test`, môi trường `staging`; chạy lần lượt từng bước rồi chạy lại cả 7 bước: không tệp nào đổi, không có `.bak`, không dịch vụ nào bị khởi động lại, mật khẩu giữ nguyên). Lỗi tìm được và đã sửa: `http2 on;` chỉ nginx ≥ 1.25.1 hiểu, Ubuntu 24.04 có 1.24.0 nên đổi thành `listen 443 ssl http2`; tập lệnh làm mới IP Cloudflare trước đây chỉ được tạo ở bước `firewall` nên bước `nginx` chạy riêng bị hỏng, nay cả hai bước cùng gọi `cf_helper`.
+Kiểm sâu cùng ngày (gửi yêu cầu thật qua Nginx → PHP-FPM bằng một tệp thử tạm, rồi xóa): PHP-FPM chạy đúng người dùng, thư mục mã không ghi được, ảnh và thư mục riêng ghi được, nối CSDL và Redis từ FPM được, `exec()` bị tắt, nhiều tên miền lạ bị từ chối ở bước bắt tay TLS. Lỗi tìm thêm và đã sửa:
+- Nhật ký lỗi của pool (`/var/log/php8.3-fpm-<môi trường>.log`) không tạo được vì người dùng PHP không có quyền ghi `/var/log`, nên mọi `error_log()` biến mất: nay bước `php` tạo sẵn tệp (0640, nhóm `adm`) và thêm logrotate.
+- `deploy` không đọc được `/etc/vgarco/*.php` nên mọi lệnh `wp` và cron `wp cron` chạy dưới `deploy` đều không nạp được mật khẩu CSDL: nay `deploy` thuộc nhóm của người dùng PHP.
+- cron không có `/usr/local/bin` trong `PATH` nên không thấy `wp`: đã thêm dòng `PATH`.
+- Nginx giới hạn thân yêu cầu 16 MB nhưng PHP cho 18 MB (tệp 16 MB bị 413): Nginx nay 18 MB.
+- Khối Nginx mặc định của gói vẫn nghe cổng 80: đã gỡ `sites-enabled/default`.
+- MariaDB: tắt `local_infile`. **Không** thêm `skip-name-resolve`: ứng dụng nối qua `127.0.0.1` và quyền cấp cho `'…'@'localhost'` sẽ không khớp nữa.
+
+Còn mở:
+- GD của PHP trên Ubuntu báo `AVIF Support=false` và chưa cài Imagick: nén AVIF cần `php8.3-imagick` (kiểm ImageMagick của Ubuntu có AVIF không) hoặc plugin Modern Image Formats; cần quyết định trước khi đo ngân sách ảnh.
 - Tài khoản `backup` đã có sẵn trong Ubuntu (không đăng nhập được), nên script không tạo tài khoản `backup` dùng shell; cần chọn tên khác khi viết phần sao lưu.
-- WP-CLI chưa cài (cron `wp cron event run` sẽ lỗi tới khi cài); `ssh` và `firewall` chưa chạy thật.
+- Staging và production chung một máy: `redis.php` và `secrets.php` chỉ được tạo một lần với nhóm của môi trường chạy trước, người dùng PHP của môi trường sau sẽ không đọc được; cần tách theo môi trường hoặc dùng nhóm chung trước khi dựng môi trường thứ hai trên cùng máy.
+- WP-CLI chưa cài (cron `wp cron event run` sẽ lỗi tới khi cài). Múi giờ máy là UTC (cron 02:30 sao lưu sẽ là 09:30 giờ Việt Nam), chưa có swap, Nginx chưa nghe IPv6 ở cổng 443 dù `ufw` đã có dải IPv6 của Cloudflare, VM còn 43 gói chờ cập nhật và đang chờ khởi động lại (kernel, libc6).
+- `ssh` và `firewall` chưa chạy thật.
 
 ## 5. Kiểm tra sau triển khai
 
