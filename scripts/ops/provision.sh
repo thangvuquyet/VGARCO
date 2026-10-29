@@ -107,11 +107,11 @@ echo "Môi trường: ${ENV_NAME} | tên miền: ${DOMAIN} | người dùng PHP:
 
 phase_on packages && {
   log "packages: gói hệ thống"
-  PKGS=(nginx php8.3-fpm php8.3-cli php8.3-mysql php8.3-gd php8.3-mbstring php8.3-xml php8.3-zip php8.3-curl php8.3-intl php8.3-redis
+  PKGS=(nginx php8.3-fpm php8.3-cli php8.3-mysql php8.3-gd php8.3-mbstring php8.3-xml php8.3-zip php8.3-curl php8.3-intl php8.3-redis php8.3-imagick
     mariadb-server redis-server certbot fail2ban ufw unattended-upgrades rsync zstd curl ca-certificates)
   run apt-get update -y
   run env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends "${PKGS[@]}"
-  note "Kiểm khi chạy thật: php -m | grep -i -E 'gd|zip|fileinfo|mbstring|intl' và php -r 'var_dump(gd_info()[\"AVIF Support\"]);' (docs/TRIEN-KHAI.md mục 2)."
+  note "Kiểm khi chạy thật: php -m | grep -i -E 'gd|zip|fileinfo|mbstring|intl' và php -r 'var_dump(count(Imagick::queryFormats(\"AVIF\")) > 0);' (GD của Ubuntu không có AVIF, mã hóa AVIF đi qua Imagick; docs/TRIEN-KHAI.md mục 2)."
   if ! have wp; then
     note "WP-CLI chưa có. Cài bản ghim phiên bản + kiểm băm (điền WPCLI_VERSION và WPCLI_SHA512 từ trang phát hành chính thức), KHÔNG tải 'bản mới nhất':"
     note "curl -fsSL -o /usr/local/bin/wp https://github.com/wp-cli/wp-cli/releases/download/v\${WPCLI_VERSION}/wp-cli-\${WPCLI_VERSION}.phar && echo \"\${WPCLI_SHA512}  /usr/local/bin/wp\" | sha512sum -c - && chmod 0755 /usr/local/bin/wp"
@@ -127,7 +127,7 @@ phase_on users && {
   have id && id backup >/dev/null 2>&1 || run useradd --create-home --shell /bin/bash backup
   run install -d -m 0700 -o deploy -g deploy /home/deploy/.ssh
   run install -d -m 0755 -o deploy -g deploy "$(dirname "$WEB_ROOT")" "$WEB_ROOT" "$WEB_ROOT/wp-content" "$WEB_ROOT/wp-content/mu-plugins" "$WEB_ROOT/wp-content/plugins" "$WEB_ROOT/wp-content/themes"
-  run install -d -m 2775 -o "$PHP_USER" -g deploy "$WEB_ROOT/wp-content/uploads"
+  run install -d -m 2775 -o "$PHP_USER" -g "$PHP_USER" "$WEB_ROOT/wp-content/uploads"
   run install -d -m 0750 -o "$PHP_USER" -g "$PHP_USER" "$(dirname "$PRIVATE_DIR")" "$PRIVATE_DIR"
   run install -d -m 0750 -o root -g "$PHP_USER" "$SECRETS_DIR"
   run install -d -m 0750 -o deploy -g deploy "$(dirname "$WEB_ROOT")/rollback"
@@ -150,7 +150,15 @@ EOF
 }
 
 phase_on ssh && {
-  log "ssh: chỉ khóa công khai, AllowUsers deploy (cổng ${SSH_PORT})"
+  ADMIN_USER="${SUDO_USER:-}"
+  [[ "$ADMIN_USER" == "root" || "$ADMIN_USER" == "deploy" ]] && ADMIN_USER=""
+  ALLOWED="deploy${ADMIN_USER:+ $ADMIN_USER}"
+  log "ssh: chỉ khóa công khai, AllowUsers ${ALLOWED} (cổng ${SSH_PORT})"
+  if (( ! DRY )) && [[ -n "$ADMIN_USER" ]]; then
+    ADMIN_KEYS="$(getent passwd "$ADMIN_USER" | cut -d: -f6)/.ssh/authorized_keys"
+    [[ -s "$ADMIN_KEYS" ]] || { echo "DỪNG bước ssh: $ADMIN_KEYS chưa có khóa công khai nào; tắt mật khẩu lúc này sẽ khóa tài khoản quản trị $ADMIN_USER ngoài máy chủ." >&2; exit 1; }
+  fi
+  [[ -n "$ADMIN_USER" ]] || note "Không có tài khoản quản trị nào được phép SSH (chạy bằng root, không qua sudo): sau bước này chỉ còn deploy, không có quyền root, chạy lại kịch bản phải qua màn hình console."
   KEYS=/home/deploy/.ssh/authorized_keys
   if (( ! DRY )) && [[ ! -s "$KEYS" ]]; then
     echo "DỪNG bước ssh: $KEYS chưa có khóa công khai nào. Thêm khóa của người vận hành rồi chạy lại, nếu không sẽ tự khóa mình ngoài máy chủ." >&2
@@ -162,7 +170,7 @@ phase_on ssh && {
     echo "PasswordAuthentication no"
     echo "KbdInteractiveAuthentication no"
     echo "PubkeyAuthentication yes"
-    echo "AllowUsers deploy"
+    echo "AllowUsers ${ALLOWED}"
     echo "MaxAuthTries 3"
     echo "Port ${SSH_PORT}"
     if (( SSH_PORT != 22 && ! FINALIZE_SSH )); then echo "Port 22"; fi
@@ -205,6 +213,7 @@ opcache.memory_consumption = 192
 opcache.validate_timestamps = 0   ; mã chỉ đổi khi deploy.sh chạy xong và reload php-fpm
 upload_max_filesize = 16M
 post_max_size = 18M
+max_input_vars = 3000
 EOF
   ghi_tep "/etc/php/8.3/fpm/pool.d/${SITE}.conf" 0644 root:root <<EOF && POOL_CHANGED=1 || POOL_CHANGED=0
 ; Sinh bởi provision.sh — pool riêng cho ${ENV_NAME}, mỗi pool một người dùng không shell
@@ -278,6 +287,9 @@ SQL
 
 phase_on redis && {
   log "redis: chỉ localhost, có mật khẩu, 256 MB, allkeys-lru"
+  ghi_tep /etc/sysctl.d/99-vgarco-redis.conf 0644 root:root <<'EOF' && run sysctl -w vm.overcommit_memory=1 || true
+vm.overcommit_memory = 1
+EOF
   RFILE="${SECRETS_DIR}/redis.php"
   if [[ ! -f "$RFILE" ]]; then
     if (( DRY )); then
@@ -303,7 +315,7 @@ phase_on nginx && {
   CERT_DIR="/etc/letsencrypt/live/${DOMAIN}"
   if [[ ! -f "${CERT_DIR}/fullchain.pem" ]]; then
     CERT_PEM="/etc/nginx/vgarco/${SITE}-selfsigned.pem"; CERT_KEY="/etc/nginx/vgarco/${SITE}-selfsigned.key"
-    if [[ ! -f "$CERT_PEM" ]]; then run openssl req -x509 -nodes -newkey rsa:2048 -days 90 -subj "/CN=${DOMAIN}" -keyout "$CERT_KEY" -out "$CERT_PEM"; fi
+    if [[ ! -f "$CERT_PEM" ]]; then run openssl req -x509 -nodes -newkey rsa:2048 -days 90 -subj "/CN=${DOMAIN}" -addext "subjectAltName=DNS:${DOMAIN}" -keyout "$CERT_KEY" -out "$CERT_PEM"; fi
     note "Chứng chỉ tự ký đang được dùng. Cấp Let's Encrypt (certbot webroot /var/www/${SITE}/acme), rồi chạy lại --phase=nginx; sau đó Cloudflare đổi sang Full (strict)."
   else
     CERT_PEM="${CERT_DIR}/fullchain.pem"; CERT_KEY="${CERT_DIR}/privkey.pem"
@@ -314,9 +326,11 @@ phase_on nginx && {
 
   ghi_tep /etc/nginx/conf.d/00-default-reject.conf 0644 root:root <<'EOF' && NGX_CHANGED=1 || NGX_CHANGED=0
 # Truy cập bằng IP hoặc tên miền lạ không nhận được chứng chỉ (phương án 10.2).
+server_tokens off;
 server {
     listen 443 ssl http2 default_server;
     ssl_reject_handshake on;
+    return 444;
 }
 EOF
   ghi_tep "/etc/nginx/conf.d/${SITE}.conf" 0644 root:root <<EOF && NGX_CHANGED=1 || true

@@ -18,10 +18,10 @@
 
 | Lớp | Thiết lập |
 |---|---|
-| Hệ điều hành | Ubuntu LTS; người dùng `deploy` (sở hữu mã, chạy WP-CLI), `vgarco` (người dùng PHP-FPM, không có shell), `backup`; tắt đăng nhập root; SSH chỉ khóa công khai, `AllowUsers deploy`, fail2ban |
+| Hệ điều hành | Ubuntu LTS; người dùng `deploy` (sở hữu mã, chạy WP-CLI), `vgarco` (người dùng PHP-FPM, không có shell), `backup`; tắt đăng nhập root; SSH chỉ khóa công khai, `AllowUsers deploy` cùng tài khoản quản trị đã chạy `sudo provision.sh` (để còn một đường vào có quyền root), fail2ban |
 | Tường lửa | `ufw` mặc định chặn vào; **443 chỉ mở cho dải IP Cloudflare** (làm mới hằng tuần); không mở cổng 80 |
-| Nginx | `real_ip_header CF-Connecting-IP`; `default_server` với `ssl_reject_handshake on`; Authenticated Origin Pulls (chứng chỉ riêng của zone); `client_max_body_size 16m`; chặn thực thi PHP trong `uploads`, chặn `xmlrpc.php`, tệp ẩn (trừ `.well-known`), `.sql .bak .log .ini .sh .lock`, **`readme.html` và `license.txt`**; `/srv/vgarco/private` **ngoài** `root` |
-| PHP-FPM 8.3 | Hai pool (production, staging), mỗi pool một người dùng; `disable_functions = exec,passthru,shell_exec,system,proc_open,popen`; `expose_php = Off`; OPcache `validate_timestamps = 0` (triển khai xong thì reload pool); **`memory_limit` ≥ 256 MB** (ảnh toàn cảnh 12 MB cần ~190 MB khi tạo bản thu nhỏ); extension `gd` (có AVIF), `zip`, `fileinfo`, `mbstring`, `intl` (`exif` tùy chọn: mã tự đọc hướng xoay ảnh) |
+| Nginx | `real_ip_header CF-Connecting-IP`; `default_server` với `ssl_reject_handshake on`; Authenticated Origin Pulls (chứng chỉ riêng của zone); `client_max_body_size 18m` (bằng `post_max_size` của PHP); `server_tokens off`; chặn thực thi PHP trong `uploads`, chặn `xmlrpc.php`, tệp ẩn (trừ `.well-known`), `.sql .bak .log .ini .sh .lock`, **`readme.html` và `license.txt`**; `/srv/vgarco/private` **ngoài** `root` |
+| PHP-FPM 8.3 | Hai pool (production, staging), mỗi pool một người dùng; `disable_functions = exec,passthru,shell_exec,system,proc_open,popen`; `expose_php = Off`; OPcache `validate_timestamps = 0` (triển khai xong thì reload pool); **`memory_limit` ≥ 256 MB** (ảnh toàn cảnh 12 MB cần ~190 MB khi tạo bản thu nhỏ); `max_input_vars = 3000` (mặc định 1000 làm cắt cụt biểu mẫu ACF và menu lớn); extension `gd`, `imagick` (**mã hóa AVIF đi qua Imagick**: `gd` của Ubuntu không có AVIF, kiểm bằng `Imagick::queryFormats('AVIF')`), `zip`, `fileinfo`, `mbstring`, `intl` (`exif` tùy chọn: mã tự đọc hướng xoay ảnh) |
 | Quyền tệp | Mã thuộc `deploy`, PHP **chỉ đọc**; PHP chỉ ghi được `wp-content/uploads` và `/srv/vgarco/private` — kẻ chiếm được tài khoản quản trị cũng không cài được plugin hay sửa mã |
 | CSDL, Redis | MariaDB chỉ nghe `127.0.0.1`, user riêng cho mỗi môi trường; Redis chỉ localhost, có mật khẩu, `maxmemory 256mb`, `allkeys-lru` |
 | Cron hệ thống | `wp cron event run --due-now` (mỗi 5 phút; **mỗi phút** nếu muốn xóa cache Cloudflare sát 30 giây); sao lưu 02:30; làm mới IP Cloudflare và kiểm hạn chứng chỉ hằng tuần |
@@ -122,7 +122,7 @@ Chọn rsync + gói hoàn tác thay cho `releases/<commit>` + liên kết `curre
 
 **Dựng máy chủ: `scripts/ops/provision.sh`** (7/9 bước đã chạy thật trên VM thử, xem cuối mục): Ubuntu 24.04 sạch → người dùng (`deploy`, người dùng PHP không shell, `backup`), SSH chỉ khóa, `ufw` (443 chỉ cho Cloudflare, không mở 80), pool PHP-FPM riêng từng môi trường, MariaDB và Redis chỉ localhost
 (mật khẩu sinh ngẫu nhiên, chỉ nằm trong `/etc/vgarco/*.php` quyền 0640), Nginx (khối `default_server` từ chối, khối của tên miền, chặn tệp nhạy cảm, Authenticated Origin Pulls khi đã có CA), cron. Chạy lại được (chỉ ghi tệp khi nội dung đổi, giữ bản `.bak`).
-**Rủi ro lớn nhất là tự khóa mình ngoài máy chủ** (SSH, tường lửa): bước `ssh` từ chối chạy nếu `deploy` chưa có khóa công khai, giữ cổng 22 tới khi chạy lại với `--finalize-ssh`, và mở cổng SSH trước khi bật `ufw`.
+**Rủi ro lớn nhất là tự khóa mình ngoài máy chủ** (SSH, tường lửa): bước `ssh` từ chối chạy nếu `deploy` hoặc tài khoản quản trị đang chạy `sudo` chưa có khóa công khai (`AllowUsers deploy <quản trị>`; `deploy` không có quyền root nên không để lại tài khoản quản trị thì sau bước này không ai chạy lại được kịch bản), giữ cổng 22 tới khi chạy lại với `--finalize-ssh`, và mở cổng SSH trước khi bật `ufw`.
 Chưa có trong script: sao lưu restic, Telegram, cấp chứng chỉ Let's Encrypt lần đầu, tiêu đề bảo mật (HSTS/CSP) của Nginx — vẫn là tài liệu.
 
 *Chạy thử 29/10/2026* (VM Ubuntu 24.04.4, 8 CPU/8 GB, tên miền thử `staging.vgarco.test`, môi trường `staging`; chạy lần lượt từng bước rồi chạy lại cả 7 bước: không tệp nào đổi, không có `.bak`, không dịch vụ nào bị khởi động lại, mật khẩu giữ nguyên). Lỗi tìm được và đã sửa: `http2 on;` chỉ nginx ≥ 1.25.1 hiểu, Ubuntu 24.04 có 1.24.0 nên đổi thành `listen 443 ssl http2`; tập lệnh làm mới IP Cloudflare trước đây chỉ được tạo ở bước `firewall` nên bước `nginx` chạy riêng bị hỏng, nay cả hai bước cùng gọi `cf_helper`.
@@ -134,12 +134,24 @@ Kiểm sâu cùng ngày (gửi yêu cầu thật qua Nginx → PHP-FPM bằng m�
 - Khối Nginx mặc định của gói vẫn nghe cổng 80: đã gỡ `sites-enabled/default`.
 - MariaDB: tắt `local_infile`. **Không** thêm `skip-name-resolve`: ứng dụng nối qua `127.0.0.1` và quyền cấp cho `'…'@'localhost'` sẽ không khớp nữa.
 
-Còn mở:
-- GD của PHP trên Ubuntu báo `AVIF Support=false` và chưa cài Imagick: nén AVIF cần `php8.3-imagick` (kiểm ImageMagick của Ubuntu có AVIF không) hoặc plugin Modern Image Formats; cần quyết định trước khi đo ngân sách ảnh.
+Vòng kiểm thứ ba (cùng ngày) tìm và sửa thêm:
+- Thư mục `uploads` thuộc nhóm `deploy` nên thư mục tháng do `wp` (chạy dưới `deploy`) tạo ra không ghi được bởi người dùng PHP (tải ảnh trong trang quản trị và tạo bản thu nhỏ sẽ lỗi): nay nhóm của `uploads` là nhóm của người dùng PHP, mà `deploy` đã thuộc nhóm này, nên hai bên ghi được tệp của nhau (đã thử cả hai chiều).
+- Khối `default_server` trả 200 cho `Host` lạ khi đã bắt tay TLS bằng tên miền đúng: nay `return 444`; `server_tokens off` áp cho cả khối này (trang lỗi 400 không còn lộ phiên bản).
+- Bước `ssh` chỉ cho `deploy` vào, mà `deploy` không có quyền root nên sau bước này không ai chạy lại được kịch bản (cấp chứng chỉ, cập nhật): nay thêm tài khoản quản trị đang chạy `sudo` vào `AllowUsers`, và từ chối chạy nếu tài khoản đó chưa có khóa công khai.
+- Redis báo `vm.overcommit_memory` = 0 (lưu nền có thể lỗi khi thiếu RAM): bước `redis` đặt `vm.overcommit_memory = 1` (tệp `/etc/sysctl.d/99-vgarco-redis.conf`).
+- Chứng chỉ tự ký thiếu SAN: đã thêm `subjectAltName`.
+- `gd` không có AVIF nên mục "kiểm khi chạy thật" của chính script không đạt: thêm `php8.3-imagick`; Imagick 6.9.12 mã hóa và giải mã AVIF được (thử bên trong PHP-FPM).
+- `max_input_vars = 3000`.
+
+Cách kiểm cuối cùng: dọn máy thử về trạng thái sạch (gỡ đúng các gói do script cài, xóa thư mục, tài khoản, quy tắc `ufw` do script tạo), dựng lại bằng từng bước một (`packages users php mariadb redis nginx cron`, mỗi bước một lần gọi riêng), kiểm từng bước và toàn bộ (yêu cầu thật qua Nginx → PHP-FPM, quyền ghi hai chiều giữa `deploy` và người dùng PHP, giới hạn tải lên 17/18 MB, `Host` lạ, chứng chỉ, nhật ký), rồi chạy lại cả 7 bước: không tệp nào đổi, không có `.bak`, không dịch vụ nào bị khởi động lại, mật khẩu giữ nguyên.
+
+Còn mở (không thuộc 7 bước, cần quyết định hoặc việc của vận hành):
 - Tài khoản `backup` đã có sẵn trong Ubuntu (không đăng nhập được), nên script không tạo tài khoản `backup` dùng shell; cần chọn tên khác khi viết phần sao lưu.
-- Staging và production chung một máy: `redis.php` và `secrets.php` chỉ được tạo một lần với nhóm của môi trường chạy trước, người dùng PHP của môi trường sau sẽ không đọc được; cần tách theo môi trường hoặc dùng nhóm chung trước khi dựng môi trường thứ hai trên cùng máy.
-- WP-CLI chưa cài (cron `wp cron event run` sẽ lỗi tới khi cài). Múi giờ máy là UTC (cron 02:30 sao lưu sẽ là 09:30 giờ Việt Nam), chưa có swap, Nginx chưa nghe IPv6 ở cổng 443 dù `ufw` đã có dải IPv6 của Cloudflare, VM còn 43 gói chờ cập nhật và đang chờ khởi động lại (kernel, libc6).
-- `ssh` và `firewall` chưa chạy thật.
+- Staging và production chung một máy: `redis.php` và `secrets.php` chỉ được tạo một lần với nhóm của môi trường chạy trước, người dùng PHP của môi trường sau sẽ không đọc được; cần tách theo môi trường (không dùng một nhóm chung, vì staging sẽ đọc được khóa production) trước khi dựng môi trường thứ hai trên cùng máy.
+- WP-CLI chưa cài (cron `wp cron event run` sẽ lỗi tới khi cài).
+- Máy giữ múi giờ UTC (đúng thiết kế: lịch của mã chạy theo UTC, xem `KIEN-TRUC.md`; cron sao lưu 02:30 sẽ là 09:30 giờ Việt Nam), chưa có swap, Nginx chưa nghe IPv6 ở cổng 443 (Cloudflare nối bằng IPv4 khi bản ghi gốc chỉ có A), VM thử còn 43 gói chờ cập nhật và đang chờ khởi động lại (kernel, libc6); `unattended-upgrades` đã bật nên sẽ tự cập nhật bản vá bảo mật.
+- Hai dòng cảnh báo vô hại: Redis ghi `overcommit_memory` ở lần khởi động đầu lúc cài gói (trước khi bước `redis` đặt tham số), MariaDB ghi "unset environment variable" của đơn vị systemd Ubuntu.
+- `ssh` và `firewall` chưa chạy thật (hai bước dễ tự khóa mình; chốt chặn của bước `ssh` đã thử ở chế độ thật và dừng đúng trước khi ghi gì).
 
 ## 5. Kiểm tra sau triển khai
 
