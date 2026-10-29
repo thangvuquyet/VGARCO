@@ -87,7 +87,7 @@ step "2/8 Kiểm thử toàn bộ"
 if (( SKIP_TESTS )); then
   echo "   (bỏ qua theo --skip-tests)"
 else
-  node tests/run.mjs
+  run node tests/run.mjs
 fi
 
 step "3/8 Build theme (dist/ không nằm trong Git)"
