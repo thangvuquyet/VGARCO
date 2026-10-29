@@ -171,6 +171,8 @@ phase_on ssh && {
     echo "PasswordAuthentication no"
     echo "KbdInteractiveAuthentication no"
     echo "PubkeyAuthentication yes"
+    echo "X11Forwarding no"
+    echo "LoginGraceTime 30"
     echo "AllowUsers ${ALLOWED}"
     echo "MaxAuthTries 3"
     echo "Port ${SSH_PORT}"
@@ -207,6 +209,7 @@ phase_on firewall && {
   run ufw default allow outgoing
   cf_helper
   run /usr/local/sbin/vgarco-cloudflare-ips
+  [[ -f /var/log/ufw.log ]] || { run install -m 0640 -o syslog -g adm /dev/null /var/log/ufw.log; run systemctl restart rsyslog; }
   run ufw --force enable
 }
 
