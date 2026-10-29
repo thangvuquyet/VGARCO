@@ -150,6 +150,10 @@ elif (( DRY )); then
   echo "   $ node scripts/ops/smoke.mjs https://${DOMAIN} --env=${ENV_NAME}   (nếu hỏng: giải gói ${BUNDLE}, reload, xóa cache, thoát 1)"
 else
   if ! node "${REPO}/scripts/ops/smoke.mjs" "https://${DOMAIN}" "--env=${ENV_NAME}"; then
+    if ! "${SSH[@]}" "test -f '${ROLLBACK_DIR}/${BUNDLE}'"; then
+      echo "KIỂM KHÓI HỎNG — đây là lần triển khai đầu, không có bản cũ để hoàn tác. Mã mới vẫn nằm trên máy chủ; sửa lỗi rồi chạy lại. Xem docs/SU-CO.md." >&2
+      exit 1
+    fi
     echo "KIỂM KHÓI HỎNG — tự hoàn tác về ${BUNDLE}" >&2
     restore_bundle "$BUNDLE"
     node "${REPO}/scripts/ops/smoke.mjs" "https://${DOMAIN}" "--env=${ENV_NAME}" || echo "Sau hoàn tác kiểm khói VẪN hỏng: lỗi không nằm ở mã vừa đưa lên. Xem docs/SU-CO.md." >&2
