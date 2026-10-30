@@ -57,6 +57,20 @@ SECRETS_DIR="/etc/vgarco"
 WPCLI_VERSION="2.12.0"
 WPCLI_SHA512="be928f6b8ca1e8dfb9d2f4b75a13aa4aee0896f8a9a0a1c45cd5d2c98605e6172e6d014dda2e27f88c98befc16c040cbb2bd1bfa121510ea5cdf5f6a30fe8832"
 
+size_for_ram() {
+  local mb=$1 env=$2 pool children
+  if (( mb >= 7000 )); then pool="1G"; children=8
+  elif (( mb >= 3500 )); then pool="512M"; children=5
+  else pool="256M"; children=3
+  fi
+  [[ "$env" == "staging" ]] && (( mb < 7000 )) && (( children > 3 )) && children=3
+  echo "$pool $children"
+}
+
+MEM_MB=$(awk '/^MemTotal:/ {print int($2/1024)}' /proc/meminfo 2>/dev/null || true)
+MEM_MB=${MEM_MB:-8192}
+read -r INNODB_POOL FPM_CHILDREN < <(size_for_ram "$MEM_MB" "$ENV_NAME")
+
 log() { printf '\n== %s\n' "$*"; }
 note() { printf '   %s\n' "$*"; }
 have() { command -v "$1" >/dev/null 2>&1; }
@@ -127,6 +141,17 @@ phase_on packages && {
     run mv "$WPCLI_TMP" /usr/local/bin/wp
   fi
   run systemctl enable --now unattended-upgrades
+  if (( MEM_MB < 7000 )) && [[ -z "$(swapon --show --noheadings 2>/dev/null)" ]]; then
+    note "RAM ${MEM_MB} MB và chưa có swap: tạo /swapfile 2 GB, swappiness 10"
+    run fallocate -l 2G /swapfile
+    run chmod 600 /swapfile
+    run mkswap /swapfile
+    run swapon /swapfile
+    grep -q '^/swapfile ' /etc/fstab 2>/dev/null || { (( DRY )) && note "~ thêm /swapfile vào /etc/fstab" || echo '/swapfile none swap sw 0 0' >> /etc/fstab; }
+    ghi_tep /etc/sysctl.d/99-vgarco-swap.conf 0644 root:root <<'EOS' && run sysctl -p /etc/sysctl.d/99-vgarco-swap.conf || true
+vm.swappiness = 10
+EOS
+  fi
 }
 
 phase_on users && {
@@ -242,7 +267,7 @@ listen.owner = www-data
 listen.group = www-data
 listen.mode = 0660
 pm = dynamic
-pm.max_children = 8
+pm.max_children = ${FPM_CHILDREN}
 pm.start_servers = 2
 pm.min_spare_servers = 1
 pm.max_spare_servers = 3
@@ -273,11 +298,11 @@ EOF
 
 phase_on mariadb && {
   log "mariadb: chỉ nghe 127.0.0.1; CSDL và người dùng riêng cho ${ENV_NAME}"
-  ghi_tep /etc/mysql/mariadb.conf.d/99-vgarco.cnf 0644 root:root <<'EOF' && run systemctl restart mariadb || true
+  ghi_tep /etc/mysql/mariadb.conf.d/99-vgarco.cnf 0644 root:root <<EOF && run systemctl restart mariadb || true
 [mysqld]
 bind-address = 127.0.0.1
 local_infile = 0
-innodb_buffer_pool_size = 1G
+innodb_buffer_pool_size = ${INNODB_POOL}
 character-set-server = utf8mb4
 collation-server = utf8mb4_unicode_520_ci
 EOF

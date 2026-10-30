@@ -7,12 +7,12 @@
 
 | Dịch vụ | Dùng để | Chủ sở hữu | Email quản trị | 2FA | Ngày gia hạn | Người có quyền truy cập | Khóa/token nằm ở |
 |---|---|---|---|---|---|---|---|
-| Tên miền `vgarco.vn` (nhà đăng ký được VNNIC ủy quyền) | Tên miền chính | VGARCO | | | | | |
-| Tên miền `vgarco.de` | Giữ thương hiệu, chuyển hướng về bản tiếng Đức | VGARCO | | | | | |
+| Tên miền `vgarco.com.vn` (Vietnix, nhà đăng ký được VNNIC ủy quyền) | Tên miền chính | VGARCO | | | | | |
+| Tên miền `vgarco.de` (tùy chọn, mua ở PA Việt Nam vì Vietnix không bán) | Giữ thương hiệu, chuyển hướng về bản tiếng Đức | VGARCO | | | | | |
 | Cloudflare | DNS, CDN, WAF, giới hạn tần suất, DMARC | VGARCO | | | | | API token Cache Purge: `/etc/vgarco/secrets.php` |
-| Máy chủ riêng ảo (VPS) | Chạy website | VGARCO | | | | | Khóa SSH của `deploy` |
+| Máy chủ riêng ảo (VPS SSD Linux 2 của Vietnix: 2 vCPU, 4 GB RAM, 40 GB) | Chạy website (staging và production chung một máy) | VGARCO | | | | | Khóa SSH của `deploy` |
 | Backblaze B2 (hoặc Wasabi) | Kho sao lưu | VGARCO | | | | | Khóa ứng dụng + mật khẩu restic: `/etc/vgarco/restic.env` |
-| Zoho Mail | Hộp thư nhân sự theo tên miền | VGARCO | | | | | |
+| Email doanh nghiệp của Vietnix (gói 15 hộp thư) | Hộp thư nhân sự theo tên miền | VGARCO | | | | | |
 | Brevo | Thư tự động từ website (qua FluentSMTP, API) | VGARCO | | | | | Khóa API: FluentSMTP |
 | HetrixTools | Giám sát hoạt động (đăng nhập ít nhất mỗi 90 ngày) | VGARCO | | | | | |
 | Patchstack | Cảnh báo lỗ hổng thành phần | VGARCO | | | | | |
@@ -43,7 +43,7 @@ Bàn giao: tài khoản quản trị hệ thống, mã nguồn mới nhất, b�
 - ☐ Thành viên Cloudflare
 - ☐ Thành viên kho Git (và token truy cập cá nhân)
 - ☐ Backblaze B2 (khóa ứng dụng cá nhân), restic (nếu nhà thầu từng biết mật khẩu: **đổi** và lưu lại)
-- ☐ Zoho Mail (quản trị)
+- ☐ Email doanh nghiệp của Vietnix (quản trị)
 - ☐ HetrixTools, Patchstack, heartbeat sao lưu
 - ☐ Nhà đăng ký tên miền, nhà cung cấp VPS, Brevo
 - ☐ Token API đã cấp cho nhà thầu: Cloudflare, Telegram, Brevo, B2 → thu hồi và cấp mới
