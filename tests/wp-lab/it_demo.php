@@ -150,7 +150,7 @@ same( 'trang chủ: 5 ảnh trình chiếu, mỗi ảnh có liên kết dự án
 same( 'trang chủ: 5 chấm chuyển trang trình chiếu', 5, substr_count( $html, 'class="showcase-dot"' ) );
 same( 'trang chủ: 3 lĩnh vực có tóm tắt hiện ở trang chủ', 3, substr_count( $html, 'class="service-num"' ) );
 same( 'trang chủ: dải đối tác có 5 đối tác (mỗi đối tác hai lần để chạy vòng)', 10, preg_match_all( '/class="partner-logo(?: has-logo)?"/', $html ) );
-check( 'trang chủ: có bộ chuyển ngôn ngữ VI/DE', str_contains( $html, 'class="language-switch"' ) && str_contains( $html, 'lab_lang=de' ) );
+check( 'trang chủ: có bộ chuyển ngôn ngữ VI/DE', str_contains( $html, 'class="language-switch"' ) && str_contains( $html, '/de/' ) );
 check( 'trang chủ: không có thẻ ảnh với src rỗng', ! str_contains( $html, 'src=""' ) );
 $services_page = http( 'GET', '/linh-vuc-hoat-dong/' );
 same( 'trang lĩnh vực: 200, đủ 6 lĩnh vực', array( 200, 6 ), array( $services_page['status'], substr_count( $services_page['body'], 'class="service-item"' ) ) );

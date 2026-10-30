@@ -36,13 +36,13 @@ function unzip(zip, to) {
 }
 
 if (!existsSync(join(wp, 'wp-load.php'))) {
-  const [wpZip, sqliteZip] = args.map((a) => resolve(a));
-  if (!wpZip || !sqliteZip || !existsSync(wpZip) || !existsSync(sqliteZip)) die('cần đủ hai tệp: <wordpress.zip> <sqlite-database-integration.zip> (xem README.md)');
+  const [wpZip, sqliteZip, scfZip, pllZip] = args.map((a) => resolve(a));
+  if (![wpZip, sqliteZip, scfZip, pllZip].every((z) => z && existsSync(z))) die('cần đủ bốn tệp: <wordpress.zip> <sqlite-database-integration.zip> <secure-custom-fields.zip> <polylang.zip> (xem README.md)');
   unzip(wpZip, lab);
-  unzip(sqliteZip, join(wp, 'wp-content', 'plugins'));
+  for (const z of [sqliteZip, scfZip, pllZip]) unzip(z, join(wp, 'wp-content', 'plugins'));
   if (!existsSync(join(wp, 'wp-load.php'))) die('wordpress.zip không có thư mục "wordpress/"');
   if (!existsSync(join(wp, 'wp-content', 'plugins', 'sqlite-database-integration', 'db.copy'))) die('sqlite-database-integration.zip không đúng cấu trúc (thiếu db.copy)');
-  console.log('Đã giải nén WordPress và plugin SQLite');
+  console.log('Đã giải nén WordPress, plugin SQLite, Secure Custom Fields và Polylang');
 }
 
 const sqlitePlugin = join(wp, 'wp-content', 'plugins', 'sqlite-database-integration');
@@ -104,7 +104,7 @@ link(join(repo, 'wp-content', 'plugins', 'vgarco-core'), join(wp, 'wp-content', 
 link(join(repo, 'wp-content', 'themes', 'vgarco'), join(wp, 'wp-content', 'themes', 'vgarco'));
 for (const p of readdirSync(join(here, 'plugins'))) link(join(here, 'plugins', p), join(wp, 'wp-content', 'plugins', p));
 
-for (const script of ['install.php', 'setup.php']) {
+for (const script of ['install.php', 'setup.php', 'languages.php', 'pages.php']) {
   const r = spawnSync(php, ['-c', ini, join(here, script)], { encoding: 'utf8' });
   process.stdout.write(r.stdout || '');
   if (r.status !== 0) die(`${script} thất bại:\n${r.stderr || r.stdout}`);

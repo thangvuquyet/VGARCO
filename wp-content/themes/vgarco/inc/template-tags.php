@@ -129,20 +129,24 @@ function vgarco_switcher_items( array $languages, array $fallbacks ): array {
 }
 
 function vgarco_switcher_fallbacks( array $languages ): array {
-	$target = home_url( '/' );
+	$target  = home_url( '/' );
+	$page_id = 0;
 	if ( is_singular( 'du_an' ) || is_tax( 'loai_cong_trinh' ) ) {
 		$target = get_post_type_archive_link( 'du_an' ) ?: $target;
 	} elseif ( is_singular( 'tin_tuc' ) || is_tax( 'chuyen_muc' ) ) {
 		$target = get_post_type_archive_link( 'tin_tuc' ) ?: $target;
 	} elseif ( is_singular( 'vi_tri' ) || 'apply' === vgarco_page_key() ) {
-		$target = vgarco_page_url( 'careers' );
+		$target  = vgarco_page_url( 'careers' );
+		$page_id = vgarco_page_id( 'careers' );
 	}
 
 	$fallbacks = array();
 	foreach ( $languages as $code => $language ) {
-		if ( ! empty( $language['missing'] ) ) {
-			$fallbacks[ $code ] = (string) apply_filters( 'wpml_permalink', $target, $code );
+		if ( empty( $language['missing'] ) ) {
+			continue;
 		}
+		$translated         = $page_id ? (int) apply_filters( 'wpml_object_id', $page_id, 'page', false, $code ) : 0;
+		$fallbacks[ $code ] = $translated && $translated !== $page_id ? (string) get_permalink( $translated ) : (string) apply_filters( 'wpml_permalink', $target, $code );
 	}
 	return $fallbacks;
 }

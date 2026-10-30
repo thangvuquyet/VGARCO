@@ -2,6 +2,26 @@
 
 defined( 'ABSPATH' ) || exit;
 
+function vgarco_page_id( string $key ): int {
+	static $cache = array();
+
+	if ( ! array_key_exists( $key, $cache ) ) {
+		$ids = get_posts(
+			array(
+				'post_type'        => 'page',
+				'post_status'      => 'publish',
+				'posts_per_page'   => 1,
+				'fields'           => 'ids',
+				'meta_key'         => '_wp_page_template',
+				'meta_value'       => "templates/{$key}.php",
+				'suppress_filters' => false,
+			)
+		);
+		$cache[ $key ] = $ids ? (int) $ids[0] : 0;
+	}
+	return $cache[ $key ];
+}
+
 function vgarco_page_url( string $key ): string {
 	static $cache = array();
 
@@ -20,19 +40,8 @@ function vgarco_page_url( string $key ): string {
 		'privacy'     => '/chinh-sach-bao-ve-du-lieu/',
 	);
 
-	$ids = get_posts(
-		array(
-			'post_type'        => 'page',
-			'post_status'      => 'publish',
-			'posts_per_page'   => 1,
-			'fields'           => 'ids',
-			'meta_key'         => '_wp_page_template',
-			'meta_value'       => "templates/{$key}.php",
-			'suppress_filters' => false,
-		)
-	);
-
-	$cache[ $key ] = $ids ? (string) get_permalink( $ids[0] ) : home_url( $fallbacks[ $key ] ?? '/' );
+	$id            = vgarco_page_id( $key );
+	$cache[ $key ] = $id ? (string) get_permalink( $id ) : home_url( $fallbacks[ $key ] ?? '/' );
 	return $cache[ $key ];
 }
 

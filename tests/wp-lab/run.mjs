@@ -18,7 +18,7 @@ if (spawnSync(php, ['-v']).error) {
 }
 if (!existsSync(join(lab, 'wordpress', 'wp-load.php'))) { console.error('Chưa dựng môi trường: chạy node tests/wp-lab/bootstrap.mjs trước'); process.exit(1); }
 
-const order = ['env', 'import', 'media', 'export', 'seed', 'apply', 'admin', 'site', 'security', 'crawl', 'acffree', 'smoke'];
+const order = ['env', 'import', 'media', 'export', 'seed', 'apply', 'admin', 'site', 'lang', 'security', 'crawl', 'smoke'];
 const only = process.argv.slice(2);
 const optional = ['demo'];
 const todo = only.length ? [...order, ...optional].filter((n) => only.includes(n)) : order;

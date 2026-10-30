@@ -11,6 +11,17 @@ require_once VGARCO_CORE_DIR . 'inc/cli/import-lib.php';
 const VGARCO_IMPORT_MAX_IMAGE_BYTES = 15 * 1024 * 1024;
 
 class VGARCO_CLI_Command {
+	public function languages(): void {
+		$result = vgarco_setup_languages();
+		foreach ( $result['log'] as $line ) {
+			WP_CLI::log( $line );
+		}
+		if ( ! $result['ok'] ) {
+			WP_CLI::error( 'Chưa cấu hình xong ngôn ngữ.' );
+		}
+		WP_CLI::success( 'Ngôn ngữ: tiếng Việt (mặc định, không có tiền tố) và tiếng Đức (/de/).' );
+	}
+
 	public function import( array $args, array $assoc ): void {
 		[ $entity, $file ] = array_pad( $args, 2, '' );
 		if ( 'projects' !== $entity ) {
@@ -69,10 +80,10 @@ class VGARCO_CLI_Command {
 		$rows = array();
 		foreach ( array( 'du_an', 'linh_vuc', 'tin_tuc', 'vi_tri', 'page' ) as $type ) {
 			foreach ( get_posts( array( 'post_type' => $type, 'post_status' => 'publish', 'posts_per_page' => -1, 'fields' => 'ids', 'suppress_filters' => true ) ) as $id ) {
-				if ( 'vi' !== apply_filters( 'wpml_element_language_code', null, array( 'element_id' => $id, 'element_type' => 'post_' . $type ) ) ) {
+				if ( 'vi' !== vgarco_post_language( (int) $id ) ) {
 					continue;
 				}
-				if ( ! apply_filters( 'wpml_object_id', $id, $type, false, $lang ) ) {
+				if ( ! vgarco_translation_id( (int) $id, $lang ) ) {
 					$rows[] = array( 'ID' => $id, 'Loại' => $type, 'Tiêu đề' => get_the_title( $id ) );
 				}
 			}
@@ -157,7 +168,7 @@ class VGARCO_CLI_Command {
 			)
 		);
 		foreach ( $ids as $id ) {
-			$code = apply_filters( 'wpml_element_language_code', null, array( 'element_id' => $id, 'element_type' => 'post_du_an' ) );
+			$code = vgarco_post_language( (int) $id );
 			if ( null === $code || $lang === $code ) {
 				return (int) $id;
 			}
@@ -181,16 +192,21 @@ class VGARCO_CLI_Command {
 			$is_flag                = in_array( $key, array( 'cong_bo_chu_dau_tu', 'noi_bat', 'tieu_bieu' ), true );
 			$flat[ 'meta.' . $key ] = $is_flag ? ( $value && '0' !== $value ? '1' : '0' ) : (string) $value;
 		}
-		$slugs = wp_get_object_terms( $post_id, 'loai_cong_trinh', array( 'fields' => 'slugs' ) );
-		sort( $slugs );
-		$flat['terms.loai_cong_trinh'] = implode( ',', $slugs );
+		$flat['terms.loai_cong_trinh'] = implode( ',', vgarco_term_slugs_in_default_language( $post_id, 'loai_cong_trinh' ) );
 		return $flat;
 	}
 
 	private function upsert( array $plan, string $lang, int $post_id, int $source_id, string $status, bool $dry, array &$counts ): int {
 		$planned = vgarco_import_flatten( $plan, $lang );
-		$diff    = vgarco_import_diff( $this->current( $post_id ), $planned );
+		$terms   = vgarco_term_ids_in_language( $plan['terms'], 'loai_cong_trinh', $lang );
 		$label   = "{$plan['ma']} [{$lang}]";
+		if ( $terms['missing'] ) {
+			$kept = array_values( array_diff( $plan['terms'], $terms['missing'] ) );
+			sort( $kept );
+			$planned['terms.loai_cong_trinh'] = implode( ',', $kept );
+			WP_CLI::warning( "{$label}: loại công trình chưa có bản dịch, chưa gắn: " . implode( ', ', $terms['missing'] ) );
+		}
+		$diff = vgarco_import_diff( $this->current( $post_id ), $planned );
 
 		if ( ! $diff ) {
 			++$counts['unchanged'];
@@ -242,8 +258,8 @@ class VGARCO_CLI_Command {
 				update_field( substr( $key, 5 ), $is_flag ? '1' === $value : $value, $post_id );
 			}
 		}
-		if ( $plan['terms'] ) {
-			wp_set_object_terms( $post_id, $plan['terms'], 'loai_cong_trinh' );
+		if ( $terms['ids'] ) {
+			wp_set_object_terms( $post_id, $terms['ids'], 'loai_cong_trinh' );
 		}
 		do_action( 'wpml_switch_language', null );
 		return $post_id;
@@ -269,7 +285,7 @@ class VGARCO_CLI_Command {
 			update_field( 'thu_vien', $rows_vi, $vi_id );
 		}
 
-		$de_id = (int) apply_filters( 'wpml_object_id', $vi_id, 'du_an', false, 'de' );
+		$de_id = vgarco_translation_id( $vi_id, 'de' );
 		if ( $de_id && $de_id !== $vi_id ) {
 			foreach ( array( 'hero' => 'anh_dau_trang', 'the' => 'anh_the', 'slide' => 'anh_trinh_chieu' ) as $role => $field ) {
 				if ( isset( $ids[ $role ] ) ) {

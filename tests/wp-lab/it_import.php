@@ -108,5 +108,5 @@ try {
 } catch ( Throwable $e ) {
 	$report_ok = false;
 }
-check( 'report translations chạy được khi chưa có WPML', $report_ok );
+check( 'report translations chạy được khi Polylang đã có bản dịch', $report_ok );
 finish();

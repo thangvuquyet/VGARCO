@@ -17,8 +17,11 @@ same( '7 loại công trình được tạo sẵn', 7, (int) wp_count_terms( arr
 same( '3 chuyên mục tin được tạo sẵn', 3, (int) wp_count_terms( array( 'taxonomy' => 'chuyen_muc', 'hide_empty' => false ) ) );
 $o = get_post_type_object( 'ho_so_ut' );
 same( 'ho_so_ut riêng tư: không public, không REST, không xuất', array( false, false, false ), array( $o->public, $o->show_in_rest, $o->can_export ) );
-check( 'có hàm vgarco_option và đọc được mặc định (shim ACF)', 'Công ty TNHH Tư vấn Xây dựng VGARCO' === vgarco_option( 'phap_nhan.ten' ) );
+check( 'Secure Custom Fields đang hoạt động', is_plugin_active( 'secure-custom-fields/secure-custom-fields.php' ) );
+check( 'có hàm vgarco_option và đọc được mặc định', 'Công ty TNHH Tư vấn Xây dựng VGARCO' === vgarco_option( 'phap_nhan.ten' ) );
 check( 'lớp lệnh WP-CLI được dựng', class_exists( 'VGARCO_CLI_Command' ) );
-check( 'số nhóm trường ACF đăng ký qua acf_add_local_field_group = 14', 14 === count( $GLOBALS['lab_acf_groups'] ) );
-check( 'có trang cấu hình VGARCO', isset( $GLOBALS['lab_acf_options']['vgarco-cau-hinh'] ) );
+$local = array_filter( acf_get_local_field_groups(), static fn( $g ) => str_starts_with( $g['key'], 'group_vg_' ) );
+same( 'nhóm trường đăng ký với SCF = 14 nhóm gốc + nhóm cấu hình bản Đức', count( vgarco_field_groups() ) + count( vgarco_option_translation_groups( 'de' ) ), count( $local ) );
+check( 'có trang cấu hình VGARCO', (bool) acf_get_options_page( 'vgarco-cau-hinh' ) );
+check( 'có trang cấu hình bản Đức', (bool) acf_get_options_page( 'vgarco-cau-hinh-de' ) );
 finish();

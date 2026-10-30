@@ -56,6 +56,11 @@ foreach ( array( 'helpers', 'fields', 'languages' ) as $file ) {
 
 check( 'bộ lọc pll_copy_post_metas đã được đăng ký', ! empty( $GLOBALS['hooks']['pll_copy_post_metas'] ) );
 
+same( 'Polylang dịch 4 kiểu nội dung của VGARCO, không dịch hồ sơ ứng tuyển', array( 'post', 'page', 'du_an', 'linh_vuc', 'tin_tuc', 'vi_tri' ), array_keys( apply_filters( 'pll_get_post_types', array( 'post' => 'post', 'page' => 'page' ), false ) ) );
+same( 'Polylang: trong màn hình cài đặt, các kiểu của VGARCO bị ẩn (không cho người dùng đổi)', array( 'post' ), array_keys( apply_filters( 'pll_get_post_types', array( 'post' => 'post', 'du_an' => 'du_an' ), true ) ) );
+same( 'Polylang dịch 4 phân loại', array( 'category', 'loai_cong_trinh', 'chuyen_muc', 'noi_lam_viec', 'phong_ban' ), array_keys( apply_filters( 'pll_get_taxonomies', array( 'category' => 'category' ), false ) ) );
+same( 'Polylang: ẩn 4 phân loại khỏi màn hình cài đặt', array( 'category' ), array_keys( apply_filters( 'pll_get_taxonomies', array( 'category' => 'category', 'chuyen_muc' => 'chuyen_muc' ), true ) ) );
+
 $groups = vgarco_field_groups();
 $names  = array();
 foreach ( $groups as $group ) {
@@ -118,13 +123,11 @@ same(
 );
 
 $GLOBALS['stored'] = array(
-	'option'     => array(
-		'chi_so_trang_chu' => $vi,
-		'lien_he'          => array( 'dien_thoai' => '0900 000 000' ),
-	),
-	'options_de' => array(
-		'chi_so_trang_chu' => $de,
-		'lien_he'          => array( 'dien_thoai' => 'không được đọc' ),
+	'option' => array(
+		'chi_so_trang_chu'    => $vi,
+		'chi_so_trang_chu_de' => $de,
+		'lien_he'             => array( 'dien_thoai' => '0900 000 000' ),
+		'lien_he_de'          => array( 'dien_thoai' => 'không được đọc' ),
 	),
 );
 same( 'tùy chọn: tiếng Việt đọc thẳng bản gốc', 'Năm hình thành', vgarco_option( 'chi_so_trang_chu' )[0]['nhan'] );
@@ -133,7 +136,7 @@ $home_de         = vgarco_option( 'chi_so_trang_chu' );
 same( 'tùy chọn: tiếng Đức lấy nhãn từ bản dịch', 'Jahre', $home_de[0]['nhan'] );
 same( 'tùy chọn: tiếng Đức giữ con số của bản gốc', '13', $home_de[0]['so'] );
 same( 'tùy chọn: trường chỉ sao chép luôn đọc bản gốc', '0900 000 000', vgarco_option( 'lien_he.dien_thoai' ) );
-$GLOBALS['stored']['options_de'] = array();
+unset( $GLOBALS['stored']['option']['chi_so_trang_chu_de'] );
 same( 'tùy chọn: bản dịch trống → dùng mặc định trong mã (không lộ chữ tiếng Việt đã lưu)', vgarco_option_defaults()['chi_so_trang_chu'][0]['nhan'], vgarco_option( 'chi_so_trang_chu' )[0]['nhan'] );
 $GLOBALS['lang'] = 'fr';
 same( 'ngôn ngữ chưa hỗ trợ → coi như tiếng Việt', 'vi', vgarco_current_language() );
@@ -147,6 +150,7 @@ $walk    = static function ( array $fields ) use ( &$walk, &$de_keys ): void {
 		check( "nhóm bản Đức: khóa {$field['key']} có hậu tố _de", str_ends_with( $field['key'], '_de' ) );
 		check( "nhóm bản Đức: khóa {$field['key']} không trùng", ! isset( $de_keys[ $field['key'] ] ) );
 		$de_keys[ $field['key'] ] = true;
+		check( "nhóm bản Đức: {$field['name']} không bắt buộc", empty( $field['required'] ) );
 		if ( ! empty( $field['sub_fields'] ) ) {
 			$walk( $field['sub_fields'] );
 		} else {
@@ -159,13 +163,19 @@ foreach ( $de_groups as $group ) {
 	$walk( $group['fields'] );
 }
 $gt_de = array_column( array_merge( ...array_column( $de_groups, 'fields' ) ), null, 'name' );
-check( 'nhóm bản Đức: không có số điện thoại (chỉ sao chép)', ! isset( $gt_de['lien_he'] ) );
-same( 'nhóm bản Đức: chỉ số trang chủ chỉ còn ô nhãn', array( 'nhan' ), array_column( $gt_de['chi_so_trang_chu']['sub_fields'], 'name' ) );
-same( 'nhóm bản Đức: nhóm Pháp nhân chỉ còn hai địa chỉ', array( 'dia_chi_dang_ky', 'dia_chi_van_phong' ), array_column( $gt_de['phap_nhan']['sub_fields'], 'name' ) );
+check( 'nhóm bản Đức: không có số điện thoại (chỉ sao chép)', ! isset( $gt_de['lien_he_de'] ) && ! isset( $gt_de['lien_he'] ) );
+check( 'nhóm bản Đức: tên trường có hậu tố _de, không trùng tên nhóm gốc', array() === array_intersect_key( $gt_de, $names ) && isset( $gt_de['chi_so_trang_chu_de'] ) );
+same( 'nhóm bản Đức: chỉ số trang chủ chỉ còn ô nhãn', array( 'nhan' ), array_column( $gt_de['chi_so_trang_chu_de']['sub_fields'], 'name' ) );
+same( 'nhóm bản Đức: nhóm Pháp nhân chỉ còn hai địa chỉ', array( 'dia_chi_dang_ky', 'dia_chi_van_phong' ), array_column( $gt_de['phap_nhan_de']['sub_fields'], 'name' ) );
 check( 'nhóm bản Đức: không nằm trong danh sách nhóm gốc (tránh trùng tên với kiểm tra hình dạng)', 0 === count( array_filter( vgarco_field_groups(), static fn( $g ) => str_ends_with( $g['key'], '_de' ) ) ) );
+
+$pruned = vgarco_prune_translatable( array( array( 'key' => 'field_x', 'name' => 'x', 'type' => 'text', 'required' => 1, 'wpml_cf_preferences' => 2 ), array( 'key' => 'field_y', 'name' => 'y', 'type' => 'text', 'wpml_cf_preferences' => 1 ) ), '_de' );
+same( 'cắt bớt: ô bắt buộc ở bản gốc thành tùy chọn ở bản Đức, ô sao chép bị bỏ, tên có hậu tố', array( 1, 0, 'x_de', 'field_x_de' ), array( count( $pruned ), $pruned[0]['required'], $pruned[0]['name'], $pruned[0]['key'] ) );
 
 same( 'đặt ngôn ngữ bài khi không có Polylang: không làm gì', null, vgarco_set_post_language( 5, 'de' ) );
 same( 'nối bản dịch khi không có Polylang: không làm gì', null, vgarco_link_translation( 5, 6, 'de' ) );
+same( 'ngôn ngữ bài khi không có Polylang: không biết', null, vgarco_post_language( 5 ) );
+same( 'bản dịch khi không có Polylang: không có', 0, vgarco_translation_id( 5, 'de' ) );
 
 if ( ! function_exists( 'pll_set_post_language' ) ) {
 	function pll_set_post_language( $id, $lang ) {
@@ -178,6 +188,12 @@ if ( ! function_exists( 'pll_set_post_language' ) ) {
 			}
 		}
 		return array();
+	}
+	function pll_get_post_language( $id ) {
+		return $GLOBALS['pll']['lang'][ $id ] ?? false;
+	}
+	function pll_get_post( $id, $lang ) {
+		return pll_get_post_translations( $id )[ $lang ] ?? 0;
 	}
 	function pll_save_post_translations( $group ) {
 		$GLOBALS['pll']['saved'][] = $group;
@@ -193,6 +209,10 @@ same( 'nối bản dịch: chạy lại không ghi lần hai', 1, count( $GLOBAL
 vgarco_link_translation( 10, 21, 'de' );
 same( 'nối bản dịch: đổi sang bài khác thì cập nhật nhóm', array( 'vi' => 10, 'de' => 21 ), end( $GLOBALS['pll']['saved'] ) );
 vgarco_set_post_language( 30, 'de' );
+same( 'ngôn ngữ bài: đọc từ Polylang', 'de', vgarco_post_language( 30 ) );
+same( 'ngôn ngữ bài chưa gán: null', null, vgarco_post_language( 31 ) );
+same( 'bản dịch của bài 10 sang tiếng Đức', 21, vgarco_translation_id( 10, 'de' ) );
+same( 'bài chưa có bản dịch: 0', 0, vgarco_translation_id( 30, 'de' ) );
 same( 'đặt ngôn ngữ bài: gọi Polylang', 'de', $GLOBALS['pll']['lang'][30] );
 
 if ( $fail ) {

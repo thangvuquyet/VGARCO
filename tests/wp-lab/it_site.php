@@ -36,15 +36,15 @@ same( 'trang chủ: JSON-LD Organization hợp lệ', array( 'Công ty TNHH Tư 
 check( 'trang chủ: logo trong JSON-LD tải được (200)', 200 === http( 'GET', wp_parse_url( $j['Organization']['logo'] ?? $base, PHP_URL_PATH ) )['status'] );
 check( 'trang chủ: tệp CSS và JS của theme tải được (200)', 200 === http( 'GET', wp_parse_url( $attr( $x, '//link[@rel="stylesheet" and contains(@href,"dist")]', 'href' ), PHP_URL_PATH ) )['status'] && 200 === http( 'GET', wp_parse_url( $attr( $x, '//script[@type="module" and contains(@src,"dist")]', 'src' ), PHP_URL_PATH ) )['status'] );
 check( 'trang chủ: có hộp thoại tìm kiếm với địa chỉ REST thật', str_contains( $attr( $x, '//dialog[@id="search-dialog"]', 'data-endpoint' ), '/wp-json/vgarco/v1/search' ) );
-same( 'trang chủ: thuộc tính lang của <html> là vi (locale của WPML theo ngôn ngữ đang xem)', 'vi', $attr( $x, '//html', 'lang' ) );
+same( 'trang chủ: thuộc tính lang của <html> là vi (locale của Polylang theo ngôn ngữ đang xem)', 'vi', $attr( $x, '//html', 'lang' ) );
 $switch = $x->query( '//div[contains(@class,"language-switch")]/a' );
 same( 'trang chủ: bộ chuyển ngôn ngữ VI/DE, VI đang chọn', array( 2, 'vi' ), array( $switch->length, $attr( $x, '//div[contains(@class,"language-switch")]/a[@aria-current="true"]', 'hreflang' ) ) );
 $preloads = $x->query( '//link[@rel="preload" and @as="font"]' );
 same( 'trang chủ: 2 thẻ preload phông (latin + vietnamese) đều có crossorigin', array( 2, 2 ), array( $preloads->length, $x->query( '//link[@rel="preload" and @as="font" and @crossorigin]' )->length ) );
 check( 'trang chủ: các tệp phông được preload tải được (200)', 2 === $preloads->length && 200 === http( 'GET', wp_parse_url( $preloads->item( 0 )->getAttribute( 'href' ), PHP_URL_PATH ) )['status'] && 200 === http( 'GET', wp_parse_url( $preloads->item( 1 )->getAttribute( 'href' ), PHP_URL_PATH ) )['status'] );
-$de_home = http( 'GET', '/?lab_lang=de' );
+$de_home = http( 'GET', '/de/' );
 $dx      = $dom( $de_home['body'] );
-same( 'trang chủ bản Đức (giả lập): <html lang="de-DE">, chỉ preload tập latin, DE đang chọn', array( 'de-DE', 1, 'de' ), array( $attr( $dx, '//html', 'lang' ), $dx->query( '//link[@rel="preload" and @as="font"]' )->length, $attr( $dx, '//div[contains(@class,"language-switch")]/a[@aria-current="true"]', 'hreflang' ) ) );
+same( 'trang chủ bản Đức (/de/): <html lang="de-DE">, chỉ preload tập latin, DE đang chọn', array( 'de-DE', 1, 'de' ), array( $attr( $dx, '//html', 'lang' ), $dx->query( '//link[@rel="preload" and @as="font"]' )->length, $attr( $dx, '//div[contains(@class,"language-switch")]/a[@aria-current="true"]', 'hreflang' ) ) );
 check( 'không có phông/script từ miền ngoài (Google Fonts…)', ! preg_match( '#(fonts\.googleapis|fonts\.gstatic|google-analytics|googletagmanager)#', $home['body'] ) );
 
 $icon_hrefs = array();
