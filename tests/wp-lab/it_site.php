@@ -29,6 +29,15 @@ same( 'trang chủ: 200', 200, $home['status'] );
 same( 'trang chủ: tiêu đề', 'VGARCO — Tư vấn thiết kế, giám sát và quản lý dự án xây dựng', trim( $x->query( '//title' )->item( 0 )->textContent ) );
 same( 'trang chủ: canonical tuyệt đối', $base . '/', $attr( $x, '//link[@rel="canonical"]', 'href' ) );
 check( 'trang chủ: có mô tả, og:title, og:url, og:locale', '' !== $attr( $x, '//meta[@name="description"]' ) && '' !== $attr( $x, '//meta[@property="og:title"]' ) && $base . '/' === $attr( $x, '//meta[@property="og:url"]' ) && '' !== $attr( $x, '//meta[@property="og:locale"]' ) );
+$hdr = static fn( array $r, string $name ): string => preg_match( '/^' . preg_quote( $name, '/' ) . ':\\s*(.*?)\\r?$/mi', $r['headers'], $m ) ? $m[1] : '';
+foreach ( array( 'Strict-Transport-Security', 'X-Content-Type-Options', 'X-Frame-Options', 'Referrer-Policy', 'Permissions-Policy', 'Content-Security-Policy' ) as $name ) {
+	check( "tiêu đề bảo mật {$name} có ở trang chủ (mô phỏng theo khối Nginx của provision.sh)", '' !== $hdr( $home, $name ) );
+}
+check( 'CSP trang chủ: chỉ script cùng nguồn', str_contains( $hdr( $home, 'Content-Security-Policy' ), "script-src 'self' 'inline-speculation-rules'" ) && ! str_contains( $hdr( $home, 'Content-Security-Policy' ), "'unsafe-eval'" ) );
+$login = http( 'GET', '/wp-login.php' );
+check( 'trang đăng nhập không dùng CSP của khách (WordPress tự đặt frame-ancestors)', ! str_contains( $hdr( $login, 'Content-Security-Policy' ), 'default-src' ) );
+$logged = http( 'GET', '/', array( 'headers' => array( 'Cookie: wordpress_logged_in_x=1' ) ) );
+check( 'người đã đăng nhập (thanh quản trị) không bị CSP của khách', '' === $hdr( $logged, 'Content-Security-Policy' ) );
 $robots = $attr( $x, '//meta[@name="robots"]' );
 check( 'môi trường local: noindex (không bao giờ lập chỉ mục ngoài production)', str_contains( $robots, 'noindex' ) );
 $j = $ld( $x );

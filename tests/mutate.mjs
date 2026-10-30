@@ -905,6 +905,24 @@ const M = [
     "\t\t\t$out[] = '_' . $key;\n", "", 'languages'],
   ["Polylang: tiếng Đức coi là có sẵn dù Polylang chưa có ngôn ngữ đó", "wp-content/plugins/vgarco-core/inc/languages.php",
     "in_array( $lang, (array) pll_languages_list(), true )", "true", 'languages'],
+  ["máy chủ: thiếu HSTS", "scripts/ops/provision.sh",
+    "add_header Strict-Transport-Security \"max-age=31536000\" always;\n", "", 'serverconf'],
+  ["máy chủ: nosniff rỗng", "scripts/ops/provision.sh",
+    "add_header X-Content-Type-Options \"nosniff\" always;", "add_header X-Content-Type-Options \"\" always;", 'serverconf'],
+  ["máy chủ: CSP cho phép script nội tuyến", "scripts/ops/provision.sh",
+    "script-src 'self' 'inline-speculation-rules';", "script-src 'self' 'unsafe-inline' 'inline-speculation-rules';", 'serverconf'],
+  ["máy chủ: CSP không bỏ qua /wp-admin", "scripts/ops/provision.sh",
+    "    \"~^/wp-(admin|login\\.php)\" \"\";\n", "", 'serverconf'],
+  ["máy chủ: CSP không bỏ qua người đã đăng nhập", "scripts/ops/provision.sh",
+    "    \"~\\|.*wordpress_logged_in_\" \"\";\n", "", 'serverconf'],
+  ["máy chủ: khối tệp có mã băm mất tiêu đề bảo mật", "scripts/ops/provision.sh",
+    "        include /etc/nginx/vgarco/security-headers.inc;\n        access_log off;", "        access_log off;", 'serverconf'],
+  ["máy chủ: vhost không nạp tiêu đề bảo mật", "scripts/ops/provision.sh",
+    "    include /etc/nginx/vgarco/security-headers.inc;\n    client_max_body_size 18m;", "    client_max_body_size 18m;", 'serverconf'],
+  ["máy chủ: CSP cho nhúng trang vào khung ngoài", "scripts/ops/provision.sh",
+    "frame-ancestors 'self'; ", "", 'serverconf'],
+  ["máy chủ: vhost nghe cổng 80", "scripts/ops/provision.sh",
+    "    listen 443 ssl http2;\n    server_name ${DOMAIN};", "    listen 80;\n    listen 443 ssl http2;\n    server_name ${DOMAIN};", 'serverconf'],
 ];
 
 if (process.argv[2] === '--check') {
@@ -925,7 +943,7 @@ for (const [name, file, from, to, suite = 'smoke'] of M.filter(([n]) => !only ||
   cpSync(join(src, 'wp-content'), join(work, 'wp-content'), { recursive: true, filter: (from) => !/[\\/](node_modules|dist)([\\/]|$)/.test(from) });
   cpSync(join(src, 'tests', 'php'), join(work, 'tests', 'php'), { recursive: true });
   cpSync(join(src, 'content'), join(work, 'content'), { recursive: true });
-  if (suite === 'export-images') cpSync(join(src, 'scripts'), join(work, 'scripts'), { recursive: true });
+  if (suite === 'export-images' || suite === 'serverconf') cpSync(join(src, 'scripts'), join(work, 'scripts'), { recursive: true });
   if (suite === 'i18n') {
     cpSync(join(src, 'scripts'), join(work, 'scripts'), { recursive: true });
     cpSync(join(src, 'tests', 'i18n.mjs'), join(work, 'tests', 'i18n.mjs'));

@@ -352,15 +352,19 @@ EOF
 }
 
 phase_on nginx && {
-  log "nginx: default_server từ chối, khối ${DOMAIN}, chặn tệp nhạy cảm, Authenticated Origin Pulls khi đã có CA"
+  log "nginx: default_server từ chối, khối ${DOMAIN}, tiêu đề bảo mật, chặn tệp nhạy cảm, chứng chỉ Cloudflare Origin CA, Authenticated Origin Pulls khi đã có CA"
   run install -d -m 0755 /etc/nginx/aop /etc/nginx/vgarco "/var/www/${SITE}/acme"
   CERT_DIR="/etc/letsencrypt/live/${DOMAIN}"
-  if [[ ! -f "${CERT_DIR}/fullchain.pem" ]]; then
+  ORIGIN_PEM="/etc/nginx/vgarco/${SITE}-origin.pem"; ORIGIN_KEY="/etc/nginx/vgarco/${SITE}-origin.key"
+  if [[ -s "$ORIGIN_PEM" && -s "$ORIGIN_KEY" ]]; then
+    CERT_PEM="$ORIGIN_PEM"; CERT_KEY="$ORIGIN_KEY"
+    note "Dùng chứng chỉ Cloudflare Origin CA (${ORIGIN_PEM}); Cloudflare đặt SSL/TLS ở Full (strict)."
+  elif [[ -f "${CERT_DIR}/fullchain.pem" ]]; then
+    CERT_PEM="${CERT_DIR}/fullchain.pem"; CERT_KEY="${CERT_DIR}/privkey.pem"
+  else
     CERT_PEM="/etc/nginx/vgarco/${SITE}-selfsigned.pem"; CERT_KEY="/etc/nginx/vgarco/${SITE}-selfsigned.key"
     if [[ ! -f "$CERT_PEM" ]]; then run openssl req -x509 -nodes -newkey rsa:2048 -days 90 -subj "/CN=${DOMAIN}" -addext "subjectAltName=DNS:${DOMAIN}" -keyout "$CERT_KEY" -out "$CERT_PEM"; fi
-    note "Chứng chỉ tự ký đang được dùng. Cấp Let's Encrypt (certbot webroot /var/www/${SITE}/acme), rồi chạy lại --phase=nginx; sau đó Cloudflare đổi sang Full (strict)."
-  else
-    CERT_PEM="${CERT_DIR}/fullchain.pem"; CERT_KEY="${CERT_DIR}/privkey.pem"
+    note "Chứng chỉ tự ký đang được dùng. Cổng 80 đóng nên không cấp được Let's Encrypt kiểu webroot: tạo chứng chỉ Origin CA trong Cloudflare (SSL/TLS > Origin Server, 15 năm), đặt vào ${ORIGIN_PEM} và ${ORIGIN_KEY} (khóa quyền 0600 root), chạy lại --phase=nginx, rồi đổi Cloudflare sang Full (strict)."
   fi
   if [[ -s /etc/nginx/aop/${SITE}-aop-ca.pem ]]; then AOP="ssl_client_certificate /etc/nginx/aop/${SITE}-aop-ca.pem;
     ssl_verify_client on;"; else AOP="# AOP CHƯA BẬT: đặt CA vào /etc/nginx/aop/${SITE}-aop-ca.pem rồi chạy lại bước nginx
@@ -369,11 +373,24 @@ phase_on nginx && {
   ghi_tep /etc/nginx/conf.d/00-default-reject.conf 0644 root:root <<'EOF' && NGX_CHANGED=1 || NGX_CHANGED=0
 # Truy cập bằng IP hoặc tên miền lạ không nhận được chứng chỉ (phương án 10.2).
 server_tokens off;
+map "$uri|$http_cookie" $vg_csp {
+    default "default-src 'self'; script-src 'self' 'inline-speculation-rules'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'self'; form-action 'self'; base-uri 'self'; object-src 'none'";
+    "~^/wp-(admin|login\.php)" "";
+    "~\|.*wordpress_logged_in_" "";
+}
 server {
     listen 443 ssl http2 default_server;
     ssl_reject_handshake on;
     return 444;
 }
+EOF
+  ghi_tep /etc/nginx/vgarco/security-headers.inc 0644 root:root <<'EOF' && NGX_CHANGED=1 || true
+add_header Strict-Transport-Security "max-age=31536000" always;
+add_header X-Content-Type-Options "nosniff" always;
+add_header X-Frame-Options "SAMEORIGIN" always;
+add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+add_header Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()" always;
+add_header Content-Security-Policy $vg_csp always;
 EOF
   ghi_tep "/etc/nginx/conf.d/${SITE}.conf" 0644 root:root <<EOF && NGX_CHANGED=1 || true
 # Sinh bởi provision.sh — ${ENV_NAME}. Khối này khớp phương án triển khai mục 10.2.
@@ -389,6 +406,7 @@ server {
     ${AOP}
 
     include /etc/nginx/conf.d/cloudflare-realip.inc;
+    include /etc/nginx/vgarco/security-headers.inc;
     client_max_body_size 18m;
     server_tokens off;
 
@@ -405,6 +423,7 @@ server {
     location ~* ^/wp-content/themes/vgarco/dist/.+\.(css|js|woff2|avif|webp|jpe?g|png|svg)\$ {
         expires 1y;
         add_header Cache-Control "public, max-age=31536000, immutable";
+        include /etc/nginx/vgarco/security-headers.inc;
         access_log off;
     }
 
@@ -420,7 +439,7 @@ EOF
   [[ -f /etc/nginx/conf.d/cloudflare-realip.inc ]] || run /usr/local/sbin/vgarco-cloudflare-ips
   if [[ -e /etc/nginx/sites-enabled/default ]]; then run rm -f /etc/nginx/sites-enabled/default; NGX_CHANGED=1; fi
   if (( NGX_CHANGED )); then run nginx -t; run systemctl reload nginx; fi
-  note "Tiêu đề bảo mật (HSTS, X-Content-Type-Options, Referrer-Policy, CSP) do Cloudflare/Nginx đặt theo yêu cầu 5.4.2 của phương án — CHƯA có trong khối này; smoke.mjs --env=production sẽ báo thiếu."
+  note "Tiêu đề bảo mật nằm trong /etc/nginx/vgarco/security-headers.inc. Trong Cloudflare tắt Rocket Loader, Web Analytics tự chèn và làm rối địa chỉ email: CSP chặn script ngoài."
 }
 
 phase_on cron && {
