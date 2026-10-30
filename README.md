@@ -119,7 +119,7 @@ Chuỗi mới phải có bản dịch (thêm vào `de-draft.json` hoặc sửa t
 tìm kiếm dự án, SEO cơ bản, bản dịch tiếng Đức (nháp), bộ chuyển ngôn ngữ, khóa đăng nhập, xóa cache Cloudflare, nhập liệu bằng bảng tính, trợ năng (axe-core: 0 lỗi).
 
 `scripts/ops/provision.sh` (dựng máy chủ): 9/9 bước đã chạy thật trên một VM Ubuntu 24.04 thử ngày 29/10/2026. `scripts/ops/deploy.sh` (đưa mã lên, tự hoàn tác) đã chạy thật trên staging thử cùng ngày, gồm cả tự hoàn tác; chưa chạy `--env=production`.
-Chưa làm: kho Git từ xa, tên miền/hosting, cấu hình Cloudflare/Brevo, sao lưu, tiêu đề bảo mật của Nginx.
+Chưa làm: kho Git từ xa, tên miền/hosting, cấu hình Cloudflare/Brevo. Sao lưu (`scripts/ops/backup.sh`) và tiêu đề bảo mật Nginx đã có mã, đã thử bằng bản giả, chưa chạy trên máy chủ thật.
 
 Đã chạy thử trên WordPress 7.1 thật (SQLite; `tests/wp-lab`): kích hoạt, kiểu nội dung và phân loại, nhập liệu bằng bảng tính (lõi `VGARCO_CLI_Command`, WP-CLI giả), REST nộp hồ sơ và tìm kiếm,
 vai trò `vg_tuyen_dung` và quyền riêng của `ho_so_ut`, tải/xuất/xóa hồ sơ, thư, cron, đăng nhập qua `wp-login.php`, xóa cache Cloudflare (API giả), bề mặt tấn công, bản dịch `.mo`, duyệt toàn site.
