@@ -916,7 +916,9 @@ const M = [
   ["máy chủ: CSP không bỏ qua người đã đăng nhập", "scripts/ops/provision.sh",
     "    \"~\\|.*wordpress_logged_in_\" \"\";\n", "", 'serverconf'],
   ["máy chủ: khối tệp có mã băm mất tiêu đề bảo mật", "scripts/ops/provision.sh",
-    "        include /etc/nginx/vgarco/security-headers.inc;\n        access_log off;", "        access_log off;", 'serverconf'],
+    "immutable\";\n        include /etc/nginx/vgarco/security-headers.inc;\n        access_log off;", "immutable\";\n        access_log off;", 'serverconf'],
+  ["máy chủ: khối ảnh tải lên mất tiêu đề bảo mật", "scripts/ops/provision.sh",
+    "max-age=2592000\";\n        include /etc/nginx/vgarco/security-headers.inc;\n        access_log off;", "max-age=2592000\";\n        access_log off;", 'serverconf'],
   ["máy chủ: vhost không nạp tiêu đề bảo mật", "scripts/ops/provision.sh",
     "    include /etc/nginx/vgarco/security-headers.inc;\n    client_max_body_size 18m;", "    client_max_body_size 18m;", 'serverconf'],
   ["máy chủ: CSP cho nhúng trang vào khung ngoài", "scripts/ops/provision.sh",
@@ -953,6 +955,12 @@ const M = [
     "\"${WEB_BASE}/${site}/public/wp-config.php\" \"${WEB_BASE}/${site}/wp-config.php\"; do", "\"${WEB_BASE}/${site}/public/wp-config.php\"; do", 'ops-backup'],
   ["sao lưu: không cảnh báo khi thiếu wp-config.php", "scripts/ops/backup.sh",
     "(( found_config )) ||", "true ||", 'ops-backup'],
+  ["nginx: ảnh tải lên không còn cache 30 ngày", "scripts/ops/provision.sh",
+    "        expires 30d;\n        add_header Cache-Control \"public, max-age=2592000\";", "        expires off;", 'serverconf'],
+  ["danh mục dự án: ảnh thẻ đầu lại lazy (làm chậm LCP)", "wp-content/themes/vgarco/template-parts/catalogue.php",
+    "'priority' => 0 === $index", "'priority' => false", 'pages'],
+  ["tin tức: ảnh dòng đầu lại lazy (làm chậm LCP)", "wp-content/themes/vgarco/template-parts/news-archive.php",
+    "'priority' => 0 === $index,", "'priority' => false,", 'pages'],
 ];
 
 if (process.argv[2] === '--check') {

@@ -17,11 +17,12 @@ $image_id   = (int) ( $project['card_image'] ?: $project['hero_image'] );
 			echo vgarco_image(
 				$image_id,
 				array(
-					'size'  => 'vg-1200',
-					'sizes' => ! empty( $args['arrow'] )
+					'size'     => 'vg-1200',
+					'sizes'    => ! empty( $args['arrow'] )
 						? '(min-width: 1001px) 50vw, 100vw'
 						: '(min-width: 1001px) 30vw, (min-width: 701px) 45vw, 100vw',
-					'alt'   => $project['kind_label'] . ' — ' . $project['title'],
+					'alt'      => $project['kind_label'] . ' — ' . $project['title'],
+					'priority' => ! empty( $args['priority'] ),
 				)
 			);
 			?>

@@ -427,6 +427,13 @@ server {
         access_log off;
     }
 
+    location ~* ^/wp-content/(uploads|themes/vgarco/assets)/.+\.(avif|webp|jpe?g|png|gif|svg|ico|woff2?)\$ {
+        expires 30d;
+        add_header Cache-Control "public, max-age=2592000";
+        include /etc/nginx/vgarco/security-headers.inc;
+        access_log off;
+    }
+
     location / { try_files \$uri \$uri/ /index.php?\$args; }
     location ~ \.php\$ {
         include fastcgi_params;

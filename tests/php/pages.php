@@ -219,7 +219,8 @@ same( 'danh mục: vòng tròn mũi tên ở mọi thẻ là trang trí, ẩn kh
 same( 'danh mục: nhãn loại ảnh ở mọi thẻ', 19, q( $c, '//*[' . cls( 'catalogue-grid' ) . ']//*[' . cls( 'image-label' ) . ']' )->length );
 same( 'danh mục: thẻ không có địa điểm và năm chỉ có một ô meta (không ô trống) — "Nhà Đại sứ"', 1, q( $c, '//article[.//h3[.="Nhà Đại sứ"]]//*[' . cls( 'project-meta' ) . ']/span' )->length );
 same( 'danh mục: thứ tự theo "Thứ tự" chủ đầu tư đặt — thẻ đầu là Nhà Đại sứ', 'Nhà Đại sứ', trim( q( $c, '(//*[' . cls( 'catalogue-grid' ) . ']//h3)[1]' )->item( 0 )->textContent ) );
-same( 'danh mục: mọi thẻ liên kết tới trang dự án', 19, q( $c, '//*[' . cls( 'catalogue-grid' ) . ']//a[starts-with(@href, "/du-an/")]' )->length );
+same( 'danh mục: ảnh thẻ đầu là ảnh LCP (eager + fetchpriority=high), ảnh các thẻ sau lazy', array( 1, 18 ), array( q( $c, '//*[' . cls( 'catalogue-grid' ) . ']/article[1]//img[@loading="eager" and @fetchpriority="high"]' )->length, q( $c, '//*[' . cls( 'catalogue-grid' ) . ']/article[position() > 1]//img[@loading="lazy" and not(@fetchpriority)]' )->length ) );
+same( 'danh mục: mọi thẻ liên kết tới trang dự án', 19,q( $c, '//*[' . cls( 'catalogue-grid' ) . ']//a[starts-with(@href, "/du-an/")]' )->length );
 same( 'danh mục: trang thuộc module "projects" (data-vg-page)', 1, q( $c, '//body[@data-vg-page="projects"]' )->length );
 
 same( 'câu chuyện: có đúng một khối', 1, q( $c, '//section[' . cls( 'project-story' ) . ']' )->length );
@@ -476,7 +477,7 @@ same( 'tin tức: bộ lọc là liên kết thật — Tất cả + 3 chuyên m
 same( 'tin tức: đang xem "Tất cả" (aria-current)', array( 'Tất cả' ), $titles( $n1, '//nav[' . cls( 'news-filters' ) . ']//a[@aria-current="page"]' ) );
 same( 'tin tức: mới nhất trước', array( 'Chia sẻ chuyên môn cùng đội ngũ VGARCO', 'Dấu ấn hợp tác trong các dự án quốc tế', 'Từ ý tưởng đến một công trình có thể vận hành' ), $titles( $n1, '//div[' . cls( 'news-list' ) . ']//h2' ) );
 same( 'tin tức: dòng có ngày <time datetime> và nhãn chủ đề', array( '2026-09-03', 'Sự kiện' ), array( q( $n1, '(//div[' . cls( 'news-list' ) . ']//time)[1]' )->item( 0 )->getAttribute( 'datetime' ), trim( q( $n1, '(//div[' . cls( 'news-row-meta' ) . ']/small)[1]' )->item( 0 )->textContent ) ) );
-same( 'tin tức: ảnh nhỏ lazy và alt rỗng (tiêu đề bên cạnh đã mô tả — tránh đọc hai lần)', array( 3, 3 ), array( q( $n1, '//figure//img[@loading="lazy" and @alt=""]' )->length, q( $n1, '//article[' . cls( 'news-row' ) . ']//img' )->length ) );
+same( 'tin tức: ảnh nhỏ alt rỗng (tiêu đề bên cạnh đã mô tả — tránh đọc hai lần); ảnh đầu là ảnh LCP (eager + fetchpriority=high), hai ảnh sau lazy', array( 2, 1, 3 ), array( q( $n1, '//figure//img[@loading="lazy" and @alt="" and not(@fetchpriority)]' )->length, q( $n1, '//figure//img[@loading="eager" and @fetchpriority="high" and @alt=""]' )->length, q( $n1, '//article[' . cls( 'news-row' ) . ']//img' )->length ) );
 same( 'tin tức: ít bài thì không có phân trang', 0, q( $n1, '//nav[' . cls( 'pagination' ) . ']' )->length );
 same( 'tin tức: mọi dòng là liên kết tới bài', 3, q( $n1, '//article[' . cls( 'news-row' ) . ']/a[starts-with(@href, "/tin-tuc/")]' )->length );
 

@@ -37,7 +37,7 @@ vgarco_breadcrumb( $trail );
 
 	<?php if ( $items ) : ?>
 		<div class="news-list">
-			<?php foreach ( $items as $item ) : ?>
+			<?php foreach ( $items as $index => $item ) : ?>
 				<article class="news-row">
 					<a href="<?php echo esc_url( $item['url'] ); ?>"<?php echo $item['image_id'] > 0 ? '' : ' class="no-thumb"'; ?>>
 						<?php if ( $item['image_id'] > 0 ) : ?>
@@ -47,8 +47,9 @@ vgarco_breadcrumb( $trail );
 									$item['image_id'],
 									array(
 										'size'  => 'vg-480',
-										'sizes' => '(min-width: 801px) 150px, (min-width: 601px) 96px, 100vw',
-										'alt'   => '',
+										'sizes'    => '(min-width: 801px) 150px, (min-width: 601px) 96px, 100vw',
+										'alt'      => '',
+										'priority' => 0 === $index,
 									)
 								);
 								?>
