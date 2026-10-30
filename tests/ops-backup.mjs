@@ -56,7 +56,8 @@ const make = (opts = {}) => {
   }
   const web = join(dir, 'www', 'vgarco', 'public', 'wp-content', 'uploads');
   mkdirSync(web, { recursive: true });
-  writeFileSync(join(dir, 'www', 'vgarco', 'wp-config.php'), '<?php');
+  if (opts.configAbove) writeFileSync(join(dir, 'www', 'vgarco', 'wp-config.php'), '<?php');
+  else if (!opts.noConfig) writeFileSync(join(dir, 'www', 'vgarco', 'public', 'wp-config.php'), '<?php');
   if (!opts.noPrivate) mkdirSync(join(dir, 'srv', 'vgarco', 'private'), { recursive: true });
   mkdirSync(join(dir, 'etc-vgarco'));
   mkdirSync(join(dir, 'etc-nginx'));
@@ -108,10 +109,10 @@ const make = (opts = {}) => {
   check('mysqldump dùng --single-transaction và --databases đúng CSDL', c.some((l) => /^mysqldump .*--single-transaction .*--databases vgarco$/.test(l)));
   const backup = c.find((l) => l.startsWith('restic backup')) ?? '';
   check('restic backup gắn thẻ, bỏ cache, một hệ tệp', /--tag vgarco --exclude-caches --one-file-system/.test(backup));
-  for (const part of ['wp-content/uploads', 'srv/vgarco/private', 'wp-config.php', 'etc-vgarco', 'etc-nginx', '/dumps']) {
+  for (const part of ['wp-content/uploads', 'srv/vgarco/private', 'vgarco/public/wp-config.php', 'etc-vgarco', 'etc-nginx', '/dumps']) {
     check(`restic backup gồm ${part}`, backup.includes(part));
   }
-  same('lưu giữ 7 ngày, 4 tuần, 3 tháng và dọn kho', true, /^restic forget --tag vgarco --keep-daily 7 --keep-weekly 4 --keep-monthly 3 --prune$/.test(c.find((l) => l.startsWith('restic forget')) ?? ''));
+  same('lưu giữ 7 ngày, 4 tuần, 3 tháng và dọn kho', true, /^restic forget --tag vgarco --group-by host,tags --keep-daily 7 --keep-weekly 4 --keep-monthly 3 --prune$/.test(c.find((l) => l.startsWith('restic forget')) ?? ''));
   check('thứ tự: dump → backup → forget → heartbeat', c.findIndex((l) => l.startsWith('mysqldump')) < c.findIndex((l) => l.startsWith('restic backup')) && c.findIndex((l) => l.startsWith('restic backup')) < c.findIndex((l) => l.startsWith('restic forget')) && c.findIndex((l) => l.startsWith('restic forget')) < c.findIndex((l) => l.startsWith('curl')));
   check('heartbeat gọi đúng địa chỉ thành công (không có /fail)', c.some((l) => /curl .* https:\/\/hc\.example\.test\/ping\/abc$/.test(l)) && !c.some((l) => l.includes('/fail')));
   check('không kiểm kho ngày thường (thứ Tư)', !c.some((l) => l.startsWith('restic check')));
@@ -166,6 +167,21 @@ const make = (opts = {}) => {
   const t = make({ noHeartbeat: true });
   const r = t.run();
   check('không cấu hình heartbeat: vẫn sao lưu, không gọi curl', r.status === 0 && !t.calls().some((l) => l.startsWith('curl')) && t.calls().some((l) => l.startsWith('restic backup')));
+  rmSync(t.dir, { recursive: true, force: true });
+}
+
+{
+  const t = make({ configAbove: true });
+  t.run();
+  const backup = t.calls().find((l) => l.startsWith('restic backup')) ?? '';
+  check('wp-config.php nằm ngoài public (thư mục cha) vẫn được đưa vào và không có cảnh báo', backup.includes('www/vgarco/wp-config.php') && !t.log().includes('không thấy wp-config.php'));
+  rmSync(t.dir, { recursive: true, force: true });
+}
+
+{
+  const t = make({ noConfig: true });
+  const r = t.run();
+  check('không có wp-config.php ở đâu cả: cảnh báo trong nhật ký, vẫn sao lưu phần còn lại', r.status === 0 && t.log().includes('không thấy wp-config.php của vgarco') && t.calls().some((l) => l.startsWith('restic backup')));
   rmSync(t.dir, { recursive: true, force: true });
 }
 

@@ -15,7 +15,7 @@
 
 ## 2. Lịch và lưu giữ (thiết kế)
 
-- **Hằng ngày 02:30 giờ Việt Nam** (`/etc/cron.d/vgarco-backup`, `CRON_TZ=Asia/Ho_Chi_Minh`, chạy bằng root để đọc được CSDL, ảnh và CV): CSDL (`mysqldump --single-transaction`, nén gzip, giữ 3 bản gần nhất tại `/var/backups/vgarco`) + `uploads` + `/srv/vgarco/private` + `wp-config.php` + `/etc/vgarco` + `/etc/nginx`, bằng **restic** (mã hóa sẵn, khử trùng lặp) tới **kho S3 trong tài khoản của VGARCO**; khóa S3 chỉ có quyền trên đúng kho đó. Bản sao CSDL cụt (thiếu dòng `Dump completed`) bị từ chối và báo lỗi.
+- **Hằng ngày 19:30 UTC = 02:30 giờ Việt Nam** (`/etc/cron.d/vgarco-backup`; máy chủ giữ múi giờ UTC và cron của Ubuntu không nhận `CRON_TZ` trong `/etc/cron.d`, chạy bằng root để đọc được CSDL, ảnh và CV): CSDL (`mysqldump --single-transaction`, nén gzip, giữ 3 bản gần nhất tại `/var/backups/vgarco`) + `uploads` + `/srv/vgarco/private` + `wp-config.php` + `/etc/vgarco` + `/etc/nginx`, bằng **restic** (mã hóa sẵn, khử trùng lặp) tới **kho S3 trong tài khoản của VGARCO**; khóa S3 chỉ có quyền trên đúng kho đó. Bản sao CSDL cụt (thiếu dòng `Dump completed`) bị từ chối và báo lỗi.
   Sao lưu cả tệp **hằng ngày** (vượt yêu cầu "tệp hằng tuần") vì CV nộp trong tuần không được mất nếu sự cố xảy ra trước kỳ sao lưu tuần.
 - **Lưu giữ:** 7 bản theo ngày, 4 theo tuần, 3 theo tháng (`restic forget --keep-daily 7 --keep-weekly 4 --keep-monthly 3 --prune`).
 - **Kiểm tra:** `restic check --read-data-subset=5%` hằng tuần; mỗi quý khôi phục thử vào staging.
@@ -37,7 +37,7 @@ restic snapshots                                   # chọn mã snapshot (thư�
 restic restore <mã-snapshot> --target /tmp/restore
 rsync -a /tmp/restore/var/www/vgarco/public/wp-content/uploads/  /var/www/vgarco/public/wp-content/uploads/
 rsync -a /tmp/restore/srv/vgarco/private/                         /srv/vgarco/private/
-cp /tmp/restore/var/www/vgarco/wp-config.php /var/www/vgarco/wp-config.php
+cp /tmp/restore/var/www/vgarco/public/wp-config.php /var/www/vgarco/public/wp-config.php
 rsync -a /tmp/restore/etc/vgarco/ /etc/vgarco/
 
 # 3. Quyền: PHP chỉ ghi được uploads và private

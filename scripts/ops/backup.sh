@@ -90,13 +90,18 @@ find "$DUMP_DIR" -maxdepth 1 -name '*.sql.gz' -mtime +3 -delete
 
 paths=("$DUMP_DIR" "$ETC_VGARCO" "$ETC_NGINX")
 for site in $BACKUP_SITES; do
-  for p in "${WEB_BASE}/${site}/public/wp-content/uploads" "${PRIV_BASE}/${site}/private" "${WEB_BASE}/${site}/wp-config.php"; do
+  for p in "${WEB_BASE}/${site}/public/wp-content/uploads" "${PRIV_BASE}/${site}/private"; do
     if [[ -e "$p" ]]; then paths+=("$p"); else echo "$(date -Is) bỏ qua, không thấy: ${p}"; fi
   done
+  found_config=0
+  for p in "${WEB_BASE}/${site}/public/wp-config.php" "${WEB_BASE}/${site}/wp-config.php"; do
+    if [[ -e "$p" ]]; then paths+=("$p"); found_config=1; fi
+  done
+  (( found_config )) || echo "$(date -Is) bỏ qua, không thấy wp-config.php của ${site}"
 done
 
 restic backup --tag vgarco --exclude-caches --one-file-system "${paths[@]}"
-restic forget --tag vgarco --keep-daily 7 --keep-weekly 4 --keep-monthly 3 --prune
+restic forget --tag vgarco --group-by host,tags --keep-daily 7 --keep-weekly 4 --keep-monthly 3 --prune
 
 if [[ "${VGARCO_BACKUP_DOW:-$(date +%u)}" == "7" ]]; then
   restic check --read-data-subset=5%

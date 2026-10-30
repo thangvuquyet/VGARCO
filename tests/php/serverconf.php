@@ -89,7 +89,7 @@ check( 'danh sách bước của provision.sh có backup, đứng sau cron', str
 preg_match( '/phase_on backup && \{(.*?)\n\}\n/s', $prov, $bk );
 $bk = $bk[1] ?? '';
 check( 'bước backup tồn tại', '' !== $bk );
-check( 'backup: lịch 02:30 giờ Việt Nam bằng CRON_TZ, chạy bằng root', str_contains( $bk, 'CRON_TZ=Asia/Ho_Chi_Minh' ) && str_contains( $bk, '30 2 * * * root /usr/local/sbin/vgarco-backup' ) );
+check( 'backup: lịch 19:30 UTC (02:30 giờ Việt Nam; cron của Ubuntu bỏ qua CRON_TZ trong /etc/cron.d), chạy bằng root', str_contains( $bk, '30 19 * * * root /usr/local/sbin/vgarco-backup' ) && ! str_contains( $bk, 'CRON_TZ' ) );
 check( 'backup: cài tệp cạnh provision.sh với quyền 0750 root', str_contains( $bk, 'install -m 0750 -o root -g root "$SCRIPT_DIR/backup.sh" /usr/local/sbin/vgarco-backup' ) );
 check( 'backup: tệp khóa riêng 0600 và chỉ tạo khi chưa có (không ghi đè khóa đã điền)', str_contains( $bk, 'if [[ ! -f "${SECRETS_DIR}/backup.env" ]]' ) && str_contains( $bk, 'backup.env" 0600 root:root' ) );
 check( 'backup: mẫu không khai báo khóa rỗng (chỉ dòng chú thích)', ! preg_match( '/^(RESTIC_PASSWORD|RESTIC_REPOSITORY|AWS_ACCESS_KEY_ID|AWS_SECRET_ACCESS_KEY|HEARTBEAT_URL)=/m', $bk ) );

@@ -185,7 +185,7 @@ Chưa làm ở bước dựng máy chủ: cài plugin bên thứ ba (cần tải
 Còn mở (không thuộc bước dựng máy chủ, cần quyết định hoặc việc của vận hành):
 - Tài khoản `backup` đã có sẵn trong Ubuntu (không đăng nhập được), nên script không tạo tài khoản `backup` dùng shell; cần chọn tên khác khi viết phần sao lưu.
 - Staging và production chung một máy: `redis.php` và `secrets.php` chỉ được tạo một lần với nhóm của môi trường chạy trước, người dùng PHP của môi trường sau sẽ không đọc được; cần tách theo môi trường (không dùng một nhóm chung, vì staging sẽ đọc được khóa production) trước khi dựng môi trường thứ hai trên cùng máy.
-- Máy giữ múi giờ UTC (đúng thiết kế: lịch của mã chạy theo UTC, xem `KIEN-TRUC.md`; cron sao lưu 02:30 sẽ là 09:30 giờ Việt Nam), Nginx chưa nghe IPv6 ở cổng 443 (Cloudflare nối bằng IPv4 khi bản ghi gốc chỉ có A), VM thử đã cập nhật hết và khởi động lại ngày 29/10/2026 (xem phần kiểm sâu); `unattended-upgrades` đã bật nên sẽ tự cập nhật bản vá bảo mật.
+- Máy giữ múi giờ UTC (đúng thiết kế: lịch của mã chạy theo UTC, xem `KIEN-TRUC.md`; cron sao lưu đặt 19:30 UTC = 02:30 giờ Việt Nam), Nginx chưa nghe IPv6 ở cổng 443 (Cloudflare nối bằng IPv4 khi bản ghi gốc chỉ có A), VM thử đã cập nhật hết và khởi động lại ngày 29/10/2026 (xem phần kiểm sâu); `unattended-upgrades` đã bật nên sẽ tự cập nhật bản vá bảo mật.
 - Hai dòng cảnh báo vô hại: Redis ghi `overcommit_memory` ở lần khởi động đầu lúc cài gói (trước khi bước `redis` đặt tham số), MariaDB ghi "unset environment variable" của đơn vị systemd Ubuntu.
 - Cổng 443 chỉ nhận từ Cloudflare nên tên miền thật phải đi qua Cloudflare (proxy bật) trước khi mở site ra ngoài; chưa có IP công cộng ánh xạ về VM thử.
 

@@ -67,7 +67,7 @@ size_for_ram() {
   echo "$pool $children"
 }
 
-MEM_MB=$(awk '/^MemTotal:/ {print int($2/1024)}' /proc/meminfo 2>/dev/null || true)
+MEM_MB="${VGARCO_MEM_MB:-$(awk '/^MemTotal:/ {print int($2/1024)}' /proc/meminfo 2>/dev/null || true)}"
 MEM_MB=${MEM_MB:-8192}
 read -r INNODB_POOL FPM_CHILDREN < <(size_for_ram "$MEM_MB" "$ENV_NAME")
 
@@ -453,11 +453,11 @@ EOF
 # Sinh bởi provision.sh
 17 3 * * 1 root /usr/local/sbin/vgarco-cloudflare-ips >/dev/null 2>&1
 EOF
-  note "Cần đặt define('DISABLE_WP_CRON', true) trong wp-config.php (docs/CAU-HINH.md). Sao lưu 02:30 và kiểm hạn chứng chỉ: chưa có mã (xem SAO-LUU-PHUC-HOI.md)."
+  note "Cần đặt define('DISABLE_WP_CRON', true) trong wp-config.php (docs/CAU-HINH.md). Sao lưu do bước backup cài (xem SAO-LUU-PHUC-HOI.md); chứng chỉ Origin CA 15 năm nên không cần kiểm hạn hằng tuần."
 }
 
 phase_on backup && {
-  log "backup: vgarco-backup (restic) và lịch 02:30 giờ Việt Nam"
+  log "backup: vgarco-backup (restic) và lịch 19:30 UTC (02:30 giờ Việt Nam)"
   SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
   if [[ -f "$SCRIPT_DIR/backup.sh" ]]; then
     run install -m 0750 -o root -g root "$SCRIPT_DIR/backup.sh" /usr/local/sbin/vgarco-backup
@@ -478,9 +478,8 @@ BACKUP_DBS="${DB_NAME}"
 EOF
   fi
   ghi_tep /etc/cron.d/vgarco-backup 0644 root:root <<'EOF' || true
-CRON_TZ=Asia/Ho_Chi_Minh
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-30 2 * * * root /usr/local/sbin/vgarco-backup
+30 19 * * * root /usr/local/sbin/vgarco-backup
 EOF
   ghi_tep /etc/logrotate.d/vgarco-backup 0644 root:root <<'EOF' || true
 /var/log/vgarco-backup.log {

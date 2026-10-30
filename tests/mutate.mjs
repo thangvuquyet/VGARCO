@@ -942,11 +942,17 @@ const M = [
   ["sao lưu: bỏ qua khóa chạy chồng", "scripts/ops/backup.sh",
     "flock -n 9 ||", "true ||", 'ops-backup'],
   ["sao lưu: đường dẫn thiếu vẫn đưa vào", "scripts/ops/backup.sh",
-    "if [[ -e \"$p\" ]]; then", "if true; then", 'ops-backup'],
+    "if [[ -e \"$p\" ]]; then paths+=(\"$p\"); else", "if true; then paths+=(\"$p\"); else", 'ops-backup'],
   ["sao lưu: không gọi heartbeat khi xong", "scripts/ops/backup.sh",
     "echo \"$(date -Is) xong\"\nping_heartbeat\n", "echo \"$(date -Is) xong\"\n", 'ops-backup'],
   ["sao lưu: bỏ đường dẫn khóa /etc/vgarco", "scripts/ops/backup.sh",
     "paths=(\"$DUMP_DIR\" \"$ETC_VGARCO\" \"$ETC_NGINX\")", "paths=(\"$DUMP_DIR\" \"$ETC_NGINX\")", 'ops-backup'],
+  ["sao lưu: bỏ wp-config.php trong public", "scripts/ops/backup.sh",
+    "\"${WEB_BASE}/${site}/public/wp-config.php\" \"${WEB_BASE}/${site}/wp-config.php\"; do", "\"${WEB_BASE}/${site}/wp-config.php\"; do", 'ops-backup'],
+  ["sao lưu: bỏ wp-config.php ở thư mục cha", "scripts/ops/backup.sh",
+    "\"${WEB_BASE}/${site}/public/wp-config.php\" \"${WEB_BASE}/${site}/wp-config.php\"; do", "\"${WEB_BASE}/${site}/public/wp-config.php\"; do", 'ops-backup'],
+  ["sao lưu: không cảnh báo khi thiếu wp-config.php", "scripts/ops/backup.sh",
+    "(( found_config )) ||", "true ||", 'ops-backup'],
 ];
 
 if (process.argv[2] === '--check') {
