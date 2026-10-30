@@ -54,9 +54,9 @@ Kiểm tra bằng trình duyệt Chromium (CSP không vi phạm trên trang ch�
 
 473 đột biến được định nghĩa; công cụ kiểm tra từng đột biến vẫn khớp đúng một chỗ trong mã (0 đã lỗi thời).
 
+- Lần chạy đầy đủ cuối (30/10/2026, một lần liền cả 473): **472 bắt được, 1 bỏ sót**. Đột biến lọt là bỏ `mask-image` chuẩn của dải đối tác (làm hai mép hết mờ dần): phép kiểm cũ vẫn đạt nhờ dòng `-webkit-mask-image` đứng ngay trên. Đã siết phép kiểm phải có cả hai dòng, chạy lại đột biến đó thì bị bắt (473/473) và bộ kiểm thử tĩnh đạt hết.
 - Lần chạy đầy đủ trước đó (29/10/2026) chạy được 303 trong 437 đột biến thì dừng: **303 bắt được, 0 bỏ sót**.
 - Các nhóm thêm ngày 30/10/2026 (Polylang 12, cấu hình Nginx 9, sao lưu 15; tổng 36) đã chạy riêng: **36/36 bắt được**. Một đột biến ban đầu lọt (ô bắt buộc ở bản Đức) đã thêm phép kiểm tương ứng rồi bắt được.
-- Chưa chạy lại toàn bộ 473 trong một lần.
 
 ## 4. Lỗi tìm ra bằng kiểm thử trên WordPress thật
 
@@ -65,6 +65,7 @@ Những lỗi mà bộ kiểm thử bằng hàm giả không thấy, tìm ra và
 - Trước đó (lần đầu có WordPress thật): 8 lỗi (đường dẫn phân loại 404, khóa đăng nhập vô hiệu, XML-RPC còn mở, dò tài khoản qua "quên mật khẩu"…).
 - Khi thay ACF PRO/WPML bằng Secure Custom Fields/Polylang (30/10/2026): trùng tên trường `doi_tac`; importer ghi đè bài tiếng Việt bằng bản Đức; phân loại rác sinh ra khi nhập bản Đức; bộ chuyển ngôn ngữ dẫn tới địa chỉ bị chuyển hướng; trang chủ tiếng Đức ở `/de/startseite/`; chuyển hướng tới trình hướng dẫn của Polylang ở lần vào quản trị đầu tiên.
 - Khi chạy thật lần hai trên máy chủ thử (30/10): `wp-config.php` nằm trong `public/` nên **không được sao lưu** (script tìm ở thư mục cha); cron của Ubuntu bỏ qua `CRON_TZ` trong `/etc/cron.d` (lịch sao lưu chạy lệch 7 giờ); xóa bản cũ của restic chia theo nhóm đường dẫn nên bản cũ nằm mãi; `wp vgarco report translations` báo "đã có bản dịch" khi Polylang chưa bật.
+- Khi chạy đủ 473 đột biến (30/10): phép kiểm viền mờ dải đối tác chỉ cần dòng `-webkit-mask-image`, nên dòng `mask-image` chuẩn hỏng mà không ai biết; đã siết.
 - Khi rà sẵn sàng triển khai: tên gói `modern-image-formats` sai (đúng là `webp-uploads`); thiếu ngôn ngữ `vi` khi chưa bật Polylang làm trang ra `lang="en-US"`; Let's Encrypt kiểu webroot không chạy được vì cổng 80 đóng (chuyển sang Cloudflare Origin CA).
 
 ## 5. Chưa kiểm — việc còn lại trước khi nghiệm thu
