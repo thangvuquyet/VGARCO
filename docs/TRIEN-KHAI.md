@@ -9,7 +9,7 @@
 | Thành phần | Nguồn | Vào máy chủ bằng cách |
 |---|---|---|
 | Mã tự viết: `vgarco-loader.php`, `vgarco-core/`, theme `vgarco/` | Git (kho này) | Sao chép sau khi build theme |
-| Lõi WordPress, WPML, ACF PRO, FluentSMTP, WP 2FA, WPS Hide Login, Redis Object Cache, Modern Image Formats, Patchstack | `plugins.lock.json` (tên, lý do, bắt buộc/tùy chọn) — **không** nằm trong Git | Cài bằng WP-CLI từ nguồn chính thức; WPML và ACF PRO bằng tệp `.zip` + khóa giấy phép đứng tên VGARCO |
+| Lõi WordPress, Polylang, Secure Custom Fields, FluentSMTP, WP 2FA, WPS Hide Login, Redis Object Cache, Modern Image Formats, Patchstack | `plugins.lock.json` (tên, lý do, bắt buộc/tùy chọn) — **không** nằm trong Git | Cài bằng WP-CLI từ wordpress.org; tất cả miễn phí, không có giấy phép hay tệp `.zip` riêng |
 | `wp-config.php`, khóa bí mật | Máy chủ (`/etc/vgarco/secrets.php`) | Xem `CAU-HINH.md` |
 | Ảnh tải lên (`uploads`), CV (`/srv/vgarco/private`) | Máy chủ; có trong sao lưu | Không triển khai; chỉ sao lưu/khôi phục |
 
@@ -31,14 +31,15 @@ Chi tiết Cloudflare (DNS, SSL Full strict, Cache Rules, WAF, rate limiting) n�
 
 ## 3. Cài mới (lần đầu, mỗi môi trường)
 
-Thứ tự có ý nghĩa: **ACF PRO phải có trước `vgarco-core`** (không có thì trang quản trị báo thiếu và không có trường nhập liệu).
+Thứ tự có ý nghĩa: **Secure Custom Fields phải có trước `vgarco-core`** (không có thì trang quản trị báo thiếu và không có trường nhập liệu). Không cài ACF hoặc ACF PRO song song: SCF tự tắt chúng.
 
 ```bash
 # 1. Lõi WordPress, cấu hình (wp-config.php theo CAU-HINH.md), CSDL
 wp core install --url=https://<tên-miền> --title="VGARCO" --admin_user=<không-dùng-admin> --admin_email=<hộp-thư-vận-hành> --skip-email
 
-# 2. Plugin theo plugins.lock.json (bản quyền: tệp .zip + khóa)
-wp plugin install <acf-pro.zip> <wpml-multilingual-cms.zip> <wpml-string-translation.zip> <acfml.zip> --activate
+# 2. Plugin theo plugins.lock.json (ghim đúng bản đã kiểm thử)
+wp plugin install secure-custom-fields --version=6.9.7 --activate
+wp plugin install polylang --version=3.9.1 --activate
 wp plugin install fluent-smtp wp-2fa wps-hide-login redis-cache modern-image-formats patchstack --activate   # kiểm tra tên gói khi cài
 
 # 3. Mã tự viết (mu-plugin tự chạy; plugin và theme cần kích hoạt)
@@ -68,7 +69,9 @@ Trang cần tạo (tiêu đề → đường dẫn → mẫu); **bản đồ đ�
 Dự án `/du-an/`, tin tức `/tin-tuc/`, vị trí tuyển dụng `/tuyen-dung/<slug>/` do kiểu nội dung tạo; **không** tạo trang cho chúng.
 
 ```bash
-# 5. Cấu hình bản dịch/WPML theo mục 6.7 của phương án (chạy thử trên staging trước), rồi:
+# 5. Ngôn ngữ: tạo vi (mặc định, không tiền tố) và de (/de/), đặt tùy chọn Polylang, gán tiếng Việt cho nội dung đã có; chạy lại an toàn
+wp vgarco languages
+# Rồi:
 # 6. Nhập nội dung (xem VAN-HANH.md mục 2)
 wp vgarco import projects content/projects.csv --images=<thư-mục-ảnh> --dry-run
 wp vgarco import projects content/projects.csv --images=<thư-mục-ảnh>
@@ -77,7 +80,7 @@ wp vgarco import projects content/projects.csv --images=<thư-mục-ảnh>
 wp user create <tên> <email> --role=vg_tuyen_dung
 ```
 
-Việc **chưa được kiểm chứng** ở bước này vì chưa có giấy phép: nối với ACF PRO thật (trang cấu hình, trường lặp), WPML/ACFML (URL `/de/`, dịch đường dẫn, đồng bộ trường) — đây là việc đầu tiên trên staging (xem `README.md` gốc, mục Trạng thái).
+Đã kiểm chứng trong phòng thử (`tests/wp-lab`) trên Secure Custom Fields 6.9.7 và Polylang 3.9.1 thật, WordPress 7.1.2: trang cấu hình và trường lặp, URL `/de/` và trang chủ tiếng Đức ở `/de/`, bộ chuyển ngôn ngữ và `hreflang`, nhập dự án có bản Đức, sao chép trường khi tạo bản dịch, cấu hình riêng cho bản Đức. **Chưa kiểm chứng**: thao tác trên giao diện bằng trình duyệt (nút "+" của Polylang, màn hình nhập liệu), MariaDB thật (phòng thử dùng SQLite) và việc dịch tên phân loại sang tiếng Đức; đó là các việc đầu tiên trên staging. Giới hạn của Polylang miễn phí: không dịch được phần tiền tố cố định của địa chỉ, nên `/du-an/`, `/tin-tuc/`, `/tuyen-dung/` giữ nguyên ở bản `/de/`; các trang (Về công ty, Liên hệ…) có địa chỉ tiếng Đức riêng như bảng trên khi tạo bản dịch.
 
 ## 4. Triển khai bản mới (mã tự viết)
 
@@ -162,7 +165,7 @@ Kiểm sâu sau khi bật `firewall` và `ssh` (cùng ngày): chạy lại toàn
 *WP-CLI và WordPress trên VM thử (29/10/2026)*. Bước `packages` nay tự cài WP-CLI bản ghim (2.12.0, mã SHA-512 lấy từ trang phát hành chính thức của dự án, ghim trong script; không khớp thì dừng, không để lại tệp): thử cả đường sai mã băm (thoát mã 1, không cài gì) lẫn đường đúng, chạy lại không đổi gì; `wp` chạy được dưới `deploy`. WordPress 7.1.4 (bản vá của nhánh 7.1 đã kiểm thử, `vi`) cài bằng `wp core download` (WP-CLI tự kiểm băm, `verify-checksums` đạt), `wp-config.php` đọc mật khẩu CSDL, Redis và khóa từ `/etc/vgarco/*.php` (chủ `deploy`, nhóm người dùng PHP, 0640; PHP không ghi được), salt sinh bằng `wp config shuffle-salts`, tiền tố bảng `vgx_`, `wp core install` với tài khoản quản trị không phải `admin` (mật khẩu cất ở `/home/deploy/.wp-admin-initial-password`, quyền 600, không in ra). Yêu cầu thật qua Nginx → PHP-FPM → MariaDB: trang đăng nhập tiếng Việt, REST có phản hồi, `xmlrpc.php`, `readme.html`, `.git`, `debug.log` bị chặn. Lỗi tìm được và đã sửa:
 - Mẫu `secrets.php` của script dùng tên `VGARCO_CF_API_TOKEN`, `VGARCO_CF_ZONE_ID`, `VGARCO_TELEGRAM_CHAT_ID` còn mã đọc `VGARCO_CF_TOKEN`, `VGARCO_CF_ZONE`, `VGARCO_TELEGRAM_CHAT`: ai điền theo mẫu sẽ làm xóa cache Cloudflare và cảnh báo Telegram im lặng không chạy. Nay mẫu dùng đúng tên và để các dòng đó ở dạng chú thích, vì mã Cloudflare chỉ kiểm `defined()` (khai báo rỗng là bật tính năng với khóa rỗng); bỏ `VGARCO_IP_SALT` vì mã dùng `wp_salt('auth')`.
 - `/wp-config.php` trả 200 (trang trắng, chạy cả WordPress): nay khối Nginx chặn 403.
-Chưa làm ở bước dựng máy chủ: cài plugin bên thứ ba (cần tải thêm; ACF PRO và WPML cần giấy phép). Theme, mã tự viết và trang: xem phần chạy thật `deploy.sh` cuối mục 4.
+Chưa làm ở bước dựng máy chủ: cài plugin bên thứ ba (cần tải thêm từ wordpress.org; không còn plugin nào cần giấy phép). Theme, mã tự viết và trang: xem phần chạy thật `deploy.sh` cuối mục 4.
 
 Còn mở (không thuộc bước dựng máy chủ, cần quyết định hoặc việc của vận hành):
 - Tài khoản `backup` đã có sẵn trong Ubuntu (không đăng nhập được), nên script không tạo tài khoản `backup` dùng shell; cần chọn tên khác khi viết phần sao lưu.
@@ -178,7 +181,7 @@ Còn mở (không thuộc bước dựng máy chủ, cần quyết định hoặ
 4. Chạy đầy đủ (mọi kiểm thử, build, tar, kiểm khói 26/26): gói hoàn tác đặt tên theo mã commit đang chạy, `.deployed-ref` được ghi.
 5. Tự hoàn tác: một nhánh tạm có `throw` ở đầu `functions.php` làm mọi trang trả 500; kiểm khói hỏng 13 phép; `deploy.sh` giải gói cũ, reload, kiểm khói lại 26/26 và thoát mã 1; `.deployed-ref` giữ nguyên, không còn mã hỏng trên máy chủ; nhánh tạm đã xóa.
 
-Lần cài đầu nên chạy `deploy.sh --no-smoke`, kích hoạt plugin rồi theme, tạo trang (mục 3), rồi chạy lại có kiểm khói. Kiểm khói 26/26 là trên chồng phần mềm thật nhưng **chưa có ACF PRO, WPML và nội dung thật** (theme dùng giá trị mặc định trong mã), nên chưa chứng minh được trang có dữ liệu thật; đó là việc của staging thật.
+Lần cài đầu nên chạy `deploy.sh --no-smoke`, kích hoạt plugin rồi theme, tạo trang (mục 3), rồi chạy lại có kiểm khói. Kiểm khói 26/26 là trên chồng phần mềm thật nhưng **chưa có Secure Custom Fields, Polylang và nội dung thật** (theme dùng giá trị mặc định trong mã), nên chưa chứng minh được trang có dữ liệu thật; đó là việc của staging thật.
 
 ## 5. Kiểm tra sau triển khai
 

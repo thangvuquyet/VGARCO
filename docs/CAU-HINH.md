@@ -70,5 +70,5 @@ Việc **công bố chủ đầu tư và đối tác** của từng dự án n�
 
 ## 6. Thành phần bên thứ ba
 
-Danh sách, lý do dùng và trạng thái bắt buộc/tùy chọn: [`plugins.lock.json`](../plugins.lock.json) (12 mục, trong đó 2 tùy chọn; mỗi mục có lý do — đặc tả 5.7 #3).
-Giấy phép thương mại (ACF PRO, WPML) **đứng tên VGARCO**; tệp cài đặt `.zip` và khóa **không bao giờ** vào Git.
+Danh sách, lý do dùng và trạng thái bắt buộc/tùy chọn: [`plugins.lock.json`](../plugins.lock.json) (9 mục, trong đó 1 tùy chọn; mỗi mục có lý do — đặc tả 5.7 #3).
+Polylang và Secure Custom Fields đều miễn phí trên wordpress.org nên không có giấy phép phải gia hạn. Nếu mua Real Cookie Banner (tùy chọn), giấy phép **đứng tên VGARCO**; tệp cài đặt `.zip` và khóa **không bao giờ** vào Git.

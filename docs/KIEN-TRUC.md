@@ -26,7 +26,8 @@ Header bảo mật (HSTS, CSP...) **do Nginx gửi**, không gửi ở PHP.
 | Nhóm tệp (`inc/`) | Làm gì |
 |---|---|
 | `post-types.php`, `taxonomies.php`, `seed.php` | Kiểu nội dung, phân loại, dữ liệu mồi (7 loại công trình, 3 chuyên mục) |
-| `fields.php`, `fields/*.php`, `options.php`, `helpers.php` | Trường ACF (14 nhóm), trang **Cấu hình VGARCO**, giá trị mặc định trong mã (`vgarco_option()`) |
+| `fields.php`, `fields/*.php`, `options.php`, `helpers.php` | Trường Secure Custom Fields (14 nhóm), trang **Cấu hình VGARCO** và trang **Bản DE**, giá trị mặc định trong mã (`vgarco_option()`) |
+| `languages.php` | Polylang: kiểu nội dung và phân loại được dịch, sao chép trường khi tạo bản dịch, nối bản dịch, cấu hình riêng cho bản Đức, lệnh `wp vgarco languages` |
 | `careers/*` | Tuyển dụng: mã bảo mật, nhận hồ sơ, lưu CV, quản trị hồ sơ, thư, xuất `.xlsx`, tự xóa 12 tháng |
 | `search*.php` | Tìm kiếm dự án (REST, chỉ mục theo ngôn ngữ) |
 | `security*.php` | Khóa đăng nhập sai, "quên mật khẩu" không lộ tài khoản, báo quản trị viên mới |
@@ -46,7 +47,7 @@ PHP đọc `dist/.vite/manifest.json` để nạp CSS/JS có mã băm (`inc/enqu
 |---|---|---|
 | `du_an` — Dự án | `/du-an/<slug>/` | Sắp theo "Thứ tự" (`menu_order`) rồi tên. Khóa nhập liệu: trường `ma` (chữ thường không dấu, gạch ngang) |
 | `linh_vuc` — Lĩnh vực hoạt động | không có trang riêng | Hiển thị trên một trang, mỗi mục có mã neo |
-| `tin_tuc` — Tin tức | `/tin-tuc/<slug>/` | Kiểu riêng (không dùng `post`) vì WPML không dịch được tiền tố của bài viết thường |
+| `tin_tuc` — Tin tức | `/tin-tuc/<slug>/` | Kiểu riêng (không dùng `post`) vì Polylang không dịch được tiền tố của bài viết thường |
 | `vi_tri` — Vị trí tuyển dụng | `/tuyen-dung/<slug>/` | `has_archive = false` để không tranh đường dẫn với trang Tuyển dụng (là một `page`) |
 | `ho_so_ut` — Hồ sơ ứng tuyển | **không có URL** | Riêng tư: không REST, không xuất, không công khai; chỉ vai trò Nhân sự tuyển dụng và Quản trị viên |
 
@@ -55,6 +56,15 @@ Phân loại: `loai_cong_trinh` (`/du-an/loai/<nhóm>/`), `chuyen_muc` (`/tin-tu
 Sau khi thêm hoặc đổi kiểu nội dung/phân loại phải **làm mới đường dẫn** (`wp rewrite flush`); kích hoạt plugin đã tự làm.
 
 Trang tĩnh dùng mẫu trong `themes/vgarco/templates/`: Về công ty, Ban lãnh đạo, Phòng ban, Lĩnh vực hoạt động, Tuyển dụng, Ứng tuyển, Liên hệ. Trang chủ là trang tĩnh gắn nhóm trường ACF (để trống thì dùng bản mặc định trong mã).
+
+### Ngôn ngữ (Polylang)
+
+- Tiếng Việt là ngôn ngữ mặc định, **không có tiền tố** (`/du-an/`); tiếng Đức ở `/de/`. `wp vgarco languages` tạo hai ngôn ngữ, đặt tùy chọn (không tự đoán ngôn ngữ trình duyệt để giữ bộ nhớ đệm Cloudflare; trang chủ tiếng Đức là `/de/`) và gán tiếng Việt cho nội dung đã có; chạy lại không đổi gì.
+- Dịch: `du_an`, `linh_vuc`, `tin_tuc`, `vi_tri`, bốn phân loại và các trang. `ho_so_ut` **không** dịch. Polylang miễn phí không dịch được phần tiền tố cố định, nên `/de/du-an/`, `/de/tin-tuc/`, `/de/tuyen-dung/<vị trí>/` giữ tiền tố tiếng Việt; trang tĩnh có địa chỉ tiếng Đức riêng (`/de/ueber-uns/`…).
+- Theme chỉ dùng giao diện `wpml_*` mà Polylang cung cấp (`wpml_current_language`, `wpml_active_languages`, `wpml_permalink`, `wpml_object_id`), còn mã trong `vgarco-core` dùng thẳng hàm của Polylang (`pll_*`).
+- Mỗi trường có ưu tiên dịch (`wpml_cf_preferences`: 0 bỏ qua, 1 sao chép, 2 dịch, 3 chép một lần). Khi tạo bản dịch trong trang quản trị, `languages.php` chỉ chép các trường ưu tiên 1 và 3 (kèm khóa tham chiếu của ACF); ô cần dịch để trống cho biên tập viên.
+- Trang **Cấu hình VGARCO** chỉ có một bản. Các ô cần dịch của nó được nhân thành trang con **Bản DE**, lưu ở trường có hậu tố `_de` (ví dụ `chi_so_trang_chu_de`). Khi đọc bằng tiếng Đức, `vgarco_option()` lấy chữ từ bản `_de` và con số, liên kết, ảnh từ bản gốc; bản `_de` để trống thì dùng giá trị mặc định tiếng Đức trong mã.
+- Tên phân loại (loại công trình, chuyên mục) chưa có bản tiếng Đức; dịch trong trang quản trị, rồi chạy lại `wp vgarco import` để gắn vào dự án tiếng Đức (chưa dịch thì importer báo và bỏ qua loại đó).
 
 ### Vai trò và quyền
 - `vg_tuyen_dung` ("Nhân sự tuyển dụng"): đọc, xem danh sách/chi tiết hồ sơ, tải CV, xuất bảng tính, xóa hồ sơ. **Không** có quyền sửa bài, tải ảnh hay vào cấu hình.
@@ -115,4 +125,4 @@ Có Redis (object cache) thì transient nằm ở Redis, không ở bảng `opti
 | Dịch | `node scripts/i18n/sync.mjs` |
 | Xuất ảnh master | `php scripts/content/export-images.php …` |
 
-Phòng thử `tests/wp-lab` dùng **ACF PRO và WPML bản giả**: việc nối với ACF PRO, WPML và ACFML thật chưa được kiểm chứng và là việc đầu tiên khi có giấy phép (xem `README.md` gốc, mục Trạng thái).
+Phòng thử `tests/wp-lab` chạy **Secure Custom Fields và Polylang thật** (WordPress 7.1 + SQLite). Chưa kiểm chứng: giao diện trình duyệt của biên tập viên và MariaDB thật (xem `README.md` gốc, mục Trạng thái).

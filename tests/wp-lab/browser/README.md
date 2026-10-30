@@ -15,7 +15,7 @@ Mỗi trang được nạp trong một iframe rộng đúng W px (media query th
 
 ```js
 await vgAxe( [ '/', '/gioi-thieu/', '/du-an/', '/tin-tuc/', '/tuyen-dung/' ], [ 1440, 768, 390 ] );   // mảng { url, w, n (số vi phạm), v (mô tả) }; n === 0 ở mọi dòng là đạt
-await vgAxe( [ '/?lab_lang=de', '/tuyen-dung/?lab_lang=de' ], [ 1440, 390 ] );                       // giao diện tiếng Đức
+await vgAxe( [ '/de/', '/de/karriere/' ], [ 1440, 390 ] );                                          // giao diện tiếng Đức
 await vgAxeState( 'hộp thoại tìm kiếm', '/', 1440, async ( d, w ) => { /* thao tác trên d (document của iframe), w (window) */ } );
 ```
 
@@ -33,7 +33,7 @@ await vgAxeState( 'đối chứng', '/', 1440, ( d ) => d.querySelector( 'main' 
 const W = [ 600, 601, 700, 701, 800, 801, 900, 901, 1000, 1001, 1180, 1181 ];
 await vgSweep( [ [ 'tin-tuc', '/tin-tuc/' ] ], W );              // mỗi độ rộng một dòng: các khối lưới/flex và số cột (g150/298/210 = lưới 3 cột); "!!SCROLL" = cả trang cuộn ngang được
 await vgSweep( [ [ 'news', '/news.html' ] ], W, 700 );           // cùng trang ở bản thiết kế (trang nạp bằng JS cần chờ lâu hơn: 700 ms)
-await vgCramped( [ [ 'tin-tuc', '/tin-tuc/?lab_lang=de' ] ], [ 601, 701, 768, 801 ] );   // đoạn chữ từ 3 dòng mà dưới 24 ký tự/dòng
+await vgCramped( [ [ 'tin-tuc', '/de/tin-tuc/' ] ], [ 601, 701, 768, 801 ] );   // đoạn chữ từ 3 dòng mà dưới 24 ký tự/dòng
 ```
 
 Cách đọc: tìm độ rộng mà hai bên đổi số cột khác nhau; khác biệt có chủ đích thì ghi lại, còn lại sửa theme theo bản thiết kế (biến `$bp-*` trong `src/scss/_mixins.scss`).
@@ -61,7 +61,7 @@ Báo lỗi khi: điểm dừng không có tên truy cập; có `:focus-visible` 
 
 ```js
 const urls = ['/', '/gioi-thieu/', '/du-an/', '/tuyen-dung/vt-kts/', '/lien-he/'];
-const de = await vgLayout(390, urls, 'de');   // giao diện tiếng Đức (plugin lab-lang, tham số ?lab_lang=de)
+const de = await vgLayout(390, urls, 'de');   // giao diện tiếng Đức (địa chỉ /de/… qua vgDeUrl)
 const vi = await vgLayout(390, urls, '');
 vgLayoutDiff(de, vi);                         // chỉ lỗi xuất hiện riêng ở tiếng Đức
 ```
@@ -194,7 +194,7 @@ Chuẩn bị: `node tests/wp-lab/run.mjs demo` (xem `tests/wp-lab/README.md`), `
 
 | Việc | Công cụ | Kết quả |
 |---|---|---|
-| axe-core trên trang có ảnh thật | `axe-check.js` | 0 vi phạm ở `/`, `/du-an/`, chi tiết dự án có ảnh, chi tiết dự án **không ảnh**, `/linh-vuc-hoat-dong/`, `/tin-tuc/`, `/tuyen-dung/`, `/gioi-thieu/` (mỗi trang ở 2–3 độ rộng trong 390/768/1440 px), cả `/?lab_lang=de` và `/du-an/?lab_lang=de` ở 390 px. **Đối chứng** (chèn `<img>` thiếu alt) phải ra `image-alt(critical)`: đã thấy |
+| axe-core trên trang có ảnh thật | `axe-check.js` | 0 vi phạm ở `/`, `/du-an/`, chi tiết dự án có ảnh, chi tiết dự án **không ảnh**, `/linh-vuc-hoat-dong/`, `/tin-tuc/`, `/tuyen-dung/`, `/gioi-thieu/` (mỗi trang ở 2–3 độ rộng trong 390/768/1440 px), cả giao diện tiếng Đức ở 390 px (lúc đó bằng tham số `?lab_lang=de` của bản giả; nay dùng `/de/`). **Đối chứng** (chèn `<img>` thiếu alt) phải ra `image-alt(critical)`: đã thấy |
 | Bố cục, không ảnh → có ảnh | `layout-check.js` | Không có trang nào cuộn ngang ở 390/768/1440 px. Ba kết quả "lỗi" được chấp nhận: (1) mục cuối đường dẫn vị trí của chi tiết dự án, cắt bằng "…" theo thiết kế; (2) mũi tên menu xoay 45° vượt 3 px ở 1440; (3) **mới:** dấu "+" của hàng lĩnh vực đang mở (`summary` ở `/linh-vuc-hoat-dong/`) vượt 7–9 px — là khung bao của phần tử xoay 45°, chữ không tràn |
 | Giảm chuyển động (mô phỏng) | `reduced-motion-check.js` | Trang chủ và chi tiết dự án: `scroll-behavior: auto`, 0 chuyển cảnh, 0 hoạt ảnh, vòng CTA ẩn, dải đối tác đứng, H1 không có hoạt ảnh vào, nút dừng ở trạng thái "đã dừng" (`aria-pressed=true`, `body.is-paused` ở trang chủ). **Đối chứng** (không giảm chuyển động): 88 chuyển cảnh + 4 hoạt ảnh ở trang chủ, 67 + 1 ở chi tiết dự án, cuộn mượt, vòng CTA hiện, nút dừng `aria-pressed=false` |
 | Duyệt phím Tab (phím thật) | `tab-walk.js` | Trang chủ 40 điểm dừng, chi tiết dự án 45: thứ tự hợp lý (liên kết bỏ qua → logo → menu → tìm kiếm → ngôn ngữ → nội dung → chân trang → "Về đầu trang" → quay lại liên kết bỏ qua), **mọi điểm dừng có tên truy cập và vòng tiêu điểm nhìn thấy**, không bẫy bàn phím, không phần tử ẩn nhận tiêu điểm; trang tự cuộn theo tiêu điểm. Thư viện ảnh: vùng trình chiếu (có nhãn) → phóng to → tạm dừng → trước → các chấm → sau → danh sách ảnh nhỏ → dự án kế tiếp |

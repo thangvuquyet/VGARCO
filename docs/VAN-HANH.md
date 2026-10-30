@@ -33,6 +33,12 @@ Quy tắc chính (chi tiết ở `content/README.md`):
 - Sau khi nạp ảnh: `wp vgarco report images` liệt kê ảnh bị hạ chất lượng AVIF để vừa trần dung lượng (chất lượng 50 hoặc 45) và ảnh **vẫn vượt trần ở 45** — ảnh sau nên được thay bằng ảnh ít chi tiết hơn hoặc cắt lại. Ảnh không có trong báo cáo vẫn giữ chất lượng chung 55. Mã hóa thử làm việc nạp ảnh lớn chậm hơn (1–3 lần mã hóa thêm cho mỗi ảnh); nạp hàng loạt nên chạy bằng WP-CLI (không bị giới hạn thời gian của web).
 - Chỉ mục tìm kiếm tự làm mới khi dự án đổi. Khi bạn **xuất bản** dự án (hoặc sửa dự án đã xuất bản), cache Cloudflare được lên lịch xóa sau 30 giây (tùy chu kỳ cron hệ thống); dự án nháp không làm đổi trang công khai nên không kích hoạt xóa cache.
 
+Bản tiếng Đức (Polylang):
+- Các cột `*_de` của bảng tạo hoặc cập nhật bài tiếng Đức và nối với bài tiếng Việt cùng `ma`; bài tiếng Đức nằm ở `/de/du-an/<slug-de>/`. Dự án chưa có bản Đức thì bộ chuyển ngôn ngữ đưa người xem về danh mục.
+- Tin, vị trí, lĩnh vực và trang: bấm dấu "+" ở cột ngôn ngữ trong danh sách bài để tạo bản dịch (Polylang chép các ô sao chép, để trống ô cần dịch).
+- Chữ của trang **Cấu hình VGARCO** (chỉ số, địa chỉ, mẫu thư, câu chuyện, đối tác) nhập ở **Cấu hình VGARCO → Bản DE**; để trống thì dùng giá trị mặc định tiếng Đức trong mã.
+- Loại công trình và chuyên mục phải được dịch tên trước (Ngôn ngữ → trang phân loại) thì `wp vgarco import` mới gắn được cho dự án tiếng Đức; chưa dịch thì lệnh báo và bỏ qua loại đó.
+
 Tin tức, vị trí tuyển dụng, lĩnh vực: nhập trong trang quản trị (khối soạn thảo bị giới hạn để không phá bố cục).
 
 ## 3. Quản lý tài khoản

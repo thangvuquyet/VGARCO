@@ -10,7 +10,7 @@ Kho này chỉ chứa mã do nhà thầu viết. Lõi WordPress và plugin bên 
 wp-content/
 ├── mu-plugins/vgarco-loader.php   Luôn chạy: khóa XML-RPC, chặn liệt kê tài khoản, tắt bình luận,
 │                                  chặn gửi thư thật ở staging
-├── plugins/vgarco-core/           DỮ LIỆU và NGHIỆP VỤ: kiểu nội dung, phân loại, trường ACF, trang cấu hình, ảnh,
+├── plugins/vgarco-core/           DỮ LIỆU và NGHIỆP VỤ: kiểu nội dung, phân loại, trường Secure Custom Fields, trang cấu hình, ngôn ngữ (Polylang), ảnh,
 │                                  tuyển dụng (mã bảo mật, nộp hồ sơ, quản trị hồ sơ), tìm kiếm, khóa đăng nhập,
 │                                  xóa cache Cloudflare, cảnh báo, nhập liệu bằng bảng tính (WP-CLI)
 └── themes/vgarco/                 TRÌNH BÀY: mẫu trang, SCSS, JS, chuỗi giao diện, SEO cơ bản
@@ -36,12 +36,12 @@ Mỗi chức năng có nghiệp vụ viết thành **hàm thuần** (`*-lib.php`
 | `vi_tri` — Vị trí tuyển dụng | `/tuyen-dung/<vị-trí>/` | Bộ lọc `noi_lam_viec`, `phong_ban` |
 | `ho_so_ut` — Hồ sơ ứng tuyển | — | **Riêng tư**, không URL công khai; chỉ vai trò Nhân sự tuyển dụng và Quản trị viên; CV lưu ngoài thư mục web |
 
-Tin tức dùng kiểu riêng thay vì `post` vì WPML không dịch được phần tiền tố cố định trong đường dẫn của bài viết thường.
+Tin tức dùng kiểu riêng thay vì `post` vì Polylang không dịch được phần tiền tố cố định trong đường dẫn của bài viết thường.
 
 ## Yêu cầu
 
 - WordPress 6.6+ (khuyến nghị bản 7.x), PHP 8.3 (phần mở rộng `gd`, `zip`, `fileinfo`, `mbstring`, `intl`)
-- Plugin trong `plugins.lock.json`. Bắt buộc để nhập dữ liệu: **ACF PRO** (bản miễn phí không có trang cấu hình và trường lặp)
+- Plugin trong `plugins.lock.json`. Bắt buộc: **Secure Custom Fields** (trang cấu hình, trường lặp) và **Polylang** (song ngữ); cả hai miễn phí trên wordpress.org
 - Node.js 20+ để build CSS/JS của theme
 - Cấu hình trong `wp-config.php` (không commit): `VGARCO_PRIVATE_DIR` (nơi lưu CV, **ngoài** thư mục web), `VGARCO_CF_ZONE` và `VGARCO_CF_TOKEN`
   (xóa cache Cloudflare), tùy chọn `VGARCO_TELEGRAM_TOKEN` và `VGARCO_TELEGRAM_CHAT` (cảnh báo)
@@ -83,11 +83,11 @@ Kiểm tra trên trình duyệt (không nằm trong `run.mjs`): `node tests/rend
 Các bộ trên dùng hàm WordPress **giả** nên không thấy lỗi chỉ lộ khi WordPress thật xử lý. Vì vậy có thêm bộ kiểm thử tích hợp chạy trên **WordPress 7.1 thật** (SQLite, không cần MySQL):
 
 ```bash
-PHP=... PHP_EXT=... node tests/wp-lab/bootstrap.mjs wordpress.zip sqlite-database-integration.zip   # một lần
-PHP=... node tests/wp-lab/run.mjs                                                                   # 12 kịch bản, ~400 phép kiểm
+PHP=... PHP_EXT=... node tests/wp-lab/bootstrap.mjs wordpress.zip sqlite-database-integration.zip secure-custom-fields.zip polylang.zip   # một lần
+PHP=... node tests/wp-lab/run.mjs                                                                   # 12 kịch bản, ~500 phép kiểm
 ```
 
-Hướng dẫn, danh sách kịch bản và **giới hạn** (ACF PRO/WPML là bản giả, không có Nginx/Cloudflare/trình duyệt khác Chromium) ở [`tests/wp-lab/README.md`](tests/wp-lab/README.md).
+Hướng dẫn, danh sách kịch bản và **giới hạn** (không có Nginx/Cloudflare/MariaDB/trình duyệt khác Chromium) ở [`tests/wp-lab/README.md`](tests/wp-lab/README.md).
 Bộ này đã tìm ra 8 lỗi mà các bộ giả không thấy (đường dẫn phân loại 404, khóa đăng nhập vô hiệu, XML-RPC còn mở, dò tài khoản qua "quên mật khẩu"...).
 
 ## Dịch
@@ -123,6 +123,6 @@ Chưa làm: kho Git từ xa, tên miền/hosting, cấu hình Cloudflare/Brevo, 
 
 Đã chạy thử trên WordPress 7.1 thật (SQLite; `tests/wp-lab`): kích hoạt, kiểu nội dung và phân loại, nhập liệu bằng bảng tính (lõi `VGARCO_CLI_Command`, WP-CLI giả), REST nộp hồ sơ và tìm kiếm,
 vai trò `vg_tuyen_dung` và quyền riêng của `ho_so_ut`, tải/xuất/xóa hồ sơ, thư, cron, đăng nhập qua `wp-login.php`, xóa cache Cloudflare (API giả), bề mặt tấn công, bản dịch `.mo`, duyệt toàn site.
+Từ 30/10/2026 phòng thử chạy **Secure Custom Fields 6.9.7 và Polylang 3.9.1 thật** (không còn bản giả): `/de/`, bộ chuyển ngôn ngữ và `hreflang`, nhập dự án có bản Đức, sao chép trường khi tạo bản dịch, cấu hình riêng cho bản Đức.
 
-**Còn phải kiểm chứng khi có giấy phép (spike đầu tiên trên staging):** ACF PRO + WPML/ACFML thật (chế độ nhóm trường, ưu tiên dịch của trường lặp, dịch đường dẫn kiểu nội dung
-`wpml-config.xml`, giao diện nhập liệu của biên tập viên), lệnh `wp vgarco import` bằng WP-CLI thật, Nginx/header bảo mật/Cloudflare/Brevo thật, Safari, Firefox, Cốc Cốc và trình đọc màn hình thật.
+**Còn phải kiểm chứng (việc đầu tiên trên staging):** giao diện nhập liệu của biên tập viên trên trình duyệt (nút "+" của Polylang, trang Cấu hình và Bản DE), MariaDB thật (phòng thử dùng SQLite), lệnh `wp vgarco import` và `wp vgarco languages` bằng WP-CLI thật, Nginx/header bảo mật/Cloudflare/Brevo thật, Safari, Firefox, Cốc Cốc và trình đọc màn hình thật.

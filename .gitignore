@@ -9,7 +9,7 @@ wp-config.php
 secrets.php
 
 # --- Giấy phép thương mại ---
-# WPML, ACF PRO... đứng tên VGARCO. Tệp .zip cài đặt và khóa giấy phép không được vào Git.
+# Giấy phép thương mại (nếu mua) đứng tên VGARCO. Tệp .zip cài đặt và khóa giấy phép không được vào Git.
 *.zip
 
 # --- Dữ liệu ---

@@ -10,9 +10,8 @@ chạy bằng PHP tích hợp và SQLite — không cần MySQL, Docker hay Ngin
 
 ## Không kiểm chứng điều gì
 
-- **ACF PRO và WPML là bản giả** (`plugins/lab-acf-shim`): chỉ đủ `get_field`, `update_field`, nhóm trường cục bộ và trang cấu hình, lưu bằng meta/option.
-  Việc nối với ACF PRO/WPML thật (giao diện nhập liệu, đồng bộ bản dịch, `wpml_cf_preferences`) **chưa được kiểm chứng** và phải thử trên staging
-  khi có tệp cài đặt giấy phép. Không có ACF PRO hay WPML nào trong thư mục này.
+- **Secure Custom Fields và Polylang là bản thật** (tải từ wordpress.org, cho vào `.lab/`, không vào Git). Chưa kiểm chứng: thao tác trong trình duyệt của biên tập viên
+  (nút "+" của Polylang, kéo thả trường lặp) và MariaDB (phòng thử dùng SQLite).
 - Thư không gửi thật (`plugins/lab-mail-capture` ghi vào `.lab/mail.log`); Cloudflare không được gọi thật (yêu cầu ghi vào `.lab/http.log`, trả kết quả giả).
 - Không kiểm tra Nginx, header bảo mật, TLS, Cloudflare, Safari/Firefox/Cốc Cốc, trình đọc màn hình. Xem `tests/a11y.md` cho phần kiểm tay.
 
@@ -21,19 +20,21 @@ chạy bằng PHP tích hợp và SQLite — không cần MySQL, Docker hay Ngin
 Cần PHP 8.3 với các phần mở rộng `mbstring gd fileinfo zip intl exif curl openssl pdo_sqlite sqlite3 gettext sodium`, Node 20+, và theme đã build
 (`cd wp-content/themes/vgarco && npm ci && npm run build`).
 
-Tải tay hai tệp (không nằm trong Git, `*.zip` bị bỏ qua):
+Tải tay bốn tệp (không nằm trong Git, `*.zip` bị bỏ qua):
 
 - WordPress: <https://wordpress.org/latest.zip>
-- Plugin *SQLite Database Integration*: <https://downloads.wordpress.org/plugin/sqlite-database-integration.latest-stable.zip>
+$1- Plugin *Secure Custom Fields*: <https://downloads.wordpress.org/plugin/secure-custom-fields.6.9.7.zip>
+- Plugin *Polylang*: <https://downloads.wordpress.org/plugin/polylang.3.9.1.zip>
 
 ```bash
 PHP=/đường/dẫn/php PHP_EXT=/đường/dẫn/thư-mục-ext \
-  node tests/wp-lab/bootstrap.mjs wordpress.zip sqlite-database-integration.zip
+  $1 secure-custom-fields.zip polylang.zip
 ```
 
 Bước này giải nén vào `tests/wp-lab/.lab/` (không vào Git), tạo `wp-config.php` với khóa ngẫu nhiên, cài WordPress, nối `wp-content/mu-plugins`,
 `vgarco-core` và theme `vgarco` bằng liên kết (sửa mã là thấy ngay), kích hoạt, tạo các trang theo mẫu. Mật khẩu quản trị thử được sinh ngẫu nhiên và
-ghi vào `.lab/credentials.txt`. Dùng `--reset` để dựng lại từ đầu.
+ghi vào `.lab/credentials.txt`. Dùng `--reset` để dựng lại từ đầu (xóa cả dữ liệu minh họa `demo`).
+Sau khi cài, `languages.php` chạy `vgarco_setup_languages()` (tiếng Việt mặc định, tiếng Đức ở `/de/`) và `pages.php` tạo 9 trang tiếng Việt cùng bản dịch tiếng Đức của chúng. Lab dựng từ bản cũ có bản giả ACF/WPML phải dựng lại bằng `--reset`.
 
 ## Chạy
 
@@ -55,11 +56,9 @@ Máy chủ chạy ở `http://localhost:8080` (cố định) trong lúc chạy v
 | `apply`    | Nộp hồ sơ qua REST: mã bảo mật, token một lần, Origin/Referer, bẫy, kiểm tra trường và tệp thật, CV ngoài web root, thư HR và ứng viên (cả tiếng Đức), SMTP hỏng + gửi lại theo giờ, giới hạn 5 lần/giờ |
 | `admin`    | Vai trò và quyền, danh sách hồ sơ, xem, tải CV (nonce, nhật ký, header), xuất `.xlsx` an toàn công thức, xóa kèm tệp, tự xóa sau 12 tháng, cảnh báo |
 | `site`     | Trang công khai: SEO, JSON-LD, 404 theo mục, tìm kiếm REST, bộ lọc phân loại, sơ đồ trang, bề mặt tấn công (author, REST users, XML-RPC), bản dịch `.mo` |
+| `lang`     | Polylang thật: hai ngôn ngữ và cài đặt, 8 cặp trang VI ↔ DE (200, bộ chuyển trỏ thẳng, `hreflang`), `/de/` là trang chủ, không đoán ngôn ngữ trình duyệt, nhập dự án có bản Đức (nối bản dịch, chạy lại không đổi, danh mục mỗi ngôn ngữ), sao chép trường khi tạo bản dịch, cấu hình riêng cho bản Đức, màn hình quản trị |
 | `security` | Đăng nhập qua `wp-login.php`: khóa IP và tài khoản, thông báo chung, quên mật khẩu không lộ tài khoản, báo quản trị mới, xóa cache Cloudflare |
-| `acffree`  | Tùy chọn: ACF bản MIỄN PHÍ thật thay shim — website không sập khi thiếu ACF PRO, quản trị viên được báo, ACF thật đọc được nhóm trường của VGARCO |
 | `crawl`    | Duyệt mọi liên kết nội bộ: 200, tài nguyên tải được, một H1, không trùng id, ảnh có alt, không tài nguyên ngoài miền |
-
-`acffree` chỉ chạy khi đã giải nén plugin *Advanced Custom Fields* bản miễn phí (<https://downloads.wordpress.org/plugin/advanced-custom-fields.latest-stable.zip>) vào `.lab/wordpress/wp-content/plugins/advanced-custom-fields/`; không thì in "BỎ QUA".
 
 Thứ tự trong `run.mjs` có ý nghĩa (`import` → `seed` → các kịch bản dùng dữ liệu đó). Mỗi kịch bản chạy lại được.
 
@@ -86,10 +85,8 @@ Mọi kịch bản khác dọn dữ liệu này lúc bắt đầu, nên `demo` k
 
 ## Kiểm tra trên trình duyệt (không tự động)
 
-Bố cục ở nhiều độ rộng (kể cả giao diện **tiếng Đức** qua plugin `lab-lang`, tham số `?lab_lang=de`), thao tác JS, giảm chuyển động (mô phỏng) và duyệt bằng phím Tab cần trình duyệt: xem [`browser/README.md`](browser/README.md).
+Bố cục ở nhiều độ rộng (kể cả giao diện **tiếng Đức** ở `/de/…`), thao tác JS, giảm chuyển động (mô phỏng) và duyệt bằng phím Tab cần trình duyệt: xem [`browser/README.md`](browser/README.md).
 Lần kiểm đầu tiên tìm ra 4 chỗ vỡ bố cục tiếng Đức và 2 lỗi thao tác (Esc ở hộp thoại tìm kiếm, thông báo khi xin mã bảo mật quá nhiều lần).
-
-`lab-lang` giả lập phần WPML mà theme dùng: locale `vi` (hoặc `de_DE` khi có `?lab_lang=de`) và bộ lọc `wpml_active_languages` (bộ chuyển VI/DE, hreflang). Không có URL `/de/`, không có nội dung dịch, không dịch đường dẫn: những thứ đó chỉ kiểm được với WPML thật.
 
 ## Viết thêm
 

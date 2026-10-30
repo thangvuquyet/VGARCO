@@ -1,10 +1,26 @@
+window.vgDeUrl = function ( u ) {
+	const paths = {
+		'/': '/de/',
+		'/gioi-thieu/': '/de/ueber-uns/',
+		'/gioi-thieu/ban-lanh-dao/': '/de/ueber-uns/geschaeftsfuehrung/',
+		'/gioi-thieu/phong-ban/': '/de/ueber-uns/abteilungen/',
+		'/linh-vuc-hoat-dong/': '/de/leistungen/',
+		'/tuyen-dung/': '/de/karriere/',
+		'/ung-tuyen/': '/de/bewerbung/',
+		'/lien-he/': '/de/kontakt/',
+		'/chinh-sach-bao-ve-du-lieu/': '/de/datenschutz/',
+	};
+	const [ path, query ] = u.split( '?' );
+	return ( paths[ path ] ?? '/de' + path ) + ( query ? '?' + query : '' );
+};
+
 window.vgLayout = async function ( W, urls, lang ) {
 	const out = {};
 	for ( const u of urls ) {
 		const f = document.createElement( 'iframe' );
 		f.style.cssText = `position:absolute;left:-20000px;top:0;border:0;width:${ W }px;height:900px`;
 		document.body.appendChild( f );
-		const url = lang ? u + ( u.includes( '?' ) ? '&' : '?' ) + 'lab_lang=' + lang : u;
+		const url = 'de' === lang ? window.vgDeUrl( u ) : u;
 		await new Promise( ( r ) => {
 			f.onload = r;
 			f.src = url;

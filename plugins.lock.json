@@ -1,56 +1,28 @@
 {
-  "$comment": "Danh sách thành phần bên thứ ba của website VGARCO. Yêu cầu 5.7.3: tối đa 12, mỗi thành phần có lý do sử dụng. Ghim phiên bản vào trường 'version' ngay khi cài lên staging lần đầu; sau đó chỉ đổi phiên bản sau khi đã kiểm thử trên staging.",
+  "$comment": "Danh sách thành phần bên thứ ba của website VGARCO. Yêu cầu 5.7.3: tối đa 12, mỗi thành phần có lý do sử dụng. Phiên bản đã ghim cho Polylang và Secure Custom Fields là bản đã kiểm thử trong phòng thử (tests/wp-lab) cùng WordPress 7.1.2; các thành phần còn lại ghim ngay khi cài lên staging lần đầu. Sau đó chỉ đổi phiên bản sau khi đã kiểm thử trên staging.",
   "limit": 12,
   "wordpress": {
-    "version": null,
+    "version": "7.1.2",
     "php": "8.3"
   },
   "plugins": [
     {
-      "slug": "sitepress-multilingual-cms",
-      "name": "WPML Multilingual CMS",
-      "source": "wpml.org — giấy phép mua theo tài khoản VGARCO",
-      "license": "commercial",
+      "slug": "polylang",
+      "name": "Polylang",
+      "source": "wordpress.org",
+      "license": "GPL",
       "required": true,
-      "version": null,
-      "reason": "Song ngữ Việt–Đức: URL /de/, dịch slug, hreflang. Đặc tả bảng 8.5 chỉ định."
+      "version": "3.9.1",
+      "reason": "Song ngữ Việt–Đức: URL /de/, hreflang, liên kết bản dịch. Bản miễn phí; không dịch được phần tiền tố cố định của địa chỉ (kiểu nội dung giữ /du-an/, /tin-tuc/ ở cả hai ngôn ngữ)."
     },
     {
-      "slug": "wpml-string-translation",
-      "name": "WPML String Translation",
-      "source": "wpml.org — nằm trong gói Multilingual CMS",
-      "license": "commercial",
+      "slug": "secure-custom-fields",
+      "name": "Secure Custom Fields",
+      "source": "wordpress.org",
+      "license": "GPL",
       "required": true,
-      "version": null,
-      "reason": "Dịch slug của kiểu nội dung và phân loại; dịch chuỗi cấu hình."
-    },
-    {
-      "slug": "wpml-translation-management",
-      "name": "WPML Translation Management",
-      "source": "wpml.org — nằm trong gói Multilingual CMS",
-      "license": "commercial",
-      "required": false,
-      "verify": "Xác nhận khi cài staging: nếu gói CMS yêu cầu thành phần này thì tính vào giới hạn 12. Phương án v2 mục 5.5 chưa đếm.",
-      "version": null,
-      "reason": "Trình dịch nâng cao của WPML."
-    },
-    {
-      "slug": "advanced-custom-fields-pro",
-      "name": "ACF PRO",
-      "source": "advancedcustomfields.com — giấy phép mua theo tài khoản VGARCO",
-      "license": "commercial",
-      "required": true,
-      "version": null,
-      "reason": "Trường dữ liệu, repeater, trang cấu hình. Đặc tả bảng 8.5 chỉ định."
-    },
-    {
-      "slug": "acfml",
-      "name": "ACF Multilingual",
-      "source": "wpml.org — nằm trong gói Multilingual CMS",
-      "license": "commercial",
-      "required": true,
-      "version": null,
-      "reason": "Đồng bộ trường ACF giữa hai ngôn ngữ."
+      "version": "6.9.7",
+      "reason": "Trường dữ liệu, trường lặp, trang cấu hình. Bản của WordPress.org kế thừa mã ACF, cùng hàm get_field/update_field; không cần giấy phép. Không cài song song ACF hoặc ACF PRO."
     },
     {
       "slug": "fluent-smtp",

@@ -149,7 +149,6 @@ EOF
 <?php
 // Khóa bí mật của VGARCO. Quyền 0640 root:<người dùng PHP>. KHÔNG đưa vào Git, KHÔNG gửi qua chat/email.
 // Bỏ // ở đầu dòng và điền giá trị khi đã có. KHÔNG khai báo hằng số với giá trị rỗng: mã Cloudflare chỉ kiểm defined(), khai báo rỗng là bật tính năng với khóa rỗng.
-// define( 'ACF_PRO_LICENSE', '' );
 // define( 'VGARCO_CF_ZONE', '' );
 // define( 'VGARCO_CF_TOKEN', '' );   // token Cloudflare chỉ có quyền Cache Purge của đúng zone
 // define( 'VGARCO_TELEGRAM_TOKEN', '' );

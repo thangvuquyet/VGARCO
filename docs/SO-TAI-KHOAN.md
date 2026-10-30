@@ -17,8 +17,6 @@
 | HetrixTools | Giám sát hoạt động (đăng nhập ít nhất mỗi 90 ngày) | VGARCO | | | | | |
 | Patchstack | Cảnh báo lỗ hổng thành phần | VGARCO | | | | | |
 | Heartbeat sao lưu (healthchecks.io hoặc tương đương) | Cảnh báo khi sao lưu không chạy | VGARCO | | | | | Địa chỉ ping: `/etc/vgarco/restic.env` |
-| ACF PRO | Giấy phép trường dữ liệu | VGARCO | | | | | Khóa giấy phép: `/etc/vgarco/secrets.php` |
-| WPML | Giấy phép đa ngôn ngữ (gồm String Translation, ACFML) | VGARCO | | | | | Khóa giấy phép |
 | Kho Git của mã nguồn | `vgarco-web` | VGARCO | | | | | |
 | Telegram bot (cảnh báo) | Cảnh báo vận hành | VGARCO | | | | | `VGARCO_TELEGRAM_TOKEN`, `VGARCO_TELEGRAM_CHAT` |
 | Figma `Project-1-VGARCO` | Tệp thiết kế gốc (chuyển quyền sở hữu sang tài khoản VGARCO khi bàn giao) | VGARCO | | | | | |
@@ -34,7 +32,6 @@
 | Token bot Telegram, ID nhóm | `VGARCO_TELEGRAM_*` | `/etc/vgarco/secrets.php` | Khi nghi lộ |
 | Khóa ứng dụng B2, mật khẩu restic | Sao lưu | `/etc/vgarco/restic.env` + kho mật khẩu | **Mất mật khẩu restic = mất toàn bộ bản sao lưu**: bản dự phòng ngoài máy chủ bắt buộc |
 | Khóa Brevo | FluentSMTP | Kho mật khẩu (+ cấu hình FluentSMTP) | Khi có người rời nhóm |
-| Khóa giấy phép ACF PRO, WPML | Cài và cập nhật plugin | `/etc/vgarco/secrets.php` + kho mật khẩu | Khi gia hạn |
 | Salt của WordPress | `wp-config.php` | Máy chủ | Khi nghi bị xâm nhập (`wp config shuffle-salts`) |
 
 ## 3. Danh sách rút quyền khi kết thúc hợp tác (đặc tả 9.7 — trong 05 ngày làm việc)
@@ -49,7 +46,6 @@ Bàn giao: tài khoản quản trị hệ thống, mã nguồn mới nhất, b�
 - ☐ Zoho Mail (quản trị)
 - ☐ HetrixTools, Patchstack, heartbeat sao lưu
 - ☐ Nhà đăng ký tên miền, nhà cung cấp VPS, Brevo
-- ☐ Khóa giấy phép ACF PRO, WPML còn đăng ký theo email của nhà thầu → chuyển sang email của VGARCO
 - ☐ Token API đã cấp cho nhà thầu: Cloudflare, Telegram, Brevo, B2 → thu hồi và cấp mới
 - ☐ Tệp Figma và kho mật khẩu: nhà thầu không còn quyền
 - ☐ Đổi mọi mật khẩu dùng chung đã từng cho nhà thầu biết
