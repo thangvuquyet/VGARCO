@@ -83,6 +83,9 @@ class VGARCO_CLI_Command {
 			WP_CLI::error( 'Chỉ hỗ trợ: translations, images.' );
 		}
 		$lang = (string) ( $assoc['lang'] ?? 'de' );
+		if ( ! vgarco_language_available( $lang ) ) {
+			WP_CLI::error( "Polylang chưa bật với ngôn ngữ {$lang}: cài Polylang rồi chạy wp vgarco languages trước." );
+		}
 		$rows = array();
 		foreach ( array( 'du_an', 'linh_vuc', 'tin_tuc', 'vi_tri', 'page' ) as $type ) {
 			foreach ( get_posts( array( 'post_type' => $type, 'post_status' => 'publish', 'posts_per_page' => -1, 'fields' => 'ids', 'suppress_filters' => true ) ) as $id ) {

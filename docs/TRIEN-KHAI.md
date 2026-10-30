@@ -196,6 +196,13 @@ Còn mở (không thuộc bước dựng máy chủ, cần quyết định hoặ
 4. Chạy đầy đủ (mọi kiểm thử, build, tar, kiểm khói 26/26): gói hoàn tác đặt tên theo mã commit đang chạy, `.deployed-ref` được ghi.
 5. Tự hoàn tác: một nhánh tạm có `throw` ở đầu `functions.php` làm mọi trang trả 500; kiểm khói hỏng 13 phép; `deploy.sh` giải gói cũ, reload, kiểm khói lại 26/26 và thoát mã 1; `.deployed-ref` giữ nguyên, không còn mã hỏng trên máy chủ; nhánh tạm đã xóa.
 
+*Chạy thật lần hai trên VM thử (30/10/2026, Ubuntu 24.04, 8 CPU/8 GB, môi trường staging).* Các bước `packages`, `nginx`, `backup` của `provision.sh` chạy thật (restic 0.16.4 từ apt); chạy lại ở RAM thật và ở RAM giả 4 GB (`VGARCO_MEM_MB=4096`): swap 2 GB, MariaDB 512M, pool PHP 3 tiến trình đều đúng, site vẫn 200.
+- **Tiêu đề bảo mật qua Nginx thật:** khách nhận đủ HSTS, nosniff, X-Frame-Options, Referrer-Policy, Permissions-Policy, CSP; `/wp-login.php`, `/wp-admin` và người có cookie đăng nhập không bị CSP của khách; tệp có mã băm giữ `immutable` kèm tiêu đề.
+- **Sao lưu và khôi phục thật** (kho restic cục bộ, MariaDB thật): sao lưu 1,5 giây, khôi phục 2 giây, CSDL khôi phục khớp (12 bài, 12 bảng, cùng `siteurl`), `wp-config.php` và `/etc/vgarco` giống bản gốc; sai mật khẩu kho thì thoát lỗi, ghi nhật ký riêng và nhật ký hệ thống; cron chạy được lệnh. Ba lỗi chỉ lộ ra ở lần chạy thật: `wp-config.php` nằm trong `public/` (đã không được sao lưu), cron của Ubuntu bỏ qua `CRON_TZ` trong `/etc/cron.d` (nay đặt 19:30 UTC), xóa bản cũ chia theo nhóm đường dẫn (nay gom theo máy và thẻ).
+- **WP-CLI thật:** `wp vgarco import projects` (xem trước, nhập 23 dự án, chạy lại 0 thay đổi) và `wp vgarco languages` (tạo vi + de, chạy lại không đổi) đều chạy đúng; `deploy.sh` đưa commit mới lên, kiểm khói 27/27 ở cả hai chế độ: chỉ Secure Custom Fields (Mốc 1) và có Polylang (Mốc 2).
+- **Bật Polylang là công khai tiếng Đức ngay:** bộ chuyển ngôn ngữ, thẻ `hreflang` và `/de/` (trang chủ tiếng Đức với chữ mặc định bản nháp) xuất hiện ngay cả khi chưa có nội dung dịch. Vì vậy ở Mốc 1 **không cài Polylang**; chỉ cài và chạy `wp vgarco languages` khi bắt đầu Mốc 2 và đã có bản dịch của các trang chính.
+- Chưa thử: FluentSMTP, WP 2FA, WPS Hide Login, Redis Object Cache, Modern Image Formats, Patchstack; Cloudflare thật; kho S3 thật; chứng chỉ Origin CA thật (máy thử vẫn dùng chứng chỉ tự ký).
+
 Lần cài đầu nên chạy `deploy.sh --no-smoke`, kích hoạt plugin rồi theme, tạo trang (mục 3), rồi chạy lại có kiểm khói. Kiểm khói 26/26 là trên chồng phần mềm thật nhưng **chưa có Secure Custom Fields, Polylang và nội dung thật** (theme dùng giá trị mặc định trong mã), nên chưa chứng minh được trang có dữ liệu thật; đó là việc của staging thật.
 
 ## 5. Kiểm tra sau triển khai
