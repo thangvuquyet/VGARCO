@@ -11,12 +11,12 @@
 | Tên miền `vgarco.de` (tùy chọn, mua ở PA Việt Nam vì Vietnix không bán) | Giữ thương hiệu, chuyển hướng về bản tiếng Đức | VGARCO | | | | | |
 | Cloudflare | DNS, CDN, WAF, giới hạn tần suất, DMARC | VGARCO | | | | | API token Cache Purge: `/etc/vgarco/secrets.php` |
 | Máy chủ riêng ảo (VPS SSD Linux 2 của Vietnix: 2 vCPU, 4 GB RAM, 40 GB) | Chạy website (staging và production chung một máy) | VGARCO | | | | | Khóa SSH của `deploy` |
-| Backblaze B2 (hoặc Wasabi) | Kho sao lưu | VGARCO | | | | | Khóa ứng dụng + mật khẩu restic: `/etc/vgarco/restic.env` |
+| Kho S3 sao lưu (gói S3 nhỏ của nhà cung cấp VPS) | Kho sao lưu ngoài máy chủ | VGARCO | | | | | Khóa S3 + mật khẩu restic: `/etc/vgarco/backup.env` |
 | Email doanh nghiệp của Vietnix (gói 15 hộp thư) | Hộp thư nhân sự theo tên miền | VGARCO | | | | | |
 | Brevo | Thư tự động từ website (qua FluentSMTP, API) | VGARCO | | | | | Khóa API: FluentSMTP |
 | HetrixTools | Giám sát hoạt động (đăng nhập ít nhất mỗi 90 ngày) | VGARCO | | | | | |
 | Patchstack | Cảnh báo lỗ hổng thành phần | VGARCO | | | | | |
-| Heartbeat sao lưu (healthchecks.io hoặc tương đương) | Cảnh báo khi sao lưu không chạy | VGARCO | | | | | Địa chỉ ping: `/etc/vgarco/restic.env` |
+| Heartbeat sao lưu (healthchecks.io hoặc tương đương) | Cảnh báo khi sao lưu không chạy | VGARCO | | | | | Địa chỉ ping: `/etc/vgarco/backup.env` |
 | Kho Git của mã nguồn | `vgarco-web` | VGARCO | | | | | |
 | Telegram bot (cảnh báo) | Cảnh báo vận hành | VGARCO | | | | | `VGARCO_TELEGRAM_TOKEN`, `VGARCO_TELEGRAM_CHAT` |
 | Figma `Project-1-VGARCO` | Tệp thiết kế gốc (chuyển quyền sở hữu sang tài khoản VGARCO khi bàn giao) | VGARCO | | | | | |
@@ -30,7 +30,7 @@
 | API token Cloudflare (chỉ quyền Cache Purge) | `VGARCO_CF_TOKEN` | `/etc/vgarco/secrets.php` + kho mật khẩu | Khi có người rời nhóm hoặc nghi lộ |
 | ID zone Cloudflare | `VGARCO_CF_ZONE` | `/etc/vgarco/secrets.php` | — |
 | Token bot Telegram, ID nhóm | `VGARCO_TELEGRAM_*` | `/etc/vgarco/secrets.php` | Khi nghi lộ |
-| Khóa ứng dụng B2, mật khẩu restic | Sao lưu | `/etc/vgarco/restic.env` + kho mật khẩu | **Mất mật khẩu restic = mất toàn bộ bản sao lưu**: bản dự phòng ngoài máy chủ bắt buộc |
+| Khóa S3, mật khẩu restic | Sao lưu | `/etc/vgarco/backup.env` + kho mật khẩu | **Mất mật khẩu restic = mất toàn bộ bản sao lưu**: bản dự phòng ngoài máy chủ bắt buộc |
 | Khóa Brevo | FluentSMTP | Kho mật khẩu (+ cấu hình FluentSMTP) | Khi có người rời nhóm |
 | Salt của WordPress | `wp-config.php` | Máy chủ | Khi nghi bị xâm nhập (`wp config shuffle-salts`) |
 
@@ -42,11 +42,11 @@ Bàn giao: tài khoản quản trị hệ thống, mã nguồn mới nhất, b�
 - ☐ Khóa SSH của nhà thầu trên máy chủ (`~deploy/.ssh/authorized_keys`), tài khoản hệ điều hành `deploy` đổi chủ
 - ☐ Thành viên Cloudflare
 - ☐ Thành viên kho Git (và token truy cập cá nhân)
-- ☐ Backblaze B2 (khóa ứng dụng cá nhân), restic (nếu nhà thầu từng biết mật khẩu: **đổi** và lưu lại)
+- ☐ Kho S3 sao lưu (khóa truy cập cá nhân), restic (nếu nhà thầu từng biết mật khẩu: **đổi** và lưu lại)
 - ☐ Email doanh nghiệp của Vietnix (quản trị)
 - ☐ HetrixTools, Patchstack, heartbeat sao lưu
 - ☐ Nhà đăng ký tên miền, nhà cung cấp VPS, Brevo
-- ☐ Token API đã cấp cho nhà thầu: Cloudflare, Telegram, Brevo, B2 → thu hồi và cấp mới
+- ☐ Token API đã cấp cho nhà thầu: Cloudflare, Telegram, Brevo, S3 → thu hồi và cấp mới
 - ☐ Tệp Figma và kho mật khẩu: nhà thầu không còn quyền
 - ☐ Đổi mọi mật khẩu dùng chung đã từng cho nhà thầu biết
 

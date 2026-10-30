@@ -4,7 +4,7 @@ set -euo pipefail
 
 usage() {
   cat <<'USAGE'
-provision.sh — dựng máy chủ gốc VGARCO từ Ubuntu 24.04 sạch (9/9 bước đã chạy thật trên VM thử 29/10/2026)
+provision.sh — dựng máy chủ gốc VGARCO từ Ubuntu 24.04 sạch (9 bước đầu đã chạy thật trên VM thử 29/10/2026; bước backup chưa chạy thật)
 
   sudo ./provision.sh --env=staging|production --domain=<tên miền> [--ssh-port=<số>] [--finalize-ssh] [--phase=a,b,...] [--dry-run]
 
@@ -12,7 +12,7 @@ provision.sh — dựng máy chủ gốc VGARCO từ Ubuntu 24.04 sạch (9/9 b�
   --domain         tên miền của khối Nginx
   --ssh-port       cổng SSH mới (mặc định 22); cổng 22 chỉ đóng khi chạy lại với --finalize-ssh
   --finalize-ssh   đóng cổng 22 sau khi đã đăng nhập thử thành công bằng cổng mới ở cửa sổ khác (chỉ dùng cùng --ssh-port khác 22)
-  --phase          chỉ chạy các bước: packages users ssh firewall php mariadb redis nginx cron
+  --phase          chỉ chạy các bước: packages users ssh firewall php mariadb redis nginx cron backup
   --dry-run        chỉ in kế hoạch, không đổi gì
 USAGE
 }
@@ -22,7 +22,7 @@ ENV_NAME=""
 DOMAIN=""
 SSH_PORT=22
 FINALIZE_SSH=0
-PHASE_LIST="packages,users,ssh,firewall,php,mariadb,redis,nginx,cron"
+PHASE_LIST="packages,users,ssh,firewall,php,mariadb,redis,nginx,cron,backup"
 SELECTED="$PHASE_LIST"
 
 for arg in "$@"; do
@@ -125,7 +125,7 @@ echo "Môi trường: ${ENV_NAME} | tên miền: ${DOMAIN} | người dùng PHP:
 phase_on packages && {
   log "packages: gói hệ thống"
   PKGS=(nginx php8.3-fpm php8.3-cli php8.3-mysql php8.3-gd php8.3-mbstring php8.3-xml php8.3-zip php8.3-curl php8.3-intl php8.3-redis php8.3-imagick
-    mariadb-server redis-server certbot fail2ban ufw unattended-upgrades rsync zstd curl ca-certificates)
+    mariadb-server redis-server certbot fail2ban ufw unattended-upgrades rsync zstd curl ca-certificates restic)
   run apt-get update -y
   run env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends "${PKGS[@]}"
   note "Kiểm khi chạy thật: php -m | grep -i -E 'gd|zip|fileinfo|mbstring|intl' và php -r 'var_dump(count(Imagick::queryFormats(\"AVIF\")) > 0);' (GD của Ubuntu không có AVIF, mã hóa AVIF đi qua Imagick; docs/TRIEN-KHAI.md mục 2)."
@@ -454,6 +454,44 @@ EOF
 17 3 * * 1 root /usr/local/sbin/vgarco-cloudflare-ips >/dev/null 2>&1
 EOF
   note "Cần đặt define('DISABLE_WP_CRON', true) trong wp-config.php (docs/CAU-HINH.md). Sao lưu 02:30 và kiểm hạn chứng chỉ: chưa có mã (xem SAO-LUU-PHUC-HOI.md)."
+}
+
+phase_on backup && {
+  log "backup: vgarco-backup (restic) và lịch 02:30 giờ Việt Nam"
+  SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+  if [[ -f "$SCRIPT_DIR/backup.sh" ]]; then
+    run install -m 0750 -o root -g root "$SCRIPT_DIR/backup.sh" /usr/local/sbin/vgarco-backup
+  else
+    echo "DỪNG: không thấy backup.sh cạnh provision.sh (chép cả hai tệp lên máy chủ)." >&2
+    (( DRY )) || exit 1
+  fi
+  if [[ ! -f "${SECRETS_DIR}/backup.env" ]]; then
+    ghi_tep "${SECRETS_DIR}/backup.env" 0600 root:root <<EOF || true
+# Điền các dòng dưới đây (bỏ # ở đầu dòng), giữ quyền 0600. KHÔNG commit, KHÔNG gửi qua chat/email.
+# RESTIC_REPOSITORY=s3:https://<điểm-cuối-S3>/<tên-kho>
+# RESTIC_PASSWORD=<mật khẩu restic: mất là mất toàn bộ bản sao lưu, cất thêm trong kho mật khẩu của VGARCO>
+# AWS_ACCESS_KEY_ID=<khóa truy cập S3>
+# AWS_SECRET_ACCESS_KEY=<khóa bí mật S3>
+# HEARTBEAT_URL=<địa chỉ ping của healthchecks.io hoặc tương đương>
+BACKUP_SITES="${SITE}"
+BACKUP_DBS="${DB_NAME}"
+EOF
+  fi
+  ghi_tep /etc/cron.d/vgarco-backup 0644 root:root <<'EOF' || true
+CRON_TZ=Asia/Ho_Chi_Minh
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+30 2 * * * root /usr/local/sbin/vgarco-backup
+EOF
+  ghi_tep /etc/logrotate.d/vgarco-backup 0644 root:root <<'EOF' || true
+/var/log/vgarco-backup.log {
+    weekly
+    rotate 8
+    compress
+    missingok
+    notifempty
+}
+EOF
+  note "Sau khi điền ${SECRETS_DIR}/backup.env: chạy tay 'sudo vgarco-backup --init' đúng một lần, rồi 'sudo vgarco-backup' và 'sudo vgarco-backup --status' để kiểm; diễn tập khôi phục theo docs/SAO-LUU-PHUC-HOI.md."
 }
 
 log "Xong (${ENV_NAME})."

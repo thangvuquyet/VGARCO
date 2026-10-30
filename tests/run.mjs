@@ -50,6 +50,11 @@ for ( const script of [ 'smoke.php', 'coexist.php', 'languages.php', 'serverconf
 }
 
 {
+	const r = run( process.execPath, [ join( root, 'tests', 'ops-backup.mjs' ) ] );
+	report( 'ops-backup.mjs', r.status === 0, ( r.stdout + r.stderr ).trim().split( '\n' ).pop() );
+}
+
+{
 	const r = run( process.execPath, [ join( root, 'tests', 'i18n.mjs' ) ] );
 	report( 'i18n.mjs', r.status === 0, ( r.stdout + r.stderr ).trim().split( '\n' ).pop() );
 

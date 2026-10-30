@@ -85,6 +85,24 @@ check( 'thứ tự chọn chứng chỉ: Origin CA, rồi Let\'s Encrypt, rồi 
 check( 'cổng 80 đóng nên lời nhắc hướng tới Origin CA', str_contains( $prov, 'Origin CA' ) && str_contains( $prov, 'Cổng 80 đóng' ) );
 check( 'không đặt khóa Origin CA trong Git (đường dẫn trên máy chủ, không có khóa trong kịch bản)', ! str_contains( $prov, 'BEGIN PRIVATE KEY' ) );
 
+check( 'danh sách bước của provision.sh có backup, đứng sau cron', str_contains( $prov, 'PHASE_LIST="packages,users,ssh,firewall,php,mariadb,redis,nginx,cron,backup"' ) );
+preg_match( '/phase_on backup && \{(.*?)\n\}\n/s', $prov, $bk );
+$bk = $bk[1] ?? '';
+check( 'bước backup tồn tại', '' !== $bk );
+check( 'backup: lịch 02:30 giờ Việt Nam bằng CRON_TZ, chạy bằng root', str_contains( $bk, 'CRON_TZ=Asia/Ho_Chi_Minh' ) && str_contains( $bk, '30 2 * * * root /usr/local/sbin/vgarco-backup' ) );
+check( 'backup: cài tệp cạnh provision.sh với quyền 0750 root', str_contains( $bk, 'install -m 0750 -o root -g root "$SCRIPT_DIR/backup.sh" /usr/local/sbin/vgarco-backup' ) );
+check( 'backup: tệp khóa riêng 0600 và chỉ tạo khi chưa có (không ghi đè khóa đã điền)', str_contains( $bk, 'if [[ ! -f "${SECRETS_DIR}/backup.env" ]]' ) && str_contains( $bk, 'backup.env" 0600 root:root' ) );
+check( 'backup: mẫu không khai báo khóa rỗng (chỉ dòng chú thích)', ! preg_match( '/^(RESTIC_PASSWORD|RESTIC_REPOSITORY|AWS_ACCESS_KEY_ID|AWS_SECRET_ACCESS_KEY|HEARTBEAT_URL)=/m', $bk ) );
+check( 'backup: xoay vòng nhật ký', str_contains( $bk, '/etc/logrotate.d/vgarco-backup' ) );
+check( 'gói restic được cài ở bước packages', 1 === preg_match( '/PKGS=\(.*?\brestic\b/s', $prov ) );
+
+$backup = (string) file_get_contents( ROOT . '/scripts/ops/backup.sh' );
+check( 'backup.sh: kho giữ 7 ngày, 4 tuần, 3 tháng', str_contains( $backup, '--keep-daily 7 --keep-weekly 4 --keep-monthly 3 --prune' ) );
+check( 'backup.sh: thứ tự thực hiện mysqldump trước restic backup', strpos( $backup, 'mysqldump' ) < strpos( $backup, 'restic backup' ) );
+check( 'backup.sh: umask 077 (bản sao CSDL không đọc được bởi người khác)', str_contains( $backup, 'umask 077' ) );
+check( 'backup.sh: báo /fail khi lỗi', str_contains( $backup, 'ping_heartbeat /fail' ) );
+check( 'backup.sh: không có mật khẩu viết cứng', ! preg_match( '/RESTIC_PASSWORD=[^$"\s]/', $backup ) );
+
 if ( $fail ) {
 	foreach ( $fail as $line ) {
 		echo "  ✗ {$line}\n";

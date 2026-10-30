@@ -923,6 +923,30 @@ const M = [
     "frame-ancestors 'self'; ", "", 'serverconf'],
   ["máy chủ: vhost nghe cổng 80", "scripts/ops/provision.sh",
     "    listen 443 ssl http2;\n    server_name ${DOMAIN};", "    listen 80;\n    listen 443 ssl http2;\n    server_name ${DOMAIN};", 'serverconf'],
+  ["sao lưu: giữ 1 ngày thay vì 7", "scripts/ops/backup.sh",
+    "--keep-daily 7", "--keep-daily 1", 'ops-backup'],
+  ["sao lưu: không dọn kho (prune)", "scripts/ops/backup.sh",
+    "--keep-monthly 3 --prune", "--keep-monthly 3", 'ops-backup'],
+  ["sao lưu: nhận bản CSDL cụt", "scripts/ops/backup.sh",
+    "grep -q 'Dump completed'", "grep -q ''", 'ops-backup'],
+  ["sao lưu: lỗi không báo /fail", "scripts/ops/backup.sh",
+    "  ping_heartbeat /fail\n", "", 'ops-backup'],
+  ["sao lưu: không dọn bản CSDL cũ", "scripts/ops/backup.sh",
+    "-mtime +3 -delete", "-mtime +3000 -delete", 'ops-backup'],
+  ["sao lưu: mysqldump không dùng single-transaction", "scripts/ops/backup.sh",
+    "--single-transaction ", "", 'ops-backup'],
+  ["sao lưu: không kiểm kho Chủ nhật", "scripts/ops/backup.sh",
+    "== \"7\" ]]", "== \"9\" ]]", 'ops-backup'],
+  ["sao lưu: restic backup không gắn thẻ", "scripts/ops/backup.sh",
+    "restic backup --tag vgarco ", "restic backup ", 'ops-backup'],
+  ["sao lưu: bỏ qua khóa chạy chồng", "scripts/ops/backup.sh",
+    "flock -n 9 ||", "true ||", 'ops-backup'],
+  ["sao lưu: đường dẫn thiếu vẫn đưa vào", "scripts/ops/backup.sh",
+    "if [[ -e \"$p\" ]]; then", "if true; then", 'ops-backup'],
+  ["sao lưu: không gọi heartbeat khi xong", "scripts/ops/backup.sh",
+    "echo \"$(date -Is) xong\"\nping_heartbeat\n", "echo \"$(date -Is) xong\"\n", 'ops-backup'],
+  ["sao lưu: bỏ đường dẫn khóa /etc/vgarco", "scripts/ops/backup.sh",
+    "paths=(\"$DUMP_DIR\" \"$ETC_VGARCO\" \"$ETC_NGINX\")", "paths=(\"$DUMP_DIR\" \"$ETC_NGINX\")", 'ops-backup'],
 ];
 
 if (process.argv[2] === '--check') {
@@ -948,6 +972,10 @@ for (const [name, file, from, to, suite = 'smoke'] of M.filter(([n]) => !only ||
     cpSync(join(src, 'scripts'), join(work, 'scripts'), { recursive: true });
     cpSync(join(src, 'tests', 'i18n.mjs'), join(work, 'tests', 'i18n.mjs'));
   }
+  if (suite === 'ops-backup') {
+    cpSync(join(src, 'scripts'), join(work, 'scripts'), { recursive: true });
+    cpSync(join(src, 'tests', 'ops-backup.mjs'), join(work, 'tests', 'ops-backup.mjs'));
+  }
 
   const path = join(work, file);
   const text = readFileSync(path, 'utf8').replace(/\r\n/g, '\n');
@@ -958,6 +986,8 @@ for (const [name, file, from, to, suite = 'smoke'] of M.filter(([n]) => !only ||
   const extra = [ 'apply', 'media', 'export-images' ].includes(suite) ? ['-d', 'extension=gd', '-d', 'extension=fileinfo', '-d', 'extension=zip'] : [];
   const r = suite === 'i18n'
     ? spawnSync(process.execPath, [join(work, 'tests', 'i18n.mjs')], { encoding: 'utf8' })
+    : suite === 'ops-backup'
+    ? spawnSync(process.execPath, [join(work, 'tests', 'ops-backup.mjs')], { encoding: 'utf8' })
     : spawnSync(php, ['-d', `extension_dir=${ext}`, '-d', 'extension=mbstring', ...extra, join(work, 'tests', 'php', `${suite}.php`)], { encoding: 'utf8' });
   const out = (r.stdout || '') + (r.stderr || '');
   const red = out.match(/THẤT BẠI (\d+)/);

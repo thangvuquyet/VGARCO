@@ -1,6 +1,6 @@
 # Sao lưu và phục hồi
 
-> **Trạng thái: thiết kế; phần sao lưu chưa chạy trên máy chủ nào** (máy chủ thử đã dựng bằng `provision.sh`, nhưng chưa có sao lưu). Chưa có `vgarco-backup` hay kho restic; **biên bản diễn tập khôi phục (đặc tả 5.5 #3) chưa có** — mục 5 là mẫu để điền khi diễn tập.
+> **Trạng thái: đã có mã** — `scripts/ops/backup.sh` (cài thành `/usr/local/sbin/vgarco-backup` bởi `provision.sh --phase=backup`) và 29 phép kiểm bằng restic/mysqldump giả (`tests/ops-backup.mjs`). **Chưa chạy thật** với restic, MariaDB và kho S3; **biên bản diễn tập khôi phục (đặc tả 5.5 #3) chưa có** — mục 5 là mẫu để điền khi diễn tập.
 
 ## 1. Cái gì phải sao lưu
 
@@ -15,13 +15,13 @@
 
 ## 2. Lịch và lưu giữ (thiết kế)
 
-- **Hằng ngày 02:30** (cron, người dùng `backup`): CSDL + `uploads` + `/srv/vgarco/private` + `wp-config.php` + `/etc/vgarco` + `/etc/nginx`, bằng **restic** (mã hóa sẵn, khử trùng lặp) tới bucket **Backblaze B2 trong tài khoản của VGARCO**; khóa ứng dụng B2 chỉ có quyền trên đúng bucket đó.
+- **Hằng ngày 02:30 giờ Việt Nam** (`/etc/cron.d/vgarco-backup`, `CRON_TZ=Asia/Ho_Chi_Minh`, chạy bằng root để đọc được CSDL, ảnh và CV): CSDL (`mysqldump --single-transaction`, nén gzip, giữ 3 bản gần nhất tại `/var/backups/vgarco`) + `uploads` + `/srv/vgarco/private` + `wp-config.php` + `/etc/vgarco` + `/etc/nginx`, bằng **restic** (mã hóa sẵn, khử trùng lặp) tới **kho S3 trong tài khoản của VGARCO**; khóa S3 chỉ có quyền trên đúng kho đó. Bản sao CSDL cụt (thiếu dòng `Dump completed`) bị từ chối và báo lỗi.
   Sao lưu cả tệp **hằng ngày** (vượt yêu cầu "tệp hằng tuần") vì CV nộp trong tuần không được mất nếu sự cố xảy ra trước kỳ sao lưu tuần.
 - **Lưu giữ:** 7 bản theo ngày, 4 theo tuần, 3 theo tháng (`restic forget --keep-daily 7 --keep-weekly 4 --keep-monthly 3 --prune`).
 - **Kiểm tra:** `restic check --read-data-subset=5%` hằng tuần; mỗi quý khôi phục thử vào staging.
 - **Giám sát:** sau mỗi lần sao lưu thành công gọi một địa chỉ heartbeat; **quá 26 giờ không có tín hiệu thì báo**.
 - **Mục tiêu:** mất dữ liệu tối đa 24 giờ (RPO), khôi phục trong 2 giờ (RTO).
-- **Mật khẩu restic, khóa B2 cất trong kho mật khẩu đứng tên chủ đầu tư. Mất mật khẩu restic là mất toàn bộ bản sao lưu.**
+- **Mật khẩu restic, khóa S3 cất trong kho mật khẩu đứng tên chủ đầu tư. Mất mật khẩu restic là mất toàn bộ bản sao lưu.**
 
 Hệ quả cho dữ liệu cá nhân: CV bị xóa khỏi hệ thống (tự xóa sau 12 tháng, hoặc xóa tay) còn trong bản sao lưu **tối đa ~3 tháng** (bản theo tháng). Ghi rõ điều này trong *Chính sách bảo vệ dữ liệu*.
 
@@ -29,8 +29,8 @@ Hệ quả cho dữ liệu cá nhân: CV bị xóa khỏi hệ thống (tự xó
 
 ```bash
 # 0. Máy chủ dựng bằng scripts/ops/provision.sh (đã chạy thật trên máy chủ thử 29/10/2026): người dùng, Nginx, PHP-FPM, MariaDB, quyền tệp — xem TRIEN-KHAI.md mục 2
-# 1. Lấy khóa và mật khẩu từ kho mật khẩu của chủ đầu tư, đặt /etc/vgarco/restic.env
-source /etc/vgarco/restic.env
+# 1. Lấy khóa và mật khẩu từ kho mật khẩu của chủ đầu tư, đặt /etc/vgarco/backup.env (mẫu do provision.sh --phase=backup tạo)
+set -a; source /etc/vgarco/backup.env; set +a
 restic snapshots                                   # chọn mã snapshot (thường là bản mới nhất)
 
 # 2. Khôi phục tệp
@@ -45,7 +45,7 @@ chown -R vgarco:vgarco /var/www/vgarco/public/wp-content/uploads /srv/vgarco/pri
 chmod -R u=rwX,g=rX,o= /srv/vgarco/private         # CV 0640
 
 # 4. CSDL
-gunzip -c /tmp/restore/var/backups/vgarco/db-<ngày>.sql.gz | mysql vgarco_prod
+gunzip -c /tmp/restore/var/backups/vgarco/<csdl>-<ngày>.sql.gz | mysql   # tệp có sẵn CREATE DATABASE
 
 # 5. Mã nguồn từ Git (git checkout <commit>), build theme, cài lại plugin bên thứ ba theo plugins.lock.json (xem TRIEN-KHAI.md mục 3–4)
 
