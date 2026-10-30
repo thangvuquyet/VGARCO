@@ -17,6 +17,8 @@ Công ty TNHH Tư vấn Xây dựng VGARCO (mã số thuế `[mã số thuế]`,
 
 **Cookie:** website chỉ dùng cookie cần thiết cho hoạt động (đăng nhập của quản trị viên; ghi nhớ ngôn ngữ khi bật bản tiếng Đức). Chúng tôi không dùng cookie quảng cáo hay đo lường. `[Nếu sau này thêm công cụ thống kê hoặc nhúng dịch vụ bên thứ ba: cập nhật mục này và thêm bảng đồng ý cookie.]`
 
+**Trang Liên hệ:** biểu mẫu ở trang này chỉ mở ứng dụng thư trên thiết bị của bạn để soạn sẵn thư gửi tới hộp thư công ty; website không nhận và không lưu nội dung đó. Thư bạn gửi đến hộp thư công ty được xử lý như thư thông thường và lưu theo chính sách của hộp thư.
+
 Nếu bạn chỉ xem website hoặc dùng ô tìm kiếm thì chúng tôi không yêu cầu bạn cung cấp họ tên hay liên hệ.
 
 ## 3. Mục đích và căn cứ xử lý
