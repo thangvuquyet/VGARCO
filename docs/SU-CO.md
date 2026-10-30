@@ -103,7 +103,7 @@ wp option delete vgarco_alerts           # hoặc bấm "Đã xem, ẩn cảnh b
 Dấu hiệu: thư báo "Có tài khoản quản trị mới" mà không ai tạo; thư báo khóa tài khoản liên tục; giao diện hay nội dung bị đổi; cảnh báo Patchstack mức cao; nhà cung cấp hoặc Google báo mã độc.
 
 1. **Giữ nguyên hiện trường:** chụp bản sao CSDL và nhật ký Nginx/PHP trước khi sửa gì.
-2. **Cắt đường vào:** đổi mật khẩu mọi tài khoản quản trị, đăng xuất mọi phiên (`wp user session destroy --all <tên>` hoặc đổi salt), thu hồi token (Cloudflare, Telegram, B2, API Brevo), bật chế độ "I'm Under Attack" của Cloudflare nếu đang bị tấn công.
+2. **Cắt đường vào:** đổi mật khẩu mọi tài khoản quản trị, đăng xuất mọi phiên (`wp user session destroy --all <tên>` hoặc đổi salt), thu hồi token (Cloudflare, Telegram, khóa S3 sao lưu, API Brevo), bật chế độ "I'm Under Attack" của Cloudflare nếu đang bị tấn công.
 3. **Kiểm tra:**
    ```bash
    wp user list --role=administrator --fields=ID,user_login,user_email,user_registered   # tài khoản lạ?
