@@ -25,6 +25,7 @@ check( 'hồ sơ ứng tuyển KHÔNG được dịch', ! PLL()->model->is_trans
 foreach ( array( 'loai_cong_trinh', 'chuyen_muc', 'noi_lam_viec', 'phong_ban' ) as $t ) {
 	check( "phân loại {$t} được dịch", PLL()->model->is_translated_taxonomy( $t ) );
 }
+same( 'sau khi cấu hình ngôn ngữ: trang quản trị không bị chuyển sang trình hướng dẫn của Polylang', false, get_transient( 'pll_activation_redirect' ) );
 $again = vgarco_setup_languages();
 same( 'chạy lại lệnh cấu hình ngôn ngữ: không tạo thêm, không đổi cài đặt', array( true, array( '= ngôn ngữ vi: đã có', '= ngôn ngữ de: đã có' ) ), array( $again['ok'], array_slice( $again['log'], 0, 2 ) ) );
 same( 'giao diện WPML của Polylang trả đủ hai ngôn ngữ cho theme', array( 'vi', 'de' ), array_keys( (array) apply_filters( 'wpml_active_languages', null, array( 'skip_missing' => 0 ) ) ) );

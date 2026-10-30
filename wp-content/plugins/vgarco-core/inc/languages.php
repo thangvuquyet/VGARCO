@@ -325,6 +325,7 @@ function vgarco_setup_languages(): array {
 	PLL()->model->languages->clean_cache();
 	PLL()->model->set_language_in_mass();
 	$log[] = '~ nội dung chưa có ngôn ngữ được gán tiếng Việt';
+	delete_transient( 'pll_activation_redirect' );
 	flush_rewrite_rules();
 	return array( 'ok' => true, 'log' => $log );
 }
