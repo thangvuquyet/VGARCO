@@ -82,6 +82,19 @@ wp vgarco import projects content/projects.csv --images=<thư-mục-ảnh>
 wp user create <tên> <email> --role=vg_tuyen_dung
 ```
 
+**Cấu hình plugin bên thứ ba** (làm trên staging trước; các plugin này chưa được cài thử, nên ghi lại tên tùy chọn thật khi cài lần đầu):
+
+| Plugin | Việc phải làm | Kiểm |
+|---|---|---|
+| WP 2FA | Bắt buộc 2FA cho mọi vai trò vào trang quản trị (kể cả Nhân sự tuyển dụng), thời gian ân hạn 3 ngày | Đăng nhập bằng một tài khoản mới phải được yêu cầu thiết lập 2FA |
+| WPS Hide Login | Đổi đường dẫn đăng nhập sang một đoạn khó đoán (tùy chọn `whl_page`), cất đường dẫn mới trong kho mật khẩu; `/wp-login.php` và `/wp-admin` khi chưa đăng nhập phải trả 404 | `curl -sI https://<tên miền>/wp-login.php` không phải trang đăng nhập |
+| FluentSMTP | Nhà cung cấp Brevo (API), địa chỉ gửi `no-reply@<tên miền>`, bật Force From Email, nhật ký 30 ngày; gửi thư thử | Thư tới Gmail có `spf=pass dkim=pass` (xem `DNS-EMAIL.md`) |
+| Redis Object Cache | Hằng `WP_REDIS_*` đã có trong `wp-config.php` do `provision.sh` sinh; chạy `wp redis enable` | `wp redis status` báo Connected |
+| Modern Image Formats | Bật AVIF và WebP | Ảnh mới tải lên có bản `.avif`; `report images` không báo ảnh vượt trần |
+| Patchstack | Kết nối tài khoản của VGARCO, đặt hộp thư nhận cảnh báo là hộp thư công ty | Trang Patchstack hiện site đã kết nối |
+
+Giám sát và cảnh báo (tài khoản đứng tên VGARCO, gói miễn phí): HetrixTools kiểm `https://<tên miền>/` mỗi phút và tìm chữ "VGARCO"; healthchecks.io nhận ping của `vgarco-backup` (quá 26 giờ không có tín hiệu thì báo); cảnh báo gửi hộp thư công ty (và Telegram nếu có bot).
+
 Đã kiểm chứng trong phòng thử (`tests/wp-lab`) trên Secure Custom Fields 6.9.7 và Polylang 3.9.1 thật, WordPress 7.1.2: trang cấu hình và trường lặp, URL `/de/` và trang chủ tiếng Đức ở `/de/`, bộ chuyển ngôn ngữ và `hreflang`, nhập dự án có bản Đức, sao chép trường khi tạo bản dịch, cấu hình riêng cho bản Đức. **Chưa kiểm chứng**: thao tác trên giao diện bằng trình duyệt (nút "+" của Polylang, màn hình nhập liệu), MariaDB thật (phòng thử dùng SQLite) và việc dịch tên phân loại sang tiếng Đức; đó là các việc đầu tiên trên staging. Giới hạn của Polylang miễn phí: không dịch được phần tiền tố cố định của địa chỉ, nên `/du-an/`, `/tin-tuc/`, `/tuyen-dung/` giữ nguyên ở bản `/de/`; các trang (Về công ty, Liên hệ…) có địa chỉ tiếng Đức riêng như bảng trên khi tạo bản dịch.
 
 ## 4. Triển khai bản mới (mã tự viết)

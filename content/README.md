@@ -85,3 +85,7 @@ công cụ không ghi đè `images.csv` đã có. Rồi nhập: `wp vgarco impor
 - Dựng lại ảnh master từ thư mục ảnh gốc của khách:
   `php tests/wp-lab/demo/prepare-photos.php <thư-mục-ảnh-gốc> <thư-mục-ra> --manual=content/photos.json`. Ảnh gốc và ảnh master **không** nằm trong kho mã.
 - Ảnh thấp độ phân giải (14 ảnh) được phóng to và làm nét, mềm hơn ảnh gốc cùng cỡ; thay bằng ảnh gốc độ phân giải cao khi khách có.
+
+### Chính sách bảo vệ dữ liệu
+
+`chinh-sach-bao-ve-du-lieu.md` là **bản nháp** theo Luật 91/2025/QH15 và Nghị định 356/2025/NĐ-CP, mô tả đúng những gì mã hiện thu thập (họ tên, thư, điện thoại, CV, mã băm IP, thời điểm và phiên bản đồng ý; CV tự xóa sau 12 tháng). Điền các chỗ `[ ]`, cho tư vấn pháp lý duyệt, rồi dán vào trang "Chính sách bảo vệ dữ liệu". Khi sửa nội dung có thay đổi mục đích, thời hạn lưu hoặc bên nhận dữ liệu, **tăng `VGARCO_APPLY_CONSENT_VERSION`** trong `inc/careers/apply-process.php` để bản ghi đồng ý của ứng viên mới gắn đúng phiên bản.
