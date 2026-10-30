@@ -42,7 +42,7 @@ wp language core install vi --activate   # bắt buộc khi chưa bật Polylang
 # 2. Plugin theo plugins.lock.json (ghim đúng bản đã kiểm thử)
 wp plugin install secure-custom-fields --version=6.9.7 --activate
 wp plugin install polylang --version=3.9.1 --activate
-wp plugin install fluent-smtp wp-2fa wps-hide-login redis-cache modern-image-formats patchstack --activate   # kiểm tra tên gói khi cài
+wp plugin install fluent-smtp wp-2fa wps-hide-login redis-cache webp-uploads patchstack --activate   # tên gói đã kiểm tồn tại trên wordpress.org (30/10/2026); ghim phiên bản vào plugins.lock.json sau lần cài đầu
 
 # 3. Mã tự viết (mu-plugin tự chạy; plugin và theme cần kích hoạt)
 wp plugin activate vgarco-core
