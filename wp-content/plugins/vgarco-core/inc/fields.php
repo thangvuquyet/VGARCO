@@ -65,7 +65,11 @@ add_action(
 		if ( ! function_exists( 'acf_add_local_field_group' ) ) {
 			return;
 		}
-		foreach ( vgarco_field_groups() as $group ) {
+		$groups = vgarco_field_groups();
+		foreach ( vgarco_secondary_languages() as $lang ) {
+			$groups = array_merge( $groups, vgarco_option_translation_groups( $lang ) );
+		}
+		foreach ( $groups as $group ) {
 			acf_add_local_field_group( $group );
 		}
 	}
@@ -89,7 +93,7 @@ add_action(
 		if ( function_exists( 'acf_add_options_page' ) || ! current_user_can( 'activate_plugins' ) ) {
 			return;
 		}
-		echo '<div class="notice notice-error"><p><strong>VGARCO Core:</strong> cần cài và kích hoạt <em>ACF PRO</em> '
-			. '(bản miễn phí không có trang cấu hình và trường lặp) để nhập dữ liệu dự án, tuyển dụng và cấu hình chung.</p></div>';
+		echo '<div class="notice notice-error"><p><strong>VGARCO Core:</strong> cần cài và kích hoạt <em>Secure Custom Fields</em> '
+			. '(ACF bản miễn phí không có trang cấu hình và trường lặp) để nhập dữ liệu dự án, tuyển dụng và cấu hình chung.</p></div>';
 	}
 );

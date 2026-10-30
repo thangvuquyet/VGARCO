@@ -2,13 +2,13 @@
 
 defined( 'ABSPATH' ) || exit;
 
-function vgarco_location_options_page(): array {
+function vgarco_location_options_page( string $slug = 'vgarco-cau-hinh' ): array {
 	return array(
 		array(
 			array(
 				'param'    => 'options_page',
 				'operator' => '==',
-				'value'    => 'vgarco-cau-hinh',
+				'value'    => $slug,
 			),
 		),
 	);

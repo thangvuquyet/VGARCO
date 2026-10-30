@@ -230,17 +230,9 @@ class VGARCO_CLI_Command {
 		}
 		$post_id = (int) $result;
 
-		if ( 'de' === $lang && $source_id && ! apply_filters( 'wpml_element_has_translations', null, $post_id, 'post_du_an' ) ) {
-			do_action(
-				'wpml_set_element_language_details',
-				array(
-					'element_id'           => $post_id,
-					'element_type'         => 'post_du_an',
-					'trid'                 => apply_filters( 'wpml_element_trid', null, $source_id, 'post_du_an' ),
-					'language_code'        => 'de',
-					'source_language_code' => 'vi',
-				)
-			);
+		vgarco_set_post_language( $post_id, $lang );
+		if ( 'de' === $lang && $source_id ) {
+			vgarco_link_translation( $source_id, $post_id, $lang );
 		}
 
 		update_field( 'ma', $plan['ma'], $post_id );

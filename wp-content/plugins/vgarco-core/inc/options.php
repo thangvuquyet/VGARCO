@@ -22,5 +22,20 @@ add_action(
 				'updated_message' => 'Đã lưu cấu hình.',
 			)
 		);
+
+		foreach ( vgarco_secondary_languages() as $lang ) {
+			acf_add_options_page(
+				array(
+					'page_title'      => 'Cấu hình VGARCO — bản ' . strtoupper( $lang ),
+					'menu_title'      => 'Bản ' . strtoupper( $lang ),
+					'menu_slug'       => 'vgarco-cau-hinh-' . $lang,
+					'parent_slug'     => 'vgarco-cau-hinh',
+					'post_id'         => 'options_' . $lang,
+					'capability'      => 'manage_options',
+					'update_button'   => 'Lưu bản ' . strtoupper( $lang ),
+					'updated_message' => 'Đã lưu cấu hình bản ' . strtoupper( $lang ) . '.',
+				)
+			);
+		}
 	}
 );

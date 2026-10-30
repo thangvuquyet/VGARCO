@@ -76,6 +76,9 @@ if ( ! function_exists( 'vgarco_option' ) ) {
 	function vgarco_option( string $path, $fallback = '' ) {
 		$root  = explode( '.', $path )[0];
 		$saved = function_exists( 'get_field' ) ? get_field( $root, 'option' ) : null;
+		if ( function_exists( 'vgarco_localize_option' ) ) {
+			$saved = vgarco_localize_option( $root, $saved );
+		}
 		$value = vgarco_dot_get( array( $root => $saved ), $path );
 
 		if ( null !== $value && '' !== $value && array() !== $value && false !== $value ) {
