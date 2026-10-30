@@ -10,7 +10,7 @@ Tài liệu kỹ thuật cho người vận hành website (đặc tả mục 5.7
 | [`TRIEN-KHAI.md`](TRIEN-KHAI.md) | Quy trình đưa mã lên máy chủ, kiểm tra sau triển khai, hoàn tác | **Thiết kế, mới chạy thử một phần** (`provision.sh`: 9/9 bước đã chạy thật trên VM thử 29/10/2026; `deploy.sh`: đã chạy thật trên staging thử cùng ngày, gồm tự hoàn tác; chưa chạy production) |
 | [`SAO-LUU-PHUC-HOI.md`](SAO-LUU-PHUC-HOI.md) | Cái gì phải sao lưu, lịch, khôi phục từng bước, mẫu biên bản diễn tập | **Thiết kế, chưa chạy thật**; biên bản diễn tập còn trống |
 | [`HUONG-DAN-QUAN-TRI.md`](HUONG-DAN-QUAN-TRI.md) | Tra cứu nhanh cho người biên tập và nhân sự tuyển dụng: đăng nhập, nhập dự án, tin, vị trí, hồ sơ ứng tuyển | Khớp tên ô và menu trong mã; chưa thử với người dùng thật |
-| [`BAO-CAO-KIEM-THU.md`](BAO-CAO-KIEM-THU.md) | Kết quả kiểm thử ngày 30/10/2026 (4.128 + 519 phép kiểm), đột biến, lỗi tìm ra, danh sách chưa kiểm | **Số đo thật**; viết lại khi chạy lại |
+| [`BAO-CAO-KIEM-THU.md`](BAO-CAO-KIEM-THU.md) | Kết quả kiểm thử ngày 30/10/2026 (4.130 + 519 phép kiểm), đột biến, lỗi tìm ra, danh sách chưa kiểm | **Số đo thật**; viết lại khi chạy lại |
 | [`DNS-EMAIL.md`](DNS-EMAIL.md) | Bản ghi DNS của website và thư (SPF, DKIM, DMARC), cài đặt Cloudflare, chứng chỉ Origin CA, bảo mật tên miền, thứ tự làm | **Thiết kế**; giá trị bản ghi thư chờ Vietnix và Brevo |
 $1| [`SO-TAI-KHOAN.md`](SO-TAI-KHOAN.md) | Sổ tài khoản dịch vụ (mẫu để điền) và danh sách rút quyền khi kết thúc hợp tác | **Mẫu trống** — điền khi mở tài khoản |
 

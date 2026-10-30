@@ -6,9 +6,9 @@ Ngày chạy: 30/10/2026. Mã nguồn: nhánh `main` của kho Git (commit ghi �
 
 | Nhóm | Số phép kiểm | Kết quả |
 |---|---|---|
-| Kiểm thử tự động không cần WordPress (PHP, Node) | 4.128 | Đạt hết |
+| Kiểm thử tự động không cần WordPress (PHP, Node) | 4.130 | Đạt hết |
 | Kiểm thử trên WordPress 7.1.2 thật, có Secure Custom Fields 6.9.7 và Polylang 3.9.1 (SQLite) | 519 | Đạt hết |
-| Kiểm thử đột biến (cố ý phá mã, kiểm thử phải chuyển đỏ) | 470 đột biến được định nghĩa | Xem mục 3 |
+| Kiểm thử đột biến (cố ý phá mã, kiểm thử phải chuyển đỏ) | 473 đột biến được định nghĩa | Xem mục 3 |
 
 Cùng với việc quét toàn bộ lịch sử Git tìm khóa bí mật và địa chỉ nội bộ (sạch, kiểm ngày 30/10) và `npm audit` (0 lỗ hổng).
 
@@ -27,7 +27,7 @@ Cùng với việc quét toàn bộ lịch sử Git tìm khóa bí mật và đ�
 | `security.php`, `seo.php`, `search.php` | 81, 91, 47 | Khóa đăng nhập, thẻ SEO, chỉ mục tìm kiếm |
 | `languages.php` | 110 | Sao chép trường theo ưu tiên dịch, gộp cấu hình bản Đức, nối bản dịch Polylang |
 | `serverconf.php` | 47 | Cấu hình Nginx do `provision.sh` sinh: tiêu đề bảo mật, CSP, thứ tự chứng chỉ, bước sao lưu |
-| `ops-backup.mjs` | 29 | `backup.sh` với restic và mysqldump giả: thứ tự, lưu giữ, từ chối bản CSDL cụt, báo lỗi |
+| `ops-backup.mjs` | 31 | `backup.sh` với restic và mysqldump giả: thứ tự, lưu giữ, từ chối bản CSDL cụt, báo lỗi, vị trí `wp-config.php` |
 | `coexist.php` | 6 | Plugin và theme cùng khai báo `vgarco_option` không xung đột |
 | `i18n.mjs`, `gettext.php` | 69, 330 + 13 | Bản dịch tiếng Đức khớp chuỗi gốc, tệp `.mo` đọc đúng |
 
@@ -52,11 +52,11 @@ Kiểm tra bằng trình duyệt Chromium (CSP không vi phạm trên trang ch�
 
 ## 3. Kiểm thử đột biến
 
-470 đột biến được định nghĩa; công cụ kiểm tra từng đột biến vẫn khớp đúng một chỗ trong mã (0 đã lỗi thời).
+473 đột biến được định nghĩa; công cụ kiểm tra từng đột biến vẫn khớp đúng một chỗ trong mã (0 đã lỗi thời).
 
 - Lần chạy đầy đủ trước đó (29/10/2026) chạy được 303 trong 437 đột biến thì dừng: **303 bắt được, 0 bỏ sót**.
-- Các nhóm thêm ngày 30/10/2026 (Polylang 12, cấu hình Nginx 9, sao lưu 12; tổng 33) đã chạy riêng: **33/33 bắt được**. Một đột biến ban đầu lọt (ô bắt buộc ở bản Đức) đã thêm phép kiểm tương ứng rồi bắt được.
-- Chưa chạy lại toàn bộ 470 trong một lần.
+- Các nhóm thêm ngày 30/10/2026 (Polylang 12, cấu hình Nginx 9, sao lưu 15; tổng 36) đã chạy riêng: **36/36 bắt được**. Một đột biến ban đầu lọt (ô bắt buộc ở bản Đức) đã thêm phép kiểm tương ứng rồi bắt được.
+- Chưa chạy lại toàn bộ 473 trong một lần.
 
 ## 4. Lỗi tìm ra bằng kiểm thử trên WordPress thật
 
@@ -64,15 +64,16 @@ Những lỗi mà bộ kiểm thử bằng hàm giả không thấy, tìm ra và
 
 - Trước đó (lần đầu có WordPress thật): 8 lỗi (đường dẫn phân loại 404, khóa đăng nhập vô hiệu, XML-RPC còn mở, dò tài khoản qua "quên mật khẩu"…).
 - Khi thay ACF PRO/WPML bằng Secure Custom Fields/Polylang (30/10/2026): trùng tên trường `doi_tac`; importer ghi đè bài tiếng Việt bằng bản Đức; phân loại rác sinh ra khi nhập bản Đức; bộ chuyển ngôn ngữ dẫn tới địa chỉ bị chuyển hướng; trang chủ tiếng Đức ở `/de/startseite/`; chuyển hướng tới trình hướng dẫn của Polylang ở lần vào quản trị đầu tiên.
+- Khi chạy thật lần hai trên máy chủ thử (30/10): `wp-config.php` nằm trong `public/` nên **không được sao lưu** (script tìm ở thư mục cha); cron của Ubuntu bỏ qua `CRON_TZ` trong `/etc/cron.d` (lịch sao lưu chạy lệch 7 giờ); xóa bản cũ của restic chia theo nhóm đường dẫn nên bản cũ nằm mãi; `wp vgarco report translations` báo "đã có bản dịch" khi Polylang chưa bật.
 - Khi rà sẵn sàng triển khai: tên gói `modern-image-formats` sai (đúng là `webp-uploads`); thiếu ngôn ngữ `vi` khi chưa bật Polylang làm trang ra `lang="en-US"`; Let's Encrypt kiểu webroot không chạy được vì cổng 80 đóng (chuyển sang Cloudflare Origin CA).
 
 ## 5. Chưa kiểm — việc còn lại trước khi nghiệm thu
 
 | Việc | Vì sao chưa |
 |---|---|
-| Chạy thật `provision.sh` (bước `backup`, tiêu đề bảo mật, Origin CA, cỡ theo RAM) và `deploy.sh` trên máy chủ | Chưa có máy chủ của khách; máy chủ thử đã chạy 9 bước đầu và `deploy.sh` ngày 29/10 nhưng **chưa chạy lại** sau các thay đổi sau đó |
-| Sao lưu và khôi phục thật (restic, MariaDB, S3) và biên bản diễn tập | Mới thử bằng bản giả |
-| MariaDB thật | Phòng thử dùng SQLite |
+| Chạy `provision.sh` và `deploy.sh` trên **VPS của khách** | Chưa có VPS. Trên máy chủ thử đã chạy thật ngày 30/10: bước `packages`, `nginx`, `backup`, cỡ theo RAM (cả 4 GB giả), `deploy.sh` đủ 8 bước, kiểm khói 27/27 ở hai chế độ, `wp vgarco import` và `wp vgarco languages` bằng WP-CLI thật. Chưa chạy thật: bước `ssh` và `firewall` sau thay đổi, chứng chỉ Origin CA thật (máy thử dùng chứng chỉ tự ký) |
+| Sao lưu tới **kho S3 thật** và biên bản diễn tập chính thức | Đã diễn tập thật ngày 30/10 trên máy chủ thử với restic và MariaDB thật nhưng kho là thư mục cục bộ: sao lưu 1,5 giây, khôi phục 2 giây, CSDL khớp, `wp-config.php` giống bản gốc. Chưa có kho S3 và chưa điền mẫu biên bản mục 5 của `SAO-LUU-PHUC-HOI.md` |
+| MariaDB thật cho toàn bộ kịch bản WordPress | Phòng thử dùng SQLite; máy chủ thử đã chạy MariaDB thật cho nhập dự án, sao lưu và khôi phục |
 | Giao diện biên tập viên bằng trình duyệt (nút "+" của Polylang, trang Cấu hình và Bản DE, kéo thả trường lặp) | Chưa có người thao tác |
 | Hiệu năng trên VPS 2 vCPU/4 GB/40 GB (Lighthouse, tải đồng thời, mức dùng RAM) | Chưa có VPS |
 | Cloudflare thật (Full strict, Authenticated Origin Pulls, Cache Rules), Brevo, SPF/DKIM/DMARC, thư không vào thư rác | Chờ tên miền và giá trị DNS |
