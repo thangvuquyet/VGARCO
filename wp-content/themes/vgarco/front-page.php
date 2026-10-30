@@ -11,7 +11,7 @@ $showcase  = vgarco_showcase_projects( 3 );
 $services  = vgarco_home_services( 3 );
 $news      = vgarco_latest_news( 3 );
 $facts     = (array) vgarco_option( 'chi_so_trang_chu', array() );
-$partners  = array_values( array_filter( (array) vgarco_option( 'doi_tac', array() ), static fn( $p ) => ! empty( $p['ten'] ) ) );
+$partners  = array_values( array_filter( (array) vgarco_option( 'dai_doi_tac', array() ), static fn( $p ) => ! empty( $p['ten'] ) ) );
 $projects  = get_post_type_archive_link( 'du_an' ) ?: home_url( '/du-an/' );
 $news_url  = get_post_type_archive_link( 'tin_tuc' ) ?: home_url( '/tin-tuc/' );
 $band = vgarco_split_lines( vgarco_field_text( 'dai_chu', '', $id ) );

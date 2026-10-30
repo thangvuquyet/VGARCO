@@ -161,7 +161,7 @@ function vgarco_fields_cau_hinh(): array {
 					)
 				),
 				$o(
-					'doi_tac',
+					'dai_doi_tac',
 					'Khách hàng và đối tác',
 					'repeater',
 					'translate',

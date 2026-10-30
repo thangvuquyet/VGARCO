@@ -163,6 +163,20 @@ foreach ( $groups as $group ) {
 	$walk( $group['fields'], $group['key'] );
 }
 
+$shapes = array();
+foreach ( $groups as $group ) {
+	foreach ( $group['fields'] as $field ) {
+		if ( 'tab' === $field['type'] ) {
+			continue;
+		}
+		$sub = array_column( $field['sub_fields'] ?? array(), 'name' );
+		sort( $sub );
+		$shape = $field['type'] . ':' . implode( ',', $sub );
+		check( "trùng tên {$field['name']} giữa các nhóm phải cùng kiểu và cùng trường con ({$group['key']})", ! isset( $shapes[ $field['name'] ] ) || $shapes[ $field['name'] ] === $shape );
+		$shapes[ $field['name'] ] = $shape;
+	}
+}
+
 $du_an = array_column( $groups[0]['fields'], null, 'name' );
 foreach ( array( 'ma', 'dia_diem', 'quoc_gia', 'thoi_gian', 'vai_tro', 'pham_vi', 'chu_dau_tu', 'doi_tac', 'cong_bo_chu_dau_tu', 'anh_dau_trang', 'anh_the', 'anh_trinh_chieu', 'loai_anh_dai_dien', 'thu_vien', 'noi_bat', 'tieu_bieu', 'mo_ta_seo' ) as $name ) {
 	check( "du_an có trường {$name}", isset( $du_an[ $name ] ) );

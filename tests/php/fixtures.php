@@ -294,7 +294,7 @@ fx_post( 504, 'page', 'Lĩnh vực hoạt động', array(), array( 'url' => '/l
 fx_post( 505, 'page', 'Liên hệ', array(), array( 'url' => '/lien-he/' ) );
 
 $GLOBALS['fx']['options'] = $fx_empty ? array() : array(
-	'doi_tac'           => array(
+	'dai_doi_tac'       => array(
 		array( 'ten' => 'AVITYCO', 'viet_tat' => 'AV', 'mo_ta' => 'Kiến trúc & Xây dựng', 'logo' => getenv( 'VG_FX_PARTNER_LOGO' ) ? fx_image( 'project-images/ambassador-05.jpg' ) : 0 ),
 		array( 'ten' => 'Kiến trúc Việt', 'viet_tat' => 'KV', 'mo_ta' => 'Tư vấn kiến trúc' ),
 		array( 'ten' => 'FBN Studio', 'viet_tat' => 'FBN', 'mo_ta' => 'Ferri Nguyen GbR' ),

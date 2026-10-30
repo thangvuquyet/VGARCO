@@ -114,7 +114,7 @@ foreach ( $partners as $i => $partner ) {
 		}
 	}
 }
-update_field( 'doi_tac', $partners, 'option' );
+update_field( 'dai_doi_tac', $partners, 'option' );
 update_field( 'anh_hero_mac_dinh', (int) get_field( 'anh_dau_trang', $by_ma( 'tong-lanh-su-quan-viet-nam-tai-savannakhet' ) ), 'option' );
 update_field(
 	'cau_chuyen',
