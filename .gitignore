@@ -40,5 +40,5 @@ Thumbs.db
 tests/out/
 
 # Môi trường thử WordPress thật (tests/wp-lab): lõi WordPress, CSDL SQLite, nhật ký, mật khẩu thử
-tests/wp-lab/.lab/
+tests/wp-lab*/.lab/
 tests/wp-lab/compare/out/
