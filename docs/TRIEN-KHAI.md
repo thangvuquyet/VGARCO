@@ -37,6 +37,7 @@ Thứ tự có ý nghĩa: **Secure Custom Fields phải có trước `vgarco-cor
 ```bash
 # 1. Lõi WordPress, cấu hình (wp-config.php theo CAU-HINH.md), CSDL
 wp core install --url=https://<tên-miền> --title="VGARCO" --admin_user=<không-dùng-admin> --admin_email=<hộp-thư-vận-hành> --skip-email
+wp language core install vi --activate   # bắt buộc khi chưa bật Polylang (Mốc 1): thiếu thì <html lang> thành en-US và phông tiếng Việt không được nạp trước
 
 # 2. Plugin theo plugins.lock.json (ghim đúng bản đã kiểm thử)
 wp plugin install secure-custom-fields --version=6.9.7 --activate

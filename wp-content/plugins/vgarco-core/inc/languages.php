@@ -119,6 +119,10 @@ function vgarco_copy_post_metas( $keys, $sync = false ): array {
 }
 add_filter( 'pll_copy_post_metas', 'vgarco_copy_post_metas', 30, 2 );
 
+function vgarco_language_available( string $lang ): bool {
+	return function_exists( 'pll_languages_list' ) && in_array( $lang, (array) pll_languages_list(), true );
+}
+
 function vgarco_post_language( int $post_id ): ?string {
 	$lang = function_exists( 'pll_get_post_language' ) ? pll_get_post_language( $post_id ) : null;
 	return is_string( $lang ) && '' !== $lang ? $lang : null;

@@ -175,6 +175,7 @@ same( 'cắt bớt: ô bắt buộc ở bản gốc thành tùy chọn ở bản
 same( 'đặt ngôn ngữ bài khi không có Polylang: không làm gì', null, vgarco_set_post_language( 5, 'de' ) );
 same( 'nối bản dịch khi không có Polylang: không làm gì', null, vgarco_link_translation( 5, 6, 'de' ) );
 same( 'ngôn ngữ bài khi không có Polylang: không biết', null, vgarco_post_language( 5 ) );
+same( 'tiếng Đức khi không có Polylang: không dùng được', false, vgarco_language_available( 'de' ) );
 same( 'bản dịch khi không có Polylang: không có', 0, vgarco_translation_id( 5, 'de' ) );
 
 if ( ! function_exists( 'pll_set_post_language' ) ) {
@@ -188,6 +189,9 @@ if ( ! function_exists( 'pll_set_post_language' ) ) {
 			}
 		}
 		return array();
+	}
+	function pll_languages_list() {
+		return array( 'vi' );
 	}
 	function pll_get_post_language( $id ) {
 		return $GLOBALS['pll']['lang'][ $id ] ?? false;
@@ -210,6 +214,7 @@ vgarco_link_translation( 10, 21, 'de' );
 same( 'nối bản dịch: đổi sang bài khác thì cập nhật nhóm', array( 'vi' => 10, 'de' => 21 ), end( $GLOBALS['pll']['saved'] ) );
 vgarco_set_post_language( 30, 'de' );
 same( 'ngôn ngữ bài: đọc từ Polylang', 'de', vgarco_post_language( 30 ) );
+same( 'Polylang chỉ có vi: tiếng Đức chưa dùng được, tiếng Việt thì được', array( false, true ), array( vgarco_language_available( 'de' ), vgarco_language_available( 'vi' ) ) );
 same( 'ngôn ngữ bài chưa gán: null', null, vgarco_post_language( 31 ) );
 same( 'bản dịch của bài 10 sang tiếng Đức', 21, vgarco_translation_id( 10, 'de' ) );
 same( 'bài chưa có bản dịch: 0', 0, vgarco_translation_id( 30, 'de' ) );

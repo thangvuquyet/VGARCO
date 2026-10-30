@@ -36,6 +36,10 @@ class VGARCO_CLI_Command {
 		if ( '' !== $lang && ! in_array( $lang, array( 'vi', 'de' ), true ) ) {
 			WP_CLI::error( '--lang chỉ nhận vi hoặc de.' );
 		}
+		$has_de = vgarco_language_available( 'de' );
+		if ( 'de' === $lang && ! $has_de ) {
+			WP_CLI::error( 'Chưa bật Polylang với tiếng Đức: chạy wp vgarco languages trước.' );
+		}
 
 		$result = vgarco_import_projects( (string) file_get_contents( $file ), array( 'terms' => vgarco_seed_term_map()['loai_cong_trinh'] ) );
 		$images = $this->read_images( $file, $assoc, array_column( $result['plans'], 'ma' ), $result['errors'] );
@@ -53,7 +57,9 @@ class VGARCO_CLI_Command {
 				$vi_id = $this->upsert( $plan, 'vi', $vi_id, 0, $status, $dry, $counts );
 			}
 			if ( ( '' === $lang || 'de' === $lang ) && $plan['de'] ) {
-				if ( ! $vi_id && ! $dry ) {
+				if ( ! $has_de ) {
+					WP_CLI::warning( "{$plan['ma']}: bỏ qua bản tiếng Đức vì Polylang chưa bật." );
+				} elseif ( ! $vi_id && ! $dry ) {
 					WP_CLI::warning( "{$plan['ma']}: chưa có bản tiếng Việt nên bỏ qua bản tiếng Đức." );
 				} else {
 					$this->upsert( $plan, 'de', $this->find( $plan['ma'], 'de' ), (int) $vi_id, $status, $dry, $counts );

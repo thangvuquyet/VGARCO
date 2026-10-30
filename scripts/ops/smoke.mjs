@@ -51,7 +51,8 @@ for (const path of exposed) {
 }
 
 const home = await get('/');
-const noindex = /<meta name=["']robots["'][^>]*noindex/i.test(home.text);
+check('trang chủ khai báo lang="vi" (locale của site là vi)', /<html[^>]*\blang=["']vi["']/i.test(home.text), (home.text.match(/<html[^>]*>/i) ?? ['không thấy thẻ html'])[0]);
+const noindex =/<meta name=["']robots["'][^>]*noindex/i.test(home.text);
 if (env === 'production') {
   check('production: trang chủ cho lập chỉ mục (không noindex)', !noindex);
   check('production: dùng HTTPS', base.startsWith('https://'));

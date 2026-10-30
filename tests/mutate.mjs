@@ -903,6 +903,8 @@ const M = [
     "add_filter( 'pll_copy_post_metas', 'vgarco_copy_post_metas', 30, 2 );", "", 'languages'],
   ["Polylang: khóa tham chiếu của ACF không đi cùng giá trị chép", "wp-content/plugins/vgarco-core/inc/languages.php",
     "\t\t\t$out[] = '_' . $key;\n", "", 'languages'],
+  ["Polylang: tiếng Đức coi là có sẵn dù Polylang chưa có ngôn ngữ đó", "wp-content/plugins/vgarco-core/inc/languages.php",
+    "in_array( $lang, (array) pll_languages_list(), true )", "true", 'languages'],
 ];
 
 if (process.argv[2] === '--check') {
