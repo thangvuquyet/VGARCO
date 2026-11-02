@@ -961,6 +961,8 @@ const M = [
     "'priority' => 0 === $index", "'priority' => false", 'pages'],
   ["tin tức: ảnh dòng đầu lại lazy (làm chậm LCP)", "wp-content/themes/vgarco/template-parts/news-archive.php",
     "'priority' => 0 === $index,", "'priority' => false,", 'pages'],
+  ["ảnh: chọn chất lượng AVIF không chặn đo lồng nhau (Imagick đo lại hàng chục lần mỗi ảnh)", "wp-content/plugins/vgarco-core/inc/media-lib.php",
+    "$state['ctx']['quality'] = VGARCO_AVIF_QUALITY;\n\t\t\t\t\t$state['ctx']['quality'] = (int) ( $ctx['resolve'] )();", "$state['ctx']['quality'] = (int) ( $ctx['resolve'] )();", 'media'],
 ];
 
 if (process.argv[2] === '--check') {

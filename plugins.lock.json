@@ -1,5 +1,5 @@
 {
-  "$comment": "Danh sách thành phần bên thứ ba của website VGARCO. Yêu cầu 5.7.3: tối đa 12, mỗi thành phần có lý do sử dụng. Phiên bản đã ghim cho Polylang và Secure Custom Fields là bản đã kiểm thử trong phòng thử (tests/wp-lab) cùng WordPress 7.1.2; các thành phần còn lại ghim ngay khi cài lên staging lần đầu. Sau đó chỉ đổi phiên bản sau khi đã kiểm thử trên staging.",
+  "$comment": "Danh sách thành phần bên thứ ba của website VGARCO. Yêu cầu 5.7.3: tối đa 12, mỗi thành phần có lý do sử dụng. Polylang và Secure Custom Fields ghim theo bản đã kiểm thử trong phòng thử (tests/wp-lab) cùng WordPress 7.1.2; FluentSMTP, WP 2FA, WPS Hide Login, Redis Object Cache, Modern Image Formats và Patchstack ghim theo bản đã cài và chạy thật trên máy chủ thử ngày 02/11/2026 (WordPress 7.1.4). Sau đó chỉ đổi phiên bản sau khi đã kiểm thử trên staging.",
   "limit": 12,
   "wordpress": {
     "version": "7.1.2",
@@ -30,7 +30,7 @@
       "source": "wordpress.org",
       "license": "GPL",
       "required": true,
-      "version": null,
+      "version": "2.4.1",
       "reason": "Gửi thư hệ thống qua Brevo API; nhật ký thư. Không dùng hàm mail()."
     },
     {
@@ -39,7 +39,7 @@
       "source": "wordpress.org",
       "license": "GPL",
       "required": true,
-      "version": null,
+      "version": "4.2.1",
       "reason": "Bắt buộc xác thực hai lớp cho mọi tài khoản vào trang quản trị (yêu cầu 5.4.5)."
     },
     {
@@ -48,7 +48,7 @@
       "source": "wordpress.org",
       "license": "GPL",
       "required": true,
-      "version": null,
+      "version": "1.9.19",
       "reason": "Đổi đường dẫn đăng nhập (yêu cầu 5.4.5)."
     },
     {
@@ -57,7 +57,7 @@
       "source": "wordpress.org",
       "license": "GPL",
       "required": true,
-      "version": null,
+      "version": "3.0.0",
       "reason": "Object cache; cũng lưu chỉ mục tìm kiếm dự án và mã bảo mật."
     },
     {
@@ -66,7 +66,7 @@
       "source": "wordpress.org",
       "license": "GPL",
       "required": true,
-      "version": null,
+      "version": "2.7.1",
       "reason": "Sinh AVIF/WebP với URL riêng cho từng định dạng."
     },
     {
@@ -75,7 +75,7 @@
       "source": "wordpress.org",
       "license": "GPL",
       "required": true,
-      "version": null,
+      "version": "2.3.7",
       "reason": "Cảnh báo lỗ hổng của thành phần đang dùng (yêu cầu 5.4.9). Gói miễn phí chỉ cảnh báo, không vá ảo."
     },
     {

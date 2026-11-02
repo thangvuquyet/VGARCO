@@ -142,6 +142,24 @@ same( 'bản AVIF đầu tiên: đo rồi dùng kết quả', 50, vgarco_image_q
 same( 'bản AVIF thứ hai (75% cỡ gốc): dùng lại, không đo nữa', 50, vgarco_image_quality( 82, 'image/avif', array( 'width' => 1200 ) ) );
 same( 'bản AVIF nhỏ (50% cỡ gốc): mức chung', 55, vgarco_image_quality( 82, 'image/avif', array( 'width' => 800 ) ) );
 same( '… tổng cộng chỉ đo một lần', 1, $resolved );
+
+$reset();
+$resolved     = 0;
+$nested       = null;
+$state['ctx'] = array(
+	'width'   => 1600,
+	'quality' => null,
+	'resolve' => static function () use ( &$resolved, &$nested ): int {
+		++$resolved;
+		if ( $resolved > 3 ) {
+			return 99;
+		}
+		$nested = vgarco_image_quality( 82, 'image/avif', array( 'width' => 1600 ) );
+		return 50;
+	},
+);
+same( 'trình xử lý ảnh nạp lại ảnh khi đang đo (Imagick gọi bộ lọc chất lượng lúc nạp): vẫn dùng kết quả của lần đo', 50, vgarco_image_quality( 82, 'image/avif', array( 'width' => 1600 ) ) );
+same( '… lần gọi lồng nhau không đo lại và dùng mức chung', array( 1, 55 ), array( $resolved, $nested ) );
 $reset();
 
 foreach ( $needles as $n ) {

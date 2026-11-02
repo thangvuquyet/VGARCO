@@ -52,7 +52,8 @@ function vgarco_image_quality( $default, $mime = '', $size = array() ): int {
 		$ctx = $state['ctx'];
 		if ( is_array( $ctx ) ) {
 			if ( null === $ctx['quality'] && is_callable( $ctx['resolve'] ?? null ) ) {
-				$state['ctx']['quality'] = (int) ( $ctx['resolve'] )();
+				$state['ctx']['quality'] = VGARCO_AVIF_QUALITY;
+					$state['ctx']['quality'] = (int) ( $ctx['resolve'] )();
 				$ctx                     = $state['ctx'];
 			}
 			$width = (int) ( $size['width'] ?? 0 );
