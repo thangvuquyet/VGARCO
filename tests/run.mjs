@@ -39,11 +39,15 @@ const report = ( name, ok, detail = '' ) => {
 	failed += ok ? 0 : 1;
 };
 
-const phpFiles = [ ...walk( join( root, 'wp-content' ), ( p ) => p.endsWith( '.php' ) ), ...walk( join( root, 'tests' ), ( p ) => p.endsWith( '.php' ) ) ];
+const phpFiles = [
+	...walk( join( root, 'wp-content' ), ( p ) => p.endsWith( '.php' ) ),
+	...walk( join( root, 'tests' ), ( p ) => p.endsWith( '.php' ) ),
+	...walk( join( root, 'scripts' ), ( p ) => p.endsWith( '.php' ) ),
+];
 const bad = phpFiles.filter( ( f ) => run( php, [ ...phpArgs, '-l', f ] ).status !== 0 );
 report( `php -l (${ phpFiles.length } tệp)`, bad.length === 0, bad.join( ', ' ) );
 
-for ( const script of [ 'smoke.php', 'coexist.php', 'languages.php', 'serverconf.php', 'pages.php', 'apply.php', 'search.php', 'seo.php', 'security.php', 'import.php', 'media.php', 'export-images.php' ] ) {
+for ( const script of [ 'smoke.php', 'coexist.php', 'languages.php', 'serverconf.php', 'setup.php', 'pages.php', 'apply.php', 'search.php', 'seo.php', 'security.php', 'import.php', 'media.php', 'export-images.php' ] ) {
 	const r = run( php, [ ...( [ 'apply.php', 'media.php', 'export-images.php' ].includes( script ) ? withApply : withMb ), join( 'tests', 'php', script ) ] );
 	const last = ( r.stdout + r.stderr ).trim().split( '\n' ).pop();
 	report( script, r.status === 0, last );
@@ -52,6 +56,11 @@ for ( const script of [ 'smoke.php', 'coexist.php', 'languages.php', 'serverconf
 {
 	const r = run( process.execPath, [ join( root, 'tests', 'ops-backup.mjs' ) ] );
 	report( 'ops-backup.mjs', r.status === 0, ( r.stdout + r.stderr ).trim().split( '\n' ).pop() );
+}
+
+{
+	const r = run( process.execPath, [ join( root, 'tests', 'ops-install.mjs' ) ] );
+	report( 'ops-install.mjs', r.status === 0, ( r.stdout + r.stderr ).trim().split( '\n' ).pop() );
 }
 
 {

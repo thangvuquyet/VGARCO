@@ -341,6 +341,50 @@ const M = [
     "'width'  => 1200,", "'width'  => 1000,", 'pages'],
   ["ảnh chia sẻ: thẻ mặc định lấy mô tả ảnh theo tiêu đề trang", "wp-content/themes/vgarco/inc/seo.php",
     "\t\t$alt   = 'VGARCO';", "\t\t$alt   = get_the_title( $id );", 'pages'],
+  ["ảnh chia sẻ: nhận cả AVIF", "wp-content/themes/vgarco/inc/seo-lib.php",
+    "'/\\.(jpe?g|png|gif)$/i'", "'/\\.(jpe?g|png|gif|avif)$/i'", 'seo'],
+  ["ảnh chia sẻ: định dạng xét cả chuỗi truy vấn", "wp-content/themes/vgarco/inc/seo-lib.php",
+    "(string) parse_url( $url, PHP_URL_PATH )", "$url", 'seo'],
+  ["ảnh chia sẻ: bỏ kiểm định dạng khi chọn ảnh", "wp-content/themes/vgarco/inc/seo.php",
+    "is_array( $src ) && vgarco_seo_share_format_ok( (string) $src[0] )", "is_array( $src )", 'pages'],
+  ["ảnh chia sẻ: không thử bản gốc khi cỡ 1200 là AVIF", "wp-content/themes/vgarco/inc/seo.php",
+    "array( 'vg-1200', 'full' )", "array( 'vg-1200' )", 'pages'],
+  ["cài WordPress: ghi đè khi đã có WordPress", "scripts/ops/install-wordpress.sh",
+    "if [[ -e \"$CONFIG\" || -e \"$WEB_ROOT/wp-includes/version.php\" ]]; then", "if false; then", 'ops-install'],
+  ["cài WordPress: wp-config.php mở quyền đọc cho mọi người", "scripts/ops/install-wordpress.sh",
+    "chmod 0640 \"$CONFIG\"", "chmod 0644 \"$CONFIG\"", 'ops-install'],
+  ["cài WordPress: in mật khẩu quản trị ra màn hình", "scripts/ops/install-wordpress.sh",
+    "grep -v 'Admin password' \"$OUT\"\nrm -f \"$OUT\"\nnote \"mật khẩu", "cat \"$OUT\"\nrm -f \"$OUT\"\nnote \"mật khẩu", 'ops-install'],
+  ["cài WordPress: bỏ đổi muối khóa", "scripts/ops/install-wordpress.sh",
+    "wpd config shuffle-salts", "true", 'ops-install'],
+  ["cài WordPress: cho phép tài khoản tên admin", "scripts/ops/install-wordpress.sh",
+    " && \"$ADMIN_USER\" != \"admin\"", "", 'ops-install'],
+  ["cài WordPress: WP_ENVIRONMENT_TYPE cố định production", "scripts/ops/install-wordpress.sh",
+    "define( 'WP_ENVIRONMENT_TYPE', '${WP_ENV}' );", "define( 'WP_ENVIRONMENT_TYPE', 'production' );", 'ops-install'],
+  ["cài WordPress: tiền tố bảng mặc định wp_", "scripts/ops/install-wordpress.sh",
+    "TABLE_PREFIX=\"vgx_\"", "TABLE_PREFIX=\"wp_\"", 'ops-install'],
+  ["cài WordPress: bỏ DISALLOW_FILE_MODS", "scripts/ops/install-wordpress.sh",
+    "define( 'DISALLOW_FILE_MODS', true );\ndefine( 'AUTOMATIC_UPDATER_DISABLED'", "define( 'AUTOMATIC_UPDATER_DISABLED'", 'ops-install'],
+  ["cài WordPress: phiên bản lõi lệch khóa plugins.lock.json", "scripts/ops/install-wordpress.sh",
+    "WP_VERSION=\"7.1.4\"", "WP_VERSION=\"7.1.2\"", 'ops-install'],
+  ["cài WordPress: tệp mật khẩu quản trị mở quyền", "scripts/ops/install-wordpress.sh",
+    "install -m 0600 -o deploy -g deploy /dev/null \"$PW_FILE\"", "install -m 0644 -o deploy -g deploy /dev/null \"$PW_FILE\"", 'ops-install'],
+  ["cài WordPress: thư mục CV nằm trong thư mục web", "scripts/ops/install-wordpress.sh",
+    "define( 'VGARCO_PRIVATE_DIR', '${PRIVATE_DIR}' );", "define( 'VGARCO_PRIVATE_DIR', '/var/www/vgarco/public/private' );", 'ops-install'],
+  ["cài WordPress: bỏ nạp khóa bí mật", "scripts/ops/install-wordpress.sh",
+    "require '${SECRETS_DIR}/secrets.php';\n", "", 'ops-install'],
+  ["tạo trang: không đặt trang chủ tĩnh", "scripts/ops/setup-pages.php",
+    "update_option( 'show_on_front', 'page' );\n", "", 'setup'],
+  ["tạo trang: trang con không có trang cha", "scripts/ops/setup-pages.php",
+    "count( $parts ) > 1 ?", "false ?", 'setup'],
+  ["tạo trang: tạo lại trang đã có", "scripts/ops/setup-pages.php",
+    "$existing ? $existing->ID :", "false ? $existing->ID :", 'setup'],
+  ["tạo trang: Liên hệ gán nhầm mẫu", "scripts/ops/setup-pages.php",
+    "'lien-he', 'templates/contact.php'", "'lien-he', 'templates/about.php'", 'setup'],
+  ["tạo trang: chính sách còn chữ bản thử", "scripts/ops/setup-pages.php",
+    "<p>Nội dung đang được cập nhật.</p>", "<p>Nội dung chính sách (bản thử).</p>", 'setup'],
+  ["tạo trang: bỏ gán mẫu trang", "scripts/ops/setup-pages.php",
+    "if ( $template ) {", "if ( false ) {", 'setup'],
   ["favicon: biểu tượng riêng của quản trị bị theme ghi đè", "wp-content/themes/vgarco/inc/seo.php",
     "(int) get_option( 'site_icon' ) > 0 ? (string) $url :", "false ? (string) $url :", 'pages'],
   ["favicon: vẫn chèn SVG khi quản trị đã chọn biểu tượng riêng", "wp-content/themes/vgarco/inc/seo.php",
@@ -996,6 +1040,14 @@ for (const [name, file, from, to, suite = 'smoke'] of M.filter(([n]) => !only ||
     cpSync(join(src, 'scripts'), join(work, 'scripts'), { recursive: true });
     cpSync(join(src, 'tests', 'ops-backup.mjs'), join(work, 'tests', 'ops-backup.mjs'));
   }
+  if (suite === 'setup' || suite === 'ops-install') {
+    cpSync(join(src, 'scripts'), join(work, 'scripts'), { recursive: true });
+    cpSync(join(src, 'docs'), join(work, 'docs'), { recursive: true });
+  }
+  if (suite === 'ops-install') {
+    cpSync(join(src, 'plugins.lock.json'), join(work, 'plugins.lock.json'));
+    cpSync(join(src, 'tests', 'ops-install.mjs'), join(work, 'tests', 'ops-install.mjs'));
+  }
 
   const path = join(work, file);
   const text = readFileSync(path, 'utf8').replace(/\r\n/g, '\n');
@@ -1008,6 +1060,8 @@ for (const [name, file, from, to, suite = 'smoke'] of M.filter(([n]) => !only ||
     ? spawnSync(process.execPath, [join(work, 'tests', 'i18n.mjs')], { encoding: 'utf8' })
     : suite === 'ops-backup'
     ? spawnSync(process.execPath, [join(work, 'tests', 'ops-backup.mjs')], { encoding: 'utf8' })
+    : suite === 'ops-install'
+    ? spawnSync(process.execPath, [join(work, 'tests', 'ops-install.mjs')], { encoding: 'utf8' })
     : spawnSync(php, ['-d', `extension_dir=${ext}`, '-d', 'extension=mbstring', ...extra, join(work, 'tests', 'php', `${suite}.php`)], { encoding: 'utf8' });
   const out = (r.stdout || '') + (r.stderr || '');
   const red = out.match(/THẤT BẠI (\d+)/);

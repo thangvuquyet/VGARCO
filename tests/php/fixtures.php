@@ -447,7 +447,14 @@ function wp_get_attachment_image( $id, $size = 'thumbnail', $icon = false, $attr
 
 function wp_get_attachment_image_url( $id, $size = 'thumbnail' ) {
 	$img = $GLOBALS['fx']['images'][ $id ] ?? null;
-	return $img ? '/img/' . $img[0] : false;
+	if ( ! $img ) {
+		return false;
+	}
+	$name = $img[0];
+	if ( getenv( 'VG_FX_AVIF_ALL' ) || ( getenv( 'VG_FX_AVIF_SIZES' ) && 'full' !== $size ) ) {
+		$name = (string) preg_replace( '/\.\w+$/', '.avif', $name );
+	}
+	return '/img/' . $name;
 }
 
 function wp_kses( $text, $allowed ) {

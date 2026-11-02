@@ -854,6 +854,14 @@ same( 'SEO dự án: tiêu đề "Tên — Dự án — VGARCO"', 'Đài kiểm 
 check( 'SEO dự án: không có mo_ta_seo thì mô tả lấy từ nội dung', str_starts_with( $meta( $pd, '//meta[@name="description"]' ), 'Dự án đài kiểm soát không lưu' ) );
 same( 'SEO dự án: canonical là địa chỉ dự án', 'https://vgarco.test/du-an/104/', $meta( $pd, '//link[@rel="canonical"]' ) );
 check( 'SEO dự án: og:image tuyệt đối kèm kích thước và mô tả ảnh', str_starts_with( $meta( $pd, '//meta[@property="og:image"]' ), 'https://' ) && '1200' === $meta( $pd, '//meta[@property="og:image:width"]' ) && 'Đài kiểm soát không lưu Đồng Hới' === $meta( $pd, '//meta[@property="og:image:alt"]' ) );
+$pd_avif = render( 'single-du_an', false, 'vi', array_merge( $abs, array( 'VG_FX_ID' => '104', 'VG_FX_AVIF_SIZES' => '1' ) ) );
+check( 'ảnh chia sẻ: cỡ 1200 là AVIF thì og:image dùng bản gốc JPEG (mạng xã hội không đọc chắc AVIF)', 1 === preg_match( '#^https://vgarco\.test/img/[^?]+\.jpe?g$#i', $meta( $pd_avif, '//meta[@property="og:image"]' ) ) );
+$pd_avif_all = render( 'single-du_an', false, 'vi', array_merge( $abs, array( 'VG_FX_ID' => '104', 'VG_FX_AVIF_ALL' => '1' ) ) );
+same(
+	'ảnh chia sẻ: mọi cỡ đều là AVIF thì dùng thẻ thương hiệu PNG 1200×630',
+	array( 'https://vgarco.test/assets/images/share-default-vi.png', '1200', '630', 'VGARCO' ),
+	array( $meta( $pd_avif_all, '//meta[@property="og:image"]' ), $meta( $pd_avif_all, '//meta[@property="og:image:width"]' ), $meta( $pd_avif_all, '//meta[@property="og:image:height"]' ), $meta( $pd_avif_all, '//meta[@property="og:image:alt"]' ) )
+);
 same( 'SEO dự án: og:type website, locale vi_VN với bản thay thế de_DE', array( 'website', 'vi_VN', 'de_DE' ), array( $meta( $pd, '//meta[@property="og:type"]' ), $meta( $pd, '//meta[@property="og:locale"]' ), $meta( $pd, '//meta[@property="og:locale:alternate"]' ) ) );
 $bc = $ld( $pd, 'BreadcrumbList' );
 same( 'SEO dự án: BreadcrumbList 3 mục, địa chỉ tuyệt đối', array( 3, 'https://vgarco.test/', 'https://vgarco.test/du-an/104/' ), array( count( $bc['itemListElement'] ?? array() ), $bc['itemListElement'][0]['item'] ?? '', $bc['itemListElement'][2]['item'] ?? '' ) );

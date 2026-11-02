@@ -1,8 +1,8 @@
 {
-  "$comment": "Danh sách thành phần bên thứ ba của website VGARCO. Yêu cầu 5.7.3: tối đa 12, mỗi thành phần có lý do sử dụng. Polylang và Secure Custom Fields ghim theo bản đã kiểm thử trong phòng thử (tests/wp-lab) cùng WordPress 7.1.2; FluentSMTP, WP 2FA, WPS Hide Login, Redis Object Cache, Modern Image Formats và Patchstack ghim theo bản đã cài và chạy thật trên máy chủ thử ngày 02/11/2026 (WordPress 7.1.4). Sau đó chỉ đổi phiên bản sau khi đã kiểm thử trên staging.",
+  "$comment": "Danh sách thành phần bên thứ ba của website VGARCO. Yêu cầu 5.7.3: tối đa 12, mỗi thành phần có lý do sử dụng. Polylang và Secure Custom Fields ghim theo bản đã kiểm thử trong phòng thử (tests/wp-lab) cùng WordPress 7.1.2 (lõi WordPress ghim 7.1.4, bản vá của nhánh đó, đã dựng và chạy thật trên máy chủ thử từ 29/10/2026); FluentSMTP, WP 2FA, WPS Hide Login, Redis Object Cache, Modern Image Formats và Patchstack ghim theo bản đã cài và chạy thật trên máy chủ thử ngày 02/11/2026 (WordPress 7.1.4). Sau đó chỉ đổi phiên bản sau khi đã kiểm thử trên staging.",
   "limit": 12,
   "wordpress": {
-    "version": "7.1.2",
+    "version": "7.1.4",
     "php": "8.3"
   },
   "plugins": [

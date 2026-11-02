@@ -34,6 +34,8 @@ Chi tiết Cloudflare (DNS, SSL Full strict, Cache Rules, WAF, rate limiting) n�
 
 Thứ tự có ý nghĩa: **Secure Custom Fields phải có trước `vgarco-core`** (không có thì trang quản trị báo thiếu và không có trường nhập liệu). Không cài ACF hoặc ACF PRO song song: SCF tự tắt chúng.
 
+**Bản tự động của bước 1, 4 và bảng trang:** `sudo scripts/ops/install-wordpress.sh --env=<môi trường> --domain=<tên miền> --admin-email=<hộp thư vận hành> [--wp-env=staging] [--dry-run]` tải lõi WordPress đúng phiên bản trong `plugins.lock.json`, ghi `wp-config.php` (khối cấu hình khớp mẫu trong `CAU-HINH.md`, quyền 0640, muối khóa sinh mới), cài đặt, cài tiếng Việt, đặt đường dẫn và múi giờ; mật khẩu quản trị ban đầu cất ở `/home/deploy/.wp-admin-initial-password` (0600), không in ra. Sau khi plugin, mã tự viết và theme đã vào máy, `wp eval-file scripts/ops/setup-pages.php` (chép lên máy bằng `scp`, chạy bằng `deploy`) tạo 9 trang trong bảng dưới và đặt trang chủ tĩnh; chạy lại an toàn, không ghi đè trang đã có. Hai kịch bản này được kiểm bằng WordPress giả và bằng việc chạy khối sinh `wp-config.php` thật; bản tham số hóa **chưa chạy trên máy chủ** (bản rời gốc đã chạy thật trên VM thử ngày 29/10/2026), nên lần chạy đầu trên VPS nên có `--dry-run` trước và ai đó theo dõi.
+
 ```bash
 # 1. Lõi WordPress, cấu hình (wp-config.php theo CAU-HINH.md), CSDL
 wp core install --url=https://<tên-miền> --title="VGARCO" --admin_user=<không-dùng-admin> --admin_email=<hộp-thư-vận-hành> --skip-email
@@ -227,3 +229,18 @@ Mỗi lần chạy xin **một** mã bảo mật (tính vào giới hạn 30 lư
 
 Kiểm tay thêm trước khi mở cho khách (xem mục 12 của phương án): trang ứng tuyển hiện ảnh mã bảo mật đọc được (ảnh dựng bằng GD trên PHP của máy chủ thật), thử nộp một hồ sơ giả rồi xóa; thư xác nhận tới Gmail/Outlook/Zoho vào hộp chính;
 SSL Labs và securityheaders.com hạng A; mail-tester ≥ 9/10; diễn tập khôi phục có biên bản.
+
+## 6. Rà soát trước ngày mở site (máy chủ thử, 02/11/2026)
+
+Máy chủ thử là bản **diễn tập**, không phải bản chép nguyên sang máy thật: máy thật dựng lại từ `provision.sh` và `deploy.sh`, rồi nhập nội dung. Đã dò công khai và đọc lại mã; kết quả và các việc còn lại:
+
+- **Từng là kịch bản tạm:** việc tải lõi WordPress, ghi `wp-config.php`, cài đặt và tạo 9 trang trên máy chủ thử làm bằng kịch bản nằm ngoài kho Git, nên không lặp lại được trên máy thật. Nay là `scripts/ops/install-wordpress.sh` và `scripts/ops/setup-pages.php` (xem mục 3). Còn **chưa có kịch bản** cho 6 lĩnh vực hoạt động và dải đối tác (trên máy chủ thử dựng bằng kịch bản tạm): nhập bằng trang quản trị, hoặc thêm lệnh nhập khi cần.
+- **Không mang sang:** 3 bài tin tức và 3 vị trí tuyển dụng trên máy chủ thử là nội dung mẫu do nhà thầu dựng (đoạn mở đầu giả, vị trí và hạn nộp tự đặt). Máy thật dùng bài và vị trí thật của khách, hoặc để trống; kiểm giao diện trang Tin tức và Tuyển dụng khi trống.
+- **Chính sách bảo vệ dữ liệu:** trang trên máy chủ thử chỉ có một dòng "bản thử". Bản nháp đầy đủ là `content/chinh-sach-bao-ve-du-lieu.md`, còn hai chỗ `[xác nhận …]` (tên pháp nhân trên hợp đồng Vietnix, trung tâm dữ liệu của Brevo) và cần rà soát pháp lý trước khi đưa vào trang.
+- **Hộp thư chung:** `email_chung` đang mặc định `vgarco.cc@gmail.com`; địa chỉ này hiện ở trang Liên hệ và dữ liệu có cấu trúc (JSON-LD) và nhận hồ sơ ứng tuyển khi `email_tuyen_dung` trống. Đổi sang hộp thư công ty ở trang *Cấu hình VGARCO* ngay khi có.
+- **Ảnh chia sẻ:** `og:image` chỉ nhận JPEG, PNG, GIF (bản AVIF không được mạng xã hội đọc chắc); sửa ngày 02/11, chỉ có trong mã từ commit đó trở đi, nên máy chủ thử còn trỏ AVIF cho tới lần triển khai tiếp theo.
+- **Môi trường:** mỗi môi trường có người dùng PHP, pool, CSDL và thư mục riêng, nhưng hai môi trường trên cùng một máy chưa dùng chung được (mục "Còn mở" ở mục 4). Một VPS dựng **một** môi trường: dùng `--env=production`, và giữ `WP_ENVIRONMENT_TYPE` là `staging` (không lập chỉ mục, chặn thư ra ngoài) cho tới ngày mở rồi đổi sang `production`.
+- **Hệ điều hành VPS:** `provision.sh` từ chối chạy nếu không phải Ubuntu 24.04. Chọn mẫu Ubuntu Server 24.04 LTS khi đặt máy, không chọn bảng điều khiển có sẵn, và xác nhận với nhà cung cấp trước khi thanh toán.
+- **Nguồn ảnh:** 122 ảnh master, `images.csv`, logo đối tác và ảnh nền Tuyển dụng nằm **ngoài Git**; lưu ở nơi có sao lưu và bàn giao cùng mã.
+- **Tùy chọn làm kín thêm, chưa làm:** `wp-cron.php` và `readme.txt` của plugin trả 200 (nội dung rỗng và phiên bản plugin); không lộ gì nghiêm trọng, nhưng muốn kín thì chặn bằng một khối Nginx và kiểm bằng `nginx -t` ở lần dựng máy thật đầu tiên.
+- **Đã dò công khai, đều đúng ý:** `/wp-config.php`, `.git`, `.env`, `xmlrpc.php`, `readme.html`, `license.txt`, thư mục `uploads` bị chặn (403); `/wp-login.php`, danh sách người dùng REST, `?author=1`, trang tác giả và sơ đồ trang người dùng trả 404; `Host` lạ bị cắt ở bước bắt tay TLS; tiêu đề bảo mật đủ; nén gzip; staging có `noindex, nofollow`.

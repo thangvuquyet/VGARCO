@@ -80,11 +80,15 @@ function vgarco_seo_default_description(): string {
 }
 
 function vgarco_seo_image( int $attachment_id ): array {
-	if ( $attachment_id <= 0 ) {
-		return array( 'url' => '', 'width' => 0, 'height' => 0 );
+	if ( $attachment_id > 0 ) {
+		foreach ( array( 'vg-1200', 'full' ) as $size ) {
+			$src = wp_get_attachment_image_src( $attachment_id, $size );
+			if ( is_array( $src ) && vgarco_seo_share_format_ok( (string) $src[0] ) ) {
+				return array( 'url' => (string) $src[0], 'width' => (int) $src[1], 'height' => (int) $src[2] );
+			}
+		}
 	}
-	$src = wp_get_attachment_image_src( $attachment_id, 'vg-1200' );
-	return is_array( $src ) ? array( 'url' => (string) $src[0], 'width' => (int) $src[1], 'height' => (int) $src[2] ) : array( 'url' => '', 'width' => 0, 'height' => 0 );
+	return array( 'url' => '', 'width' => 0, 'height' => 0 );
 }
 
 function vgarco_seo_default_image( string $locale ): array {

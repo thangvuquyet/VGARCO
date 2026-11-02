@@ -78,6 +78,13 @@ same( 'thẻ: ảnh, kích thước, mô tả ảnh', array( array( 'https://vga
 same( 'thẻ: có ảnh → twitter summary_large_image', array( 'summary_large_image' ), $content( '//meta[@name="twitter:card"]' ) );
 same( 'thẻ: website không có article:published_time', array(), $content( '//meta[@property="article:published_time"]' ) );
 
+foreach ( array( 'https://x.vn/a.jpg', 'https://x.vn/a.JPEG', 'https://x.vn/a.png', 'https://x.vn/a.gif', 'https://x.vn/a.jpg?v=2' ) as $ok ) {
+	same( "ảnh chia sẻ: định dạng mọi mạng xã hội đọc được ({$ok})", true, vgarco_seo_share_format_ok( $ok ) );
+}
+foreach ( array( 'https://x.vn/a.avif', 'https://x.vn/a.webp', 'https://x.vn/a.svg', 'https://x.vn/a.jpg.avif', 'https://x.vn/a.avif?x=a.jpg', 'https://x.vn/a', '' ) as $bad ) {
+	same( "ảnh chia sẻ: định dạng không chắc đọc được thì từ chối ({$bad})", false, vgarco_seo_share_format_ok( $bad ) );
+}
+
 $article = vgarco_seo_tags( array_merge( $page, array( 'type' => 'article', 'published' => '2026-09-01T08:00:00+07:00' ) ) );
 check( 'thẻ: bài viết → og:type=article và article:published_time', str_contains( $article, '<meta property="og:type" content="article">' ) && str_contains( $article, '<meta property="article:published_time" content="2026-09-01T08:00:00+07:00">' ) );
 check( 'thẻ: published bị bỏ khi không phải article', ! str_contains( vgarco_seo_tags( array_merge( $page, array( 'published' => '2026-09-01' ) ) ), 'published_time' ) );

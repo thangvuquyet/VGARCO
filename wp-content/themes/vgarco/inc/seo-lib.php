@@ -40,6 +40,10 @@ function vgarco_share_image_file( string $locale ): string {
 	return str_starts_with( $locale, 'de' ) ? 'share-default-de.png' : 'share-default-vi.png';
 }
 
+function vgarco_seo_share_format_ok( string $url ): bool {
+	return 1 === preg_match( '/\.(jpe?g|png|gif)$/i', (string) parse_url( $url, PHP_URL_PATH ) );
+}
+
 function vgarco_seo_attr( string $value ): string {
 	return htmlspecialchars( $value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8' );
 }
