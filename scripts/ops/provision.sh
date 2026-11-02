@@ -274,6 +274,7 @@ pm.max_spare_servers = 3
 pm.max_requests = 500
 ; Ảnh toàn cảnh 12 MB cần ~190 MB khi tạo bản thu nhỏ (docs/TRIEN-KHAI.md mục 2)
 php_admin_value[memory_limit] = 256M
+php_admin_value[max_execution_time] = 90
 php_admin_value[disable_functions] = exec,passthru,shell_exec,system,proc_open,popen
 php_admin_value[error_log] = /var/log/php8.3-fpm-${SITE}.log
 php_admin_flag[log_errors] = on
@@ -438,6 +439,7 @@ server {
     location ~ \.php\$ {
         include fastcgi_params;
         fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+        fastcgi_read_timeout 90s;
         fastcgi_pass unix:${FPM_SOCK};
     }
 }

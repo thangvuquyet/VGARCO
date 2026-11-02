@@ -963,6 +963,10 @@ const M = [
     "'priority' => 0 === $index,", "'priority' => false,", 'pages'],
   ["ảnh: chọn chất lượng AVIF không chặn đo lồng nhau (Imagick đo lại hàng chục lần mỗi ảnh)", "wp-content/plugins/vgarco-core/inc/media-lib.php",
     "$state['ctx']['quality'] = VGARCO_AVIF_QUALITY;\n\t\t\t\t\t$state['ctx']['quality'] = (int) ( $ctx['resolve'] )();", "$state['ctx']['quality'] = (int) ( $ctx['resolve'] )();", 'media'],
+  ["php-fpm: pool lại dùng max_execution_time mặc định 30 giây (tải ảnh lớn lỗi nghiêm trọng)", "scripts/ops/provision.sh",
+    "php_admin_value[max_execution_time] = 90\n", "", 'serverconf'],
+  ["nginx: bỏ fastcgi_read_timeout 90s (tải ảnh lớn bị 504 sau 60 giây)", "scripts/ops/provision.sh",
+    "        fastcgi_read_timeout 90s;\n", "", 'serverconf'],
 ];
 
 if (process.argv[2] === '--check') {

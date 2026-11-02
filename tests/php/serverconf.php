@@ -77,7 +77,8 @@ check( 'khối vhost đọc được', '' !== $vh );
 same( 'vhost nạp tệp tiêu đề bảo mật ở cấp server và ở hai khối tệp tĩnh (có mã băm; ảnh tải lên và ảnh của theme)', 3, substr_count( $vh, 'include /etc/nginx/vgarco/security-headers.inc;' ) );
 check( 'ảnh tải lên và ảnh của theme cache 30 ngày (max-age=2592000) cùng tệp tiêu đề', 1 === preg_match( '/location ~\* \^\/wp-content\/\(uploads\|themes\/vgarco\/assets\)\/\.\+\\\\\.\(avif\|webp\|jpe\?g\|png\|gif\|svg\|ico\|woff2\?\)\\\\\$ \{\s*expires 30d;\s*add_header Cache-Control "public, max-age=2592000";\s*include \/etc\/nginx\/vgarco\/security-headers\.inc;/', $vh ) );
 check( 'khối tệp có mã băm đặt Cache-Control immutable cùng tệp tiêu đề (add_header trong location thay thế tiêu đề thừa kế)', 1 === preg_match( '/location ~\* \^\/wp-content\/themes\/vgarco\/dist\/.*?add_header Cache-Control.*?security-headers\.inc;/s', $vh ) );
-check( 'chỉ nghe cổng 443, không mở 80', ! str_contains( $vh, 'listen 80' ) );
+check( 'tải ảnh lớn có đủ thời gian: pool PHP-FPM đặt max_execution_time 90 và Nginx fastcgi_read_timeout 90s (dưới giới hạn 100 giây của Cloudflare)', str_contains( $prov, 'php_admin_value[max_execution_time] = 90' ) && 1 === preg_match( '/fastcgi_read_timeout 90s;\s*fastcgi_pass/', $vh ) );
+check( 'chỉ nghe cổng 443, không mở 80',! str_contains( $vh, 'listen 80' ) );
 
 $pos_origin = strpos( $prov, 'ORIGIN_PEM" && -s "$ORIGIN_KEY"' );
 $pos_le     = strpos( $prov, 'elif [[ -f "${CERT_DIR}/fullchain.pem" ]]' );
