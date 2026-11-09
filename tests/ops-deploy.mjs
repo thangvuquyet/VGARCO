@@ -61,6 +61,28 @@ same('7 gói: giữ 5 gói mới nhất, xóa 2 gói cũ nhất', [0, ['b2.tar.z
 check('tệp không phải gói hoàn tác không bị xóa', seven.other && none.other);
 same('mã commit ghi đúng (có xuống dòng cuối)', 'abc1234def56\n', seven.ref);
 
+const run = (args) => {
+  const r = spawnSync('bash', [posix(script), ...args], { encoding: 'utf8' });
+  return { status: r.status, out: `${r.stdout ?? ''}${r.stderr ?? ''}` };
+};
+const rb = ['--host=deploy@203.0.113.10', '--domain=vgarco.com.vn', '--yes-production', '--dry-run', '--rollback-to=20261109-143725-fcee06d9e9fe.tar.zst'];
+
+const prodDefault = run(['--env=production', ...rb]);
+check('không đặt --smoke-env: kiểm khói theo --env (production)', prodDefault.status === 0 && prodDefault.out.includes('smoke.mjs https://vgarco.com.vn --env=production'));
+const stagingDefault = run(['--env=staging', ...rb]);
+check('không đặt --smoke-env, --env=staging: kiểm khói theo staging', stagingDefault.status === 0 && stagingDefault.out.includes('smoke.mjs https://vgarco.com.vn --env=staging') && !stagingDefault.out.includes('--env=production'));
+const prodAsStaging = run(['--env=production', '--smoke-env=staging', ...rb]);
+check('--env=production --smoke-env=staging: kiểm khói theo staging, thư mục đích vẫn là production', prodAsStaging.status === 0 && prodAsStaging.out.includes('smoke.mjs https://vgarco.com.vn --env=staging') && !prodAsStaging.out.includes('smoke.mjs https://vgarco.com.vn --env=production') && prodAsStaging.out.includes('/var/www/vgarco/rollback/'));
+const stagingAsProd = run(['--env=staging', '--smoke-env=production', ...rb]);
+check('--env=staging --smoke-env=production: kiểm khói theo production', stagingAsProd.status === 0 && stagingAsProd.out.includes('smoke.mjs https://vgarco.com.vn --env=production'));
+const bad = run(['--env=production', '--smoke-env=local', ...rb]);
+check('--smoke-env=local bị từ chối (mã 2, nói rõ tham số)', bad.status === 2 && bad.out.includes('--smoke-env'));
+const empty = run(['--env=production', '--smoke-env=', ...rb]);
+check('--smoke-env để trống bị từ chối (mã 2), không lặng lẽ lấy mặc định', empty.status === 2 && empty.out.includes('--smoke-env'));
+check('--help có nêu --smoke-env', run(['--help']).out.includes('--smoke-env'));
+check('mọi lệnh gọi smoke.mjs trong script (hoàn tác tay, kiểm khói chính, sau hoàn tác tự động) dùng SMOKE_ENV', 3 === (source.match(/smoke\.mjs" "https:\/\/\$\{DOMAIN\}" "--env=\$\{SMOKE_ENV\}"/g) ?? []).length);
+check('không còn dòng gọi smoke.mjs nào dùng --env của thư mục đích', !/smoke\.mjs.*--env=\$\{ENV_NAME\}/.test(source));
+
 if (fail.length) {
   for (const f of fail) console.log(`  ✗ ${f}`);
   console.log(`THẤT BẠI ${fail.length} / ${pass + fail.length}`);

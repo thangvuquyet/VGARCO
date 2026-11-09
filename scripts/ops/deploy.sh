@@ -4,14 +4,15 @@ set -euo pipefail
 
 usage() {
   cat <<'USAGE'
-deploy.sh — đưa mã tự viết lên máy chủ, kiểm khói, tự hoàn tác khi kiểm khói hỏng (đã chạy thật trên staging thử 29/10/2026; chưa chạy production)
+deploy.sh — đưa mã tự viết lên máy chủ, kiểm khói, tự hoàn tác khi kiểm khói hỏng (đã chạy thật trên staging thử 29/10/2026 và trên VPS production 09/11/2026)
 
-  scripts/ops/deploy.sh --env=staging|production --host=deploy@<máy> --domain=<tên miền> [--skip-tests] [--no-smoke] [--yes-production] [--dry-run]
+  scripts/ops/deploy.sh --env=staging|production --host=deploy@<máy> --domain=<tên miền> [--smoke-env=staging|production] [--skip-tests] [--no-smoke] [--yes-production] [--dry-run]
   scripts/ops/deploy.sh --env=... --host=... --domain=... --rollback-to=<tên-gói>
 
   --env              quyết định thư mục đích; production cần thêm --yes-production
   --host             ssh tới máy chủ, người dùng phải là deploy
   --domain           địa chỉ kiểm khói (https://<tên miền>)
+  --smoke-env        chế độ kiểm khói, mặc định bằng --env. Máy production còn ở chế độ staging (noindex, trước ngày lên chính thức) thì đặt --smoke-env=staging; để mặc định, kiểm khói production đòi cho lập chỉ mục nên hỏng và tự hoàn tác cả bản tốt
   --skip-tests       bỏ bước chạy toàn bộ kiểm thử
   --no-smoke         bỏ kiểm khói (không khuyến khích)
   --rollback-to      hoàn tác tay về một gói trong /var/www/<site>/rollback
@@ -19,12 +20,13 @@ deploy.sh — đưa mã tự viết lên máy chủ, kiểm khói, tự hoàn t�
 USAGE
 }
 
-ENV_NAME=""; HOST=""; DOMAIN=""; SKIP_TESTS=0; NO_SMOKE=0; YES_PROD=0; DRY=0; ROLLBACK_TO=""
+ENV_NAME=""; HOST=""; DOMAIN=""; SMOKE_ENV=""; SMOKE_ENV_SET=0; SKIP_TESTS=0; NO_SMOKE=0; YES_PROD=0; DRY=0; ROLLBACK_TO=""
 for arg in "$@"; do
   case "$arg" in
     --env=*) ENV_NAME="${arg#*=}" ;;
     --host=*) HOST="${arg#*=}" ;;
     --domain=*) DOMAIN="${arg#*=}" ;;
+    --smoke-env=*) SMOKE_ENV="${arg#*=}"; SMOKE_ENV_SET=1 ;;
     --skip-tests) SKIP_TESTS=1 ;;
     --no-smoke) NO_SMOKE=1 ;;
     --yes-production) YES_PROD=1 ;;
@@ -36,6 +38,8 @@ for arg in "$@"; do
 done
 
 [[ "$ENV_NAME" == "staging" || "$ENV_NAME" == "production" ]] || { echo "Cần --env=staging|production" >&2; exit 2; }
+(( SMOKE_ENV_SET )) || SMOKE_ENV="$ENV_NAME"
+[[ "$SMOKE_ENV" == "staging" || "$SMOKE_ENV" == "production" ]] || { echo "--smoke-env phải là staging hoặc production" >&2; exit 2; }
 [[ "$HOST" =~ ^deploy@[A-Za-z0-9._-]+$ ]] || { echo "--host phải dạng deploy@<máy> (người dùng deploy, không phải root)" >&2; exit 2; }
 [[ -n "$DOMAIN" || $NO_SMOKE -eq 1 ]] || { echo "Cần --domain=<tên miền> để kiểm khói (hoặc --no-smoke)" >&2; exit 2; }
 [[ -z "$DOMAIN" || "$DOMAIN" =~ ^[a-z0-9]([a-z0-9.-]*[a-z0-9])?$ ]] || { echo "--domain không hợp lệ" >&2; exit 2; }
@@ -69,7 +73,7 @@ restore_bundle() {
 
 if [[ -n "$ROLLBACK_TO" ]]; then
   restore_bundle "$ROLLBACK_TO"
-  (( NO_SMOKE )) || run node "${REPO}/scripts/ops/smoke.mjs" "https://${DOMAIN}" "--env=${ENV_NAME}"
+  (( NO_SMOKE )) || run node "${REPO}/scripts/ops/smoke.mjs" "https://${DOMAIN}" "--env=${SMOKE_ENV}"
   exit 0
 fi
 
@@ -147,16 +151,17 @@ step "7/8 Kiểm khói"
 if (( NO_SMOKE )); then
   echo "   (bỏ qua theo --no-smoke) — bản mới CHƯA được xác nhận."
 elif (( DRY )); then
-  echo "   $ node scripts/ops/smoke.mjs https://${DOMAIN} --env=${ENV_NAME}   (nếu hỏng: giải gói ${BUNDLE}, reload, xóa cache, thoát 1)"
+  echo "   $ node scripts/ops/smoke.mjs https://${DOMAIN} --env=${SMOKE_ENV}   (nếu hỏng: giải gói ${BUNDLE}, reload, xóa cache, thoát 1)"
 else
-  if ! node "${REPO}/scripts/ops/smoke.mjs" "https://${DOMAIN}" "--env=${ENV_NAME}"; then
+  [[ "$SMOKE_ENV" == "$ENV_NAME" ]] || echo "   kiểm khói theo chế độ ${SMOKE_ENV} (--env=${ENV_NAME} chỉ chọn thư mục đích)"
+  if ! node "${REPO}/scripts/ops/smoke.mjs" "https://${DOMAIN}" "--env=${SMOKE_ENV}"; then
     if ! "${SSH[@]}" "test -f '${ROLLBACK_DIR}/${BUNDLE}'"; then
       echo "KIỂM KHÓI HỎNG — đây là lần triển khai đầu, không có bản cũ để hoàn tác. Mã mới vẫn nằm trên máy chủ; sửa lỗi rồi chạy lại. Xem docs/SU-CO.md." >&2
       exit 1
     fi
     echo "KIỂM KHÓI HỎNG — tự hoàn tác về ${BUNDLE}" >&2
     restore_bundle "$BUNDLE"
-    node "${REPO}/scripts/ops/smoke.mjs" "https://${DOMAIN}" "--env=${ENV_NAME}" || echo "Sau hoàn tác kiểm khói VẪN hỏng: lỗi không nằm ở mã vừa đưa lên. Xem docs/SU-CO.md." >&2
+    node "${REPO}/scripts/ops/smoke.mjs" "https://${DOMAIN}" "--env=${SMOKE_ENV}" || echo "Sau hoàn tác kiểm khói VẪN hỏng: lỗi không nằm ở mã vừa đưa lên. Xem docs/SU-CO.md." >&2
     exit 1
   fi
 fi

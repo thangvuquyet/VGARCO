@@ -1043,6 +1043,20 @@ const M = [
     "textarea:not([aria-invalid='true']):focus-visible,\nselect:not([aria-invalid='true']):focus-visible {\n  border-color: var(--c-focus);", "textarea:focus-visible,\nselect:not([aria-invalid='true']):focus-visible {\n  border-color: var(--c-focus);", 'pages'],
   ["ô nhập: quy tắc nằm ở lớp base nên bị border của trang đè", "wp-content/themes/vgarco/src/scss/main.scss",
     "@layer utilities {\n  @include meta.load-css('field-focus');\n}", "@layer base {\n  @include meta.load-css('field-focus');\n}", 'pages'],
+  ["triển khai: --smoke-env mặc định luôn là staging thay vì theo --env", "scripts/ops/deploy.sh",
+    "(( SMOKE_ENV_SET )) || SMOKE_ENV=\"$ENV_NAME\"", "(( SMOKE_ENV_SET )) || SMOKE_ENV=\"staging\"", "ops-deploy"],
+  ["triển khai: --smoke-env nhận giá trị bất kỳ", "scripts/ops/deploy.sh",
+    "[[ \"$SMOKE_ENV\" == \"staging\" || \"$SMOKE_ENV\" == \"production\" ]] || { echo \"--smoke-env phải là staging hoặc production\" >&2; exit 2; }", "true", "ops-deploy"],
+  ["triển khai: --smoke-env bị bỏ qua (không ghi nhớ là đã đặt)", "scripts/ops/deploy.sh",
+    "SMOKE_ENV=\"${arg#*=}\"; SMOKE_ENV_SET=1 ;;", "SMOKE_ENV=\"${arg#*=}\" ;;", "ops-deploy"],
+  ["triển khai: hoàn tác tay kiểm khói theo --env", "scripts/ops/deploy.sh",
+    "(( NO_SMOKE )) || run node \"${REPO}/scripts/ops/smoke.mjs\" \"https://${DOMAIN}\" \"--env=${SMOKE_ENV}\"", "(( NO_SMOKE )) || run node \"${REPO}/scripts/ops/smoke.mjs\" \"https://${DOMAIN}\" \"--env=${ENV_NAME}\"", "ops-deploy"],
+  ["triển khai: kiểm khói chính theo --env (bản tốt bị tự hoàn tác khi site còn ở staging)", "scripts/ops/deploy.sh",
+    "if ! node \"${REPO}/scripts/ops/smoke.mjs\" \"https://${DOMAIN}\" \"--env=${SMOKE_ENV}\"; then", "if ! node \"${REPO}/scripts/ops/smoke.mjs\" \"https://${DOMAIN}\" \"--env=${ENV_NAME}\"; then", "ops-deploy"],
+  ["triển khai: kiểm khói sau hoàn tác theo --env", "scripts/ops/deploy.sh",
+    "    node \"${REPO}/scripts/ops/smoke.mjs\" \"https://${DOMAIN}\" \"--env=${SMOKE_ENV}\" || echo \"Sau hoàn tác", "    node \"${REPO}/scripts/ops/smoke.mjs\" \"https://${DOMAIN}\" \"--env=${ENV_NAME}\" || echo \"Sau hoàn tác", "ops-deploy"],
+  ["triển khai: dòng in kế hoạch kiểm khói (--dry-run) theo --env", "scripts/ops/deploy.sh",
+    "smoke.mjs https://${DOMAIN} --env=${SMOKE_ENV}   (nếu hỏng", "smoke.mjs https://${DOMAIN} --env=${ENV_NAME}   (nếu hỏng", "ops-deploy"],
 ];
 
 if (process.argv[2] === '--check') {

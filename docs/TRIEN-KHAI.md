@@ -132,11 +132,12 @@ Trước khi đưa lên production: **sao lưu** (xem `SAO-LUU-PHUC-HOI.md`) và
 scripts/ops/deploy.sh --env=staging --host=deploy@<máy> --domain=<tên-miền-staging> --dry-run   # xem kế hoạch
 scripts/ops/deploy.sh --env=staging --host=deploy@<máy> --domain=<tên-miền-staging>
 scripts/ops/deploy.sh --env=production --host=deploy@<máy> --domain=<tên-miền> --yes-production
+scripts/ops/deploy.sh --env=production --host=deploy@<máy> --domain=<tên-miền> --yes-production --smoke-env=staging   # máy production còn ở chế độ staging (noindex)
 scripts/ops/deploy.sh --env=production --host=deploy@<máy> --domain=<tên-miền> --rollback-to=<tên-gói>   # hoàn tác tay
 ```
 
 Kho Git phải sạch (triển khai từ commit đã có); chạy toàn bộ kiểm thử; build theme; **nén bản đang chạy thành gói hoàn tác** (`/var/www/<site>/rollback/<thời-gian>-<commit>.tar.zst`, giữ 5 gói); rsync với `--delay-updates` (máy không có `rsync`, như máy Windows của người vận hành, thì gửi bằng `tar` qua ssh: mỗi thư mục dựng ở `.new` rồi đổi tên); reload PHP-FPM;
-xóa cache đối tượng và Cloudflare; chạy `smoke.mjs`; **nếu kiểm khói hỏng thì tự giải gói hoàn tác**, reload, xóa cache và thoát mã 1. Người dùng ssh phải là `deploy` (quyền sudo của `deploy` chỉ gồm `systemctl reload php8.3-fpm`, do `provision.sh` cấp).
+xóa cache đối tượng và Cloudflare; chạy `smoke.mjs`; **nếu kiểm khói hỏng thì tự giải gói hoàn tác**, reload, xóa cache và thoát mã 1. Kiểm khói mặc định theo `--env`; máy production còn ở chế độ staging (noindex, trước ngày lên chính thức) **phải thêm `--smoke-env=staging`**, nếu không kiểm khói production đòi cho lập chỉ mục, hỏng, và script tự hoàn tác cả bản tốt (xảy ra thật trên VPS Vietnix ngày 09/11/2026). Khi lên chính thức (đã đổi `WP_ENVIRONMENT_TYPE` sang production) thì bỏ tham số này. Người dùng ssh phải là `deploy` (quyền sudo của `deploy` chỉ gồm `systemctl reload php8.3-fpm`, do `provision.sh` cấp).
 Chọn rsync + gói hoàn tác thay cho `releases/<commit>` + liên kết `current` vì WordPress xử lý plugin/theme/mu-plugin qua liên kết tượng trưng nhiều chỗ chưa kiểm chứng (đường dẫn thật của plugin, `plugins_url`); đổi sang liên kết chỉ sau khi thử trên staging.
 
 **Dựng máy chủ: `scripts/ops/provision.sh`** (9/9 bước đã chạy thật trên VM thử, xem cuối mục): Ubuntu 24.04 sạch → người dùng (`deploy`, người dùng PHP không shell, `backup`), SSH chỉ khóa, `ufw` (443 chỉ cho Cloudflare, không mở 80), pool PHP-FPM riêng từng môi trường, MariaDB và Redis chỉ localhost
