@@ -76,6 +76,41 @@ note() { printf '   %s\n' "$*"; }
 have() { command -v "$1" >/dev/null 2>&1; }
 run() { if (( DRY )); then printf '   $ %s\n' "$*"; else "$@"; fi; }
 
+ssh_listener_pids() { pgrep -f '^sshd: .*\[listener\]' 2>/dev/null || true; }
+
+ssh_refresh_listeners() {
+  local main pid
+  main="$(systemctl show -p MainPID --value ssh 2>/dev/null || true)"
+  for pid in $(ssh_listener_pids); do
+    [[ "$pid" == "$main" ]] && continue
+    note "sshd PID ${pid} không thuộc dịch vụ ssh (chạy từ trước, còn cấu hình cũ): gửi SIGHUP để nạp lại cấu hình"
+    run kill -HUP "$pid"
+  done
+}
+
+ssh_probe_methods() {
+  ssh -v -o PreferredAuthentications=none -o PubkeyAuthentication=no -o BatchMode=yes -o ConnectTimeout=5 \
+    -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p "$SSH_PORT" deploy@127.0.0.1 true 2>&1 \
+    | sed -n 's/.*Authentications that can continue: //p' | head -n 1 || true
+}
+
+ssh_verify_listeners() {
+  local i methods seen=0
+  for i in 1 2 3 4 5 6 7 8 9 10; do
+    methods="$(ssh_probe_methods)"
+    [[ -n "$methods" ]] && seen=$((seen + 1))
+    if [[ "$methods" == *password* || "$methods" == *keyboard-interactive* ]]; then
+      echo "DỪNG: sshd vẫn đề nghị '${methods}' (lần thăm dò ${i}/10): còn một tiến trình sshd chạy với cấu hình cũ. Xem: pgrep -af 'sshd: .*listener'; tắt tiến trình cũ rồi chạy lại bước ssh." >&2
+      return 1
+    fi
+  done
+  if (( seen == 0 )); then
+    note "KHÔNG thăm dò được sshd ở 127.0.0.1:${SSH_PORT} (thiếu ssh-client hoặc sshd chưa nhận kết nối): chưa xác nhận được cấu hình mới đang chạy; thử tay nhiều lần: ssh -v -o PreferredAuthentications=none -p ${SSH_PORT} deploy@127.0.0.1"
+    return 0
+  fi
+  note "thăm dò ${seen}/10 lần: sshd chỉ đề nghị khóa công khai (không có mật khẩu)"
+}
+
 ghi_tep() {
   local path=$1 mode=$2 owner=$3 tmp
   tmp=$(mktemp)
@@ -225,6 +260,7 @@ phase_on ssh && {
       note "Mở cửa sổ SSH MỚI và đăng nhập thử bằng khóa TRƯỚC khi đóng cửa sổ này."
     fi
   fi
+  ssh_refresh_listeners
   ghi_tep /etc/fail2ban/jail.d/vgarco.local 0644 root:root <<EOF && run systemctl restart fail2ban || true
 [sshd]
 enabled = true
@@ -234,6 +270,11 @@ port = ${SSH_PORT}
 maxretry = 4
 bantime = 1h
 EOF
+  if (( DRY )); then
+    note "(--dry-run) sẽ thăm dò sshd ở 127.0.0.1:${SSH_PORT} 10 lần bằng phương thức none; còn đề nghị mật khẩu thì dừng"
+  else
+    ssh_verify_listeners || exit 1
+  fi
 }
 
 phase_on firewall && {

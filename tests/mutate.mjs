@@ -1057,6 +1057,40 @@ const M = [
     "    node \"${REPO}/scripts/ops/smoke.mjs\" \"https://${DOMAIN}\" \"--env=${SMOKE_ENV}\" || echo \"Sau hoàn tác", "    node \"${REPO}/scripts/ops/smoke.mjs\" \"https://${DOMAIN}\" \"--env=${ENV_NAME}\" || echo \"Sau hoàn tác", "ops-deploy"],
   ["triển khai: dòng in kế hoạch kiểm khói (--dry-run) theo --env", "scripts/ops/deploy.sh",
     "smoke.mjs https://${DOMAIN} --env=${SMOKE_ENV}   (nếu hỏng", "smoke.mjs https://${DOMAIN} --env=${ENV_NAME}   (nếu hỏng", "ops-deploy"],
+  ["ssh: tiến trình sshd của dịch vụ ssh cũng bị gửi SIGHUP", "scripts/ops/provision.sh",
+    "    [[ \"$pid\" == \"$main\" ]] && continue\n", "", "ops-ssh"],
+  ["ssh: gửi SIGTERM thay SIGHUP (có thể tắt luôn cổng nếu tiến trình cũ giữ ổ cắm duy nhất)", "scripts/ops/provision.sh",
+    "run kill -HUP \"$pid\"", "run kill -TERM \"$pid\"", "ops-ssh"],
+  ["ssh: chỉ xử lý tiến trình sshd đầu tiên", "scripts/ops/provision.sh",
+    "  for pid in $(ssh_listener_pids); do\n", "  for pid in $(ssh_listener_pids | head -n 1); do\n", "ops-ssh"],
+  ["ssh: pgrep không còn khớp tiêu đề tiến trình lắng nghe", "scripts/ops/provision.sh",
+    "pgrep -f '^sshd: .*\\[listener\\]'", "pgrep -f '^sshd: .*\\[khong-co\\]'", "ops-ssh"],
+  ["ssh: thăm dò không coi password là hỏng", "scripts/ops/provision.sh",
+    "[[ \"$methods\" == *password* || \"$methods\" == *keyboard-interactive* ]]", "[[ \"$methods\" == *keyboard-interactive* ]]", "ops-ssh"],
+  ["ssh: thăm dò không coi keyboard-interactive là hỏng", "scripts/ops/provision.sh",
+    "[[ \"$methods\" == *password* || \"$methods\" == *keyboard-interactive* ]]", "[[ \"$methods\" == *password* ]]", "ops-ssh"],
+  ["ssh: thăm dò hỏng mà vẫn trả mã 0", "scripts/ops/provision.sh",
+    "tắt tiến trình cũ rồi chạy lại bước ssh.\" >&2\n      return 1", "tắt tiến trình cũ rồi chạy lại bước ssh.\" >&2\n      return 0", "ops-ssh"],
+  ["ssh: chỉ thăm dò một lần (xác suất bỏ sót sshd cũ 50%)", "scripts/ops/provision.sh",
+    "  for i in 1 2 3 4 5 6 7 8 9 10; do\n    methods=", "  for i in 1; do\n    methods=", "ops-ssh"],
+  ["ssh: không thăm dò được thì dừng thay vì báo chưa xác nhận", "scripts/ops/provision.sh",
+    "    return 0\n  fi\n  note \"thăm dò ${seen}/10", "    return 1\n  fi\n  note \"thăm dò ${seen}/10", "ops-ssh"],
+  ["ssh: thăm dò bằng mật khẩu thật (bị fail2ban tính lỗi)", "scripts/ops/provision.sh",
+    "-o PreferredAuthentications=none -o PubkeyAuthentication=no", "-o PreferredAuthentications=password -o PubkeyAuthentication=no", "ops-ssh"],
+  ["ssh: bước ssh không gọi hàm nạp lại tiến trình cũ", "scripts/ops/provision.sh",
+    "  fi\n  ssh_refresh_listeners\n  ghi_tep /etc/fail2ban", "  fi\n  ghi_tep /etc/fail2ban", "ops-ssh"],
+  ["ssh: bước ssh không dừng khi thăm dò hỏng", "scripts/ops/provision.sh",
+    "    ssh_verify_listeners || exit 1\n", "    ssh_verify_listeners || true\n", "ops-ssh"],
+  ["ssh: cấu hình cho root đăng nhập", "scripts/ops/provision.sh",
+    "echo \"PermitRootLogin no\"", "echo \"PermitRootLogin yes\"", "ops-ssh"],
+  ["ssh: cấu hình bật mật khẩu", "scripts/ops/provision.sh",
+    "echo \"PasswordAuthentication no\"", "echo \"PasswordAuthentication yes\"", "ops-ssh"],
+  ["ssh: cấu hình bật keyboard-interactive", "scripts/ops/provision.sh",
+    "echo \"KbdInteractiveAuthentication no\"", "echo \"KbdInteractiveAuthentication yes\"", "ops-ssh"],
+  ["ssh: cấu hình không giới hạn người dùng", "scripts/ops/provision.sh",
+    "    echo \"AllowUsers ${ALLOWED}\"\n", "", "ops-ssh"],
+  ["ssh: cấu hình cho thử 6 lần", "scripts/ops/provision.sh",
+    "echo \"MaxAuthTries 3\"", "echo \"MaxAuthTries 6\"", "ops-ssh"],
 ];
 
 if (process.argv[2] === '--check') {
@@ -1090,6 +1124,10 @@ for (const [name, file, from, to, suite = 'smoke'] of M.filter(([n]) => !only ||
     cpSync(join(src, 'scripts'), join(work, 'scripts'), { recursive: true });
     cpSync(join(src, 'tests', 'ops-deploy.mjs'), join(work, 'tests', 'ops-deploy.mjs'));
   }
+  if (suite === 'ops-ssh') {
+    cpSync(join(src, 'scripts'), join(work, 'scripts'), { recursive: true });
+    cpSync(join(src, 'tests', 'ops-ssh.mjs'), join(work, 'tests', 'ops-ssh.mjs'));
+  }
   if (suite === 'setup' || suite === 'ops-install') {
     cpSync(join(src, 'scripts'), join(work, 'scripts'), { recursive: true });
     cpSync(join(src, 'docs'), join(work, 'docs'), { recursive: true });
@@ -1112,6 +1150,8 @@ for (const [name, file, from, to, suite = 'smoke'] of M.filter(([n]) => !only ||
     ? spawnSync(process.execPath, [join(work, 'tests', 'ops-backup.mjs')], { encoding: 'utf8' })
     : suite === 'ops-deploy'
     ? spawnSync(process.execPath, [join(work, 'tests', 'ops-deploy.mjs')], { encoding: 'utf8' })
+    : suite === 'ops-ssh'
+    ? spawnSync(process.execPath, [join(work, 'tests', 'ops-ssh.mjs')], { encoding: 'utf8' })
     : suite === 'ops-install'
     ? spawnSync(process.execPath, [join(work, 'tests', 'ops-install.mjs')], { encoding: 'utf8' })
     : spawnSync(php, ['-d', `extension_dir=${ext}`, '-d', 'extension=mbstring', ...extra, join(work, 'tests', 'php', `${suite}.php`)], { encoding: 'utf8' });
