@@ -75,7 +75,7 @@ if (( DRY )); then
   note "2. ghi ${CONFIG} (0640 deploy:${PHP_USER}); nạp ${DB_FILE}, ${SECRETS_DIR}/redis.php, ${SECRETS_DIR}/secrets.php; tiền tố bảng ${TABLE_PREFIX}"
   note "3. wp config shuffle-salts"
   note "4. wp core install --url=https://${DOMAIN} --admin_user=${ADMIN_USER} --admin_email=${ADMIN_EMAIL}; mật khẩu ban đầu cất ở ${PW_FILE} (0600), không in ra"
-  note "5. wp language core install ${WP_LOCALE} --activate; đường dẫn /%postname%/; múi giờ Asia/Ho_Chi_Minh; wp rewrite flush"
+  note "5. wp language core install ${WP_LOCALE} --activate; đường dẫn /%postname%/; múi giờ Asia/Ho_Chi_Minh; xóa nội dung mẫu của WordPress (bài 1, trang 2 và 3, bình luận kèm theo); wp rewrite flush"
   exit 0
 fi
 
@@ -142,19 +142,20 @@ install -m 0600 -o deploy -g deploy /dev/null "$PW_FILE"
 sed -n 's/^Admin password: //p' "$OUT" > "$PW_FILE"
 grep -v 'Admin password' "$OUT"
 rm -f "$OUT"
-note "mật khẩu quản trị ban đầu đã cất vào ${PW_FILE} ($(stat -c '%a %U' "$PW_FILE"), $(wc -c < "$PW_FILE") ký tự); đổi ngay lần đăng nhập đầu và cất vào kho mật khẩu của chủ đầu tư"
+note "mật khẩu quản trị ban đầu đã cất vào ${PW_FILE} ($(stat -c '%a %U' "$PW_FILE"), $(tr -d '\n' < "$PW_FILE" | wc -c) ký tự); đổi ngay lần đăng nhập đầu và cất vào kho mật khẩu của chủ đầu tư"
 
 log "4. ngôn ngữ, đường dẫn, múi giờ (theo CAU-HINH.md mục 4)"
 wpd language core install "$WP_LOCALE" --activate
 wpd option update permalink_structure '/%postname%/'
 wpd option update timezone_string 'Asia/Ho_Chi_Minh'
+wpd post delete 1 2 3 --force
 wpd rewrite flush
 
 log "5. kiểm"
 note "phiên bản: $(wpd core version)"
 note "môi trường: $(wpd eval 'echo wp_get_environment_type();')"
 note "siteurl: $(wpd option get siteurl)"
-note "ngôn ngữ site: $(wpd option get WPLANG || true)"
+note "ngôn ngữ site: $(wpd eval 'echo get_locale();')"
 wpd core verify-checksums --locale="$WP_LOCALE"
 note "bảng: $(wpd db tables --all-tables-with-prefix 2>/dev/null | wc -l) (tiền tố ${TABLE_PREFIX})"
 

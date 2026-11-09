@@ -162,7 +162,7 @@ else
 fi
 
 step "8/8 Ghi mã commit đang chạy, dọn gói hoàn tác cũ (giữ 5)"
-remote "set -euo pipefail; echo '${COMMIT}' > '${SITE_DIR}/.deployed-ref'; cd '${ROLLBACK_DIR}'; ls -1t *.tar.zst 2>/dev/null | tail -n +6 | xargs -r rm -f --"
+remote "set -euo pipefail; echo '${COMMIT}' > '${SITE_DIR}/.deployed-ref'; cd '${ROLLBACK_DIR}'; (ls -1t *.tar.zst 2>/dev/null || true) | tail -n +6 | xargs -r rm -f --"
 echo
 echo "Xong: ${ENV_NAME} đang chạy commit ${COMMIT}. Gói hoàn tác của bản trước: ${ROLLBACK_DIR}/${BUNDLE}"
 (( DRY )) && echo "(--dry-run: chưa có gì thay đổi trên máy chủ)"

@@ -97,6 +97,9 @@ check( 'backup: tệp khóa riêng 0600 và chỉ tạo khi chưa có (không gh
 check( 'backup: mẫu không khai báo khóa rỗng (chỉ dòng chú thích)', ! preg_match( '/^(RESTIC_PASSWORD|RESTIC_REPOSITORY|AWS_ACCESS_KEY_ID|AWS_SECRET_ACCESS_KEY|HEARTBEAT_URL)=/m', $bk ) );
 check( 'backup: xoay vòng nhật ký', str_contains( $bk, '/etc/logrotate.d/vgarco-backup' ) );
 check( 'gói restic được cài ở bước packages', 1 === preg_match( '/PKGS=\(.*?\brestic\b/s', $prov ) );
+check( 'gói libheif-plugin-aomenc được cài (Ubuntu tách bộ mã hóa AV1 khỏi libheif; --no-install-recommends bỏ nó, thiếu thì Imagick không ghi được AVIF)', 1 === preg_match( '/PKGS=\([^)]*\blibheif-plugin-aomenc\b/', $prov ) );
+check( 'gói rsyslog được cài ở bước packages (ảnh Ubuntu tối giản của nhà cung cấp VPS không có; thiếu thì bước firewall dừng ở "invalid user syslog")', 1 === preg_match( '/PKGS=\([^)]*\brsyslog\b/', $prov ) );
+check( 'bước packages ghi thử AVIF bằng Imagick, thoát mã 1 nếu không ghi được (queryFormats không chứng tỏ có bộ mã hóa)', str_contains( $prov, 'setImageFormat("avif"); exit(strlen($i->getImageBlob()) > 0 ? 0 : 1);\' 2>/dev/null; then' . "\n" . '    echo "DỪNG: Imagick không ghi được AVIF' ) && str_contains( $prov, 'cho ảnh tải lên." >&2' . "\n    exit 1\n  fi\n" ) );
 
 $backup = (string) file_get_contents( ROOT . '/scripts/ops/backup.sh' );
 check( 'backup.sh: kho giữ 7 ngày, 4 tuần, 3 tháng', str_contains( $backup, '--keep-daily 7 --keep-weekly 4 --keep-monthly 3 --prune' ) );

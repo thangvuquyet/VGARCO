@@ -124,11 +124,15 @@ echo "Môi trường: ${ENV_NAME} | tên miền: ${DOMAIN} | người dùng PHP:
 
 phase_on packages && {
   log "packages: gói hệ thống"
-  PKGS=(nginx php8.3-fpm php8.3-cli php8.3-mysql php8.3-gd php8.3-mbstring php8.3-xml php8.3-zip php8.3-curl php8.3-intl php8.3-redis php8.3-imagick
-    mariadb-server redis-server certbot fail2ban ufw unattended-upgrades rsync zstd curl ca-certificates restic)
+  PKGS=(nginx php8.3-fpm php8.3-cli php8.3-mysql php8.3-gd php8.3-mbstring php8.3-xml php8.3-zip php8.3-curl php8.3-intl php8.3-redis php8.3-imagick libheif-plugin-aomenc
+    mariadb-server redis-server certbot fail2ban ufw rsyslog unattended-upgrades rsync zstd curl ca-certificates restic)
   run apt-get update -y
   run env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends "${PKGS[@]}"
-  note "Kiểm khi chạy thật: php -m | grep -i -E 'gd|zip|fileinfo|mbstring|intl' và php -r 'var_dump(count(Imagick::queryFormats(\"AVIF\")) > 0);' (GD của Ubuntu không có AVIF, mã hóa AVIF đi qua Imagick; docs/TRIEN-KHAI.md mục 2)."
+  note "Kiểm khi chạy thật: php -m | grep -i -E 'gd|zip|fileinfo|mbstring|intl' và ghi thử một ảnh AVIF bằng Imagick (GD của Ubuntu không có AVIF; Imagick cần libheif-plugin-aomenc, gói mà --no-install-recommends bỏ; Imagick::queryFormats('AVIF') vẫn báo có khi thiếu bộ mã hóa nên không dùng làm phép thử; docs/TRIEN-KHAI.md mục 2)."
+  if (( ! DRY )) && ! php -r '$i = new Imagick(); $i->newImage(8, 8, new ImagickPixel("red")); $i->setImageFormat("avif"); exit(strlen($i->getImageBlob()) > 0 ? 0 : 1);' 2>/dev/null; then
+    echo "DỪNG: Imagick không ghi được AVIF (thiếu libheif-plugin-aomenc?); site cần AVIF cho ảnh tải lên." >&2
+    exit 1
+  fi
   if ! have wp; then
     WPCLI_TMP="/usr/local/bin/.wp.new"
     run curl -fsSL --max-time 180 -o "$WPCLI_TMP" "https://github.com/wp-cli/wp-cli/releases/download/v${WPCLI_VERSION}/wp-cli-${WPCLI_VERSION}.phar"

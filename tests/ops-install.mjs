@@ -60,6 +60,10 @@ check('wp-config.php 0640, chủ deploy, nhóm người dùng PHP', source.inclu
 check('mật khẩu ban đầu cất ở tệp 0600 và không bao giờ in ra', source.includes('install -m 0600 -o deploy -g deploy /dev/null "$PW_FILE"') && source.includes("sed -n 's/^Admin password: //p' \"$OUT\" > \"$PW_FILE\"") && (source.match(/grep -v 'Admin password' "\$OUT"/g) ?? []).length === 2 && !/cat "\$OUT"|cat "\$PW_FILE"/.test(source));
 check('cài tiếng Việt, đường dẫn /%postname%/, múi giờ Việt Nam, xóa bộ nhớ đường dẫn', source.includes('language core install "$WP_LOCALE" --activate') && source.includes("permalink_structure '/%postname%/'") && source.includes("timezone_string 'Asia/Ho_Chi_Minh'") && source.includes('wpd rewrite flush'));
 check('tài khoản quản trị không được là admin', source.includes('"$ADMIN_USER" != "admin"'));
+check('xóa nội dung mẫu của WordPress (bài 1, trang 2 và 3) sau khi cài và trước khi xóa bộ nhớ đường dẫn', at('wpd post delete 1 2 3 --force') > at('wpd core install') && at('wpd post delete 1 2 3 --force') < at('wpd rewrite flush'));
+check('--dry-run nêu việc xóa nội dung mẫu', prod.includes('xóa nội dung mẫu của WordPress'));
+check('ngôn ngữ site đọc bằng get_locale (WPLANG trống khi lõi đã là bản tiếng Việt, lệnh option get báo lỗi)', source.includes("note \"ngôn ngữ site: $(wpd eval 'echo get_locale();')\"") && !source.includes('option get WPLANG'));
+check('số ký tự mật khẩu không đếm dấu xuống dòng', source.includes("$(tr -d '\\n' < \"$PW_FILE\" | wc -c) ký tự"));
 check('không có tên miền hay hộp thư cố định trong script', !/vgarco\.com\.vn|vgarco\.vn|staging\.vgarco|@gmail\.com/.test(source.replace(/^\s*(?:usage|--).*$/gm, '')));
 
 const startAt = source.indexOf('{\n  cat <<PHP\n<?php');

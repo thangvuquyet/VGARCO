@@ -355,6 +355,20 @@ const M = [
     "chmod 0640 \"$CONFIG\"", "chmod 0644 \"$CONFIG\"", 'ops-install'],
   ["cài WordPress: in mật khẩu quản trị ra màn hình", "scripts/ops/install-wordpress.sh",
     "grep -v 'Admin password' \"$OUT\"\nrm -f \"$OUT\"\nnote \"mật khẩu", "cat \"$OUT\"\nrm -f \"$OUT\"\nnote \"mật khẩu", 'ops-install'],
+  ["cài WordPress: để lại trang mẫu và bài mẫu của WordPress (công khai ra ngoài)", "scripts/ops/install-wordpress.sh",
+    "wpd post delete 1 2 3 --force\n", "", 'ops-install'],
+  ["triển khai: dọn gói hoàn tác hỏng khi chưa có gói nào (máy mới, thoát mã 2)", "scripts/ops/deploy.sh",
+    "(ls -1t *.tar.zst 2>/dev/null || true) | tail", "ls -1t *.tar.zst 2>/dev/null | tail", 'ops-deploy'],
+  ["triển khai: giữ 8 gói hoàn tác thay vì 5", "scripts/ops/deploy.sh",
+    "tail -n +6 | xargs", "tail -n +9 | xargs", 'ops-deploy'],
+  ["triển khai: không xóa gói hoàn tác cũ", "scripts/ops/deploy.sh",
+    "xargs -r rm -f --\"", "xargs -r echo --\"", 'ops-deploy'],
+  ["triển khai: không ghi mã commit đang chạy", "scripts/ops/deploy.sh",
+    "echo '${COMMIT}' > '${SITE_DIR}/.deployed-ref'; cd", "cd", 'ops-deploy'],
+  ["cài WordPress: dòng ngôn ngữ lại đọc WPLANG (trống và báo lỗi trên lõi tiếng Việt)", "scripts/ops/install-wordpress.sh",
+    "$(wpd eval 'echo get_locale();')", "$(wpd option get WPLANG || true)", 'ops-install'],
+  ["cài WordPress: đếm cả dấu xuống dòng vào độ dài mật khẩu", "scripts/ops/install-wordpress.sh",
+    "$(tr -d '\\n' < \"$PW_FILE\" | wc -c) ký tự", "$(wc -c < \"$PW_FILE\") ký tự", 'ops-install'],
   ["cài WordPress: bỏ đổi muối khóa", "scripts/ops/install-wordpress.sh",
     "wpd config shuffle-salts", "true", 'ops-install'],
   ["cài WordPress: cho phép tài khoản tên admin", "scripts/ops/install-wordpress.sh",
@@ -1011,6 +1025,14 @@ const M = [
     "php_admin_value[max_execution_time] = 90\n", "", 'serverconf'],
   ["nginx: bỏ fastcgi_read_timeout 90s (tải ảnh lớn bị 504 sau 60 giây)", "scripts/ops/provision.sh",
     "        fastcgi_read_timeout 90s;\n", "", 'serverconf'],
+  ["packages: thiếu libheif-plugin-aomenc (Imagick không ghi được AVIF, ảnh tải lên không có bản AVIF)", "scripts/ops/provision.sh",
+    "php8.3-imagick libheif-plugin-aomenc\n", "php8.3-imagick\n", 'serverconf'],
+  ["packages: thiếu rsyslog (ảnh VPS tối giản không có người dùng syslog, bước firewall dừng giữa chừng)", "scripts/ops/provision.sh",
+    "fail2ban ufw rsyslog unattended-upgrades", "fail2ban ufw unattended-upgrades", 'serverconf'],
+  ["packages: phép thử AVIF luôn báo đạt (máy thiếu bộ mã hóa vẫn đi tiếp)", "scripts/ops/provision.sh",
+    "> 0 ? 0 : 1);'", "> 0 ? 0 : 0);'", 'serverconf'],
+  ["packages: phép thử AVIF không dừng khi hỏng", "scripts/ops/provision.sh",
+    "cho ảnh tải lên.\" >&2\n    exit 1\n  fi\n", "cho ảnh tải lên.\" >&2\n  fi\n", 'serverconf'],
 ];
 
 if (process.argv[2] === '--check') {
@@ -1040,6 +1062,10 @@ for (const [name, file, from, to, suite = 'smoke'] of M.filter(([n]) => !only ||
     cpSync(join(src, 'scripts'), join(work, 'scripts'), { recursive: true });
     cpSync(join(src, 'tests', 'ops-backup.mjs'), join(work, 'tests', 'ops-backup.mjs'));
   }
+  if (suite === 'ops-deploy') {
+    cpSync(join(src, 'scripts'), join(work, 'scripts'), { recursive: true });
+    cpSync(join(src, 'tests', 'ops-deploy.mjs'), join(work, 'tests', 'ops-deploy.mjs'));
+  }
   if (suite === 'setup' || suite === 'ops-install') {
     cpSync(join(src, 'scripts'), join(work, 'scripts'), { recursive: true });
     cpSync(join(src, 'docs'), join(work, 'docs'), { recursive: true });
@@ -1060,6 +1086,8 @@ for (const [name, file, from, to, suite = 'smoke'] of M.filter(([n]) => !only ||
     ? spawnSync(process.execPath, [join(work, 'tests', 'i18n.mjs')], { encoding: 'utf8' })
     : suite === 'ops-backup'
     ? spawnSync(process.execPath, [join(work, 'tests', 'ops-backup.mjs')], { encoding: 'utf8' })
+    : suite === 'ops-deploy'
+    ? spawnSync(process.execPath, [join(work, 'tests', 'ops-deploy.mjs')], { encoding: 'utf8' })
     : suite === 'ops-install'
     ? spawnSync(process.execPath, [join(work, 'tests', 'ops-install.mjs')], { encoding: 'utf8' })
     : spawnSync(php, ['-d', `extension_dir=${ext}`, '-d', 'extension=mbstring', ...extra, join(work, 'tests', 'php', `${suite}.php`)], { encoding: 'utf8' });

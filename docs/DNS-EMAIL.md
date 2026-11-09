@@ -1,6 +1,6 @@
 # DNS, thư và bảo mật tên miền
 
-Tên miền chính: `vgarco.com.vn` (đăng ký ở Vietnix). **DNS đặt ở Cloudflare**: nhà đăng ký chỉ giữ tên miền và trỏ nameserver về Cloudflare; mọi bản ghi tạo ở Cloudflare. Thư nhân viên dùng gói Email doanh nghiệp 15 hộp thư của Vietnix; thư tự động của website gửi qua Brevo (FluentSMTP). Giá trị bản ghi thư của Vietnix và Brevo **chưa có** (chờ khi mua gói và xác thực tên miền); các ô `<…>` dưới đây điền khi có.
+Tên miền chính: `vgarco.com.vn` (đăng ký ở Vietnix). **DNS đặt ở Cloudflare**: nhà đăng ký chỉ giữ tên miền và trỏ nameserver về Cloudflare; mọi bản ghi tạo ở Cloudflare. Thư nhân viên dùng gói Email doanh nghiệp 15 hộp thư của Vietnix; thư tự động của website gửi qua Brevo (FluentSMTP). Giá trị bản ghi thư của Vietnix đã có (mục 2; Vietnix tạo sẵn khi mua gói email, Cloudflare nhập tự động ngày 09/11/2026); giá trị của Brevo **chưa có** (chờ xác thực tên miền) nên các ô `<…>` của Brevo điền khi có.
 
 ## 1. Bản ghi cho website
 
@@ -24,14 +24,16 @@ Mọi bản ghi thư để **DNS only** (mây xám). Chỉ được có **một*
 
 | Loại | Tên | Giá trị | Nguồn giá trị |
 |---|---|---|---|
-| MX | `@` | `<máy chủ thư của Vietnix>` (ưu tiên theo hướng dẫn của Vietnix) | Vietnix |
-| TXT (SPF) | `@` | `v=spf1 include:<tên SPF của Vietnix> include:<tên SPF của Brevo> ~all` | Vietnix, Brevo |
-| DKIM thư nhân viên | theo Vietnix | theo Vietnix | Vietnix |
+| A | `mail` | `103.200.23.49` (máy chủ thư của Vietnix; **bắt buộc DNS only**, proxy làm hỏng SMTP/IMAP) | Vietnix |
+| MX | `@` | `mail.vgarco.com.vn`, ưu tiên 0 | Vietnix |
+| TXT (SPF) | `@` | hiện có: `v=spf1 +mx +a +ip4:103.200.23.49 +include:_spf.mta.vietnix.com ~all`; khi có Brevo sửa thành `v=spf1 +mx +a +ip4:103.200.23.49 +include:_spf.mta.vietnix.com include:<tên SPF của Brevo> ~all` | Vietnix, Brevo |
+| TXT (DKIM thư nhân viên) | `default._domainkey` | khóa RSA do Vietnix tạo (đã có, không sửa) | Vietnix |
 | DKIM Brevo | theo Brevo (hai CNAME) | theo Brevo | Brevo: Senders, Domains & Dedicated IPs > Domains |
 | TXT xác thực Brevo | theo Brevo | theo Brevo | Brevo |
-| TXT (DMARC) | `_dmarc` | `v=DMARC1; p=none; rua=mailto:<hộp thư nhận báo cáo trong tên miền>; adkim=r; aspf=r` | tự đặt |
+| TXT (DMARC) | `_dmarc` | hiện có (Vietnix tạo sẵn): `v=DMARC1; p=reject;`. Đổi thành `v=DMARC1; p=none; rua=mailto:<hộp thư nhận báo cáo trong tên miền>; adkim=r; aspf=r` **trước khi bật Brevo** | tự đặt |
 
 Quy tắc:
+- DMARC `p=reject` của Vietnix không có địa chỉ báo cáo. Thư của website gửi qua Brevo mà Brevo chưa xác thực tên miền (DKIM) sẽ bị Gmail và các nơi khác từ chối; vì vậy hạ xuống `p=none` rồi nâng lại theo lộ trình bên dưới.
 - SPF gộp cả hai nơi gửi thư trong **một** bản ghi và dùng không quá 10 lần tra cứu DNS; kiểm bằng công cụ SPF sau khi thêm.
 - Lộ trình DMARC: `p=none` trong 2 tuần đầu (đọc báo cáo, sửa nguồn gửi hợp lệ còn thiếu), rồi `p=quarantine; pct=25`, `pct=100`, cuối cùng `p=reject` (khoảng tuần thứ 6, theo `VAN-HANH.md`).
 - Thư của website gửi từ một địa chỉ cố định trong tên miền (ví dụ `no-reply@vgarco.com.vn`), đặt ở FluentSMTP (nhà cung cấp Brevo API, bật Force From Email). Trước khi nhận thư thật, giữ staging ở chế độ chặn (`VG_MAIL_ALLOW`).
@@ -63,10 +65,10 @@ Mục tiêu kế hoạch 5.5: SSL Labs A, securityheaders.com A, mail-tester t�
 
 ## 5. Thứ tự làm
 
-1. Mua tên miền và VPS; trỏ nameserver về Cloudflare; chờ phân giải.
+1. Mua tên miền và VPS; trỏ nameserver về Cloudflare; chờ phân giải. *(Xong 09/11/2026: tên miền Active ở Cloudflare.)* Vietnix tự thêm `nsbak.vietnix.net` vào danh sách nameserver và phải nhờ gỡ; kiểm bằng `nslookup -norecurse -type=NS vgarco.com.vn a.dns-servers.vn` (chỉ được còn hai nameserver Cloudflare) rồi mới thêm bản ghi website, nếu không một phần truy vấn tới nameserver cũ không biết bản ghi mới.
 2. Bản ghi website (mục 1) ở chế độ chưa bật proxy cho tới khi chứng chỉ Origin CA đã đặt.
 3. Chạy `provision.sh` và `deploy.sh` (xem `TRIEN-KHAI.md`), bật proxy, đổi SSL sang Full (strict), bật Authenticated Origin Pulls.
-4. Mua gói email; thêm MX, SPF, DKIM của Vietnix.
+4. Mua gói email; thêm MX, SPF, DKIM của Vietnix. *(Xong 09/11/2026: Cloudflare nhập sẵn từ DNS Vietnix, `mail` để DNS only; chưa tạo hộp thư nào.)*
 5. Xác thực tên miền ở Brevo; thêm DKIM của Brevo; sửa SPF thành một bản ghi gộp; cấu hình FluentSMTP.
 6. Thêm DMARC ở `p=none`; thử thư; nâng chính sách theo lộ trình.
 7. Bật DNSSEC.
