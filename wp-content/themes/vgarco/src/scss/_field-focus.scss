@@ -1,0 +1,19 @@
+input:not([type='checkbox'], [type='radio'], [type='file'], [type='submit'], [type='button'], [type='hidden']):focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: none;
+}
+
+input:not([type='checkbox'], [type='radio'], [type='file'], [type='submit'], [type='button'], [type='hidden'], [aria-invalid='true']):focus-visible,
+textarea:not([aria-invalid='true']):focus-visible,
+select:not([aria-invalid='true']):focus-visible {
+  border-color: var(--c-focus);
+}
+
+.on-dark {
+  input:not([type='checkbox'], [type='radio'], [type='file'], [type='submit'], [type='button'], [type='hidden'], [aria-invalid='true']):focus-visible,
+  textarea:not([aria-invalid='true']):focus-visible {
+    border-color: var(--c-focus-invert);
+    box-shadow: 0 1px 0 0 var(--c-focus-invert);
+  }
+}

@@ -1033,6 +1033,16 @@ const M = [
     "> 0 ? 0 : 1);'", "> 0 ? 0 : 0);'", 'serverconf'],
   ["packages: phép thử AVIF không dừng khi hỏng", "scripts/ops/provision.sh",
     "cho ảnh tải lên.\" >&2\n    exit 1\n  fi\n", "cho ảnh tải lên.\" >&2\n  fi\n", 'serverconf'],
+  ["ô nhập: nhận tiêu điểm vẫn hiện khung outline", "wp-content/themes/vgarco/src/scss/_field-focus.scss",
+    "textarea:focus-visible,\nselect:focus-visible {\n  outline: none;\n}", "textarea:focus-visible,\nselect:focus-visible {\n  outline: 2px solid var(--c-focus);\n}", 'pages'],
+  ["ô nhập: nhận tiêu điểm không đổi màu viền", "wp-content/themes/vgarco/src/scss/_field-focus.scss",
+    "  border-color: var(--c-focus);\n}", "  border-color: var(--c-line-strong);\n}", 'pages'],
+  ["ô nhập nền tối: không còn gạch chân dày khi nhận tiêu điểm", "wp-content/themes/vgarco/src/scss/_field-focus.scss",
+    "    box-shadow: 0 1px 0 0 var(--c-focus-invert);", "    box-shadow: none;", 'pages'],
+  ["ô nhập: vùng văn bản báo lỗi bị đổi viền khi nhận tiêu điểm", "wp-content/themes/vgarco/src/scss/_field-focus.scss",
+    "textarea:not([aria-invalid='true']):focus-visible,\nselect:not([aria-invalid='true']):focus-visible {\n  border-color: var(--c-focus);", "textarea:focus-visible,\nselect:not([aria-invalid='true']):focus-visible {\n  border-color: var(--c-focus);", 'pages'],
+  ["ô nhập: quy tắc nằm ở lớp base nên bị border của trang đè", "wp-content/themes/vgarco/src/scss/main.scss",
+    "@layer utilities {\n  @include meta.load-css('field-focus');\n}", "@layer base {\n  @include meta.load-css('field-focus');\n}", 'pages'],
 ];
 
 if (process.argv[2] === '--check') {

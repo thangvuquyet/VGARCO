@@ -687,6 +687,13 @@ $homescss = (string) file_get_contents( $scss_dir . 'pages/_home.scss' );
 $navjs    = (string) file_get_contents( ROOT . '/wp-content/themes/vgarco/src/js/modules/nav.js' );
 $homejs   = (string) file_get_contents( ROOT . '/wp-content/themes/vgarco/src/js/modules/home.js' );
 
+$field_focus = (string) file_get_contents( $scss_dir . '_field-focus.scss' );
+$main_scss   = (string) file_get_contents( $scss_dir . 'main.scss' );
+check( 'ô nhập: nhận tiêu điểm thì bỏ khung outline ngoài (ô chữ, vùng văn bản, ô chọn), không bỏ ở nút, ô tích, ô tệp', 1 === preg_match( '/^input:not\(\[type=\'checkbox\'\], \[type=\'radio\'\], \[type=\'file\'\][^)]*\):focus-visible,\s*textarea:focus-visible,\s*select:focus-visible \{\s*outline: none;\s*\}/m', $field_focus ) );
+check( 'ô nhập: thay khung bằng viền của chính ô đổi sang màu nhấn; ô đang báo lỗi giữ viền đỏ của trạng thái lỗi (loại trừ ở cả năm bộ chọn)', 5 === substr_count( $field_focus, "[aria-invalid='true']" ) && 1 === preg_match( '/\[aria-invalid=\'true\'\]\):focus-visible,[^{]*\{\s*border-color: var\(--c-focus\);\s*\}/', $field_focus ) );
+check( 'ô nhập trên nền tối: gạch chân trắng dày 2 px thay cho khung', 1 === preg_match( '/\.on-dark \{.*border-color: var\(--c-focus-invert\);\s*box-shadow: 0 1px 0 0 var\(--c-focus-invert\);/s', $field_focus ) );
+check( 'ô nhập: quy tắc nằm ở lớp utilities, sau lớp pages (nếu không, border của từng trang đè mất màu viền khi nhận tiêu điểm)', 1 === preg_match( '/@layer pages \{.*?\n\}\n\n@layer utilities \{\s*@include meta\.load-css\(\'field-focus\'\);\s*\}/s', $main_scss ) );
+
 check( 'chuyển động: cuộn mượt khi bấm liên kết neo, chỉ khi KHÔNG bật giảm chuyển động', 1 === preg_match( '/@media \(prefers-reduced-motion: no-preference\) \{\s*html \{\s*scroll-behavior: smooth;/', $reset ) );
 check( 'chuyển động: giảm chuyển động vẫn tắt cuộn mượt, chuyển cảnh và độ trễ chuyển cảnh', 1 === preg_match( '/@media \(prefers-reduced-motion: reduce\) \{.*scroll-behavior: auto;.*transition-duration: 0\.01ms !important;\s*transition-delay: 0s !important;/s', $reset ) );
 
